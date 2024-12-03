@@ -84,8 +84,6 @@ export default function NavBar() {
             router.push(`/bookmark/${currentUser}`)
         } else if (NavTitle === 'notice') {
             router.push('/')
-            setSelectedMenu('notice')
-            setNewNotice(false)
         }
     }
 
@@ -114,6 +112,7 @@ export default function NavBar() {
         <>
             <NavBarWrap>
                 <div>
+                    {/* 공지사항 */}
                     <NavMenu isActive={'notice' === selectedMenu} onClick={() => handleNavClick('notice')}>
                         <div className='post_alarm' css={css`${newNotice ? 'background : red' : 'background : none'}`}></div>
                         <div className='menu_icon'>
@@ -140,6 +139,8 @@ export default function NavBar() {
 
                         </div>
                     </NavMenu>
+
+                    {/* 메인 / 전체 포스트 */}
                     <NavMenu isActive={'allPost' === selectedMenu} onClick={() => handleNavClick('allPost')}>
                         <div className='post_alarm'></div>
                         <div className='menu_icon'>
@@ -160,6 +161,7 @@ export default function NavBar() {
                         </div>
                     </NavMenu>
 
+                    {/* 북마크 */}
                     <NavMenu isActive={'bookmark' === selectedMenu} onClick={() => handleNavClick('bookmark')}>
                         <div className='menu_icon'>
                             {'bookmark' === selectedMenu ?
@@ -179,6 +181,7 @@ export default function NavBar() {
                         </div>
                     </NavMenu>
 
+                    {/* 검색 */}
                     <NavMenu isActive={false}>
                         <div className='menu_icon'>
                             <svg width="40" height="40" viewBox="0 0 40 40">
@@ -190,6 +193,7 @@ export default function NavBar() {
                         </div>
                     </NavMenu>
 
+                    {/* 포스팅 */}
                     <NavMenu isActive={false} onClick={handlePosting}>
                         <div className='menu_icon'>
                             <svg width="40" height="40" viewBox="0 0 40 40">

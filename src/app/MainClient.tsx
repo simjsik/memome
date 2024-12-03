@@ -7,17 +7,20 @@ import { ADMIN_ID, newNoticeState, PostData, PostState, postStyleState, storageL
 import { useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import { PostWrap, TitleHeader } from './styled/PostComponents';
-import { collection, deleteDoc, doc, getCountFromServer, getDoc, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getCountFromServer, getDoc, limit, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
 import { auth, db } from './DB/firebaseConfig';
 import { selectedMenuState } from './state/LayoutState';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchPosts } from './api/loadToFirebasePostData/fetchPostData';
+
+// Swiper
 import SwiperCore from 'swiper'
 import { Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
-SwiperCore.use([Pagination]);
 import 'swiper/css';
 import 'swiper/css/pagination';
+SwiperCore.use([Pagination]);
+
 const postDeleteBtn = css`
 position : absolute;
 right : 20px;
@@ -29,6 +32,7 @@ background : red;
 border : none;
 cursor : pointer;
 `
+
 interface MainHomeProps {
     posts: PostData[],
     initialNextPage: any;
@@ -45,6 +49,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     const [notice, setNotice] = useState<boolean>(false);
     const [postLength, setPostLength] = useState<[number, number]>([0, 0]);
     const [lastParams, setLastParams] = useState<[boolean, Timestamp] | null>(null);
+    const [noticeLastParams, setNoticeLastParams] = useState<[boolean, Timestamp] | null>(null);
     const ADMIN = useRecoilValue(ADMIN_ID);
     // state
     const router = useRouter();
@@ -60,6 +65,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         }
     }, [userId])
 
+    // 무한 스크롤 로직
     const {
         data,
         fetchNextPage,
@@ -115,62 +121,85 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         };
     }, [hasNextPage, fetchNextPage])
 
-    // 포스트 탭 변경
-    useEffect(() => {
-        // 공지사항 제외 전체 포스트 길이 가져오기.
-        if (!postStyle) {
-            const getTotalPost = async () => {
-                const totalPost = await getCountFromServer(query(collection(db, 'posts'), where('notice', '==', false)));
-                const totalPostLength = totalPost.data().count; // 전체 포스트 수
-                const totalPages = Math.ceil(totalPostLength / 10); // 페이지당 10개 기준
-                setPostLength([totalPages, totalPostLength])
-            }
-
-            getTotalPost();
-        }
-
-        // 내비 탭 변경 시 데이터 변경
-        let unsubscribe: () => void;
-
-        unsubscribe = onSnapshot(
-            query(collection(db, 'posts'), where('notice', '==', true), orderBy('createAt', 'desc')),// 공지사항이므로 notice 정렬 제외
-            (snapshot) => {
-                const postData: PostData[] = snapshot.docs.map((doc) => ({
-                    ...doc.data(),
-                    id: doc.id,
-                })) as PostData[];
-
-
-                setNoticePosts(postData);
-            }
-        );
-
-        return () => unsubscribe();
-
-    }, [notice, postStyle])
-
     // 페이지네이션 로직
     const handleClickPagenation = async (page: number) => {
         const pageSize = 10 * page;
-        if ((posts.length >= pageSize || !lastParams)) return; // 현재 포스트 길이가 페이지 최대 수와 같거나 크면 요청 X
 
-        const newPosts = await fetchPosts(lastParams, pageSize, posts.length);
+        if ((posts.length >= pageSize || (!lastParams || !noticeLastParams))) return;
+        // 현재 포스트 길이가 페이지 최대 수와 같거나 크면 또는 마지막 포스트 데이터가 없으면 요청 X
 
-        setPosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
-        setLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
+        if (notice) {
+            const newPosts = await fetchPosts(noticeLastParams, pageSize, noticePosts.length);
+
+            setNoticePosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
+            setNoticeLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
+        } else {
+            const newPosts = await fetchPosts(lastParams, pageSize, posts.length);
+
+            setPosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
+            setLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
+        }
+
     }
 
-
-
-    // 공지사항 스타일
+    // 공지사항 탭 변경
     useEffect(() => {
         if (selectedMenu === 'n') {
             setNotice(true)
         } else {
             setNotice(false)
         }
+
     }, [selectedMenu])
 
+    // 포스트 탭 변경
+    useEffect(() => {
+        if (!postStyle) {
+            // 포스트 길이 가져오기.
+            const getTotalPost = async () => {
+                if (!notice) { // 공지사항 제외 길이.
+                    const totalPost = await getCountFromServer(query(collection(db, 'posts'), where('notice', '==', false)));
+                    const totalPostLength = totalPost.data().count; // 전체 포스트 수
+                    const totalPages = Math.ceil(totalPostLength / 10); // 페이지당 10개 기준
+
+                    setPostLength([totalPages, totalPostLength])
+
+                } else { // 공지사항 길이만.
+                    const totalPost = await getCountFromServer(query(collection(db, 'posts'), where('notice', '==', true)));
+                    const totalPostLength = totalPost.data().count; // 전체 포스트 수
+                    const totalPages = Math.ceil(totalPostLength / 10); // 페이지당 10개 기준
+
+                    setPostLength([totalPages, totalPostLength])
+                }
+            }
+
+            getTotalPost();
+
+            // 포스트 스타일 변경 시 공지사항 데이터 가져오기.
+            let unsubscribe: () => void;
+
+            unsubscribe = onSnapshot(
+                query(collection(db, 'posts'), where('notice', '==', true), orderBy('createAt', 'desc'), limit(10)),// 공지사항이므로 notice 정렬 제외
+                (snapshot) => {
+                    const postData: PostData[] = snapshot.docs.map((doc) => ({
+                        ...doc.data(),
+                        id: doc.id,
+                    })) as PostData[];
+
+
+                    if (snapshot.docs.length > 0) {
+                        const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+                        setNoticeLastParams([lastDoc.data().notice, lastDoc.data().createAt]); // 페이지네이션을 위한 마지막 문서 저장
+                    } else {
+                        setNoticeLastParams(null); // 마지막 문서가 없을 경우 null 처리
+                    }
+                    setNoticePosts(postData);
+                }
+            );
+
+            return () => unsubscribe();
+        }
+    }, [notice, postStyle])
     // 공지사항 알림
     useEffect(() => {
         let lastNoticeTimestamp: number | null = null;
@@ -315,52 +344,23 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                     <p className='h_date'>날짜</p>
                                 </div>
                             </TitleHeader>
-                            {/* 공지사항 */}
-                            {
-                                noticePosts.map((post) => (
-                                    <div key={post.id} className={post.notice ? 'post_box notice' : 'post_box'}>
-                                        <div className='post_title_wrap'>
-                                            {(post.images && post.images?.length > 0) ?
-                                                <div className='post_img_icon'>
-                                                </div>
-                                                :
-                                                <div className='post_img_icon'>
-                                                </div>
-                                            }
-                                            <span className='post_tag'>[{post.tag}]</span>
-                                            <h2 className='post_title' onClick={() => handlePostClick(post.id)}>{post.title}</h2>
-                                            {post.commentCount > 0 &&
-                                                <p className='post_comment'>[{post.commentCount}]</p>
-                                            }
-                                        </div>
-                                        <div className='post_right_wrap'>
-                                            <p className='user_id'>
-                                                {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
-                                            </p>
-                                            <p className='post_date'>{formatDate(post.createAt)}</p>
-                                        </div>
-                                        {post.userId === auth.currentUser?.uid &&
-                                            <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
-                                        }
-                                    </div>
-                                ))}
-                            {/* 포스트 */}
-                            {!notice &&
-                                <Swiper
-                                    slidesPerView={1}
-                                    onSwiper={(swiper) => (swiperRef.current = swiper)} // Swiper 인스턴스 저장
-                                    pagination={{
-                                        clickable: true,
-                                    }}
-                                    modules={[Pagination]}
-                                    className="mySwiper"
-                                >
-                                    {Array.from({ length: postLength[0] }, (_, pageIndex) => (
-                                        <SwiperSlide key={pageIndex}>
-                                            {posts
-                                                .slice(pageIndex * 10, (pageIndex + 1) * 10)
-                                                .map((post) => (
-                                                    <div key={post.id} className={post.notice ? 'post_box notice' : 'post_box'}>
+
+                            {/* 공지사항 전체 */}
+                            {notice &&
+                                <>
+                                    <Swiper
+                                        slidesPerView={1}
+                                        onSwiper={(swiper) => (swiperRef.current = swiper)} // Swiper 인스턴스 저장
+                                        pagination={{
+                                            clickable: true,
+                                        }}
+                                        modules={[Pagination]}
+                                        className="mySwiper"
+                                    >
+                                        {Array.from({ length: postLength[0] }, (_, pageIndex) => (
+                                            <SwiperSlide key={pageIndex}>
+                                                {noticePosts.map((post) => (
+                                                    <div key={post.id} className='post_box'>
                                                         <div className='post_title_wrap'>
                                                             {(post.images && post.images?.length > 0) ?
                                                                 <div className='post_img_icon'>
@@ -386,11 +386,89 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                                         }
                                                     </div>
                                                 ))}
-                                        </SwiperSlide>
+                                            </SwiperSlide>
+                                        ))}
+                                    </Swiper>
+
+                                </>
+                            }
+                            {/* 포스트 전체 */}
+                            {!notice &&
+                                <>
+                                    {/* 최신 공지사항 5개 */}
+                                    {noticePosts.slice(0, 5).map((post) => (
+                                        <div key={post.id} className={post.notice ? 'post_box notice' : 'post_box'}>
+                                            <div className='post_title_wrap'>
+                                                {(post.images && post.images?.length > 0) ?
+                                                    <div className='post_img_icon'>
+                                                    </div>
+                                                    :
+                                                    <div className='post_img_icon'>
+                                                    </div>
+                                                }
+                                                <span className='post_tag'>[{post.tag}]</span>
+                                                <h2 className='post_title' onClick={() => handlePostClick(post.id)}>{post.title}</h2>
+                                                {post.commentCount > 0 &&
+                                                    <p className='post_comment'>[{post.commentCount}]</p>
+                                                }
+                                            </div>
+                                            <div className='post_right_wrap'>
+                                                <p className='user_id'>
+                                                    {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
+                                                </p>
+                                                <p className='post_date'>{formatDate(post.createAt)}</p>
+                                            </div>
+                                            {post.userId === auth.currentUser?.uid &&
+                                                <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
+                                            }
+                                        </div>
                                     ))}
 
-                                </Swiper>
-
+                                    {/* 전체 포스트 */}
+                                    <Swiper
+                                        slidesPerView={1}
+                                        onSwiper={(swiper) => (swiperRef.current = swiper)} // Swiper 인스턴스 저장
+                                        pagination={{
+                                            clickable: true,
+                                        }}
+                                        modules={[Pagination]}
+                                        className="mySwiper"
+                                    >
+                                        {Array.from({ length: postLength[0] }, (_, pageIndex) => (
+                                            <SwiperSlide key={pageIndex}>
+                                                {posts
+                                                    .slice(pageIndex * 10, (pageIndex + 1) * 10)
+                                                    .map((post) => (
+                                                        <div key={post.id} className={post.notice ? 'post_box notice' : 'post_box'}>
+                                                            <div className='post_title_wrap'>
+                                                                {(post.images && post.images?.length > 0) ?
+                                                                    <div className='post_img_icon'>
+                                                                    </div>
+                                                                    :
+                                                                    <div className='post_img_icon'>
+                                                                    </div>
+                                                                }
+                                                                <span className='post_tag'>[{post.tag}]</span>
+                                                                <h2 className='post_title' onClick={() => handlePostClick(post.id)}>{post.title}</h2>
+                                                                {post.commentCount > 0 &&
+                                                                    <p className='post_comment'>[{post.commentCount}]</p>
+                                                                }
+                                                            </div>
+                                                            <div className='post_right_wrap'>
+                                                                <p className='user_id'>
+                                                                    {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
+                                                                </p>
+                                                                <p className='post_date'>{formatDate(post.createAt)}</p>
+                                                            </div>
+                                                            {post.userId === auth.currentUser?.uid &&
+                                                                <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
+                                                            }
+                                                        </div>
+                                                    ))}
+                                            </SwiperSlide>
+                                        ))}
+                                    </Swiper>
+                                </>
                             }
                             <div>
                                 {Array.from({ length: postLength[0] }, (_, index) => (
@@ -399,6 +477,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                     </button>
                                 ))}
                             </div>
+
                         </>
                         :
                         <>
