@@ -50,7 +50,7 @@ background :${(props) => (props.postStyle ? 'none' : '#fff')};;
     margin-bottom : 40px;
     }
     .post_box:nth-of-type(odd){
-      margin-right : 20px;
+      // margin-right : 20px;
     }
 
     // 포스트 제목
@@ -206,6 +206,12 @@ background :${(props) => (props.postStyle ? 'none' : '#fff')};;
 
     .post_pr_img:last-child{
     margin-right : 0;
+    }
+
+    // 포스트 Swiper Style
+    .swiper{
+    width: 100%;
+    margin: 0;
     }
 `
 export const TitleHeader = styled.div`

@@ -7,14 +7,17 @@ import { ADMIN_ID, newNoticeState, PostData, PostState, postStyleState, storageL
 import { useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import { PostWrap, TitleHeader } from './styled/PostComponents';
-import { collection, deleteDoc, doc, DocumentData, getCountFromServer, getDoc, getDocs, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getCountFromServer, getDoc, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
 import { auth, db } from './DB/firebaseConfig';
 import { selectedMenuState } from './state/LayoutState';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchPosts } from './api/loadToFirebasePostData/fetchPostData';
-import { extractImageUrls } from './api/utils/extractImageUrls';
-
-
+import SwiperCore from 'swiper'
+import { Pagination } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
+SwiperCore.use([Pagination]);
+import 'swiper/css';
+import 'swiper/css/pagination';
 const postDeleteBtn = css`
 position : absolute;
 right : 20px;
@@ -46,6 +49,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     // state
     const router = useRouter();
     const userId = auth.currentUser?.uid
+    const swiperRef = useRef<SwiperCore | null>(null);
     const observerLoadRef = useRef(null);
 
 
@@ -129,7 +133,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         let unsubscribe: () => void;
 
         unsubscribe = onSnapshot(
-            query(collection(db, 'posts'), where('notice', '==', true)),// 공지사항이므로 notice 정렬 제외
+            query(collection(db, 'posts'), where('notice', '==', true), orderBy('createAt', 'desc')),// 공지사항이므로 notice 정렬 제외
             (snapshot) => {
                 const postData: PostData[] = snapshot.docs.map((doc) => ({
                     ...doc.data(),
@@ -342,37 +346,55 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                 ))}
                             {/* 포스트 */}
                             {!notice &&
-                                posts.map((post) => (
-                                    <div key={post.id} className={post.notice ? 'post_box notice' : 'post_box'}>
-                                        <div className='post_title_wrap'>
-                                            {(post.images && post.images?.length > 0) ?
-                                                <div className='post_img_icon'>
-                                                </div>
-                                                :
-                                                <div className='post_img_icon'>
-                                                </div>
-                                            }
-                                            <span className='post_tag'>[{post.tag}]</span>
-                                            <h2 className='post_title' onClick={() => handlePostClick(post.id)}>{post.title}</h2>
-                                            {post.commentCount > 0 &&
-                                                <p className='post_comment'>[{post.commentCount}]</p>
-                                            }
-                                        </div>
-                                        <div className='post_right_wrap'>
-                                            <p className='user_id'>
-                                                {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
-                                            </p>
-                                            <p className='post_date'>{formatDate(post.createAt)}</p>
-                                        </div>
-                                        {post.userId === auth.currentUser?.uid &&
-                                            <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
-                                        }
-                                    </div>
-                                ))
+                                <Swiper
+                                    slidesPerView={1}
+                                    onSwiper={(swiper) => (swiperRef.current = swiper)} // Swiper 인스턴스 저장
+                                    pagination={{
+                                        clickable: true,
+                                    }}
+                                    modules={[Pagination]}
+                                    className="mySwiper"
+                                >
+                                    {Array.from({ length: postLength[0] }, (_, pageIndex) => (
+                                        <SwiperSlide key={pageIndex}>
+                                            {posts
+                                                .slice(pageIndex * 10, (pageIndex + 1) * 10)
+                                                .map((post) => (
+                                                    <div key={post.id} className={post.notice ? 'post_box notice' : 'post_box'}>
+                                                        <div className='post_title_wrap'>
+                                                            {(post.images && post.images?.length > 0) ?
+                                                                <div className='post_img_icon'>
+                                                                </div>
+                                                                :
+                                                                <div className='post_img_icon'>
+                                                                </div>
+                                                            }
+                                                            <span className='post_tag'>[{post.tag}]</span>
+                                                            <h2 className='post_title' onClick={() => handlePostClick(post.id)}>{post.title}</h2>
+                                                            {post.commentCount > 0 &&
+                                                                <p className='post_comment'>[{post.commentCount}]</p>
+                                                            }
+                                                        </div>
+                                                        <div className='post_right_wrap'>
+                                                            <p className='user_id'>
+                                                                {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
+                                                            </p>
+                                                            <p className='post_date'>{formatDate(post.createAt)}</p>
+                                                        </div>
+                                                        {post.userId === auth.currentUser?.uid &&
+                                                            <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
+                                                        }
+                                                    </div>
+                                                ))}
+                                        </SwiperSlide>
+                                    ))}
+
+                                </Swiper>
+
                             }
                             <div>
                                 {Array.from({ length: postLength[0] }, (_, index) => (
-                                    <button key={index} onClick={() => handleClickPagenation(index + 1)}>
+                                    <button key={index} onClick={() => { handleClickPagenation(index + 1); swiperRef.current?.slideTo(index, 0); }}>
                                         {index + 1}
                                     </button>
                                 ))}
@@ -432,7 +454,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                 </>
                 {postStyle && < div ref={observerLoadRef} style={{ height: '1px' }} />}
                 {(!hasNextPage && postStyle) && <p>제일 최근 메모입니다.</p>}
-            </PostWrap>
+            </PostWrap >
         </>
     )
 }
