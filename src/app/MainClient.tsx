@@ -40,7 +40,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const [selectedMenu] = useRecoilValue<string>(selectedMenuState);
     const [notice, setNotice] = useState<boolean>(false);
-    const [postLength, setPostLength] = useState<number>(0);
+    const [postLength, setPostLength] = useState<[number, number]>([0, 0]);
     const [lastParams, setLastParams] = useState<[boolean, Timestamp] | null>(null);
     const ADMIN = useRecoilValue(ADMIN_ID);
     // state
@@ -91,63 +91,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         }
     }, [data.pages])
 
-    // 포스트 탭 변경
-    useEffect(() => {
-        // 공지사항 제외 전체 포스트 길이 가져오기.
-        if (!postStyle) {
-            const getTotalPost = async () => {
-                const totalPost = await getCountFromServer(query(collection(db, 'posts'), where('notice', '==', false)));
-                const totalPostLength = totalPost.data().count; // 전체 포스트 수
-                const totalPages = Math.ceil(totalPostLength / 10); // 페이지당 10개 기준
-                setPostLength(totalPages)
-            }
-
-            getTotalPost();
-        }
-
-        // 내비 탭 변경 시 데이터 변경
-        let unsubscribe: () => void;
-
-        const getPostQuery = (notice?: boolean) => {
-            const baseQuery = collection(db, 'posts');
-
-            // 조건에 따라 필터 추가
-            return query(baseQuery, where('notice', '==', true)); // 공지사항이므로 notice 정렬 제외
-
-        };
-
-        unsubscribe = onSnapshot(
-            getPostQuery(notice),
-            (snapshot) => {
-                const postData: PostData[] = snapshot.docs.map((doc) => ({
-                    ...doc.data(),
-                    id: doc.id,
-                })) as PostData[];
-
-
-                setNoticePosts(postData);
-            }
-        );
-
-        return () => unsubscribe();
-
-    }, [notice, postStyle])
-
-    // 페이지네이션 로직
-    const handleClickPagenation = async (page: number) => {
-        const pageSize = 10 * page;
-
-        if (posts.length >= pageSize) return;
-
-        const newPosts = await fetchPosts(lastParams, pageSize, posts.length);
-
-        console.log(page, '페이지 넘버')
-        console.log(newPosts, '받아온 포스트 데이터')
-        setPosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
-        setLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
-
-    }
-
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
         const obsever = new IntersectionObserver(
@@ -168,6 +111,53 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         };
     }, [hasNextPage, fetchNextPage])
 
+    // 포스트 탭 변경
+    useEffect(() => {
+        // 공지사항 제외 전체 포스트 길이 가져오기.
+        if (!postStyle) {
+            const getTotalPost = async () => {
+                const totalPost = await getCountFromServer(query(collection(db, 'posts'), where('notice', '==', false)));
+                const totalPostLength = totalPost.data().count; // 전체 포스트 수
+                const totalPages = Math.ceil(totalPostLength / 10); // 페이지당 10개 기준
+                setPostLength([totalPages, totalPostLength])
+            }
+
+            getTotalPost();
+        }
+
+        // 내비 탭 변경 시 데이터 변경
+        let unsubscribe: () => void;
+
+        unsubscribe = onSnapshot(
+            query(collection(db, 'posts'), where('notice', '==', true)),// 공지사항이므로 notice 정렬 제외
+            (snapshot) => {
+                const postData: PostData[] = snapshot.docs.map((doc) => ({
+                    ...doc.data(),
+                    id: doc.id,
+                })) as PostData[];
+
+
+                setNoticePosts(postData);
+            }
+        );
+
+        return () => unsubscribe();
+
+    }, [notice, postStyle])
+
+    // 페이지네이션 로직
+    const handleClickPagenation = async (page: number) => {
+        const pageSize = 10 * page;
+        if ((posts.length >= pageSize || !lastParams)) return; // 현재 포스트 길이가 페이지 최대 수와 같거나 크면 요청 X
+
+        const newPosts = await fetchPosts(lastParams, pageSize, posts.length);
+
+        setPosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
+        setLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
+    }
+
+
+
     // 공지사항 스타일
     useEffect(() => {
         if (selectedMenu === 'n') {
@@ -176,7 +166,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
             setNotice(false)
         }
     }, [selectedMenu])
-
 
     // 공지사항 알림
     useEffect(() => {
@@ -382,7 +371,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                 ))
                             }
                             <div>
-                                {Array.from({ length: postLength }, (_, index) => (
+                                {Array.from({ length: postLength[0] }, (_, index) => (
                                     <button key={index} onClick={() => handleClickPagenation(index + 1)}>
                                         {index + 1}
                                     </button>
