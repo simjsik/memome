@@ -35,7 +35,7 @@ background :${(props) => (props.postStyle ? 'none' : '#fff')};;
 
   .notice {
   background : rgba(255, 78, 90, 0.05);
-
+    
     .post_tag,
     .post_title{
       color : #ff4e59;

@@ -200,6 +200,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
             return () => unsubscribe();
         }
     }, [notice, postStyle])
+
     // 공지사항 알림
     useEffect(() => {
         let lastNoticeTimestamp: number | null = null;

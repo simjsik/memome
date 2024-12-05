@@ -609,15 +609,18 @@ export default function PostMenu() {
         setToolToggle(tool)
     }
 
+    // 포스트 내용 입력 시 해당 스테이트에 저장
     const handlePostingEditor = (content: string) => {
         setPosting(content)
-    } // 포스트 내용 입력 시 해당 스테이트에 저장
+    }
 
+    // 포스팅 제목.
     const handlePostingTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPostTitle(e.target.value);
-    } // 포스팅 제목.
+    }
 
-    const uploadImgCdn = async (image: string) => { // Cloudinary에 이미지 업로드 요청
+    // Cloudinary에 이미지 업로드 요청
+    const uploadImgCdn = async (image: string) => {
         const response = await fetch('/api/uploadToCloudinary', {
             method: 'POST',
             headers: {
@@ -656,7 +659,7 @@ export default function PostMenu() {
 
             // Cloudinary에 이미지 업로드
             const response = await fetch('/api/uploadToCloudinary', {
-                method: 'POST',
+                method: 'PHOTO',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -706,6 +709,7 @@ export default function PostMenu() {
                         return cloudinaryUrl;
                     })
                 );
+
                 // content 내 이미지 URL을 최적화된 URL로 교체
                 const optContentUrls = await uploadContentImgCdn(posting, uploadedImageUrls);
 

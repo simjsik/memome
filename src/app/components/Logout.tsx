@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
-'use clients';
+"use client";
 
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState } from "../state/PostState";
@@ -38,7 +38,13 @@ export default function Logout() {
     // Function
     return (
         <>
-            {(yourLogin) ? <button onClick={handleLogout} css={LogoutButton}>로그아웃</button> : <button onClick={handleLoginToggle} css={LogoutButton}>로그인</button>}
+            {(yourLogin) ?
+                <div>
+                    <button onClick={handleLogout} css={LogoutButton}>로그아웃</button>
+                </div>
+                :
+                <button onClick={handleLoginToggle} css={LogoutButton}>로그인</button>
+            }
         </>
     )
 }
