@@ -70,6 +70,7 @@ export default function NavBar() {
     const [selectedMenu, setSelectedMenu] = useRecoilState<string>(selectedMenuState);
     const [currentUser, setCurrentUser] = useRecoilState<string | null>(userState)
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
+    const setPostStyle = useSetRecoilState<boolean>(postStyleState)
 
 
     // State
@@ -84,6 +85,7 @@ export default function NavBar() {
             router.push(`/bookmark/${currentUser}`)
         } else if (NavTitle === 'notice') {
             router.push('/')
+            setPostStyle(false);
         }
     }
 

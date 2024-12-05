@@ -121,60 +121,33 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         };
     }, [hasNextPage, fetchNextPage])
 
-    // 페이지네이션 로직
-    const handleClickPagenation = async (page: number) => {
-        const pageSize = 10 * page;
+    // 포스트 스타일, 공지사항 값 별 포스트 길이 함수
+    const getTotalPost = async (notice: boolean) => {
 
-        if ((posts.length >= pageSize || (!lastParams || !noticeLastParams))) return;
-        // 현재 포스트 길이가 페이지 최대 수와 같거나 크면 또는 마지막 포스트 데이터가 없으면 요청 X
+        if (!notice) { // 공지사항 제외 길이.
+            const totalPost = await getCountFromServer(query(collection(db, 'posts'), where('notice', '==', false)));
+            const totalPostLength = totalPost.data().count; // 전체 포스트 수
+            const totalPages = Math.ceil(totalPostLength / 10); // 페이지당 10개 기준
 
-        if (notice) {
-            const newPosts = await fetchPosts(noticeLastParams, pageSize, noticePosts.length);
+            setPostLength([totalPages, totalPostLength])
 
-            setNoticePosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
-            setNoticeLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
-        } else {
-            const newPosts = await fetchPosts(lastParams, pageSize, posts.length);
+        } else { // 공지사항 길이만.
+            const totalPost = await getCountFromServer(query(collection(db, 'posts'), where('notice', '==', true)));
+            const totalPostLength = totalPost.data().count; // 전체 포스트 수
+            const totalPages = Math.ceil(totalPostLength / 10); // 페이지당 10개 기준
 
-            setPosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
-            setLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
+            setPostLength([totalPages, totalPostLength])
         }
-
     }
 
-    // 공지사항 탭 변경
+    // 초기 포스트 길이 가져오기
     useEffect(() => {
-        if (selectedMenu === 'n') {
-            setNotice(true)
-        } else {
-            setNotice(false)
-        }
-
-    }, [selectedMenu])
+        getTotalPost(false);
+    }, [])
 
     // 포스트 탭 변경
     useEffect(() => {
         if (!postStyle) {
-            // 포스트 길이 가져오기.
-            const getTotalPost = async () => {
-                if (!notice) { // 공지사항 제외 길이.
-                    const totalPost = await getCountFromServer(query(collection(db, 'posts'), where('notice', '==', false)));
-                    const totalPostLength = totalPost.data().count; // 전체 포스트 수
-                    const totalPages = Math.ceil(totalPostLength / 10); // 페이지당 10개 기준
-
-                    setPostLength([totalPages, totalPostLength])
-
-                } else { // 공지사항 길이만.
-                    const totalPost = await getCountFromServer(query(collection(db, 'posts'), where('notice', '==', true)));
-                    const totalPostLength = totalPost.data().count; // 전체 포스트 수
-                    const totalPages = Math.ceil(totalPostLength / 10); // 페이지당 10개 기준
-
-                    setPostLength([totalPages, totalPostLength])
-                }
-            }
-
-            getTotalPost();
-
             // 포스트 스타일 변경 시 공지사항 데이터 가져오기.
             let unsubscribe: () => void;
 
@@ -197,9 +170,52 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                 }
             );
 
+            // 공지사항 길이, 일반 포스트 길이
+            if (notice) {
+                getTotalPost(true);
+            } else {
+                getTotalPost(false);
+            }
             return () => unsubscribe();
         }
     }, [notice, postStyle])
+
+    // 페이지네이션 로직
+    const handleClickPagenation = async (page: number) => {
+
+        const pageSize = 10 * page;
+        if ((posts.length >= pageSize || (!lastParams && !noticeLastParams) || posts.length >= postLength[1])) return console.log('함수 호출 안함');
+        // 현재 포스트 길이가 페이지 최대 수와 같거나 크면 또는 마지막 포스트 데이터가 없으면 요청 X
+
+        if (notice) {
+            const newPosts = await fetchPosts(noticeLastParams, pageSize, noticePosts.length);
+
+            setNoticePosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
+            setNoticeLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
+        } else {
+            const newPosts = await fetchPosts(lastParams, pageSize, posts.length);
+
+            setPosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
+            setLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
+        }
+    }
+
+    // 공지사항 탭 변경
+    useEffect(() => {
+        if (selectedMenu === 'n') {
+            setNotice(true)
+        } else {
+            setNotice(false)
+        }
+
+    }, [selectedMenu])
+
+
+    useEffect(() => {
+        if (!postStyle) {
+            handleClickPagenation(1);
+        }
+    }, [postStyle])
 
     // 공지사항 알림
     useEffect(() => {
