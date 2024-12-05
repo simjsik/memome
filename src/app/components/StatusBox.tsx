@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import Logout from './Logout';
 import MemoStatus from './status/MemoStatus';
-import { useParams, usePathname,  } from 'next/navigation';
+import { useParams, usePathname, } from 'next/navigation';
 import UserProfile from './status/UserProfile';
 
 
@@ -41,10 +41,12 @@ export default function StatusBox() {
     // Function
     return (
         <PostListWrap >
-            <UserProfile></UserProfile >
+            {
+                <UserProfile></UserProfile >
+            }
             <div className='list_top'>
                 {
-                    path === `/memo/${params?.postId}` && <MemoStatus post={postId} />
+                    path === `/home/memo/${params?.postId}` && <MemoStatus post={postId} />
                 }
             </div>
             <Logout></Logout>

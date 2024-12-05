@@ -192,7 +192,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
     }
 
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
-        router.push(`/memo/${postId}`)
+        router.push(`memo/${postId}`)
     }
 
     const addComment = async (parentId: string | null = null, commentId: string) => {

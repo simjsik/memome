@@ -2,12 +2,11 @@
 "use client";
 
 import { fetchComments, fetchPostList } from "@/app/api/loadToFirebasePostData/fetchPostData";
-import { db } from "@/app/DB/firebaseConfig";
 import { ADMIN_ID, Comment, memoCommentState, memoList, memoState } from "@/app/state/PostState";
 import { HomeBtn } from "@/app/styled/RouterComponents";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
-import { collection, DocumentData, getDocs, orderBy, query, where } from "firebase/firestore";
+import { DocumentData, } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -120,7 +119,7 @@ export default function Memo({ post }: ClientPostProps) {
     }, [postlist]);
 
     const handleHomeBtn = () => {
-        router.push('/')
+        router.push('/home/main')
     }
 
     const formatDate = (createAt: any) => {

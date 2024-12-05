@@ -105,7 +105,7 @@ export default function Bookmark({ bookmark }: ClientBookmarkProps) {
     }
 
     const clickBookmark = (postId: string) => {
-        router.push(`/memo/${postId}`)
+        router.push(`/home/memo/${postId}`)
     }
 
     const deleteBookmark = async (postId: string | string[]) => {

@@ -3,15 +3,15 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { ADMIN_ID, newNoticeState, PostData, PostState, postStyleState, storageLoadState, userState } from './state/PostState';
+import { ADMIN_ID, newNoticeState, PostData, PostState, postStyleState, storageLoadState, userState } from '../../state/PostState';
 import { useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
-import { PostWrap, TitleHeader } from './styled/PostComponents';
+import { PostWrap, TitleHeader } from '../../styled/PostComponents';
 import { collection, deleteDoc, doc, getCountFromServer, getDoc, limit, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
-import { auth, db } from './DB/firebaseConfig';
-import { selectedMenuState } from './state/LayoutState';
+import { auth, db } from '../../DB/firebaseConfig';
+import { selectedMenuState } from '../../state/LayoutState';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { fetchPosts } from './api/loadToFirebasePostData/fetchPostData';
+import { fetchPosts } from '../../api/loadToFirebasePostData/fetchPostData';
 
 // Swiper
 import SwiperCore from 'swiper'
@@ -123,7 +123,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
     // 포스트 스타일, 공지사항 값 별 포스트 길이 함수
     const getTotalPost = async (notice: boolean) => {
-
         if (!notice) { // 공지사항 제외 길이.
             const totalPost = await getCountFromServer(query(collection(db, 'posts'), where('notice', '==', false)));
             const totalPostLength = totalPost.data().count; // 전체 포스트 수
@@ -142,8 +141,18 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
     // 초기 포스트 길이 가져오기
     useEffect(() => {
-        getTotalPost(false);
+        if (!postStyle) {
+            getTotalPost(false);
+        }
     }, [])
+
+    // 공지사항 탭 시 데이터 변경
+    useEffect(() => {
+        console.log(selectedMenu)
+
+        if (selectedMenu === 'notice') {
+        }
+    }, [selectedMenu])
 
     // 포스트 탭 변경
     useEffect(() => {
@@ -170,22 +179,25 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                 }
             );
 
-            // 공지사항 길이, 일반 포스트 길이
-            if (notice) {
-                getTotalPost(true);
-            } else {
-                getTotalPost(false);
-            }
             return () => unsubscribe();
         }
-    }, [notice, postStyle])
 
+        // 공지사항 길이, 일반 포스트 길이
+        if (notice) {
+            getTotalPost(true);
+        } else {
+            getTotalPost(false);
+        }
+    }, [notice, postStyle])
     // 페이지네이션 로직
     const handleClickPagenation = async (page: number) => {
 
         const pageSize = 10 * page;
-        if ((posts.length >= pageSize || (!lastParams && !noticeLastParams) || posts.length >= postLength[1])) return console.log('함수 호출 안함');
-        // 현재 포스트 길이가 페이지 최대 수와 같거나 크면 또는 마지막 포스트 데이터가 없으면 요청 X
+        if ((posts.length >= pageSize || (!lastParams && !noticeLastParams) || posts.length >= postLength[1]))
+            // `현재 포스트 길이가 페이지 최대 수`와 같거나 크면 또는
+            // `마지막 포스트 데이터가 없으면` 또는
+            // `전체 포스트 수`보다 같거나 커지면 요청 X
+            return;
 
         if (notice) {
             const newPosts = await fetchPosts(noticeLastParams, pageSize, noticePosts.length);
@@ -199,17 +211,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
             setLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
         }
     }
-
-    // 공지사항 탭 변경
-    useEffect(() => {
-        if (selectedMenu === 'n') {
-            setNotice(true)
-        } else {
-            setNotice(false)
-        }
-
-    }, [selectedMenu])
-
 
     useEffect(() => {
         if (!postStyle) {
@@ -258,7 +259,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         // return () => unsubscribe();
     }, []);
 
-
     // 포스트 삭제
     const deletePost = async (postId: string) => {
         if (!auth.currentUser) {
@@ -296,7 +296,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
     // 포스트 보기
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
-        router.push(`/memo/${postId}`)
+        router.push(`memo/${postId}`)
     }
 
     const formatDate = (createAt: any) => {
@@ -343,6 +343,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                 <>
                     {!postStyle ?
                         <>
+                            {/* 페이지네이션 타이틀 */}
                             <TitleHeader>
                                 {
                                     notice ?
@@ -487,6 +488,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                     </Swiper>
                                 </>
                             }
+                            {/* 페이지네이션 버튼 */}
                             <div>
                                 {Array.from({ length: postLength[0] }, (_, index) => (
                                     <button key={index} onClick={() => { handleClickPagenation(index + 1); swiperRef.current?.slideTo(index, 0); }}>
@@ -494,10 +496,10 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                     </button>
                                 ))}
                             </div>
-
                         </>
                         :
                         <>
+                            {/* 무한 스크롤 구조 */}
                             {posts.map((post) => (
                                 <div key={post.id} className='post_box' onClick={() => handlePostClick(post.id)}>
                                     {/* 작성자 프로필 */}

@@ -74,34 +74,36 @@ export default function NavBar() {
 
 
     // State
-
+    const router = useRouter();
     const path = usePathname();
-
-    const handleNavClick = (NavTitle: string) => {
-        setSelectedMenu(NavTitle)
-        if (NavTitle === 'allPost') {
-            router.push('/')
-        } else if (NavTitle === 'bookmark') {
-            router.push(`/bookmark/${currentUser}`)
-        } else if (NavTitle === 'notice') {
-            router.push('/')
-            setPostStyle(false);
-        }
-    }
 
     useEffect(() => {
         if (path) {
             const pathSegment = path?.split('/').filter(Boolean)
-            if (pathSegment[0] !== undefined) {
-                setSelectedMenu(pathSegment[0])
-            } else if (pathSegment[0] === undefined) {
+            if (pathSegment[1] === 'main') {
                 setSelectedMenu('allPost')
             }
         }
-    }, [])
+    }, [path])
 
-    const router = useRouter();
+    // 내비 클릭 시 선택 메뉴 설정
+    const handleNavClick = (NavTitle: string) => {
+        if (NavTitle === 'allPost') {
+            router.push('/home/main')
+        } else if (NavTitle === 'bookmark') {
+            if (yourLogin) {
+                router.push(`/home/bookmark/${currentUser}`)
+            } else {
+                return alert('로그인이 필요한 기능입니다.')
+            }
+        } else if (NavTitle === 'notice') {
+            setPostStyle(false);
+        }
+        console.log(NavTitle)
+        setSelectedMenu(NavTitle)
+    }
 
+    // 포스팅 메뉴 클릭 시 이동 및 제어
     const handlePosting = () => {
         if (yourLogin) {
             router.push('/post');
@@ -109,6 +111,9 @@ export default function NavBar() {
             setLoginToggle(true);
         }
     };
+
+
+
     // Function
     return (
         <>
