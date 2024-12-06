@@ -4,279 +4,334 @@
 import styled from "@emotion/styled";
 
 export const PostWrap = styled.div<{ postStyle: boolean }>`
-
 // 포스트 리스트 스타일 별 우측이 목록별로
 position : absolute;
 left : ${(props) => (props.postStyle ? '500px' : '420px')};
-top : ${(props) => (props.postStyle ? '30px' : '0px')};
+top : ${(props) => (props.postStyle ? '40px' : '0px')};
 display : flex;
 flex-wrap : wrap;
 width: ${(props) => (props.postStyle ? '700px' : '860px')};
 padding :${(props) => (props.postStyle ? '0px' : '10px 20px')};
 border-radius : 4px;
-border : ${(props) => (props.postStyle ? 'none' : '1px solid #ededed')};;
-background :${(props) => (props.postStyle ? 'none' : '#fff')};;
+border : none;
+border-left : ${(props) => (props.postStyle ? 'none' : '1px solid #ededed')};
+border-right : ${(props) => (props.postStyle ? 'none' : '1px solid #ededed')};
+background :${(props) => (props.postStyle ? 'none' : '#fff')};
 
-// 포스트 박스
+    // 포스트 박스
     .post_box{
     position: relative;
     display : ${(props) => (props.postStyle ? 'block' : 'flex')};
     justify-content: space-between;
     flex : 1 0 100%;
-    min-height :${(props) => (props.postStyle ? '360px' : '24px')};
+    min-height :${(props) => (props.postStyle ? '360px' : '36px')};
     margin-bottom : ${(props) => (props.postStyle ? '20px' : '0px')};
     padding: ${(props) => (props.postStyle ? '20px' : '0')};
     border-radius : ${(props) => (props.postStyle ? '8px' : '4px')};;
     border-bottom : 1px solid #ededed;
-    line-height :   ${(props) => (props.postStyle ? '10px' : '32px')};
+    line-height :   ${(props) => (props.postStyle ? '10px' : 'auto')};
     background: #fff;
     box-shadow : ${(props) => (props.postStyle ? '0px 0px 10px rgba(0,0,0,0.1)' : 'none')};
     }
 
-  .notice {
-  background : rgba(255, 78, 90, 0.05);
-    
-    .post_tag,
-    .post_title{
-      color : #ff4e59;
+    .notice {
+    background : rgba(255, 78, 90, 0.05);
+        
+      .post_tag,
+      .post_title{
+        color : #ff4e59;
+      }
+
+      .post_tag{
+      margin-right : 4px;
+      }
+
     }
 
-    .post_tag{
-    margin-right : 4px;
-    }
-  }
+      .post_box:last-child{
+      margin-bottom : 40px;
+      }
+      .post_box:nth-of-type(odd){
+        // margin-right : 20px;
+      }
 
-    .post_box:last-child{
-    margin-bottom : 40px;
-    }
-    .post_box:nth-of-type(odd){
-      // margin-right : 20px;
-    }
-
-    // 포스트 제목
-    .post_title_wrap,
-    .post_right_wrap{
-    display: flex;
-    }
-
-    .post_title_wrap{
-    flex: 0 0 60%;
-    flex-wrap:${(props) => (props.postStyle ? 'wrap' : 'nowrap')};
-    margin-top : ${(props) => (props.postStyle ? '8px' : '0px')};
-    padding-left : ${(props) => (props.postStyle ? '0px' : '20px')};
-    padding-bottom : ${(props) => (props.postStyle ? '10px' : '0px')};
-    border-bottom : ${(props) => (props.postStyle ? '1px solid #ededed' : 'none')};
-    }
-
-    .post_right_wrap{
-    display:flex;
-    flex: 0 0 40%;
-    }
-
-    // 포스트 태그
-    .post_tag{
-    width : ${(props) => (props.postStyle ? '100%' : 'auto')};
-    margin-right : 4px;
-    font-size : 14px;
-    line-height : ${(props) => (props.postStyle ? '24px' : '32px')};
-    color : #555;
-    }
-    
-    // 포스트 제목
-    .post_title{
-    font-size : ${(props) => (props.postStyle ? '20px' : '14px')};
-    font-family : var(--font-pretendard-light);
-    line-height : 32px;
-    border-bottom : none;
-    }
-
-    // 포스트 내용
-    .post_content_wrap{
-      margin-top : 20px;
-      min-height: 120px;
-    }
-
-    // 유저 이름, 포스트 날짜, 포스트 댓글
-    .user_id,
-    .post_date,
-    .post_coment {
-    font-size : 14px;
-    line-height : 32px;
-    }
-
-    .user_id,
-    .post_date{
-    flex : ${(props) => (props.postStyle ? '0 0 auto' : '0 0 50%')};
-    }
-
-    .user_id{
-    margin-right : ${(props) => (props.postStyle ? '4px' : '0')};
-    }
-
-    .post_bottom_wrap{
-    display: flex;
-    border-top: 1px solid #ededed;
-    margin-top: 20px;
-    padding-top: 10px;
-    }
-
-    .post_comment_icon{
-    width: 32px;
-    height: 32px;
-    background: red;
-    margin-right : 4px
-    }
-
-    .post_comment{
-    font-family : ${(props) => (props.postStyle ? 'var(--font-pretendard-medium)' : 'var(--font-pretendard-bold)')};
-    font-size : ${(props) => (props.postStyle ? '16px' : '14px')};
-    color: ${(props) => (props.postStyle ? '#191919' : 'red')};
-    margin-left : ${(props) => (props.postStyle ? '0px' : '4px')};
-    display : ${(props) => (props.postStyle ? 'flex' : 'block')};
-    line-height : ${(props) => (props.postStyle ? '32px' : '32px')};
-    }
-
-    & .user_id:hover,
-    .post_title:hover{
-    text-decoration : underline;
-    cursor: pointer;
-    }
-
-  // 포스트 프로필 박스
-    .post_profile{
-    display:flex;
-    }
-    .user_profile{
-    width : 32px;
-    height : 32px;
-    margin-right : 4px;
-    border-radius: 50%;
-    background: red;
-    }
-
-  // 포스트 이미지 있을 때 표시
-    .post_img_icon{
-    width : 16px;
-    height : 16px;
-    margin : 8px 4px 0px;
-    background : red;
-    }
-
-  // 포스트 이미지 감추기
-    .post_text img{
-    display : none;
-    }
-
-  // 포스트 내용
-  .post_text{
-    max-height: 300px;
-    overflow: hidden;
-    max-width: 580px;
-  }
-    .post_text p{
-    line-height : 32px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    }
-    .post_text p:nth-of-type(n+3){
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    }
-
-    .post_text p:nth-of-type(n+5){
-      display : none
-    }
-
-  // 포스트 이미지 미리보기
-    .post_pr_img_wrap{
-        display:flex
-    }
-
-    .post_pr_img{
-    max-width : 300px;
-    flex : 1 0 24%;
-    min-height: 120px;
-    margin-right : 8px;
-    background-size : cover;
-    border-radius : 4px;
-    box-shadow : 0px 0px 10px rgba(0,0,0,0.1)
-    }
-
-    .post_pr_img:last-child{
-    margin-right : 0;
-    }
-
-    // 포스트 Swiper Style
-    .swiper{
-    width: 100%;
-    margin: 0;
-    }
-
-    // 공지사항 스타일
-    .notice_wrap{
-    left : 0px;
-    top : 0;
-    width: 860px;
-    padding : 0;
-    border : 1px solid #ededed;
-    background : #fff;
-
-      .post_box{
-      display : flex;
-      min-height : 24px;
-      margin-bottom : 0;
-      padding: 0;
-      border-radius : 4px;
-      line-height : 32px;
-      box-shadow : none;
+      // 포스트 제목
+      .post_title_wrap,
+      .post_right_wrap{
+      display: flex;
       }
 
       .post_title_wrap{
-      flex-wrap: nowrap;
-      margin-top : 0;
-      padding-left : 20px;
-      padding-bottom : 0;
+      flex: 0 0 60%;
+      flex-wrap:${(props) => (props.postStyle ? 'wrap' : 'nowrap')};
+      margin-top : ${(props) => (props.postStyle ? '8px' : '0px')};
+      padding-left : ${(props) => (props.postStyle ? '0px' : '20px')};
+      padding-bottom : ${(props) => (props.postStyle ? '10px' : '0px')};
+      border-bottom : ${(props) => (props.postStyle ? '1px solid #ededed' : 'none')};
+      }
+
+      .post_right_wrap{
+      display:flex;
+      flex: 0 0 40%;
+      }
+
+      // 포스트 태그
+      .post_tag{
+      width : ${(props) => (props.postStyle ? '100%' : 'auto')};
+      margin-right : 4px;
+      font-size : 14px;
+      line-height : ${(props) => (props.postStyle ? '24px' : '36px')};
+      color : #555;
+      }
+    
+      // 포스트 제목
+      .post_title{
+      font-size : ${(props) => (props.postStyle ? '20px' : '14px')};
+      font-family : var(--font-pretendard-light);
+      line-height : 36px;
       border-bottom : none;
       }
 
-      // 공지사항 태그
-      .post_tag{
-      width : auto;
-      line-height : 32px;
+      // 포스트 내용
+      .post_content_wrap{
+        margin-top : 20px;
+        min-height: 120px;
       }
-      // 공지사항 제목
-      .post_title{
+
+      // 유저 이름, 포스트 날짜, 포스트 댓글
+      .user_id,
+      .post_date,
+      .post_coment {
       font-size : 14px;
+      line-height : 36px;
       }
 
       .user_id,
       .post_date{
-      flex : 0 0 50%;
+      flex : ${(props) => (props.postStyle ? '0 0 auto' : '0 0 50%')};
       }
 
       .user_id{
+      margin-right : ${(props) => (props.postStyle ? '4px' : '0')};
+      }
+
+      .post_bottom_wrap{
+      display: flex;
+      border-top: 1px solid #ededed;
+      margin-top: 20px;
+      padding-top: 10px;
+      }
+
+      .post_comment_icon{
+      width: 32px;
+      height: 32px;
+      background: red;
+      margin-right : 4px
+      }
+
+      .post_comment{
+
+      font-family : ${(props) => (props.postStyle ? 'var(--font-pretendard-medium)' : 'var(--font-pretendard-bold)')};
+      font-size : ${(props) => (props.postStyle ? '16px' : '14px')};
+      color: ${(props) => (props.postStyle ? '#191919' : 'red')};
+      margin-left : ${(props) => (props.postStyle ? '0px' : '4px')};
+      display : ${(props) => (props.postStyle ? 'flex' : 'block')};
+      line-height : 36px;
+      }
+
+      & .user_id:hover,
+      .post_title:hover{
+
+      text-decoration : underline;
+      cursor: pointer;
+      }
+
+      // 포스트 프로필 박스
+      .post_profile{
+
+      display:flex;
+      }
+
+      .user_profile{
+
+      width : 32px;
+      height : 32px;
+      margin-right : 4px;
+      border-radius: 50%;
+      background: red;
+      }
+
+       // 포스트 이미지 있을 때 표시
+      .post_img_icon{
+
+      width : 16px;
+      height : 16px;
+      margin : 11px 4px 0px;
+      background : red;
+      }
+
+      // 포스트 이미지 감추기
+      .post_text img{
+
+      display : none;
+      }
+
+      // 포스트 내용
+      .post_text{
+
+        max-height: 300px;
+        overflow: hidden;
+        max-width: 580px;
+      }
+
+      .post_text p{
+
+      line-height : 36px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      }
+
+      .post_text p:nth-of-type(n+3){
+
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      }
+
+      .post_text p:nth-of-type(n+5){
+
+        display : none
+      }
+
+      // 포스트 이미지 미리보기
+    
+      .post_pr_img_wrap{
+
+          display:flex
+      }
+
+      .post_pr_img{
+
+      max-width : 300px;
+      flex : 1 0 24%;
+      min-height: 120px;
+      margin-right : 8px;
+      background-size : cover;
+      border-radius : 4px;
+      box-shadow : 0px 0px 10px rgba(0,0,0,0.1)
+      }
+
+      .post_pr_img:last-child{
+
       margin-right : 0;
       }
-      .post_comment{
-      font-family : var(--font-pretendard-bold);
-      font-size : 14px;
-      color: red;
-      margin-left : 4px;
-      display : block;
-      line-height : 32px;
+
+      // 포스트 Swiper Style
+
+      .swiper{
+
+      width: 100%;
+      margin: 0;
       }
-    }
+
+      .swiper-pagination{
+      display : none;
+      }
+
+      // 페이지네이션
+      .pagination_btn_wrap{
+      position: relative;
+      display: flex;
+      justify-content: space-evenly;
+      width: fit-content;
+      height: 24px;
+      margin: 0 auto;
+      border-right : 1px solid #ededed;
+      border-left : 1px solid #ededed;
+
+        button{
+        display: block;
+        width: 24px;
+        margin-right : 4px;
+        border: none;
+        background: none;
+        cursor:pointer;
+        }
+
+        button:last-child{
+        margin : 0;
+        }
+      }
+
+      // 공지사항 숨기기 버튼
+      .hide_notice_wrap{
+
+        label{
+        display : flex;
+        width : fit-content;
+        }
+
+        span {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        margin: 16px 4px 0px;
+        border: 1px solid #ccc; /* 기본 테두리 */
+        border-radius: 2px; /* 테두리 둥글게 */
+        background-color: white;
+        position: relative;
+        cursor:pointer;
+        }
+
+        input[type="checkbox"] {
+        appearance: none;
+        display: none; /* 화면에 표시되지 않도록 숨김 */
+        }
+
+        input[type="checkbox"]:checked + span {
+          border-color: #ccc; /* 체크 시 테두리 색 */
+          background-color: none; /* 체크 시 배경색 */
+        }
+
+        /* 체크 아이콘 추가 */
+        input[type="checkbox"]:checked + span::before {
+          content: "✔"; /* 체크 아이콘 (Unicode) */
+          color: #ff0010;
+          font-size: 12px;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%); /* 중앙 정렬 */
+        }
+          
+        .hide_text{
+            line-height: 48px;
+        }
+      }
+
 `
 export const TitleHeader = styled.div`
 width: 100%;
 background: #fff;
 
-    .all_post{
+    .title_wrap{
+      display: flex;
+      justify-content: space-between;
+    }   
+    .notice_post {
     display:block;
     margin-left : 10px;
     flex: 1 0 100%;
+    line-height : 48px;
+    font-size: 20px;
+    font-family: var(--font-pretendard-bold);
+    }
+
+    .all_post{
+    display:block;
+    margin-left : 10px;
+    flex: 1 0 80%;
     line-height : 48px;
     font-size: 20px;
     font-family: var(--font-pretendard-bold);

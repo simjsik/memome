@@ -19,6 +19,7 @@ import { Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
+import styled from '@emotion/styled';
 SwiperCore.use([Pagination]);
 
 const postDeleteBtn = css`
@@ -31,6 +32,205 @@ height : 14px;
 background : red;
 border : none;
 cursor : pointer;
+`
+
+const postStyleBtn = css`
+position : fixed;
+right : 580px;
+top : 0;
+
+width : 42px;
+height : 42px;
+background : red;
+`
+
+const NoticeWrap = styled.div`
+position : absolute; 
+left : 420px;
+top : 0px;
+width: 860px;
+padding : 10px 20px;
+border : none;
+border-left : 1px solid #ededed;
+border-right : 1px solid #ededed;
+background : #fff;
+// 공지사항 스타일
+    .notice_wrap{
+
+      .post_box{
+      position : relative;
+      display : flex;
+      min-height : 24px;
+      margin-bottom : 0;
+      padding: 0;
+      border-radius : 4px;
+      line-height : 36px;
+      box-shadow : none;
+      }
+
+      .post_title_wrap{
+      flex-wrap: nowrap;
+      flex : 0 0 60%;
+      margin-top : 0;
+      padding-left : 20px;
+      padding-bottom : 0;
+      border-bottom : none;
+      }
+
+      // 공지사항 태그
+      .post_tag{
+      width : auto;
+      margin-right : 4px;
+      line-height : 36px;
+      color : #555;
+      font-size : 14px;
+      }
+      // 공지사항 제목
+      .post_title{
+      font-size : 14px;
+      }
+
+      .user_id,
+      .post_date{
+      flex : 0 0 50%;
+      }
+
+      .user_id{
+      margin-right : 0;
+      }
+      .post_comment{
+      font-family : var(--font-pretendard-bold);
+      font-size : 14px;
+      color: red;
+      margin-left : 4px;
+      display : block;
+      line-height : 36px;
+      }
+  }
+
+    .post_box:last-child{
+    margin-bottom : 40px;
+    }
+    .post_box:nth-of-type(odd){
+      // margin-right : 20px;
+    }
+
+    // 포스트 제목
+    .post_title_wrap,
+    .post_right_wrap{
+    font-family : var(--font-pretendard-light);
+    display: flex;
+    }
+
+
+    .post_right_wrap{
+    display:flex;
+    flex: 0 0 40%;
+    }
+
+    // 유저 이름, 포스트 날짜, 포스트 댓글
+    .user_id,
+    .post_date,
+    .post_coment {
+    font-size : 14px;
+    line-height : 36px;
+    }
+
+    .post_bottom_wrap{
+    display: flex;
+    border-top: 1px solid #ededed;
+    margin-top: 20px;
+    padding-top: 10px;
+    }
+
+    .post_comment_icon{
+    width: 32px;
+    height: 32px;
+    background: red;
+    margin-right : 4px
+    }
+    & .user_id:hover,
+    .post_title:hover{
+    text-decoration : underline;
+    cursor: pointer;
+    }
+
+  // 포스트 프로필 박스
+    .post_profile{
+    display:flex;
+    }
+    .user_profile{
+    width : 32px;
+    height : 32px;
+    margin-right : 4px;
+    border-radius: 50%;
+    background: red;
+    }
+
+  // 포스트 이미지 있을 때 표시
+    .post_img_icon{
+    width : 16px;
+    height : 16px;
+    margin : 11px 4px 0px;
+    background : red;
+    }
+
+  // 포스트 이미지 감추기
+    .post_text img{
+    display : none;
+    }
+
+  // 포스트 내용
+  .post_text{
+    max-height: 300px;
+    overflow: hidden;
+    max-width: 580px;
+  }
+    .post_text p{
+    line-height : 36px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    }
+    .post_text p:nth-of-type(n+3){
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    }
+
+    .post_text p:nth-of-type(n+5){
+      display : none
+    }
+
+    .swiper-pagination{
+        display : none;
+    }
+
+    // 페이지네이션
+      .pagination_btn_wrap{
+      position: relative;
+      display: flex;
+      justify-content: space-evenly;
+      width: fit-content;
+      height: 24px;
+      margin: 0 auto;
+    border-right : 1px solid #ededed;
+      border-left : 1px solid #ededed;
+
+
+        button{
+        display: block;
+        width: 24px;
+        margin-right : 4px;
+        border: none;
+        background: none;
+        cursor:pointer;
+        }
+
+        button:last-child{
+        margin : 0;
+        }
+      }
 `
 
 interface MainHomeProps {
@@ -47,6 +247,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const [selectedMenu] = useRecoilValue<string>(selectedMenuState);
     const [notice, setNotice] = useRecoilState<boolean>(noticeState);
+    const [noticeHide, setNoticeHide] = useState<boolean>(false);
     const [postLength, setPostLength] = useState<[number, number]>([0, 0]);
     const [lastParams, setLastParams] = useState<[boolean, Timestamp] | null>(null);
     const [noticeLastParams, setNoticeLastParams] = useState<[boolean, Timestamp] | null>(null);
@@ -148,7 +349,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
     // 공지사항 탭 시 데이터 변경
     useEffect(() => {
-        if (notice) {
+        if (notice || noticePosts.length <= 0) {
             // 포스트 스타일 변경 및 공지사항 탭 시 공지사항 데이터 가져오기.
             let unsubscribe: () => void;
 
@@ -174,9 +375,9 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         }
         getTotalPost(notice);
 
-    }, [selectedMenu, notice])
+    }, [selectedMenu, notice, postStyle])
 
-    // 포스트 탭 변경
+    // 탭 변경
     useEffect(() => {
         getTotalPost(notice);
 
@@ -325,6 +526,10 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         }
     }
 
+    // 공지사항 숨기기
+    const noticeHideToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setNoticeHide(e.target.checked)
+    }
     // function
 
     // 포스팅 저장된 내용 확인. 있어야 이미지 불러와짐
@@ -339,157 +544,32 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
     return (
         <>
-            <PostWrap postStyle={postStyle}>
+            {notice &&
                 <>
-
-                    {notice &&
-                        <>
-                            {/* 페이지네이션 타이틀 */}
-                            <TitleHeader>
-                                {
-                                    notice ?
-                                        <>
-                                            <p className='all_post'>공지사항</p>
-                                        </>
-                                        :
-                                        <>
-                                            <p className='all_post'>전체 글</p>
-                                            <button>공지사항 숨기기</button>
-                                        </>
-                                }
-                                <div className='post_header'>
-                                    <p className='h_title'>제목</p>
-                                    <p className='h_user'>작성자</p>
-                                    <p className='h_date'>날짜</p>
-                                </div>
-                            </TitleHeader>
-                            {/* 공지사항 전체 */}
-                            <>
-                                <Swiper
-                                    slidesPerView={1}
-                                    onSwiper={(swiper) => (swiperRef.current = swiper)} // Swiper 인스턴스 저장
-                                    pagination={{
-                                        clickable: true,
-                                    }}
-                                    modules={[Pagination]}
-                                    className="mySwiper"
-                                >
-                                    {Array.from({ length: postLength[0] }, (_, pageIndex) => (
-                                        <SwiperSlide key={pageIndex} className='notice_wrap'>
-                                            {noticePosts.map((post) => (
-                                                <div key={post.id} className='post_box'>
-                                                    <div className='post_title_wrap'>
-                                                        {(post.images && post.images?.length > 0) ?
-                                                            <div className='post_img_icon'>
-                                                            </div>
-                                                            :
-                                                            <div className='post_img_icon'>
-                                                            </div>
-                                                        }
-                                                        <span className='post_tag'>[{post.tag}]</span>
-                                                        <h2 className='post_title' onClick={() => handlePostClick(post.id)}>{post.title}</h2>
-                                                        {post.commentCount > 0 &&
-                                                            <p className='post_comment'>[{post.commentCount}]</p>
-                                                        }
-                                                    </div>
-                                                    <div className='post_right_wrap'>
-                                                        <p className='user_id'>
-                                                            {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
-                                                        </p>
-                                                        <p className='post_date'>{formatDate(post.createAt)}</p>
-                                                    </div>
-                                                    {post.userId === auth.currentUser?.uid &&
-                                                        <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
-                                                    }
-                                                </div>
-                                            ))}
-                                        </SwiperSlide>
-                                    ))}
-                                </Swiper>
-                            </>
-                            {/* 페이지네이션 버튼 */}
-                            <div>
-                                {Array.from({ length: postLength[0] }, (_, index) => (
-                                    <button key={index} onClick={() => { handleClickPagenation(index + 1); swiperRef.current?.slideTo(index, 0); }}>
-                                        {index + 1}
-                                    </button>
-                                ))}
+                    {/* 공지사항 전체 */}
+                    <NoticeWrap>
+                        {/* 페이지네이션 타이틀 */}
+                        <TitleHeader>
+                            <p className='notice_post'>공지사항</p>
+                            <div className='post_header'>
+                                <p className='h_title'>제목</p>
+                                <p className='h_user'>작성자</p>
+                                <p className='h_date'>날짜</p>
                             </div>
-                        </>
-                    }
-                    {!postStyle ?
-                        <>
-                            {/* 페이지네이션 타이틀 */}
-                            <TitleHeader>
-                                {
-                                    notice ?
-                                        <>
-                                            <p className='all_post'>공지사항</p>
-                                        </>
-                                        :
-                                        <>
-                                            <p className='all_post'>전체 글</p>
-                                            <button>공지사항 숨기기</button>
-                                        </>
-                                }
-                                <div className='post_header'>
-                                    <p className='h_title'>제목</p>
-                                    <p className='h_user'>작성자</p>
-                                    <p className='h_date'>날짜</p>
-                                </div>
-                            </TitleHeader>
-                            {/* 공지사항 전체 */}
-                            {notice &&
-                                <>
-                                    <Swiper
-                                        slidesPerView={1}
-                                        onSwiper={(swiper) => (swiperRef.current = swiper)} // Swiper 인스턴스 저장
-                                        pagination={{
-                                            clickable: true,
-                                        }}
-                                        modules={[Pagination]}
-                                        className="mySwiper notice_wrap"
-                                    >
-                                        {Array.from({ length: postLength[0] }, (_, pageIndex) => (
-                                            <SwiperSlide key={pageIndex}>
-                                                {noticePosts.map((post) => (
-                                                    <div key={post.id} className='post_box'>
-                                                        <div className='post_title_wrap'>
-                                                            {(post.images && post.images?.length > 0) ?
-                                                                <div className='post_img_icon'>
-                                                                </div>
-                                                                :
-                                                                <div className='post_img_icon'>
-                                                                </div>
-                                                            }
-                                                            <span className='post_tag'>[{post.tag}]</span>
-                                                            <h2 className='post_title' onClick={() => handlePostClick(post.id)}>{post.title}</h2>
-                                                            {post.commentCount > 0 &&
-                                                                <p className='post_comment'>[{post.commentCount}]</p>
-                                                            }
-                                                        </div>
-                                                        <div className='post_right_wrap'>
-                                                            <p className='user_id'>
-                                                                {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
-                                                            </p>
-                                                            <p className='post_date'>{formatDate(post.createAt)}</p>
-                                                        </div>
-                                                        {post.userId === auth.currentUser?.uid &&
-                                                            <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
-                                                        }
-                                                    </div>
-                                                ))}
-                                            </SwiperSlide>
-                                        ))}
-                                    </Swiper>
-                                </>
-                            }
-                            {/* 포스트 전체 */}
-                            {!notice &&
-                                <>
-                                    {/* 최신 공지사항 5개 */}
-                                    {noticePosts.slice(0, 5).map((post) => (
-                                        <div key={post.id} className={post.notice ? 'post_box notice' : 'post_box'}>
+                        </TitleHeader>
+                        <Swiper
+                            slidesPerView={1}
+                            onSwiper={(swiper) => (swiperRef.current = swiper)} // Swiper 인스턴스 저장
+                            pagination={{
+                                clickable: true,
+                            }}
+                            modules={[Pagination]}
+                            className="mySwiper notice_wrap"
+                        >
+                            {Array.from({ length: postLength[0] }, (_, pageIndex) => (
+                                <SwiperSlide key={pageIndex} >
+                                    {noticePosts.map((post) => (
+                                        <div key={post.id} className='post_box'>
                                             <div className='post_title_wrap'>
                                                 {(post.images && post.images?.length > 0) ?
                                                     <div className='post_img_icon'>
@@ -515,120 +595,192 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                             }
                                         </div>
                                     ))}
+                                </SwiperSlide>
+                            ))}
+                        </Swiper>
+                        {/* 페이지네이션 버튼 */}
+                        <div className='pagination_btn_wrap'>
+                            {Array.from({ length: postLength[0] }, (_, index) => (
+                                <button key={index} onClick={() => { handleClickPagenation(index + 1); swiperRef.current?.slideTo(index, 0); }}>
+                                    {index + 1}
+                                </button>
+                            ))}
+                        </div>
+                    </NoticeWrap >
 
-                                    {/* 전체 포스트 */}
-                                    <Swiper
-                                        slidesPerView={1}
-                                        onSwiper={(swiper) => (swiperRef.current = swiper)} // Swiper 인스턴스 저장
-                                        pagination={{
-                                            clickable: true,
-                                        }}
-                                        modules={[Pagination]}
-                                        className="mySwiper"
-                                    >
-                                        {Array.from({ length: postLength[0] }, (_, pageIndex) => (
-                                            <SwiperSlide key={pageIndex}>
-                                                {posts
-                                                    .slice(pageIndex * 10, (pageIndex + 1) * 10)
-                                                    .map((post) => (
-                                                        <div key={post.id} className={post.notice ? 'post_box notice' : 'post_box'}>
-                                                            <div className='post_title_wrap'>
-                                                                {(post.images && post.images?.length > 0) ?
-                                                                    <div className='post_img_icon'>
-                                                                    </div>
-                                                                    :
-                                                                    <div className='post_img_icon'>
-                                                                    </div>
-                                                                }
-                                                                <span className='post_tag'>[{post.tag}]</span>
-                                                                <h2 className='post_title' onClick={() => handlePostClick(post.id)}>{post.title}</h2>
-                                                                {post.commentCount > 0 &&
-                                                                    <p className='post_comment'>[{post.commentCount}]</p>
+                </>
+            }
+            {!notice &&
+                <PostWrap postStyle={postStyle}>
+                    <>
+                        {!postStyle ?
+                            <>
+                                {/* 페이지네이션 타이틀 */}
+                                <TitleHeader>
+                                    <div className='title_wrap'>
+                                        <p className='all_post'>전체 글</p>
+                                        <div className='hide_notice_wrap'>
+                                            <label>
+                                                <input onChange={noticeHideToggle} type='checkbox' className='hide_notice_btn'></input>
+                                                <span></span>
+                                                <p className='hide_text'>공지사항 숨기기</p>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div className='post_header'>
+                                        <p className='h_title'>제목</p>
+                                        <p className='h_user'>작성자</p>
+                                        <p className='h_date'>날짜</p>
+                                    </div>
+                                </TitleHeader>
+                                {/* 포스트 전체 */}
+                                {!notice &&
+                                    <>
+                                        {/* 최신 공지사항 5개 */}
+                                        {!noticeHide &&
+                                            noticePosts.slice(0, 5).map((post) => (
+                                                <div key={post.id} className={post.notice ? 'post_box notice' : 'post_box'}>
+                                                    <div className='post_title_wrap'>
+                                                        {(post.images && post.images?.length > 0) ?
+                                                            <div className='post_img_icon'>
+                                                            </div>
+                                                            :
+                                                            <div className='post_img_icon'>
+                                                            </div>
+                                                        }
+                                                        <span className='post_tag'>[{post.tag}]</span>
+                                                        <h2 className='post_title' onClick={() => handlePostClick(post.id)}>{post.title}</h2>
+                                                        {post.commentCount > 0 &&
+                                                            <p className='post_comment'>[{post.commentCount}]</p>
+                                                        }
+                                                    </div>
+                                                    <div className='post_right_wrap'>
+                                                        <p className='user_id'>
+                                                            {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
+                                                        </p>
+                                                        <p className='post_date'>{formatDate(post.createAt)}</p>
+                                                    </div>
+                                                    {post.userId === auth.currentUser?.uid &&
+                                                        <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
+                                                    }
+                                                </div>
+                                            ))
+                                        }
+
+                                        {/* 전체 포스트 */}
+                                        <Swiper
+                                            slidesPerView={1}
+                                            onSwiper={(swiper) => (swiperRef.current = swiper)} // Swiper 인스턴스 저장
+                                            pagination={{
+                                                clickable: true,
+                                            }}
+                                            modules={[Pagination]}
+                                            className="mySwiper"
+                                        >
+                                            {Array.from({ length: postLength[0] }, (_, pageIndex) => (
+                                                <SwiperSlide key={pageIndex}>
+                                                    {posts
+                                                        .slice(pageIndex * 10, (pageIndex + 1) * 10)
+                                                        .map((post) => (
+                                                            <div key={post.id} className={post.notice ? 'post_box notice' : 'post_box'}>
+                                                                <div className='post_title_wrap'>
+                                                                    {(post.images && post.images?.length > 0) ?
+                                                                        <div className='post_img_icon'>
+                                                                        </div>
+                                                                        :
+                                                                        <div className='post_img_icon'>
+                                                                        </div>
+                                                                    }
+                                                                    <span className='post_tag'>[{post.tag}]</span>
+                                                                    <h2 className='post_title' onClick={() => handlePostClick(post.id)}>{post.title}</h2>
+                                                                    {post.commentCount > 0 &&
+                                                                        <p className='post_comment'>[{post.commentCount}]</p>
+                                                                    }
+                                                                </div>
+                                                                <div className='post_right_wrap'>
+                                                                    <p className='user_id'>
+                                                                        {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
+                                                                    </p>
+                                                                    <p className='post_date'>{formatDate(post.createAt)}</p>
+                                                                </div>
+                                                                {post.userId === auth.currentUser?.uid &&
+                                                                    <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
                                                                 }
                                                             </div>
-                                                            <div className='post_right_wrap'>
-                                                                <p className='user_id'>
-                                                                    {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
-                                                                </p>
-                                                                <p className='post_date'>{formatDate(post.createAt)}</p>
-                                                            </div>
-                                                            {post.userId === auth.currentUser?.uid &&
-                                                                <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
-                                                            }
-                                                        </div>
-                                                    ))}
-                                            </SwiperSlide>
-                                        ))}
-                                    </Swiper>
-                                </>
-                            }
-                            {/* 페이지네이션 버튼 */}
-                            <div>
-                                {Array.from({ length: postLength[0] }, (_, index) => (
-                                    <button key={index} onClick={() => { handleClickPagenation(index + 1); swiperRef.current?.slideTo(index, 0); }}>
-                                        {index + 1}
-                                    </button>
-                                ))}
-                            </div>
-                        </>
-                        :
-                        !notice && postStyle &&
-                        <>
-                            {/* 무한 스크롤 구조 */}
-                            {posts.map((post) => (
-                                <div key={post.id} className='post_box' onClick={() => handlePostClick(post.id)}>
-                                    {/* 작성자 프로필 */}
-                                    <div className='post_profile'>
-                                        <div className='user_profile'></div>
-                                        <p className='user_id'>
-                                            {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자' : post.userId}
-                                        </p>
-                                        <p className='post_date'>
-                                            · {formatDate(post.createAt)}
-                                        </p>
-                                    </div>
-                                    {/* 포스트 제목 */}
-                                    <div className='post_title_wrap'>
-                                        <span className='post_tag'>[{post.tag}]</span>
-                                        <h2 className='post_title'>{post.title}</h2>
-                                    </div>
-                                    {/* 포스트 내용 */}
-                                    <div className='post_content_wrap'>
-                                        <div className='post_text' dangerouslySetInnerHTML={{ __html: post.content }}></div>
-                                        {/* 이미지 */}
-                                        <div className='post_pr_img_wrap'>
-                                            {(post.images && post.images.length > 0) && (
-                                                post.images.map((imageUrl, index) => (
-                                                    <div className='post_pr_img' key={index}
-                                                        css={css`
+                                                        ))}
+                                                </SwiperSlide>
+                                            ))}
+                                        </Swiper>
+                                    </>
+                                }
+                                {/* 페이지네이션 버튼 */}
+                                <div className='pagination_btn_wrap'>
+                                    {Array.from({ length: postLength[0] }, (_, index) => (
+                                        <button key={index} onClick={() => { handleClickPagenation(index + 1); swiperRef.current?.slideTo(index, 0); }}>
+                                            {index + 1}
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                            :
+                            <>
+                                {/* 무한 스크롤 구조 */}
+                                {posts.map((post) => (
+                                    <div key={post.id} className='post_box' onClick={() => handlePostClick(post.id)}>
+                                        {/* 작성자 프로필 */}
+                                        <div className='post_profile'>
+                                            <div className='user_profile'></div>
+                                            <p className='user_id'>
+                                                {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자' : post.userId}
+                                            </p>
+                                            <p className='post_date'>
+                                                · {formatDate(post.createAt)}
+                                            </p>
+                                        </div>
+                                        {/* 포스트 제목 */}
+                                        <div className='post_title_wrap'>
+                                            <span className='post_tag'>[{post.tag}]</span>
+                                            <h2 className='post_title'>{post.title}</h2>
+                                        </div>
+                                        {/* 포스트 내용 */}
+                                        <div className='post_content_wrap'>
+                                            <div className='post_text' dangerouslySetInnerHTML={{ __html: post.content }}></div>
+                                            {/* 이미지 */}
+                                            <div className='post_pr_img_wrap'>
+                                                {(post.images && post.images.length > 0) && (
+                                                    post.images.map((imageUrl, index) => (
+                                                        <div className='post_pr_img' key={index}
+                                                            css={css`
                                                             background-image : url(${imageUrl});
                                                             height : ${post.images?.length === 1 ? '400px'
-                                                                :
-                                                                post.images?.length === 2 ? '300px'
                                                                     :
-                                                                    '140px'
-                                                            };
+                                                                    post.images?.length === 2 ? '300px'
+                                                                        :
+                                                                        '140px'
+                                                                };
                                                             `}></div>
-                                                ))
-                                            )}
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
+                                        {/* 포스트 댓글, 북마크 등 */}
+                                        <div className='post_bottom_wrap'>
+                                            <div className='post_comment'>
+                                                <div className='post_comment_icon'></div>
+                                                <p>{post.commentCount}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                    {/* 포스트 댓글, 북마크 등 */}
-                                    <div className='post_bottom_wrap'>
-                                        <div className='post_comment'>
-                                            <div className='post_comment_icon'></div>
-                                            <p>{post.commentCount}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </>
-                    }
-                </>
-                <button className='post_style_btn'></button>
-                {postStyle && < div ref={observerLoadRef} style={{ height: '1px' }} />}
-                {(!hasNextPage && postStyle) && <p>제일 최근 메모입니다.</p>}
-            </PostWrap >
+                                ))}
+                                {postStyle && < div ref={observerLoadRef} style={{ height: '1px' }} />}
+                                {(!hasNextPage && postStyle) && <p>제일 최근 메모입니다.</p>}
+                            </>
+                        }
+                    </>
+                    <button className='post_style_btn' onClick={() => setPostStyle((prev) => !prev)} css={postStyleBtn}></button>
+                </PostWrap>
+
+            }
         </>
     )
 }

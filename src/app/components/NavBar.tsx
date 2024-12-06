@@ -71,7 +71,6 @@ export default function NavBar() {
     const [currentUser, setCurrentUser] = useRecoilState<string | null>(userState)
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const [notice, setNotice] = useRecoilState<boolean>(noticeState);
-    const [postStyle, setPostStyle] = useRecoilState<boolean>(postStyleState)
 
 
     // State
@@ -80,9 +79,9 @@ export default function NavBar() {
 
     useEffect(() => {
         if (path) {
-            const pathSegment = path?.split('/').filter(Boolean)
+            const pathSegment = path?.split('/').filter(Boolean);
             if (pathSegment[1] === 'main') {
-                setSelectedMenu('allPost')
+                setSelectedMenu('allPost');
             }
         }
     }, [path])
@@ -90,22 +89,20 @@ export default function NavBar() {
     // 내비 클릭 시 선택 메뉴 설정
     const handleNavClick = (NavTitle: string) => {
         if (NavTitle === 'allPost') {
-            router.push('/home/main')
-            setNotice(false)
+            router.push('/home/main');
+            setNotice(false);
         } else if (NavTitle === 'bookmark') {
             if (yourLogin) {
-                router.push(`/home/bookmark/${currentUser}`)
-                setNotice(false)
+                router.push(`/home/bookmark/${currentUser}`);
+                setNotice(false);
             } else {
-                return alert('로그인이 필요한 기능입니다.')
+                return alert('로그인이 필요한 기능입니다.');
             }
         } else if (NavTitle === 'notice') {
-            if (postStyle) {
-                // setPostStyle(false);
-            }
-            setNotice(true)
+            router.push('/home/main');
+            setNotice(true);
         }
-        setSelectedMenu(NavTitle)
+        setSelectedMenu(NavTitle);
     }
 
     // 포스팅 메뉴 클릭 시 이동 및 제어
@@ -116,8 +113,6 @@ export default function NavBar() {
             setLoginToggle(true);
         }
     };
-
-
 
     // Function
     return (
