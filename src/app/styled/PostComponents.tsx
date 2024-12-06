@@ -213,6 +213,61 @@ background :${(props) => (props.postStyle ? 'none' : '#fff')};;
     width: 100%;
     margin: 0;
     }
+
+    // 공지사항 스타일
+    .notice_wrap{
+    left : 0px;
+    top : 0;
+    width: 860px;
+    padding : 0;
+    border : 1px solid #ededed;
+    background : #fff;
+
+      .post_box{
+      display : flex;
+      min-height : 24px;
+      margin-bottom : 0;
+      padding: 0;
+      border-radius : 4px;
+      line-height : 32px;
+      box-shadow : none;
+      }
+
+      .post_title_wrap{
+      flex-wrap: nowrap;
+      margin-top : 0;
+      padding-left : 20px;
+      padding-bottom : 0;
+      border-bottom : none;
+      }
+
+      // 공지사항 태그
+      .post_tag{
+      width : auto;
+      line-height : 32px;
+      }
+      // 공지사항 제목
+      .post_title{
+      font-size : 14px;
+      }
+
+      .user_id,
+      .post_date{
+      flex : 0 0 50%;
+      }
+
+      .user_id{
+      margin-right : 0;
+      }
+      .post_comment{
+      font-family : var(--font-pretendard-bold);
+      font-size : 14px;
+      color: red;
+      margin-left : 4px;
+      display : block;
+      line-height : 32px;
+      }
+    }
 `
 export const TitleHeader = styled.div`
 width: 100%;

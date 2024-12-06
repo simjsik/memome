@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { ADMIN_ID, newNoticeState, PostData, PostState, postStyleState, storageLoadState, userState } from '../../state/PostState';
+import { ADMIN_ID, newNoticeState, noticeState, PostData, PostState, postStyleState, storageLoadState, userState } from '../../state/PostState';
 import { useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import { PostWrap, TitleHeader } from '../../styled/PostComponents';
@@ -46,7 +46,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     const [currentUser, setCurrentUser] = useRecoilState<string | null>(userState)
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const [selectedMenu] = useRecoilValue<string>(selectedMenuState);
-    const [notice, setNotice] = useState<boolean>(false);
+    const [notice, setNotice] = useRecoilState<boolean>(noticeState);
     const [postLength, setPostLength] = useState<[number, number]>([0, 0]);
     const [lastParams, setLastParams] = useState<[boolean, Timestamp] | null>(null);
     const [noticeLastParams, setNoticeLastParams] = useState<[boolean, Timestamp] | null>(null);
@@ -142,22 +142,14 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     // 초기 포스트 길이 가져오기
     useEffect(() => {
         if (!postStyle) {
-            getTotalPost(false);
+            getTotalPost(notice);
         }
     }, [])
 
     // 공지사항 탭 시 데이터 변경
     useEffect(() => {
-        console.log(selectedMenu)
-
-        if (selectedMenu === 'notice') {
-        }
-    }, [selectedMenu])
-
-    // 포스트 탭 변경
-    useEffect(() => {
-        if (!postStyle) {
-            // 포스트 스타일 변경 시 공지사항 데이터 가져오기.
+        if (notice) {
+            // 포스트 스타일 변경 및 공지사항 탭 시 공지사항 데이터 가져오기.
             let unsubscribe: () => void;
 
             unsubscribe = onSnapshot(
@@ -178,42 +170,50 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                     setNoticePosts(postData);
                 }
             );
-
             return () => unsubscribe();
         }
+        getTotalPost(notice);
 
-        // 공지사항 길이, 일반 포스트 길이
-        if (notice) {
-            getTotalPost(true);
-        } else {
-            getTotalPost(false);
+    }, [selectedMenu, notice])
+
+    // 포스트 탭 변경
+    useEffect(() => {
+        getTotalPost(notice);
+
+        if (!postStyle) {
+            handleClickPagenation(1);
         }
-    }, [notice, postStyle])
+    }, [notice])
+
     // 페이지네이션 로직
     const handleClickPagenation = async (page: number) => {
 
         const pageSize = 10 * page;
-        if ((posts.length >= pageSize || (!lastParams && !noticeLastParams) || posts.length >= postLength[1]))
-            // `현재 포스트 길이가 페이지 최대 수`와 같거나 크면 또는
-            // `마지막 포스트 데이터가 없으면` 또는
-            // `전체 포스트 수`보다 같거나 커지면 요청 X
-            return;
 
-        if (notice) {
+        if ((posts.length >= pageSize || (!lastParams && !noticeLastParams) || posts.length >= postLength[1]))
+            return console.log('함수 요청 안함.');
+        // `현재 포스트 길이가 페이지 최대 수`와 같거나 크면 또는
+        // `마지막 포스트 데이터가 없으면` 또는
+        // `전체 포스트 수`보다 같거나 커지면 요청 X
+
+        if (notice && noticeLastParams) {
             const newPosts = await fetchPosts(noticeLastParams, pageSize, noticePosts.length);
 
             setNoticePosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
             setNoticeLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
-        } else {
+            console.log('공지사항 데이터 요청', '마지막 데이터 = ', noticeLastParams)
+        } else if (lastParams) {
             const newPosts = await fetchPosts(lastParams, pageSize, posts.length);
 
             setPosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
             setLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
+            console.log('일반 포스터 데이터 요청')
         }
     }
 
+    // 포스트 스타일 변경 시 기본 페이지네이션 용 데이터 가져오기
     useEffect(() => {
-        if (!postStyle) {
+        if (!postStyle && !notice) {
             handleClickPagenation(1);
         }
     }, [postStyle])
@@ -341,6 +341,82 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         <>
             <PostWrap postStyle={postStyle}>
                 <>
+
+                    {notice &&
+                        <>
+                            {/* 페이지네이션 타이틀 */}
+                            <TitleHeader>
+                                {
+                                    notice ?
+                                        <>
+                                            <p className='all_post'>공지사항</p>
+                                        </>
+                                        :
+                                        <>
+                                            <p className='all_post'>전체 글</p>
+                                            <button>공지사항 숨기기</button>
+                                        </>
+                                }
+                                <div className='post_header'>
+                                    <p className='h_title'>제목</p>
+                                    <p className='h_user'>작성자</p>
+                                    <p className='h_date'>날짜</p>
+                                </div>
+                            </TitleHeader>
+                            {/* 공지사항 전체 */}
+                            <>
+                                <Swiper
+                                    slidesPerView={1}
+                                    onSwiper={(swiper) => (swiperRef.current = swiper)} // Swiper 인스턴스 저장
+                                    pagination={{
+                                        clickable: true,
+                                    }}
+                                    modules={[Pagination]}
+                                    className="mySwiper"
+                                >
+                                    {Array.from({ length: postLength[0] }, (_, pageIndex) => (
+                                        <SwiperSlide key={pageIndex} className='notice_wrap'>
+                                            {noticePosts.map((post) => (
+                                                <div key={post.id} className='post_box'>
+                                                    <div className='post_title_wrap'>
+                                                        {(post.images && post.images?.length > 0) ?
+                                                            <div className='post_img_icon'>
+                                                            </div>
+                                                            :
+                                                            <div className='post_img_icon'>
+                                                            </div>
+                                                        }
+                                                        <span className='post_tag'>[{post.tag}]</span>
+                                                        <h2 className='post_title' onClick={() => handlePostClick(post.id)}>{post.title}</h2>
+                                                        {post.commentCount > 0 &&
+                                                            <p className='post_comment'>[{post.commentCount}]</p>
+                                                        }
+                                                    </div>
+                                                    <div className='post_right_wrap'>
+                                                        <p className='user_id'>
+                                                            {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
+                                                        </p>
+                                                        <p className='post_date'>{formatDate(post.createAt)}</p>
+                                                    </div>
+                                                    {post.userId === auth.currentUser?.uid &&
+                                                        <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
+                                                    }
+                                                </div>
+                                            ))}
+                                        </SwiperSlide>
+                                    ))}
+                                </Swiper>
+                            </>
+                            {/* 페이지네이션 버튼 */}
+                            <div>
+                                {Array.from({ length: postLength[0] }, (_, index) => (
+                                    <button key={index} onClick={() => { handleClickPagenation(index + 1); swiperRef.current?.slideTo(index, 0); }}>
+                                        {index + 1}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    }
                     {!postStyle ?
                         <>
                             {/* 페이지네이션 타이틀 */}
@@ -362,7 +438,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                     <p className='h_date'>날짜</p>
                                 </div>
                             </TitleHeader>
-
                             {/* 공지사항 전체 */}
                             {notice &&
                                 <>
@@ -373,7 +448,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                             clickable: true,
                                         }}
                                         modules={[Pagination]}
-                                        className="mySwiper"
+                                        className="mySwiper notice_wrap"
                                     >
                                         {Array.from({ length: postLength[0] }, (_, pageIndex) => (
                                             <SwiperSlide key={pageIndex}>
@@ -407,7 +482,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                             </SwiperSlide>
                                         ))}
                                     </Swiper>
-
                                 </>
                             }
                             {/* 포스트 전체 */}
@@ -498,6 +572,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                             </div>
                         </>
                         :
+                        !notice && postStyle &&
                         <>
                             {/* 무한 스크롤 구조 */}
                             {posts.map((post) => (
@@ -550,6 +625,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                         </>
                     }
                 </>
+                <button className='post_style_btn'></button>
                 {postStyle && < div ref={observerLoadRef} style={{ height: '1px' }} />}
                 {(!hasNextPage && postStyle) && <p>제일 최근 메모입니다.</p>}
             </PostWrap >

@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
-import { DidYouLogin, loginToggleState, newNoticeState, postStyleState, userState } from '../state/PostState';
+import { DidYouLogin, loginToggleState, newNoticeState, noticeState, postStyleState, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css } from '@emotion/react';
 
@@ -70,7 +70,8 @@ export default function NavBar() {
     const [selectedMenu, setSelectedMenu] = useRecoilState<string>(selectedMenuState);
     const [currentUser, setCurrentUser] = useRecoilState<string | null>(userState)
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
-    const setPostStyle = useSetRecoilState<boolean>(postStyleState)
+    const [notice, setNotice] = useRecoilState<boolean>(noticeState);
+    const [postStyle, setPostStyle] = useRecoilState<boolean>(postStyleState)
 
 
     // State
@@ -90,16 +91,20 @@ export default function NavBar() {
     const handleNavClick = (NavTitle: string) => {
         if (NavTitle === 'allPost') {
             router.push('/home/main')
+            setNotice(false)
         } else if (NavTitle === 'bookmark') {
             if (yourLogin) {
                 router.push(`/home/bookmark/${currentUser}`)
+                setNotice(false)
             } else {
                 return alert('로그인이 필요한 기능입니다.')
             }
         } else if (NavTitle === 'notice') {
-            setPostStyle(false);
+            if (postStyle) {
+                // setPostStyle(false);
+            }
+            setNotice(true)
         }
-        console.log(NavTitle)
         setSelectedMenu(NavTitle)
     }
 

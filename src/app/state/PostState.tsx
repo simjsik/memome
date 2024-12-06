@@ -67,6 +67,11 @@ export const DidYouLogin = atom<boolean>({
     key: 'DidYouLogin',
     default: false
 })
+// 공지사항 스테이트
+export const noticeState = atom<boolean>({
+    key: 'noticeState',
+    default: false
+})
 
 // 유저 ID
 export const userState = atom<string | null>({

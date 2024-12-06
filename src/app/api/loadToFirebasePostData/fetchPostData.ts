@@ -50,7 +50,6 @@ export const fetchPosts = async (
     const postsToFetch = pageSize - existingPostCount;
 
     if (postsToFetch <= 0) return { commentSnapshot: [], nextPage: null }; // 추가로 데이터 요청 필요 X
-
     const queryBase = pageParam?.at(0) ?
         query(
             collection(db, 'posts'),
@@ -67,6 +66,8 @@ export const fetchPosts = async (
             orderBy('createAt', 'desc'),
             limit(postsToFetch) // 필요한 수 만큼 데이터 가져오기
         )
+    // console.log(pageParam?.at(0), '= 공지사항 여부', pageSize, '= 페이지 사이즈', existingPostCount, '= 현재 데이터 사이즈', postsToFetch, '= 보내줄 데이터 수', '받은 인자')
+
     const postQuery = pageParam
         ?
         query(
@@ -93,7 +94,7 @@ export const fetchPosts = async (
     );
 
     const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
-    // console.log(commentSnapshot, lastVisible?.data(), lastVisible?.data().createAt, '보내는 인자')
+    // console.log(commentSnapshot, lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
     return {
         data: commentSnapshot,
         nextPage: lastVisible
