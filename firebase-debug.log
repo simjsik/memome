@@ -1,0 +1,21 @@
+[debug] [2024-12-11T08:57:25.734Z] ----------------------------------------------------------------------
+[debug] [2024-12-11T08:57:25.739Z] Command:       E:\Node\node.exe C:\Users\PC\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init functions
+[debug] [2024-12-11T08:57:25.740Z] CLI Version:   13.28.0
+[debug] [2024-12-11T08:57:25.740Z] Platform:      win32
+[debug] [2024-12-11T08:57:25.740Z] Node Version:  v22.1.0
+[debug] [2024-12-11T08:57:25.740Z] Time:          Wed Dec 11 2024 17:57:25 GMT+0900 (대한민국 표준시)
+[debug] [2024-12-11T08:57:25.740Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-12-11T08:57:25.758Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-12-11T08:57:25.758Z] > authorizing via signed-in user (simjsik75@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  E:\Web\webportfolio\React\Nextext\nextext
+

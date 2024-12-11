@@ -1,16 +1,19 @@
+/** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import "./globals.css";
 import { PretendardBold, PretendardMedium, PretendardLight } from './styled/FontsComponets';
 import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil';
 import { usePathname } from 'next/navigation';
-import { loginToggleState, postStyleState } from './state/PostState';
+import { loginToggleState, postStyleState, userState } from './state/PostState';
 
 import LoginBox from './login/LoginBox';
 import NavBar from './components/NavBar';
 import StatusBox from './components/StatusBox';
 import styled from '@emotion/styled';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { getAuth } from 'firebase/auth';
+
 // Component
 
 
@@ -29,18 +32,59 @@ height : 48px;
 background : red;
   `
 
-
 function LayoutContent({ children }: LayoutProps) {
   const pathName = usePathname();
   const isLogin = pathName === '/login';
-  const isPost = pathName === '/post';
+  const isPost = pathName === '/home/post';
   const isMain = pathName === '/';
   // 위치
 
   const loginToggle = useRecoilValue<boolean>(loginToggleState)
   const [postStyle, setPostStyle] = useRecoilState<boolean>(postStyleState)
-
+  const [user, setUser] = useRecoilState<string | null>(userState)
   // State
+  useEffect(() => {
+    const auth = getAuth();
+    const currentUser = auth.currentUser
+
+    if (currentUser) {
+      setUser(currentUser.uid)
+    } else {
+      setUser(null)
+    }
+  }, [])
+
+  useEffect(() => {
+    const checkUsageLimit = async () => {
+
+
+      if (!user) {
+        return console.log('인증되지 않은 사용자 입니다.')
+      }
+
+      if (user)
+        try {
+          const response = await fetch('/api/checkLimit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'user-id': user,
+            }
+          });
+
+          if (!response.ok) {
+            const { error } = await response.json();
+            throw new Error(error);
+          }
+
+          console.log('사용량 요청 확인');
+        } catch (error) {
+          console.error('사용량 확인 중 에러 발생.' + error)
+        }
+    };
+
+    checkUsageLimit();
+  }, [])
 
   const handlePostStyle = () => {
     setPostStyle((prev) => !prev);

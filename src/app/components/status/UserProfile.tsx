@@ -3,23 +3,215 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { DidYouLogin, userState } from "@/app/state/PostState";
+import { DidYouLogin, PostData, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
 import { auth, db } from "@/app/DB/firebaseConfig";
 import { updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
+import { css } from "@emotion/react";
 
 const ProfileWrap = styled.div`
+padding-top : 20px;
 height : 100%;
 
-profile_top{
-height : 100%;
+// 프로필 상단
+.profile_top{
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
 }
+
+.profile_id{
+    flex: 1 0 75%;
+    padding: 10px 0px;
+}
+
+.user_name{
+    font-size: 24px;
+    font-family: var(--font-pretendard-bold);
+}
+
+.user_uid{
+    color: #555;
+    font-family: var(--font-pretendard-medium);
+}
+
+.user_photo{
+    background-size: cover;
+    background-position: center;
+    min-width: 72px;
+    height: 72px;
+    border: 1px solid #ededed;
+    border-radius: 50%;
+}
+.update_toggle_btn{
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ededed;
+    background: #fff;
+    margin-top: 20px;
+}
+
+// 프로필 하단
+.profile_menu_wrap{
+    border-top: 1px solid #ededed;
+    margin-top: 20px;
+    padding: 20px 0px;
+}
+
+.memo_box{
+    position: relative;
+    display: flex;
+
+    p{
+    line-height : 32px;
+    }
+}
+
+.menu_profile{
+    -webkit-background-size: cover;
+    background-size: cover;
+    -webkit-background-position: center;
+    background-position: center;
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+    border: 1px solid #ededed;
+    border-radius: 50%;
+}
+
+.memo_btn{
+    position: absolute;
+    right: 0;
+    padding: 4px 10px;
+    border: 1px solid #ededed;
+    background: #fff;
+}
+
+// 프로필 업데이트
+.update_wrap{
+margin-top : 20px;
+
+    // 이름 변경
+    .user_name_change_wrap{
+        display: flex;
+        flex-wrap: wrap;
+        
+        label{
+        flex: 1 0 100%;
+        font-size: 14px;
+        }
+
+        input{
+        flex: 0 0 70%;
+        margin-right: 8px;
+        border: 1px solid #ededed;
+        height: 42px;
+        margin-top: 8px;
+        padding-left: 10px;
+        }
+
+        p{
+        font-size: 12px;
+        margin-top: 36px;
+        color: #777;
+        }
+    }
+    // --------------------------------------
+
+    // 프로필 사진 변경
+    .user_photo_change_wrap{
+    display: flex;
+    margin-top: 16px;
+    font-size: 14px;
+    flex-wrap: wrap;
+
+        label:first-child{
+        flex: 1 0 100%;
+        }
+
+        input[type="file"] {
+        display: none; /* 기본 파일 입력 숨기기 */
+        }
+
+        .photo_btn_wrap{
+        display : flex;
+        flex: 1 0 100%;
+        margin-top : 10px;
+
+            .photo_update{
+            display: block;
+            flex : 0 0 40%;
+            padding: 10px;
+            border: 1px solid #ededed;
+            border-radius: 8px;
+            background-color : #fff;
+            text-align: center;
+            margin-right : 8px;
+            cursor:pointer
+            }
+
+            .photo_reset{
+            flex : 0 0 30%;
+            padding: 10px;
+            border: none;
+            background : none;
+            line-height : 18px;
+            text-align: center;
+            cursor:pointer
+            }
+
+            .photo_reset:hover{
+            text-decoration : underline;
+            }
+        }
+
+    }
+    // --------------------------------------
+
+    // 변경사항 있을 시 버튼
+    .update_btn_wrap{
+    margin-top : 40px;
+    border : 1px solid #ededed;
+    padding : 8px;
+    border-radius : 8px;
+    text-align : right;
+
+        .reset_update_btn{
+        padding: 8px 18px;
+        border: none;
+        background: none; 
+        cursor : pointer;
+        margin : 12px 8px 0px 0px;
+        }
+
+        .reset_update_btn:hover{
+        text-decoration : underline;
+        }
+
+        .update_btn{
+        padding: 8px 18px;
+        border: none;
+        background: #333;
+        color: #fff;
+        border-radius: 8px;
+        cursor : pointer; 
+        }
+    }
+    // --------------------------------------
+}
+
+
 `
+interface MyPostListProps {
+    post: PostData[];
+}
 
 export default function UserProfile() {
     const user = useRecoilValue<string | null>(userState)
-    const [updateToggle, setUpdateToggle] = useState<boolean>(true)
+    const [myPostList, setMyPostList] = useState<PostData[]>([])
+    const [updateToggle, setUpdateToggle] = useState<boolean>(false)
+    const [userEmail, setUserEmail] = useState<string>('')
     const [updateUserName, setUpdateUserName] = useState<string>('')
     const [updateUserPhoto, setUpdateUserPhoto] = useState<File | null>(null)
     const [userName, setUserName] = useState<string | null>(null)
@@ -30,11 +222,21 @@ export default function UserProfile() {
     const updatePhotoRef = useRef<HTMLInputElement | null>(null)
     // ref
 
+    useEffect(() => {
+    }, [])
 
     useEffect(() => {
         if (auth.currentUser) {
+            const userEmail = auth.currentUser.email
             const userName = auth.currentUser.displayName
             const userPhoto = auth.currentUser.photoURL
+
+            if (userEmail) {
+                setUserEmail(userEmail)
+            } else {
+                setUserName('유저' + auth.currentUser.uid.slice(0, 5))
+            }
+
             if (userName) {
                 setUserName(userName)
                 setUpdateUserName(userName)
@@ -49,8 +251,6 @@ export default function UserProfile() {
             }
         }
     }, [user])
-
-
 
     // File 타입을 base64로 변경하기 위한 함수
     const fileToBase64 = (file: File): Promise<string> => {
@@ -91,6 +291,8 @@ export default function UserProfile() {
                     } else {
                         throw new Error('Cloudinary의 이미지 반환 실패')
                     }
+                } else {
+                    profileImageUrl = auth.currentUser.photoURL;
                 }
 
                 // Firebase Authentication의 프로필 업데이트
@@ -99,6 +301,7 @@ export default function UserProfile() {
                     photoURL: profileImageUrl || auth.currentUser.photoURL,
                 })
 
+                // 업데이트한 프로필 Firestore에 저장
                 await setDoc(
                     doc(db, 'users', auth.currentUser.uid), {
                     displayName: name || auth.currentUser.displayName,
@@ -155,41 +358,91 @@ export default function UserProfile() {
     }
     return (
         <ProfileWrap>
+            {/* 프로필 상단 */}
             <div className="profile_top">
                 <div className="profile_id">
                     <p className="user_name">{userName}</p>
                     <span className="user_uid">
-                        {user}
+                        {userEmail}
                     </span>
                 </div>
-                <div className="user_photo"></div>
+                <div className="user_photo" css={css`
+                        background-image : url(${userPhoto});
+                        background-size : cover;
+                        background-position : center;
+                        width : 72px;
+                        height : 72px;
+                        border : 1px solid #333;
+                        border-radius : 50%;
+                    `}></div>
+                <button className="update_toggle_btn" onClick={() => setUpdateToggle((prev) => !prev)}>
+                    {updateToggle ?
+                        '프로필 수정 취소'
+                        :
+                        '프로필 수정'
+                    }
+                </button>
             </div>
-            <button className="update_profile_btn">프로필 수정</button>
-            <div className="update_wrap">
-                <div className="update_box">
-                    <form onSubmit={(e) => { e.preventDefault(); updateToProfile(updateUserPhoto, updateUserName); }}>
-                        <div className="user_name_change_wrap">
-                            <label>별명</label>
-                            <input onChange={handleNameChange} type="text" value={updateUserName || ''} placeholder={userName || '새 유저 별명'} />
+            {
+                updateToggle ?
+                    <>
+                        {/* 프로필 업데이트 구조 */}
+                        <div className="update_wrap">
+                            <div className="update_box">
+                                <div className="user_name_change_wrap">
+                                    <label>별명</label>
+                                    <input onChange={handleNameChange} type="text" value={updateUserName || ''} placeholder={userName || '새 유저 별명'} />
+                                    <p>{updateUserName?.length}/12</p>
+                                </div>
+                                <div className="user_photo_change_wrap">
+                                    <label>사진</label>
+                                    <div className="photo_btn_wrap">
+                                        <label className="photo_update" htmlFor={'photo_input'}>사진 변경</label>
+                                        <button className="photo_reset">사진 제거</button>
+                                    </div>
+                                    <input id="photo_input" ref={updatePhotoRef} onChange={handlePhotoChange} type="file" accept="image/*" />
+                                </div>
+                                {/* 업데이트 감지 시 버튼 */}
+                                {(updateUserName !== userName || Boolean(updateUserPhoto)) &&
+                                    <div className="update_btn_wrap">
+                                        <p>{loading ? '변경 사항이 있습니다!' : ''}</p>
+                                        <button className="reset_update_btn" onClick={handleProfileReset}>
+                                            되돌리기
+                                        </button>
+                                        <button className="update_btn" onClick={(e) => { e.preventDefault(); updateToProfile(updateUserPhoto, updateUserName); }}>
+                                            변경 사항 적용
+                                        </button>
+                                    </div>
+                                }
+                            </div>
                         </div>
-                        <div className="user_photo_change_wrap">
-                            <label>프로필 사진</label>
-                            <input ref={updatePhotoRef} onChange={handlePhotoChange} type="file" accept="image/*" />
+                    </>
+                    :
+                    <>
+                        {/* 프로필 하단 메뉴*/}
+                        < div className="profile_menu_wrap">
+                            <div className="memo_box">
+                                <div className="menu_profile" css={css`
+                    background-image : url(${userPhoto});
+                    background-size : cover;
+                    background-position : center;
+                    width : 32px;
+                    height : 32px;
+                    border : 1px solid #333;
+                    border-radius : 50%;
+                `}></div>
+                                <p>새 메모를 작성하세요</p>
+                                <button className="memo_btn">메모</button>
+                            </div>
+
+                            <div className="my_post_wrap">
+                                <div>
+                                </div>
+                            </div>
                         </div>
-                        {(updateUserName !== userName || Boolean(updateUserPhoto)) &&
-                            <>
-                                <p>{loading ? '변경 사항이 있습니다!' : ''}</p>
-                                <button onClick={handleProfileReset}>
-                                    되돌리기
-                                </button>
-                                <button type="submit">
-                                    변경 사항 적용
-                                </button>
-                            </>
-                        }
-                    </form>
-                </div>
-            </div>
-        </ProfileWrap>
+                    </>
+
+            }
+        </ProfileWrap >
     )
 }

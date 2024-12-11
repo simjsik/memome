@@ -20,6 +20,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import styled from '@emotion/styled';
+import SearchComponent from '@/app/components/SearchComponent';
 SwiperCore.use([Pagination]);
 
 const postDeleteBtn = css`
@@ -239,18 +240,30 @@ interface MainHomeProps {
 }
 
 export default function MainHome({ posts: initialPosts, initialNextPage }: MainHomeProps) {
+    // 포스트 스테이트
     const [posts, setPosts] = useRecoilState<PostData[]>(PostState)
     const [noticePosts, setNoticePosts] = useState<PostData[]>([])
-    const [postStyle, setPostStyle] = useRecoilState<boolean>(postStyleState)
-    const [storageLoad, setStorageLoad] = useRecoilState<boolean>(storageLoadState);
-    const [currentUser, setCurrentUser] = useRecoilState<string | null>(userState)
-    const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
-    const [selectedMenu] = useRecoilValue<string>(selectedMenuState);
-    const [notice, setNotice] = useRecoilState<boolean>(noticeState);
-    const [noticeHide, setNoticeHide] = useState<boolean>(false);
+
+    // 포스트 길이
     const [postLength, setPostLength] = useState<[number, number]>([0, 0]);
+
+    // 불러온 마지막 데이터
     const [lastParams, setLastParams] = useState<[boolean, Timestamp] | null>(null);
     const [noticeLastParams, setNoticeLastParams] = useState<[boolean, Timestamp] | null>(null);
+
+    // 공지사항 스테이트
+    const [notice, setNotice] = useRecoilState<boolean>(noticeState);
+    const [noticeHide, setNoticeHide] = useState<boolean>(false);
+    const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
+    const [postStyle, setPostStyle] = useRecoilState<boolean>(postStyleState)
+
+    // 스토리지 기본 값 설정 용
+    const [storageLoad, setStorageLoad] = useRecoilState<boolean>(storageLoadState);
+
+    // 현재 로그인 한 유저
+    const [currentUser, setCurrentUser] = useRecoilState<string | null>(userState)
+    // 메뉴 선택 값
+    const [selectedMenu] = useRecoilValue<string>(selectedMenuState);
     const ADMIN = useRecoilValue(ADMIN_ID);
     // state
     const router = useRouter();
@@ -544,9 +557,9 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
     return (
         <>
+            {/* 공지사항 전체 */}
             {notice &&
                 <>
-                    {/* 공지사항 전체 */}
                     <NoticeWrap>
                         {/* 페이지네이션 타이틀 */}
                         <TitleHeader>
@@ -610,6 +623,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
                 </>
             }
+            {/* 공지사항 제외 전체 포스트 */}
             {!notice &&
                 <PostWrap postStyle={postStyle}>
                     <>
@@ -779,8 +793,9 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                     </>
                     <button className='post_style_btn' onClick={() => setPostStyle((prev) => !prev)} css={postStyleBtn}></button>
                 </PostWrap>
-
             }
+            {/* 검색 */}
+            <SearchComponent></SearchComponent>
         </>
     )
 }

@@ -82,6 +82,8 @@ export default function NavBar() {
             const pathSegment = path?.split('/').filter(Boolean);
             if (pathSegment[1] === 'main') {
                 setSelectedMenu('allPost');
+            } else if (pathSegment[1] === 'bookmark') {
+                setSelectedMenu('bookmark');
             }
         }
     }, [path])
@@ -108,7 +110,7 @@ export default function NavBar() {
     // 포스팅 메뉴 클릭 시 이동 및 제어
     const handlePosting = () => {
         if (yourLogin) {
-            router.push('/post');
+            router.push('/home/post');
         } else {
             setLoginToggle(true);
         }

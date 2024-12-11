@@ -102,3 +102,61 @@ export const fetchPosts = async (
             : null,
     };
 };
+
+export const searchPosts = async (
+    lastParam: [boolean, Timestamp] | null = null,
+    page: number = 5,
+    postCount: number = 0,
+    option: string,
+    search: string,
+) => {
+    const resultToFetch = page - postCount;
+
+    if (resultToFetch <= 0) return;
+
+    const queryBase = query(collection(db, 'posts'),
+        where(option, '==', search),
+        orderBy('notice', 'desc'),
+        orderBy('createAt', 'desc'),
+        limit(resultToFetch)
+    )
+
+    const postQuery = lastParam
+        ?
+        query(
+            queryBase,
+            startAfter(...lastParam),
+        )
+        :
+        queryBase
+
+    const postSnapshot = await getDocs(postQuery);
+
+    const commentSnapshot: PostData[] = await Promise.all(
+        postSnapshot.docs.map(async (doc) => {
+            const postData = {
+                id: doc.id,
+                tag: doc.data().tag,
+                title: doc.data().title,
+                images: doc.data().images,
+                createAt: new Date(doc.data().createAt.seconds * 1000).toISOString(),
+            } as PostData;
+
+            // 댓글 개수 가져오기
+            const commentRef = collection(db, 'posts', doc.id, 'comments');
+            const commentSnapshot = await getDocs(commentRef);
+            postData.commentCount = commentSnapshot.size;
+
+            return postData;
+        })
+    );
+
+    const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
+
+    return {
+        data: commentSnapshot,
+        nextPage: lastVisible
+            ? [lastVisible.data().notice, lastVisible.data().createAt] // 정렬 필드 값 배열로 반환
+            : null,
+    };
+}

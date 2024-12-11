@@ -1,9 +1,8 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { auth, db } from '../../../../DB/firebaseConfig';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
-import { PostingState, storageLoadState } from '../../../../state/PostState';
+import { PostingState, storageLoadState } from '../../state/PostState';
 import { useRecoilState, } from 'recoil';
 import { useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
@@ -12,6 +11,7 @@ import QuillResizeImage from 'quill-resize-image';
 // import 'quill/dist/quill.snow.css';
 import ReactQuill, { Quill } from 'react-quill-new';
 import styled from '@emotion/styled';
+import { auth, db } from '@/app/DB/firebaseConfig';
 
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
