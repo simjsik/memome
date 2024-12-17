@@ -2,8 +2,6 @@
 "use client";
 import { useSetRecoilState } from "recoil";
 import { DidYouLogin, userState } from "../state/PostState";
-import { onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
-import { auth } from "../DB/firebaseConfig";
 import { useEffect } from "react";
 
 export const loginListener = () => {
@@ -11,38 +9,28 @@ export const loginListener = () => {
     const setLogin = useSetRecoilState<boolean>(DidYouLogin)
 
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
-
-        if (token) {
-            setLogin(true);
-            console.log('훅 로그인')
-        } else {
-            setLogin(false);
-            console.log('훅 로그아웃')
-
-        }
-
-        if (token && !auth.currentUser) {
-            signInWithCustomToken(auth, token).catch(error => {
-                console.error("error signing in with token", error);
-
-                localStorage.removeItem("authToken"); // 인증 실패 시 토큰 제거
-            })
-        }
-
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                setUser(user.uid);
-                setLogin(true);
-            } else {
+        const checkLoginStatus = async () => {
+            try {
+                const response = await fetch("/api/utils/validateAuthToken", {
+                    method: "GET",
+                    credentials: "include", // 쿠키를 요청에 포함
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setUser(data);
+                    setLogin(true);
+                } else {
+                    setUser(null);
+                }
+            } catch (error) {
+                console.error("Failed to fetch session:", error);
                 setUser(null);
-                setLogin(false);
-                localStorage.removeItem('authToken'); // 로그아웃 시 토큰 제거
             }
-        })
+        };
 
-        return () => unsubscribe();
-    }, [setUser, setLogin])
+        checkLoginStatus();
+    }, [setUser]);
+
 }
 
 export default loginListener

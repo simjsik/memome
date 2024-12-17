@@ -1,12 +1,11 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 'use clients';
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { css } from "@emotion/react";
 import { } from "../DB/firebaseConfig";
-import { useSetRecoilState } from "recoil";
-import { loginToggleState } from "../state/PostState";
-import { loginAndFetchToken } from "../api/LoginApi";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import { loginToggleState, userState } from "../state/PostState";
 import loginListener from "../hook/LoginHook";
 import {
     CreateButton,
@@ -69,6 +68,7 @@ export default function LoginBox() {
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [user, setUser] = useRecoilState<string | null>(userState)
     const [error, setError] = useState<string>('')
     // State
 
@@ -79,17 +79,26 @@ export default function LoginBox() {
         setLoginToggle(false);
     }
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleLogin = async (email: string, password: string) => {
         try {
-            const token = await loginAndFetchToken(email, password); // 이메일 로그인 및 토큰 가져오기
-            if (token) {
-                setLoginToggle(false)
-                localStorage.setItem("authToken", token);
+            const response = await fetch("/api/auth/loginApi", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setUser(data); // 로그인 상태 업데이트
+                alert("Login successful!");
+            } else {
+                alert("Login failed. Please check your credentials.");
             }
         } catch (error) {
-            console.error("Login error:", error);
-            setError("로그인에 실패했습니다. 다시 시도해 주세요.");
+            console.error("Error during login:", error);
+            alert("An error occurred during login.");
         }
     }
 
@@ -100,7 +109,7 @@ export default function LoginBox() {
             <div css={LoginBg} onClick={() => setLoginToggle(false)}></div>
             <LoginButtonWrap css={PopupLoginWrap}>
                 <h2 css={loginTitle}>로그인</h2>
-                <form onSubmit={handleLogin}>
+                <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password);}}>
                     <LoginInputWrap>
                         <div>
                             <p>이메일 또는 아이디</p>
@@ -129,6 +138,6 @@ export default function LoginBox() {
                     </div>
                 </OtherLoginWrap>
             </LoginButtonWrap>
-        </div>
+        </div >
     )
 }

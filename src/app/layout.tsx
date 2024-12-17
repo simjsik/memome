@@ -13,6 +13,9 @@ import StatusBox from './components/StatusBox';
 import styled from '@emotion/styled';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAuth } from 'firebase/auth';
+import { collection, getDocs, getFirestore, updateDoc } from 'firebase/firestore';
+import { db } from './DB/firebaseConfig';
+import NavWrap from './components/NavWrap';
 
 // Component
 
@@ -92,8 +95,7 @@ function LayoutContent({ children }: LayoutProps) {
   // Function
   return (
     <>
-      {(!isLogin && !isPost) && <NavBar />}
-      {(!isLogin && !isPost) && <StatusBox />}
+      <StatusBox />
       {loginToggle && <LoginBox />}
       {isMain && <PostStyleBtn onClick={handlePostStyle} />}
       {children}

@@ -12,7 +12,9 @@
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@tanstack/react-query": "^5.60.2",
+    "algoliasearch": "^5.17.1",
     "cloudinary": "^2.5.1",
+    "cookies-next": "^4.3.0",
     "firebase": "^11.0.0",
     "firebase-admin": "^13.0.1",
     "next": "^13.5.7",
@@ -23,6 +25,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-instantsearch": "^7.13.9",
+    "react-instantsearch-router-nextjs": "^7.13.9",
     "react-quill-new": "^3.3.3",
     "recoil": "^0.7.7",
     "swiper": "^11.1.15"

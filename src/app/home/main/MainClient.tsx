@@ -6,6 +6,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { ADMIN_ID, newNoticeState, noticeState, PostData, PostState, postStyleState, storageLoadState, userState } from '../../state/PostState';
 import { useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { PostWrap, TitleHeader } from '../../styled/PostComponents';
 import { collection, deleteDoc, doc, getCountFromServer, getDoc, limit, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
 import { auth, db } from '../../DB/firebaseConfig';
@@ -19,8 +20,6 @@ import { Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
-import styled from '@emotion/styled';
-import SearchComponent from '@/app/components/SearchComponent';
 SwiperCore.use([Pagination]);
 
 const postDeleteBtn = css`
@@ -35,14 +34,19 @@ border : none;
 cursor : pointer;
 `
 
-const postStyleBtn = css`
+const PostStyleBtn = styled.button`
 position : fixed;
 right : 580px;
 top : 0;
-
 width : 42px;
 height : 42px;
-background : red;
+background-repeat: no-repeat;
+background-size: cover;
+background-color : #fff;
+border : none;
+border-radius : 8px;
+box-shadow : 0px 0px 10px rgba(0,0,0,0.1);
+cursor : pointer;
 `
 
 const NoticeWrap = styled.div`
@@ -170,10 +174,11 @@ background : #fff;
 
   // 포스트 이미지 있을 때 표시
     .post_img_icon{
-    width : 16px;
-    height : 16px;
-    margin : 11px 4px 0px;
-    background : red;
+      width : 16px;
+      height : 16px;
+      margin : 11px 4px 0px;
+      background-size : cover;
+      background-repeat : no-repeat;
     }
 
   // 포스트 이미지 감추기
@@ -296,6 +301,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         initialData: {
             pages: [{ data: initialPosts, nextPage: initialNextPage }],
             pageParams: [initialNextPage],
+
         },
     });
 
@@ -410,18 +416,19 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         // `마지막 포스트 데이터가 없으면` 또는
         // `전체 포스트 수`보다 같거나 커지면 요청 X
 
+        // 공지사항 요청
         if (notice && noticeLastParams) {
             const newPosts = await fetchPosts(noticeLastParams, pageSize, noticePosts.length);
 
             setNoticePosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
             setNoticeLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
-            console.log('공지사항 데이터 요청', '마지막 데이터 = ', noticeLastParams)
-        } else if (lastParams) {
+        }
+        // 일반 포스트 요청
+        else if (lastParams) {
             const newPosts = await fetchPosts(lastParams, pageSize, posts.length);
 
             setPosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
             setLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
-            console.log('일반 포스터 데이터 요청')
         }
     }
 
@@ -557,7 +564,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
     return (
         <>
-            {/* 공지사항 전체 */}
+            {/* 공지사항 전체 페이지네이션*/}
             {notice &&
                 <>
                     <NoticeWrap>
@@ -585,7 +592,10 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                         <div key={post.id} className='post_box'>
                                             <div className='post_title_wrap'>
                                                 {(post.images && post.images?.length > 0) ?
-                                                    <div className='post_img_icon'>
+                                                    <div className='post_img_icon'
+                                                        css={css`
+                                                    background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1734335311/%EC%82%AC%EC%A7%84_atcwhc.svg)
+                                                    `}>
                                                     </div>
                                                     :
                                                     <div className='post_img_icon'>
@@ -656,7 +666,10 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                                 <div key={post.id} className={post.notice ? 'post_box notice' : 'post_box'}>
                                                     <div className='post_title_wrap'>
                                                         {(post.images && post.images?.length > 0) ?
-                                                            <div className='post_img_icon'>
+                                                            <div className='post_img_icon'
+                                                                css={css`
+                                                                background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1734335311/%EC%82%AC%EC%A7%84_atcwhc.svg)
+                                                                `}>
                                                             </div>
                                                             :
                                                             <div className='post_img_icon'>
@@ -699,7 +712,10 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                                             <div key={post.id} className={post.notice ? 'post_box notice' : 'post_box'}>
                                                                 <div className='post_title_wrap'>
                                                                     {(post.images && post.images?.length > 0) ?
-                                                                        <div className='post_img_icon'>
+                                                                        <div className='post_img_icon'
+                                                                            css={css`
+                                                                            background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1734335311/%EC%82%AC%EC%A7%84_atcwhc.svg)
+                                                                            `}>
                                                                         </div>
                                                                         :
                                                                         <div className='post_img_icon'>
@@ -743,9 +759,11 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                     <div key={post.id} className='post_box' onClick={() => handlePostClick(post.id)}>
                                         {/* 작성자 프로필 */}
                                         <div className='post_profile'>
-                                            <div className='user_profile'></div>
+                                            <div className='user_profile'
+                                                css={css`background-image : url(${post.PhotoURL})`}
+                                            ></div>
                                             <p className='user_id'>
-                                                {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자' : post.userId}
+                                                {post.displayName}
                                             </p>
                                             <p className='post_date'>
                                                 · {formatDate(post.createAt)}
@@ -791,11 +809,9 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                             </>
                         }
                     </>
-                    <button className='post_style_btn' onClick={() => setPostStyle((prev) => !prev)} css={postStyleBtn}></button>
+                    <PostStyleBtn className='post_style_btn' onClick={() => setPostStyle((prev) => !prev)} ></PostStyleBtn>
                 </PostWrap>
             }
-            {/* 검색 */}
-            <SearchComponent></SearchComponent>
         </>
     )
 }

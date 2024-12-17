@@ -125,7 +125,7 @@ background :${(props) => (props.postStyle ? 'none' : '#fff')};
       .post_comment_icon{
       width: 32px;
       height: 32px;
-      background: red;
+      background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1734333987/%EB%8C%93%EA%B8%80_b7k0iv.svg);
       margin-right : 4px
       }
 
@@ -136,7 +136,7 @@ background :${(props) => (props.postStyle ? 'none' : '#fff')};
       color: ${(props) => (props.postStyle ? '#191919' : 'red')};
       margin-left : ${(props) => (props.postStyle ? '0px' : '4px')};
       display : ${(props) => (props.postStyle ? 'flex' : 'block')};
-      line-height : 36px;
+      line-height : 32px;
       }
 
       & .user_id:hover,
@@ -153,21 +153,22 @@ background :${(props) => (props.postStyle ? 'none' : '#fff')};
       }
 
       .user_profile{
-
-      width : 32px;
-      height : 32px;
+      width : 36px;
+      height : 36px;
       margin-right : 4px;
       border-radius: 50%;
-      background: red;
+      background-size : cover;
+      background-repeat : no-repeat;
+      border : 1px solid #ededed;
       }
 
        // 포스트 이미지 있을 때 표시
       .post_img_icon{
-
       width : 16px;
       height : 16px;
       margin : 11px 4px 0px;
-      background : red;
+      background-size : cover;
+      background-repeat : no-repeat;
       }
 
       // 포스트 이미지 감추기
@@ -230,9 +231,9 @@ background :${(props) => (props.postStyle ? 'none' : '#fff')};
       // 포스트 Swiper Style
 
       .swiper{
-
       width: 100%;
       margin: 0;
+      z-index: 0;
       }
 
       .swiper-pagination{
@@ -309,7 +310,13 @@ background :${(props) => (props.postStyle ? 'none' : '#fff')};
             line-height: 48px;
         }
       }
-
+//----------------------------------------------------
+.post_style_btn{
+  background-image : ${(props) => (props.postStyle ?
+    'url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1734335094/%ED%8E%98%EC%9D%B4%EC%A7%80%EB%84%A4%EC%9D%B4%EC%85%98_b1hizm.svg)'
+    :
+    'url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1734335094/%EC%8A%A4%ED%81%AC%EB%A1%A4_xermsf.svg)')};
+}
 `
 export const TitleHeader = styled.div`
 width: 100%;

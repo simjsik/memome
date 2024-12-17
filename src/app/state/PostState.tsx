@@ -10,6 +10,8 @@ export interface PostData {
     createAt: any;
     commentCount: number,
     notice: boolean,
+    displayName: string,
+    PhotoURL: string | null,
 }
 
 export interface Comment {
@@ -123,5 +125,11 @@ export const memoCommentState = atom<Comment[]>({
 // 새 공지사항 알림 토글
 export const newNoticeState = atom<boolean>({
     key: 'newNoticeState',
+    default: false,
+})
+
+// 검색 토글
+export const searchState = atom<boolean>({
+    key: 'searchState',
     default: false,
 })

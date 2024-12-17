@@ -1,10 +1,9 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState } from "../state/PostState";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { DidYouLogin, loginToggleState, userState } from "../state/PostState";
 import { css } from "@emotion/react";
-import { logoutClearToken } from "../api/LogOutApi";
 import loginListener from "../hook/LoginHook";
 
 const LogoutButton = css`
@@ -22,6 +21,7 @@ const LogoutButton = css`
 `
 export default function Logout() {
     const yourLogin = useRecoilValue<boolean>(DidYouLogin)
+    const [user, setUser] = useRecoilState<string | null>(userState)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     // State
 
@@ -29,7 +29,21 @@ export default function Logout() {
     // hook
 
     const handleLogout = async () => {
-        logoutClearToken();
+        try {
+            const response = await fetch("/api/auth/logout", {
+                method: "POST",
+            });
+
+            if (response.ok) {
+                setUser(null); // 로그아웃 상태로 초기화
+                alert("Logout successful!");
+            } else {
+                alert("Failed to logout.");
+            }
+        } catch (error) {
+            console.error("Error during logout:", error);
+            alert("An error occurred during logout.");
+        }
     }
 
     const handleLoginToggle = () => {

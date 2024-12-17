@@ -4,9 +4,10 @@ import styled from '@emotion/styled';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
-import { DidYouLogin, loginToggleState, newNoticeState, noticeState, postStyleState, userState } from '../state/PostState';
+import { DidYouLogin, loginToggleState, newNoticeState, noticeState, postStyleState, searchState, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css } from '@emotion/react';
+import SearchComponent from './SearchComponent';
 
 const NavBarWrap = styled.div`
 position: fixed;
@@ -71,6 +72,7 @@ export default function NavBar() {
     const [currentUser, setCurrentUser] = useRecoilState<string | null>(userState)
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const [notice, setNotice] = useRecoilState<boolean>(noticeState);
+    const [searchToggle, setSearchToggle] = useRecoilState<boolean>(searchState)
 
 
     // State
@@ -191,7 +193,7 @@ export default function NavBar() {
                     </NavMenu>
 
                     {/* 검색 */}
-                    <NavMenu isActive={false}>
+                    <NavMenu isActive={false} onClick={() => setSearchToggle(true)}>
                         <div className='menu_icon'>
                             <svg width="40" height="40" viewBox="0 0 40 40">
                                 <g>
@@ -218,6 +220,9 @@ export default function NavBar() {
                     </NavMenu>
                 </div>
             </NavBarWrap>
+            {searchToggle &&
+                <SearchComponent></SearchComponent >
+            }
         </>
     );
 }

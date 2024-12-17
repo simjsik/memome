@@ -45,7 +45,7 @@ export default async function requestCheckLimit(req: NextApiRequest, res: NextAp
                     lastUpdate: today,
                 })
 
-            } else if (readCount >= 1000) {
+            } else if (readCount >= 5000) {
                 // 사용량 초과
                 return res.status(429).json({ error: 'Usage limit exceeded' });
             } else {

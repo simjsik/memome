@@ -4,6 +4,7 @@
 import { fetchComments, fetchPostList } from "@/app/api/loadToFirebasePostData/fetchPostData";
 import { ADMIN_ID, Comment, memoCommentState, memoList, memoState } from "@/app/state/PostState";
 import { HomeBtn } from "@/app/styled/RouterComponents";
+import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import { DocumentData, } from "firebase/firestore";
@@ -52,9 +53,11 @@ display : flex;
 width : 32px;
 height : 32px;
 margin-right : 8px;
-background :red;
 border-radius : 50%;
+background-size: cover;
+background-repeat: no-repeat;
 }
+
 .user_id p{
 font-size : 12px;
 line-height : 32px;
@@ -165,9 +168,11 @@ export default function Memo({ post }: ClientPostProps) {
                             {post.title}
                         </p>
                         <div className="user_id">
-                            <div className="user_profile"></div>
+                            <div className="user_profile"
+                                css={css`background-image : url(${post.photoURL})`}
+                            ></div>
                             <p>
-                                {post.userId === ADMIN ? '관리자' : post.userId} · {formatDate(post.createAt)}
+                                {post.displayName} · {formatDate(post.createAt)}
                             </p>
                         </div>
                     </div>

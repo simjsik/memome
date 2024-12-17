@@ -1,16 +1,15 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { useState } from "react";
-import { PostData } from "../state/PostState";
+import { Configure, Index, InstantSearch, Pagination, SearchBox, useHits, useSearchBox } from "react-instantsearch";
+import { Hits } from 'react-instantsearch';
+import { searchClient } from "../api/algolia";
 import { TitleHeader } from "../styled/PostComponents";
-import { searchPosts } from "../api/loadToFirebasePostData/fetchPostData";
-import { collection, getCountFromServer, query, Timestamp, where } from "firebase/firestore";
-import { db } from "../DB/firebaseConfig";
-import { Hits, InstantSearch, Pagination, SearchBox } from "react-instantsearch";
-import { searchClient } from "../api/Algolia";
+import { css } from "@emotion/react";
+import { useEffect, useState } from "react";
+import { useRecoilState } from "recoil";
+import { searchState } from "../state/PostState";
 
 // 검색 창 css
 const SearchWrap = styled.div`
@@ -35,8 +34,8 @@ z-index: 1;
     .search_box{
     position: absolute;
     left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    top: 40px;
+    transform: translateX(-50%);
     display: flex;
     flex-wrap: wrap;
     width: 600px;
@@ -69,14 +68,18 @@ z-index: 1;
         margin: 5px 10px;
         }
 
-        input{
+        .ais-SearchBox-input{
         width: 100%;
-        height: 100%;
+        height: 42px;
         padding-left: 46px;
         line-height: 42px;
         border: 1px solid #ededed;
         border-radius: 8px;
         font-size : 16px;
+        }
+        .ais-SearchBox-submit,
+        .ais-SearchBox-reset{
+        display : none;
         }
     }
     // ----------------------------------------------------------------------
@@ -151,7 +154,7 @@ z-index: 1;
             // 포스터 제목란
             .result_post_title{
             display: flex;
-            flex: 0 0 60%;
+            flex: 0 0 54%;
             margin-right: 4px;
 
                 .result_img_icon{
@@ -161,7 +164,15 @@ z-index: 1;
                 background: red;
                 }
 
+                .result_tag{
+                font-size : 14px;
+                line-height: 26px;
+                color : #333;
+                margin-right : 4px;
+                }
+
                 .result_title{
+                max-width : 60%;
                 margin-right: 4px;
                 font-size: 14px;
                 text-overflow: ellipsis;
@@ -180,7 +191,7 @@ z-index: 1;
             
             // 유저
             .result_user{
-            flex: 0 0 20%;
+            flex: 0 0 18%;
             font-size: 14px;
             margin-right: 4px;
             text-overflow: ellipsis;
@@ -199,122 +210,154 @@ z-index: 1;
     }
     // ---------------------------------------------------
 `
+function formatDate(createAt: any) {
+    if (createAt?.toDate) {
+        return createAt.toDate().toLocaleString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        }).replace(/\. /g, '.');
+    } else if (createAt?.seconds) {
+        return new Date(createAt.seconds * 1000).toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        }).replace(/\. /g, '.');
+    } else {
+        const date = new Date(createAt);
+
+        const format = date.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        })
+
+        return format;
+    }
+}
+
+const UserHitComponent = ({ hit }: { hit: { displayName: string; photoURL: string } }) => (
+    <div className="search_result_wrap">
+        <div className="search_result">
+            <div
+                className="result_user_photo"
+                style={{
+                    width: '24px',
+                    height: '24px',
+                    backgroundImage: `url(${hit.photoURL})`,
+                }}
+            ></div>
+            <h2 className="result_name">{hit.displayName}</h2>
+        </div>
+    </div>
+);
+
+
+
+// 검색 결과 및 검색어 상태 처리
+const SearchResults = () => {
+    const { query, refine } = useSearchBox(); // 검색어 가져오기
+    const { items } = useHits(); // 검색 결과 가져오기
+
+    // 검색 결과 대기
+    const [debouncedQuery, setDebouncedQuery] = useState(query);
+    const [searchLoading, setSearchLoading] = useState(false); // 로딩 상태 추가
+
+    useEffect(() => {
+        if (query.trim()) {
+            setSearchLoading(true);
+        } else {
+            setDebouncedQuery('');
+            setSearchLoading(false);
+        }
+
+        const timer = setTimeout(() => {
+            setDebouncedQuery(query);
+            refine(query);
+            setSearchLoading(false);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [query, refine])
+
+
+    // 검색어가 비어 있는 경우
+    if (!debouncedQuery.trim()) {
+        return <p>검색어를 입력해주세요</p>;
+    }
+
+    // 로딩 중 상태 표시
+    if (searchLoading) {
+        return <p>Loading...</p>; // 로딩 텍스트나 스피너
+    }
+
+    // 검색 결과가 없는 경우
+    if (debouncedQuery && items.length === 0) {
+        return <p>검색결과가 없습니다.</p>;
+    }
+
+    const PostHitComponent = ({ hit }: { hit: { title: string; tag: string; commentCount: number; createAt: string } }) => (
+        <div className="search_result_wrap">
+            <div className="search_result" >
+                <div className="result_post_title">
+                    <div className="result_img_icon"></div>
+                    <p className="result_title">{hit.title}</p>
+                    <span className="result_comment">[{hit.commentCount}]</span>
+                </div>
+                <p className="result_user">유저명</p>
+                <p className="result_date">{formatDate(hit.createAt)}</p>
+            </div >
+        </div>
+    );
+
+    return (
+        <>
+            {items.map((hit: any, index: number) => (
+                <PostHitComponent key={index} hit={hit} />
+            ))}
+            <Pagination />
+            <Configure hitsPerPage={5} />
+        </>
+    )
+};
 
 export default function SearchComponent() {
-    const [searchText, setSearchText] = useState<string>('')
-    const [searchOption, setSearchOption] = useState<string>('userId')
-    const [optionToggle, setOptionToggle] = useState<boolean>(false)
-    const [searchResult, setSearchResult] = useState<PostData[]>([])
-    const [postLength, setPostLength] = useState<[number, number]>([0, 0]);
-    const [searchLastParams, setSearchLastParams] = useState<[boolean, Timestamp] | null>(null);
-
-
+    const [searchToggle, setSearchToggle] = useRecoilState<boolean>(searchState)
     // state
-
-    const handleSearchChange = (search: string) => {
-        setSearchText(search)
-    }
-
-    const handleOptionChange = (option: string) => {
-        setSearchOption(option)
-    }
-
-    // 포스트 스타일, 공지사항 값 별 포스트 길이 함수
-    const getTotalPost = async (search: string, option: string) => {
-        const totalPost = await getCountFromServer(query(collection(db, 'posts'), where(option, '==', search)));
-        const totalPostLength = totalPost.data().count; // 전체 포스트 수
-        const totalPages = Math.ceil(totalPostLength / 5); // 페이지당 5개 기준
-
-        setPostLength([totalPages, totalPostLength])
-    }
-
-    // 페이지네이션 로직
-    const handleClickPagenation = async (page: number) => {
-
-        const pageSize = 10 * page;
-
-        if ((searchResult.length >= pageSize || searchResult.length >= postLength[1]))
-            return console.log('함수 요청 안함.');
-
-        const newPosts = await searchPosts(searchLastParams, pageSize, searchResult.length, searchOption, searchText);
-
-        setSearchResult((prevPosts) => [...prevPosts, ...newPosts?.data as PostData[]]); // 기존 데이터에 추가
-        setSearchLastParams(newPosts?.nextPage as any); // 다음 페이지 정보 업데이트
-    }
-
-
     // functon
     return (
         <SearchWrap>
-            <div className="search_box">
-                <h2>메모 검색</h2>
-                <div className="search_bar">
-                    <div className="search_input_wrap">
-                        <div className="search_img"></div>
-                        <input type="text" value={searchText} onChange={(e) => handleSearchChange(e.target.value)} />
-                        <InstantSearch searchClient={searchClient} indexName="post_index">
-                            <h2>검색</h2>
-                            <SearchBox translations={{ placeholder: "검색어를 입력하세요" }} />
-                            <Hits hitComponent={Hit} />
-                            <Pagination />
-                        </InstantSearch>
-                    </div>
-                    <div className="search_option_wrap">
-                        <button onClick={() => setOptionToggle((prev) => !prev)} className="search_option_toggle_btn" css={optionToggle ? css`border-radius : 8px 8px 0px 0px` : css`border-radius : 8px`}>
-                            {searchOption === 'userId' ?
-                                '작성자'
-                                :
-                                searchOption === 'title' ?
-                                    '제목'
-                                    :
-                                    '글내용'
-                            }
-                        </button>
-                        {optionToggle &&
-                            <div className="search_option">
-                                <button data-search-value="userId">작성자</button>
-                                <button data-search-value="title">제목</button>
-                                <button data-search-value="content">글내용</button>
-                            </div>
-                        }
-                    </div>
-                    <button className="search_btn">검색</button>
-                </div>
-                <TitleHeader>
-                    <div className='post_header'>
-                        <p className='h_title'>제목</p>
-                        <p className='h_user'>작성자</p>
-                        <p className='h_date'>날짜</p>
-                    </div>
-                </TitleHeader>
-                <div className="search_result_wrap">
-                    <div className="search_result">
-                        <div className="result_post_title">
-                            <div className="result_img_icon"></div>
-                            <p className="result_title">검색결과 제목입니다람쥐렁이</p>
-                            <span className="result_comment">[+999]</span>
+            <button onClick={() => setSearchToggle(false)}>X</button>
+            <InstantSearch searchClient={searchClient} indexName="post_index">
+                <div className="search_box">
+                    <h2>메모 검색</h2>
+                    <div className="search_bar">
+                        <div className="search_input_wrap">
+                            <div className="search_img"></div>
+                            <SearchBox />
                         </div>
-                        <p className="result_user">작성자입니다리우스웨인</p>
-                        <p className="result_date">2024.12.31</p>
+                        <button className="search_btn">검색</button>
                     </div>
+
+                    {/* 유저 검색 결과 */}
+                    <Index indexName="user_index">
+                        <p>작성자 검색 결과</p>
+                        <Hits hitComponent={UserHitComponent} />
+                        <Pagination />
+                    </Index>
+
+                    {/* 게시글 결과 */}
+                    <p>게시글 검색 결과</p>
+                    <TitleHeader>
+                        <div className='post_header'>
+                            <p className='h_title'>제목</p>
+                            <p className='h_user'>작성자</p>
+                            <p className='h_date'>날짜</p>
+                        </div>
+                    </TitleHeader>
+                    <SearchResults />
                 </div>
-                {/* 페이지네이션 버튼 */}
-                {/* <div className='pagination_btn_wrap'>
-                    {Array.from({ length: resultLength }, (_, index) => (
-                        <button key={index} onClick={() => { handleClickPagenation(index + 1); swiperRef.current?.slideTo(index, 0); }}>
-                            {index + 1}
-                        </button>
-                    ))}
-                </div> */}
-            </div>
+            </InstantSearch>
         </SearchWrap>
     )
-}
-
-function Hit({ hit }: any) {
-    return (
-        <div>
-            <p>{hit.title}</p>
-        </div>
-    );
 }

@@ -72,7 +72,7 @@ export default function StatusBox() {
     return (
         <PostListWrap >
             {
-                <UserProfile></UserProfile >
+                path !== `/home/memo/${params?.postId}` && <UserProfile></UserProfile >
             }
             <div className='list_top'>
                 {
@@ -80,6 +80,6 @@ export default function StatusBox() {
                 }
             </div>
             <Logout></Logout>
-        </PostListWrap>
+        </PostListWrap >
     )
 }
