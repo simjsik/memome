@@ -447,7 +447,8 @@ font-family : var(--font-pretendard-bold);
 width : 32px;
 height: 32px;
 margin-right : 8px;
-background :red;
+background-size : cover;
+background-repeat : no-repeat;
 border-radius : 50%;
 }
 
@@ -519,9 +520,11 @@ display:flex;
 width : 24px;
 height : 24px;
 margin-right : 4px;
-background : red;
 border-radius : 50%;
+background-repeat : no-repeat;
+background-size : cover;
 }
+
 // 로그인 유저 아이디
 .login_user_id{
 font-size : 14px;

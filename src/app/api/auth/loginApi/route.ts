@@ -1,26 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/app/DB/firebaseConfig";
-
+import { adminAuth } from "@/app/DB/firebaseAdminConfig";
 export async function POST(req: NextRequest) {
     try {
         const { email, password } = await req.json();
 
-        // Firebase Client SDK로 이메일 및 비밀번호 검증
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        const user = await adminAuth.getUserByEmail(email);
 
-        // ID 토큰 발급
-        const idToken = await user.getIdToken();
+        // 커스텀 토큰 발급
+        const customToken = await adminAuth.createCustomToken(user.uid);
 
-        // ID 토큰을 HTTP-only 쿠키에 저장
-        const response = NextResponse.json({ message: "Login successful" });
-        response.cookies.set("authToken", idToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            path: "/",
-        });
+        const response = NextResponse.json(customToken);
 
         return response;
     } catch (error) {

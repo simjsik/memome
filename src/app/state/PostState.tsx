@@ -13,6 +13,12 @@ export interface PostData {
     displayName: string,
     PhotoURL: string | null,
 }
+export interface userData {
+    name: any;
+    email: any;
+    photo: any;
+    uid: any;
+}
 
 export interface Comment {
     id: string
@@ -23,6 +29,8 @@ export interface Comment {
     localTimestamp: any;
     replies: Comment[];
     parentId: string | null;
+    displayName: string,
+    PhotoURL: string | null,
 }
 
 export interface memoList {
@@ -76,9 +84,14 @@ export const noticeState = atom<boolean>({
 })
 
 // 유저 ID
-export const userState = atom<string | null>({
+export const userState = atom<userData | null>({
     key: 'userState',
-    default: null
+    default: {
+        uid: "",
+        email: "",
+        name: "",
+        photo: null,
+    },
 })
 
 // 로그인 창 토글

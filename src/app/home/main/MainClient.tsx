@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { ADMIN_ID, newNoticeState, noticeState, PostData, PostState, postStyleState, storageLoadState, userState } from '../../state/PostState';
+import { ADMIN_ID, newNoticeState, noticeState, PostData, PostState, postStyleState, storageLoadState, userData, userState } from '../../state/PostState';
 import { useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -266,7 +266,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     const [storageLoad, setStorageLoad] = useRecoilState<boolean>(storageLoadState);
 
     // 현재 로그인 한 유저
-    const [currentUser, setCurrentUser] = useRecoilState<string | null>(userState)
+    const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
     // 메뉴 선택 값
     const [selectedMenu] = useRecoilValue<string>(selectedMenuState);
     const ADMIN = useRecoilValue(ADMIN_ID);
@@ -276,13 +276,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     const swiperRef = useRef<SwiperCore | null>(null);
     const observerLoadRef = useRef(null);
 
-
-    // 로그인 시 유저 아이디 설정
-    useEffect(() => {
-        if (userId) {
-            setCurrentUser(userId)
-        }
-    }, [userId])
 
     // 무한 스크롤 로직
     const {

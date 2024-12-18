@@ -1,11 +1,10 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 'use clients';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { css } from "@emotion/react";
-import { } from "../DB/firebaseConfig";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { loginToggleState, userState } from "../state/PostState";
+import { DidYouLogin, loginToggleState, userData, userState } from "../state/PostState";
 import loginListener from "../hook/LoginHook";
 import {
     CreateButton,
@@ -17,6 +16,8 @@ import {
     NaverButton,
     OtherLoginWrap
 } from "../styled/LoginComponents";
+import { getAuth, signInWithCustomToken } from "firebase/auth";
+import { auth } from "../DB/firebaseConfig";
 
 const LoginWrap = css`
 position : fixed;
@@ -68,10 +69,11 @@ export default function LoginBox() {
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [user, setUser] = useRecoilState<string | null>(userState)
-    const [error, setError] = useState<string>('')
+    const [user, setUser] = useRecoilState<userData | null>(userState)
+    const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
     // State
-
+    const auths = getAuth();
+    const currentUser = auth.currentUser;
     loginListener();
     // hook
 
@@ -89,19 +91,73 @@ export default function LoginBox() {
                 body: JSON.stringify({ email, password }),
             });
 
+            const customToken = await response.json();
+
             if (response.ok) {
-                const data = await response.json();
-                setUser(data); // 로그인 상태 업데이트
+                const userCredential = await signInWithCustomToken(auths, customToken);
+
+                const userData = userCredential.user
+                const idToken = await userCredential.user.getIdToken();
+
+                if (idToken) {
+                    // 서버에 ID 토큰 전달하여 쿠키 저장 요청
+                    await fetch("/api/utils/validateAuthToken", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "include", // 쿠키를 요청 및 응답에 포함
+                        body: JSON.stringify({ idToken }),
+                    });
+
+                    console.log(idToken, '해당 토큰 저장 요청')
+                }
+
+                setUser({
+                    name: userData.displayName,
+                    email: userData.email,
+                    photo: userData.photoURL,
+                    uid: userData.uid,
+                });
+
+                setHasLogin(true);
+                setLoginToggle(false);
                 alert("Login successful!");
             } else {
                 alert("Login failed. Please check your credentials.");
             }
+
         } catch (error) {
             console.error("Error during login:", error);
             alert("An error occurred during login.");
+            return;
         }
     }
 
+    // 토큰 갱신
+    const refreshTokenIfExpired = async () => {
+        const user = auth.currentUser;
+
+        if (user) {
+            try {
+                const newToken = await user.getIdToken(true); // 강제 재발급
+                console.log("토큰 재발급 완료:", newToken);
+
+                // 서버에 새 토큰 전송
+                const response = await fetch("/api/validateAuthToken", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ token: newToken }),
+                });
+
+                if (response.ok) {
+                    console.log("서버 검증 성공");
+                } else {
+                    console.error("서버 검증 실패");
+                }
+            } catch (error) {
+                console.error("토큰 갱신 실패:", error);
+            }
+        }
+    };
 
     // Function
     return (
@@ -109,7 +165,7 @@ export default function LoginBox() {
             <div css={LoginBg} onClick={() => setLoginToggle(false)}></div>
             <LoginButtonWrap css={PopupLoginWrap}>
                 <h2 css={loginTitle}>로그인</h2>
-                <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password);}}>
+                <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
                     <LoginInputWrap>
                         <div>
                             <p>이메일 또는 아이디</p>

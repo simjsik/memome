@@ -2,9 +2,10 @@
 "use client";
 
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState, userState } from "../state/PostState";
+import { DidYouLogin, loginToggleState, userData, userState } from "../state/PostState";
 import { css } from "@emotion/react";
 import loginListener from "../hook/LoginHook";
+import { useRouter } from "next/navigation";
 
 const LogoutButton = css`
     position : absolute;
@@ -20,23 +21,24 @@ const LogoutButton = css`
     cursor : pointer;
 `
 export default function Logout() {
-    const yourLogin = useRecoilValue<boolean>(DidYouLogin)
-    const [user, setUser] = useRecoilState<string | null>(userState)
+    const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
+    const [user, setUser] = useRecoilState<userData | null>(userState)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     // State
-
+    const router = useRouter();
     loginListener();
     // hook
 
     const handleLogout = async () => {
         try {
-            const response = await fetch("/api/auth/logout", {
+            const response = await fetch("/api/utils/logoutDeleteToken", {
                 method: "POST",
             });
 
             if (response.ok) {
                 setUser(null); // 로그아웃 상태로 초기화
-                alert("Logout successful!");
+                setHasLogin(false)
+                router.refresh();
             } else {
                 alert("Failed to logout.");
             }
@@ -52,7 +54,7 @@ export default function Logout() {
     // Function
     return (
         <>
-            {(yourLogin) ?
+            {(hasLogin) ?
                 <div>
                     <button onClick={handleLogout} css={LogoutButton}>로그아웃</button>
                 </div>

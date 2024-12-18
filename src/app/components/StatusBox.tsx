@@ -3,9 +3,7 @@ import Logout from './Logout';
 import MemoStatus from './status/MemoStatus';
 import { useParams, usePathname, } from 'next/navigation';
 import UserProfile from './status/UserProfile';
-import { PostData } from '../state/PostState';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { auth, db } from '../DB/firebaseConfig';
+
 
 
 const PostListWrap = styled.div`
@@ -42,33 +40,7 @@ export default function StatusBox() {
     const params = useParams<{ postId: any }>();
     const postId = params?.postId
 
-    const currentUser = auth.currentUser
-
-    const getMyPostList = async () => {
-        if (!currentUser) return;
-
-        const user = currentUser.uid
-        const postQuery = query(collection(db, 'posts'), where('userId', '==', user))
-
-        const postSnapshot = await getDocs(postQuery)
-
-        const commentSnapshot: PostData[] = await Promise.all(
-            postSnapshot.docs.map(async (doc) => {
-                const postData = { id: doc.id, ...doc.data() } as PostData;
-
-                // 댓글 개수 가져오기
-                const commentRef = query(collection(db, 'posts', doc.id, 'comments'), where('userId', '==', user));
-                const commentSnapshot = await getDocs(commentRef);
-                postData.commentCount = commentSnapshot.size;
-
-                return postData;
-            }))
-        console.log(commentSnapshot)
-    }
-
-
     // Function
-
     return (
         <PostListWrap >
             {

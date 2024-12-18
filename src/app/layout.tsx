@@ -5,7 +5,7 @@ import "./globals.css";
 import { PretendardBold, PretendardMedium, PretendardLight } from './styled/FontsComponets';
 import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil';
 import { usePathname } from 'next/navigation';
-import { loginToggleState, postStyleState, userState } from './state/PostState';
+import { loginToggleState, postStyleState, userData, userState } from './state/PostState';
 
 import LoginBox from './login/LoginBox';
 import NavBar from './components/NavBar';
@@ -44,34 +44,24 @@ function LayoutContent({ children }: LayoutProps) {
 
   const loginToggle = useRecoilValue<boolean>(loginToggleState)
   const [postStyle, setPostStyle] = useRecoilState<boolean>(postStyleState)
-  const [user, setUser] = useRecoilState<string | null>(userState)
+  const [user, setUser] = useRecoilState<userData | null>(userState)
   // State
-  useEffect(() => {
-    const auth = getAuth();
-    const currentUser = auth.currentUser
 
-    if (currentUser) {
-      setUser(currentUser.uid)
-    } else {
-      setUser(null)
-    }
-  }, [])
+  const path = usePathname();
 
   useEffect(() => {
     const checkUsageLimit = async () => {
-
-
       if (!user) {
         return console.log('인증되지 않은 사용자 입니다.')
       }
 
       if (user)
         try {
-          const response = await fetch('/api/checkLimit', {
+          const response = await fetch('/api/firebaseLimit', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'user-id': user,
+              'user-id': user.uid,
             }
           });
 
@@ -95,7 +85,7 @@ function LayoutContent({ children }: LayoutProps) {
   // Function
   return (
     <>
-      <StatusBox />
+      <StatusBox></StatusBox>
       {loginToggle && <LoginBox />}
       {isMain && <PostStyleBtn onClick={handlePostStyle} />}
       {children}

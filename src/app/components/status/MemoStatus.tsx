@@ -2,7 +2,7 @@
 "use client";
 
 import { auth, db } from "@/app/DB/firebaseConfig";
-import { ADMIN_ID, Comment, memoCommentState, memoList, memoState, PostData, postStyleState } from "@/app/state/PostState";
+import { ADMIN_ID, Comment, DidYouLogin, memoCommentState, memoList, memoState, PostData, postStyleState, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
 import { addDoc, collection, deleteDoc, doc, getDoc, increment, onSnapshot, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import BookmarkBtn from "../BookmarkBtn";
 import { PostCommentInputStyle, PostCommentStyle } from "@/app/styled/PostComponents";
+import { css } from "@emotion/react";
 
 interface ClientPostProps {
     post: string;
@@ -150,7 +151,6 @@ font-size : 14px;
 }
 `
 export default function MemoStatus({ post }: ClientPostProps) {
-    const ADMIN = useRecoilValue(ADMIN_ID)
     const router = useRouter();
     const memo = useRecoilValue<memoList>(memoState)
     const [commentList, setCommentList] = useRecoilState<Comment[]>(memoCommentState)
@@ -159,6 +159,9 @@ export default function MemoStatus({ post }: ClientPostProps) {
     const [commentText, setCommentText] = useState<string>('')
     const [replyText, setReplyText] = useState<string>('')
     const [activeReply, setActiveReply] = useState<string | null>(null); // 활성화된 답글 ID
+    const user = useRecoilValue(userState)
+    const hasLogin = useRecoilValue(DidYouLogin)
+    const ADMIN = useRecoilValue(ADMIN_ID)
     // state
 
     const formatDate = (createAt: any) => {
@@ -196,47 +199,49 @@ export default function MemoStatus({ post }: ClientPostProps) {
     }
 
     const addComment = async (parentId: string | null = null, commentId: string) => {
-        if (!auth.currentUser) {
+        if (!hasLogin) {
             alert('로그인이 필요합니다.');
             return;
         }
 
-        const userId = auth.currentUser.uid;
-        const text = parentId ? replyText : commentText;
-        const commentRef = collection(db, 'posts', post, 'comments');
+        if (user) {
+            const userId = user.uid;
+            const text = parentId ? replyText : commentText;
+            const commentRef = collection(db, 'posts', post, 'comments');
 
-        if (!text.trim()) {
-            alert(parentId ? '답글을 입력해주세요.' : '댓글을 입력해주세요.');
-            return;
-        }
-
-        try {
-            const localTimestamp = new Date(); // 로컬 타임스탬프 생성
-
-            const commentData = {
-                replyId: commentId,
-                user: userId,
-                commentText: text,
-                createAt: serverTimestamp(),
-                localTimestamp,
-                parentId,
+            if (!text.trim()) {
+                alert(parentId ? '답글을 입력해주세요.' : '댓글을 입력해주세요.');
+                return;
             }
 
-            // firebase에 추가
-            await addDoc(commentRef, commentData);
+            try {
+                const localTimestamp = new Date(); // 로컬 타임스탬프 생성
 
-            // 댓글 수 수정
-            const postRef = doc(db, 'posts', post)
-            await updateDoc(postRef, {
-                commentCount: increment(1)
-            })
+                const commentData = {
+                    replyId: commentId,
+                    user: userId,
+                    commentText: text,
+                    createAt: serverTimestamp(),
+                    localTimestamp,
+                    parentId,
+                }
 
-            setCommentText('');
-            setReplyText('');
-            setActiveReply(null);
-        } catch (error) {
-            console.error('댓글 추가 중 오류:', error);
-            alert('댓글 추가에 실패했습니다.');
+                // firebase에 추가
+                await addDoc(commentRef, commentData);
+
+                // 댓글 수 수정
+                const postRef = doc(db, 'posts', post)
+                await updateDoc(postRef, {
+                    commentCount: increment(1)
+                })
+
+                setCommentText('');
+                setReplyText('');
+                setActiveReply(null);
+            } catch (error) {
+                console.error('댓글 추가 중 오류:', error);
+                alert('댓글 추가에 실패했습니다.');
+            }
         }
     }
 
@@ -246,38 +251,40 @@ export default function MemoStatus({ post }: ClientPostProps) {
             return;
         }
 
-        const userId = auth.currentUser.uid;
+        if (user) {
+            const userId = user.uid;
 
-        try {
-            const docRef = await getDoc(doc(db, 'posts', post, 'comments', commentId));
-            if (!docRef.exists()) {
-                alert('해당 댓글을 찾을 수 없습니다.');
-                return;
-            }
-
-            const commentOwnerId = docRef.data()?.user;
-
-            if (userId === commentOwnerId || userId === ADMIN) {
-                const confirmed = confirm('댓글을 삭제 하시겠습니까?')
-                if (confirmed) {
-                    await deleteDoc(doc(db, 'posts', post, 'comments', commentId));
-
-                    setCommentList((prevComments) => prevComments.filter((comment) => comment.id !== commentId));
-
-                    // 댓글 수 수정
-                    const postRef = doc(db, 'posts', post)
-                    await updateDoc(postRef, {
-                        commentCount: increment(-1)
-                    })
-
-                    alert('댓글이 삭제 되었습니다.');
+            try {
+                const docRef = await getDoc(doc(db, 'posts', post, 'comments', commentId));
+                if (!docRef.exists()) {
+                    alert('해당 댓글을 찾을 수 없습니다.');
+                    return;
                 }
-            } else {
-                alert('댓글 삭제 권한이 없습니다.');
+
+                const commentOwnerId = docRef.data()?.user;
+
+                if (userId === commentOwnerId || userId === ADMIN) {
+                    const confirmed = confirm('댓글을 삭제 하시겠습니까?')
+                    if (confirmed) {
+                        await deleteDoc(doc(db, 'posts', post, 'comments', commentId));
+
+                        setCommentList((prevComments) => prevComments.filter((comment) => comment.id !== commentId));
+
+                        // 댓글 수 수정
+                        const postRef = doc(db, 'posts', post)
+                        await updateDoc(postRef, {
+                            commentCount: increment(-1)
+                        })
+
+                        alert('댓글이 삭제 되었습니다.');
+                    }
+                } else {
+                    alert('댓글 삭제 권한이 없습니다.');
+                }
+            } catch (error) {
+                console.error('댓글 삭제 중 오류 발생:', error);
+                alert('댓글 삭제 중 오류가 발생했습니다.');
             }
-        } catch (error) {
-            console.error('댓글 삭제 중 오류 발생:', error);
-            alert('댓글 삭제 중 오류가 발생했습니다.');
         }
     } // 댓글 삭제
 
@@ -288,23 +295,52 @@ export default function MemoStatus({ post }: ClientPostProps) {
     // function
 
     // 댓글 실시간 반영
-    useEffect(() => {
-        if (!post) return;
+    // useEffect(() => {
+    //     if (!post) return;
 
-        const commentRef = collection(db, 'posts', post, 'comments');
-        const Q = query(commentRef, orderBy('createAt', 'asc'));
+    //     const commentRef = collection(db, 'posts', post, 'comments');
+    //     const Q = query(commentRef, orderBy('createAt', 'asc'));
 
-        const unsubscribe = onSnapshot(Q, (snapshot) => {
-            const comments = snapshot.docs.map((doc: any) => ({
-                id: doc.id,
-                ...doc.data(),
-            })) as Comment[]
+    //     const unsubscribe = onSnapshot(Q, async (snapshot) => {
+    //         const comments = await Promise.all(snapshot.docs.map(async (docs: any) => {
+    //             const commentData = {
+    //                 id: docs.id,
+    //                 ...docs.data(),
+    //             } as Comment;
 
-            setCommentList(comments);
-        });
+    //             // 사용자 정보 캐시 처리
+    //             if (!userCache.has(commentData.user)) { // userId를 user로 변경
+    //                 const userDocRef = doc(db, "users", commentData.user); // DocumentReference 생성
+    //                 const userDoc = await getDoc(userDocRef); // 문서 데이터 가져오기
 
-        return () => unsubscribe();
-    }, [post])
+    //                 if (userDoc.exists()) {
+    //                     const userData = userDoc.data() as { displayName: string; photoURL: string | null };
+    //                     userCache.set(commentData.user, {
+    //                         nickname: userData.displayName,
+    //                         photo: userData.photoURL || null,
+    //                     });
+    //                 } else {
+    //                     userCache.set(commentData.user, {
+    //                         nickname: "Unknown",
+    //                         photo: null,
+    //                     });
+    //                 }
+    //             }
+
+    //             // 캐시에서 사용자 정보 가져오기
+    //             const userData = userCache.get(commentData.user) || { nickname: 'Unknown', photo: null };
+    //             commentData.displayName = userData.nickname;
+    //             commentData.PhotoURL = userData.photo;
+
+    //             return commentData;
+    //         }));
+
+    //         setCommentList(comments);
+    //     });
+
+    //     return () => unsubscribe();
+    // }, [post])
+
 
     return (
         <MemoBox btnStatus={btnStatus}>
@@ -321,8 +357,12 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                 {commentList.filter(comment => !comment.parentId).map(comment => (
                                     <div key={comment.id} className="memo_comment_wrap">
                                         <div className="user_profile">
-                                            <div className="user_photo"></div>
-                                            <p className="memo_comment_id">{comment.user === ADMIN ? '관리자' : comment.user}</p>
+                                            <div className="user_photo"
+                                                css={css`
+                                                background-image : url(${comment.PhotoURL})
+                                                `}
+                                            ></div>
+                                            <p className="memo_comment_id">{comment.displayName}</p>
                                             <button className="comment_delete_btn" onClick={() => deleteComment(comment.id)}></button>
                                         </div>
                                         <p className="memo_comment">{comment.commentText}</p>
@@ -350,11 +390,15 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                             .map(reply => (
                                                 <div className="reply_wrap" key={reply.id}>
                                                     <div className="user_profile">
-                                                        <div className="user_photo"></div>
-                                                        <p className="memo_comment_id">{reply.user === ADMIN ? '관리자' : reply.user}</p>
+                                                        <div className="user_photo"
+                                                            css={css`
+                                                            background-image : url(${reply.PhotoURL})
+                                                            `}
+                                                        ></div>
+                                                        <p className="memo_comment_id">{reply.displayName}</p>
                                                         <button className="comment_delete_btn" onClick={() => deleteComment(reply.id)}></button>
                                                     </div>
-                                                    <span className="memo_reply_id">@{reply.user === ADMIN ? '관리자' : comment.user}</span>
+                                                    <span className="memo_reply_id">@{reply.displayName}</span>
                                                     <p className="memo_reply">{reply.commentText}</p>
                                                     <p className="memo_comment_date">{formatDate(reply.createAt)}</p>
                                                     <button className="comment_reply_btn" onClick={() => toggleReply(reply.id)}>답글</button>
@@ -392,8 +436,12 @@ export default function MemoStatus({ post }: ClientPostProps) {
                             </div>
                             <PostCommentInputStyle>
                                 <div className="login_user_profile">
-                                    <div className="login_user_photo"></div>
-                                    <p className="login_user_id">{auth.currentUser?.uid === ADMIN ? '관리자' : auth.currentUser?.uid}</p>
+                                    <div className="login_user_photo"
+                                        css={css`
+                                        background-image : url(${user?.photo})
+                                        `}
+                                    ></div>
+                                    <p className="login_user_id">{user?.name}</p>
                                 </div>
                                 <textarea className="comment_input" placeholder="댓글 입력" value={commentText} onChange={(e) => setCommentText(e.target.value)} />
                                 <button className="comment_upload_btn" onClick={() => addComment(null, 'comment')}>등록</button>

@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { DidYouLogin, PostData, userState } from "@/app/state/PostState";
+import { DidYouLogin, PostData, userData, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
 import { auth, db } from "@/app/DB/firebaseConfig";
 import { updateProfile } from "firebase/auth";
@@ -208,7 +208,7 @@ interface MyPostListProps {
 }
 
 export default function UserProfile() {
-    const user = useRecoilValue<string | null>(userState)
+    const user = useRecoilValue<userData | null>(userState)
     const [myPostList, setMyPostList] = useState<PostData[]>([])
     const [updateToggle, setUpdateToggle] = useState<boolean>(false)
     const [userEmail, setUserEmail] = useState<string>('')
@@ -226,29 +226,11 @@ export default function UserProfile() {
     }, [])
 
     useEffect(() => {
-        if (auth.currentUser) {
-            const userEmail = auth.currentUser.email
-            const userName = auth.currentUser.displayName
-            const userPhoto = auth.currentUser.photoURL
-
-            if (userEmail) {
-                setUserEmail(userEmail)
-            } else {
-                setUserName('유저' + auth.currentUser.uid.slice(0, 5))
-            }
-
-            if (userName) {
-                setUserName(userName)
-                setUpdateUserName(userName)
-            } else {
-                setUserName('유저' + auth.currentUser.uid.slice(0, 5))
-            }
-
-            if (userPhoto) {
-                setUserPhoto(userPhoto)
-            } else {
-                setUserPhoto('')
-            }
+        if (user) {
+            setUserName(user.name)
+            setUserEmail(user.email)
+            setUserPhoto(user.photo)
+            // console.log(user.name, user.email, user.photo)
         }
     }, [user])
 
@@ -264,7 +246,7 @@ export default function UserProfile() {
 
     // 프로필 사진 업데이트 시 로직
     const updateToProfile = async (image: File | null, name: string | null) => {
-        if (auth.currentUser) {
+        if (user) {
             try {
                 let profileImageUrl = null
 
@@ -292,20 +274,20 @@ export default function UserProfile() {
                         throw new Error('Cloudinary의 이미지 반환 실패')
                     }
                 } else {
-                    profileImageUrl = auth.currentUser.photoURL;
+                    profileImageUrl = user.uid.photoURL;
                 }
 
                 // Firebase Authentication의 프로필 업데이트
-                await updateProfile(auth.currentUser, {
-                    displayName: name || auth.currentUser.displayName,
-                    photoURL: profileImageUrl || auth.currentUser.photoURL,
+                await updateProfile(user.uid, {
+                    displayName: name || user.name,
+                    photoURL: profileImageUrl || user.photo,
                 })
 
                 // 업데이트한 프로필 Firestore에 저장
                 await setDoc(
-                    doc(db, 'users', auth.currentUser.uid), {
-                    displayName: name || auth.currentUser.displayName,
-                    photoURL: profileImageUrl || auth.currentUser.photoURL,
+                    doc(db, 'users', user.uid), {
+                    displayName: name || user.name,
+                    photoURL: profileImageUrl || user.photo,
                 },
                     { merge: true }
                 );

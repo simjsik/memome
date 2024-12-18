@@ -2,6 +2,7 @@
 "use client";
 
 import { fetchComments, fetchPostList } from "@/app/api/loadToFirebasePostData/fetchPostData";
+import StatusBox from "@/app/components/StatusBox";
 import { ADMIN_ID, Comment, memoCommentState, memoList, memoState } from "@/app/state/PostState";
 import { HomeBtn } from "@/app/styled/RouterComponents";
 import { css } from "@emotion/react";
@@ -96,6 +97,8 @@ export default function Memo({ post }: ClientPostProps) {
     const setCommentList = useSetRecoilState<Comment[]>(memoCommentState)
     // state
 
+    // 포스트 데이터
+
     const { data: comments = [] } = useQuery({
         queryKey: ['comments', post.postId],
         queryFn: () => fetchComments(post.postId),
@@ -157,6 +160,8 @@ export default function Memo({ post }: ClientPostProps) {
         }
     }
     // Function
+
+    console.log(post)
     return (
         <>
             <HomeBtn onClick={handleHomeBtn} />

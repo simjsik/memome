@@ -1,25 +1,26 @@
 import { adminAuth } from "@/app/DB/firebaseAdminConfig";
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
-    const authHeader = req.headers.get("authorization");
-    const token = authHeader?.split(" ")[1] || cookies().get("authToken")?.value;
-
-    // console.log("Authorization Header:", authHeader); // 디버깅용
-    // console.log("Cookie Token:", cookies().get("authToken")); // 디버깅용
-
-
-    if (!token) {
-        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
+export async function POST(req: NextRequest) {
     try {
-        const decodedToken = await adminAuth.verifyIdToken(token);
-        // console.log("Decoded Token:", decodedToken); // 디버깅용
-        return NextResponse.json({ decodedToken });
+        const { idToken } = await req.json();
+
+        const decodedToken = await adminAuth.verifyIdToken(idToken);
+
+        // HTTP-only 쿠키에 ID 토큰 저장
+        const response = NextResponse.json({ message: "Token validated" });
+
+        response.cookies.set("authToken", idToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production" ? true : false,
+            sameSite: "strict",
+            path: "/",
+        });
+
+        console.log("Decoded Token:", decodedToken); // 디버깅용
+        return response;
     } catch (error) {
         console.error("Token validation error:", error);
-        return NextResponse.json({ message: "Invalid token" }, { status: 403 });
+        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
 }

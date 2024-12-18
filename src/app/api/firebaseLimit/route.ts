@@ -1,19 +1,5 @@
-import { initializeApp } from "firebase-admin";
-import { cert, getApps } from "firebase-admin/app";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getFirestore } from "firebase-admin/firestore";
-
-
-// Firebase Admin 초기화 (이미 초기화된 경우 재실행 방지)
-if (!getApps().length) {
-    initializeApp({
-        credential: cert({
-            projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'), // 줄바꿈 처리
-        }),
-    });
-}
 
 const db = getFirestore();
 

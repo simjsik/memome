@@ -6,17 +6,52 @@ import { extractImageUrls } from "../utils/extractImageUrls";
 
 // 포스트의 댓글
 export const fetchComments = async (postId: string) => {
+    const userCache = new Map<string, { nickname: string; photo: string | null }>();
+
     try {
         // 포스트 댓글 가져오기
         const commentRef = collection(db, 'posts', postId, 'comments');
         const commentQuery = query(commentRef, orderBy('createAt', 'asc')); // 오름차순 정렬
         const commentSnap = await getDocs(commentQuery);
 
-        return commentSnap.docs.map((commentDoc) => ({
-            ...commentDoc.data(),
-            id: commentDoc.id,
-            createAt: new Date(commentDoc.data().createAt.seconds * 1000).toISOString(), // 개별 댓글의 createAt 변환
-        })) as Comment[]
+        const commentUser: Comment[] = await Promise.all(
+            commentSnap.docs.map(async (commentDoc) => {
+                // 댓글
+                const commentData = {
+                    ...commentDoc.data(),
+                    id: commentDoc.id,
+                    createAt: new Date(commentDoc.data().createAt.seconds * 1000).toISOString(), // 개별 댓글의 createAt 변환} as PostData;
+                } as Comment
+
+                // 포스트 데이터에 유저 이름 매핑하기
+                if (!userCache.has(commentData.user)) {
+                    const userDocRef = doc(db, "users", commentData.user); // DocumentReference 생성
+                    const userDoc = await getDoc(userDocRef); // 문서 데이터 가져오기
+
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data() as { displayName: string; photoURL: string | null }; // .data() 호출 필요
+                        userCache.set(commentData.user, {
+                            nickname: userData.displayName,
+                            photo: userData.photoURL || null,
+                        });
+
+                    } else {
+                        userCache.set(commentData.user, {
+                            nickname: "Unknown",
+                            photo: null,
+                        });
+                    }
+                }
+
+                const userData = userCache.get(commentData.user) || { nickname: 'Unknown', photo: null }
+                commentData.displayName = userData.nickname;
+                commentData.PhotoURL = userData.photo;
+
+                return commentData;
+            })
+        );
+        return commentUser;
+
     } catch (error) {
         console.error("Error fetching data:", error);
     }
