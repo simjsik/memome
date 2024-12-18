@@ -161,7 +161,6 @@ export default function Memo({ post }: ClientPostProps) {
     }
     // Function
 
-    console.log(post)
     return (
         <>
             <HomeBtn onClick={handleHomeBtn} />

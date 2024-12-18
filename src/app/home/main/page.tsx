@@ -12,7 +12,6 @@ export default async function Home() {
 
   return (
     <>
-      <NavWrap></NavWrap>
       <MainHome posts={[]} initialNextPage={initialNextPage} />;
     </>
   )

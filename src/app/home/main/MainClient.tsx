@@ -20,6 +20,7 @@ import { Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
+import useUpdateChecker from '@/app/hook/ClientPolling';
 SwiperCore.use([Pagination]);
 
 const postDeleteBtn = css`
@@ -272,11 +273,10 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     const ADMIN = useRecoilValue(ADMIN_ID);
     // state
     const router = useRouter();
-    const userId = auth.currentUser?.uid
     const swiperRef = useRef<SwiperCore | null>(null);
     const observerLoadRef = useRef(null);
 
-
+    const { hasUpdate, clearUpdate } = useUpdateChecker();
     // 무한 스크롤 로직
     const {
         data,
@@ -354,6 +354,17 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
     // 초기 포스트 길이 가져오기
     useEffect(() => {
+        if (auth.currentUser) {
+            setCurrentUser(
+                {
+                    uid: auth.currentUser.uid,
+                    email: auth.currentUser.email,
+                    name: auth.currentUser.displayName,
+                    photo: auth.currentUser.photoURL,
+                }
+            )
+        }
+
         if (!postStyle) {
             getTotalPost(notice);
         }
@@ -557,6 +568,19 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
     return (
         <>
+            {hasUpdate && <button css={css`
+                    padding: 8px;
+                    position: absolute;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 1;
+                    background: red;
+                    color: #fff;
+                    border: none;
+                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+                    cursor: pointer;
+                    `} onClick={clearUpdate}>새로운 업데이트 확인</button>}
             {/* 공지사항 전체 페이지네이션*/}
             {notice &&
                 <>

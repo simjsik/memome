@@ -211,26 +211,21 @@ export default function UserProfile() {
     const user = useRecoilValue<userData | null>(userState)
     const [myPostList, setMyPostList] = useState<PostData[]>([])
     const [updateToggle, setUpdateToggle] = useState<boolean>(false)
-    const [userEmail, setUserEmail] = useState<string>('')
+    const [userEmail, setUserEmail] = useState<string | null>('')
     const [updateUserName, setUpdateUserName] = useState<string>('')
     const [updateUserPhoto, setUpdateUserPhoto] = useState<File | null>(null)
     const [userName, setUserName] = useState<string | null>(null)
     const [userPhoto, setUserPhoto] = useState<string | null>(null)
     const [loading, setLoading] = useState(false);
     // state
-
     const updatePhotoRef = useRef<HTMLInputElement | null>(null)
     // ref
-
-    useEffect(() => {
-    }, [])
-
+    const my = auth.currentUser
     useEffect(() => {
         if (user) {
             setUserName(user.name)
             setUserEmail(user.email)
             setUserPhoto(user.photo)
-            // console.log(user.name, user.email, user.photo)
         }
     }, [user])
 
@@ -246,7 +241,7 @@ export default function UserProfile() {
 
     // 프로필 사진 업데이트 시 로직
     const updateToProfile = async (image: File | null, name: string | null) => {
-        if (user) {
+        if (my && user) {
             try {
                 let profileImageUrl = null
 
@@ -274,18 +269,18 @@ export default function UserProfile() {
                         throw new Error('Cloudinary의 이미지 반환 실패')
                     }
                 } else {
-                    profileImageUrl = user.uid.photoURL;
+                    profileImageUrl = my.photoURL;
                 }
 
                 // Firebase Authentication의 프로필 업데이트
-                await updateProfile(user.uid, {
+                await updateProfile(my, {
                     displayName: name || user.name,
                     photoURL: profileImageUrl || user.photo,
                 })
 
                 // 업데이트한 프로필 Firestore에 저장
                 await setDoc(
-                    doc(db, 'users', user.uid), {
+                    doc(db, 'users', my.uid), {
                     displayName: name || user.name,
                     photoURL: profileImageUrl || user.photo,
                 },

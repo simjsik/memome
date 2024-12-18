@@ -85,7 +85,10 @@ function LayoutContent({ children }: LayoutProps) {
   // Function
   return (
     <>
-      <StatusBox></StatusBox>
+      <NavWrap></NavWrap>
+      {path !== '/home/post' &&
+        <StatusBox></StatusBox>
+      }
       {loginToggle && <LoginBox />}
       {isMain && <PostStyleBtn onClick={handlePostStyle} />}
       {children}

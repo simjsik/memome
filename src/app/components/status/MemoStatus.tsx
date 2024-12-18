@@ -4,7 +4,7 @@
 import { auth, db } from "@/app/DB/firebaseConfig";
 import { ADMIN_ID, Comment, DidYouLogin, memoCommentState, memoList, memoState, PostData, postStyleState, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
-import { addDoc, collection, deleteDoc, doc, getDoc, increment, onSnapshot, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, increment, onSnapshot, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -266,14 +266,29 @@ export default function MemoStatus({ post }: ClientPostProps) {
                 if (userId === commentOwnerId || userId === ADMIN) {
                     const confirmed = confirm('댓글을 삭제 하시겠습니까?')
                     if (confirmed) {
+                        // 댓글 삭제
                         await deleteDoc(doc(db, 'posts', post, 'comments', commentId));
+
+                        // 해당 댓글에 대한 답글 삭제
+                        const repliesQuery = query(
+                            collection(db, 'posts', post, 'comments'),
+                            where('parentId', '==', commentId)
+                        );
+
+                        const replySnapshot = await getDocs(repliesQuery);
+                        const deletePromises = replySnapshot.docs.map(replyDoc => deleteDoc(replyDoc.ref));
+                        await Promise.all(deletePromises); // 모든 답글 삭제를 기다림
 
                         setCommentList((prevComments) => prevComments.filter((comment) => comment.id !== commentId));
 
-                        // 댓글 수 수정
+                        // 댓글 수 수정: 현재 댓글과 답글 수를 계산
+                        const allCommentsQuery = query(collection(db, 'posts', post, 'comments'));
+                        const allCommentsSnapshot = await getDocs(allCommentsQuery);
+                        const totalCommentsCount = allCommentsSnapshot.size; // 현재 댓글 수
+
                         const postRef = doc(db, 'posts', post)
                         await updateDoc(postRef, {
-                            commentCount: increment(-1)
+                            commentCount: totalCommentsCount
                         })
 
                         alert('댓글이 삭제 되었습니다.');
@@ -296,6 +311,8 @@ export default function MemoStatus({ post }: ClientPostProps) {
 
     // 댓글 실시간 반영
     // useEffect(() => {
+    //     const userCache = new Map<string, { nickname: string; photo: string | null }>();
+
     //     if (!post) return;
 
     //     const commentRef = collection(db, 'posts', post, 'comments');
@@ -334,7 +351,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
 
     //             return commentData;
     //         }));
-
     //         setCommentList(comments);
     //     });
 

@@ -107,8 +107,6 @@ export default function LoginBox() {
                         credentials: "include", // 쿠키를 요청 및 응답에 포함
                         body: JSON.stringify({ idToken }),
                     });
-
-                    console.log(idToken, '해당 토큰 저장 요청')
                 }
 
                 setUser({

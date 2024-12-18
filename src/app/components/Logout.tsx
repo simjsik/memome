@@ -31,16 +31,19 @@ export default function Logout() {
 
     const handleLogout = async () => {
         try {
-            const response = await fetch("/api/utils/logoutDeleteToken", {
-                method: "POST",
-            });
+            const confirmed = confirm('로그아웃 하시겠습니까?')
+            if (confirmed) {
+                const response = await fetch("/api/utils/logoutDeleteToken", {
+                    method: "POST",
+                });
 
-            if (response.ok) {
-                setUser(null); // 로그아웃 상태로 초기화
-                setHasLogin(false)
-                router.refresh();
-            } else {
-                alert("Failed to logout.");
+                if (response.ok) {
+                    setUser(null); // 로그아웃 상태로 초기화
+                    setHasLogin(false)
+                    router.refresh();
+                } else {
+                    alert("Failed to logout.");
+                }
             }
         } catch (error) {
             console.error("Error during logout:", error);
