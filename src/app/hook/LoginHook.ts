@@ -31,6 +31,7 @@ export const loginListener = () => {
                     setLogin(true);
                 } else {
                     setUser(null);
+                    setLogin(false);
                 }
             } catch (error) {
                 console.error("Failed to fetch session:", error);

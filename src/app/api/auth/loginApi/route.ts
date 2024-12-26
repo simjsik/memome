@@ -4,8 +4,11 @@ export async function POST(req: NextRequest) {
     try {
         const { email, password } = await req.json();
 
-        const user = await adminAuth.getUserByEmail(email);
+        if (!email || !password) {
+            return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
+        }
 
+        const user = await adminAuth.getUserByEmail(email);
         // 커스텀 토큰 발급
         const customToken = await adminAuth.createCustomToken(user.uid);
 

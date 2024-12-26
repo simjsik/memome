@@ -54,6 +54,18 @@ export interface BookmarkPostData {
     createAt: any;
 }
 
+export interface noticeType {
+    noticeId: string,
+    noticeType: string,
+    noticeText: string,
+    noticeAt: any,
+}
+// 사용량 제한 알림
+export const UsageLimitState = atom<boolean>({
+    key: 'UsageLimit',
+    default: false
+})
+
 // 관리자 아이디
 export const ADMIN_ID = atom<string>({
     key: 'ADMIN_USER_ID',
@@ -81,6 +93,12 @@ export const DidYouLogin = atom<boolean>({
 export const noticeState = atom<boolean>({
     key: 'noticeState',
     default: false
+})
+
+// 알림 리스트
+export const noticeList = atom<noticeType[]>({
+    key: 'noticeList',
+    default: [],
 })
 
 // 유저 ID

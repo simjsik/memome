@@ -5,21 +5,15 @@ import "./globals.css";
 import { PretendardBold, PretendardMedium, PretendardLight } from './styled/FontsComponets';
 import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil';
 import { usePathname } from 'next/navigation';
-import { loginToggleState, postStyleState, userData, userState } from './state/PostState';
+import { loginToggleState, postStyleState, UsageLimitState, userData, userState } from './state/PostState';
 
 import LoginBox from './login/LoginBox';
-import NavBar from './components/NavBar';
 import StatusBox from './components/StatusBox';
 import styled from '@emotion/styled';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { getAuth } from 'firebase/auth';
-import { collection, getDocs, getFirestore, updateDoc } from 'firebase/firestore';
-import { db } from './DB/firebaseConfig';
 import NavWrap from './components/NavWrap';
-
-// Component
-
-
+import { checkUsageLimit } from './api/utils/checkUsageLimit';
+import UsageLimit from './components/UsageLimit';
 
 type LayoutProps = {
   children: ReactNode;
@@ -37,54 +31,48 @@ background : red;
 
 function LayoutContent({ children }: LayoutProps) {
   const pathName = usePathname();
-  const isLogin = pathName === '/login';
-  const isPost = pathName === '/home/post';
   const isMain = pathName === '/';
   // 위치
 
   const loginToggle = useRecoilValue<boolean>(loginToggleState)
   const [postStyle, setPostStyle] = useRecoilState<boolean>(postStyleState)
-  const [user, setUser] = useRecoilState<userData | null>(userState)
+  const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
+  const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+
   // State
 
   const path = usePathname();
 
+  // 사용량 확인
   useEffect(() => {
-    const checkUsageLimit = async () => {
-      if (!user) {
-        return console.log('인증되지 않은 사용자 입니다.')
-      }
-
-      if (user)
+    if (currentUser) {
+      const checkLimit = async () => {
         try {
-          const response = await fetch('/api/firebaseLimit', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'user-id': user.uid,
-            }
-          });
-
-          if (!response.ok) {
-            const { error } = await response.json();
-            throw new Error(error);
+          await checkUsageLimit(currentUser.uid);
+        } catch (err: any) {
+          if (err.message.includes('사용량 제한')) {
+            setUsageLimit(true);
+          } else {
+            console.log('사용량을 불러오는 중 에러가 발생했습니다.');
           }
-
-          console.log('사용량 요청 확인');
-        } catch (error) {
-          console.error('사용량 확인 중 에러 발생.' + error)
         }
-    };
-
-    checkUsageLimit();
-  }, [])
+      }
+      checkLimit();
+    } else {
+      console.log('제한 안함')
+    }
+  }, [currentUser])
 
   const handlePostStyle = () => {
     setPostStyle((prev) => !prev);
   }
+
+
   // Function
+
   return (
     <>
+      {usageLimit && <UsageLimit />}
       <NavWrap></NavWrap>
       {path !== '/home/post' &&
         <StatusBox></StatusBox>

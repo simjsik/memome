@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
-import { DidYouLogin, loginToggleState, newNoticeState, noticeState, postStyleState, searchState, userState } from '../state/PostState';
+import { DidYouLogin, loginToggleState, newNoticeState, noticeState, searchState, userData, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css } from '@emotion/react';
 import SearchComponent from './SearchComponent';
@@ -69,7 +69,7 @@ export default function NavBar() {
     const yourLogin = useRecoilValue(DidYouLogin)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const [selectedMenu, setSelectedMenu] = useRecoilState<string>(selectedMenuState);
-    const [currentUser, setCurrentUser] = useRecoilState<string | null>(userState)
+    const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const [notice, setNotice] = useRecoilState<boolean>(noticeState);
     const [searchToggle, setSearchToggle] = useRecoilState<boolean>(searchState)
@@ -105,6 +105,7 @@ export default function NavBar() {
         } else if (NavTitle === 'notice') {
             router.push('/home/main');
             setNotice(true);
+            setNewNotice(false);
         }
         setSelectedMenu(NavTitle);
     }
@@ -117,6 +118,7 @@ export default function NavBar() {
             setLoginToggle(true);
         }
     };
+
 
     // Function
     return (

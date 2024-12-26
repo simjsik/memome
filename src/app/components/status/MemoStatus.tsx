@@ -11,6 +11,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import BookmarkBtn from "../BookmarkBtn";
 import { PostCommentInputStyle, PostCommentStyle } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
+import { useCommentUpdateChecker } from "@/app/hook/ClientPolling";
 
 interface ClientPostProps {
     post: string;
@@ -163,6 +164,8 @@ export default function MemoStatus({ post }: ClientPostProps) {
     const hasLogin = useRecoilValue(DidYouLogin)
     const ADMIN = useRecoilValue(ADMIN_ID)
     // state
+
+    const { hasUpdate, clearUpdate } = useCommentUpdateChecker();
 
     const formatDate = (createAt: any) => {
         if (createAt?.toDate) {
@@ -484,6 +487,19 @@ export default function MemoStatus({ post }: ClientPostProps) {
                         </div>
                     ))
                 }
+                {hasUpdate && <button css={css`
+                    padding: 8px;
+                    position: absolute;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 1;
+                    background: red;
+                    color: #fff;
+                    border: none;
+                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+                    cursor: pointer;
+                    `} onClick={clearUpdate}>새로운 업데이트 확인</button>}
             </div>
         </MemoBox >
     )

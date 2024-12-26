@@ -1,11 +1,13 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState, userData, userState } from "../state/PostState";
 import { css } from "@emotion/react";
 import loginListener from "../hook/LoginHook";
 import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { auth } from "../DB/firebaseConfig";
 
 const LogoutButton = css`
     position : absolute;
@@ -33,6 +35,7 @@ export default function Logout() {
         try {
             const confirmed = confirm('로그아웃 하시겠습니까?')
             if (confirmed) {
+                await signOut(auth);
                 const response = await fetch("/api/utils/logoutDeleteToken", {
                     method: "POST",
                 });

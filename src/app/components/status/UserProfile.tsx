@@ -2,12 +2,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRecoilValue } from "recoil";
-import { DidYouLogin, PostData, userData, userState } from "@/app/state/PostState";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { ADMIN_ID, DidYouLogin, noticeList, noticeType, PostData, userData, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
 import { auth, db } from "@/app/DB/firebaseConfig";
 import { updateProfile } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { css } from "@emotion/react";
 
 const ProfileWrap = styled.div`
@@ -217,10 +217,13 @@ export default function UserProfile() {
     const [userName, setUserName] = useState<string | null>(null)
     const [userPhoto, setUserPhoto] = useState<string | null>(null)
     const [loading, setLoading] = useState(false);
+    const [noticeLists, setNoticeLists] = useRecoilState<noticeType[]>(noticeList);
+    const ADMIN = useRecoilValue(ADMIN_ID)
     // state
     const updatePhotoRef = useRef<HTMLInputElement | null>(null)
     // ref
     const my = auth.currentUser
+
     useEffect(() => {
         if (user) {
             setUserName(user.name)
@@ -333,6 +336,59 @@ export default function UserProfile() {
             updatePhotoRef.current.value = ''; // 선택된 사진 초기화
         }
     }
+
+    const formatDate = (createAt: any) => {
+        if (createAt?.toDate) {
+            return createAt.toDate().toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+            }).replace(/\. /g, '.');
+        } else if (createAt?.seconds) {
+            return new Date(createAt.seconds * 1000).toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+            }).replace(/\. /g, '.');
+        } else {
+            const date = new Date(createAt);
+
+            const format = date.toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+            })
+
+            return format;
+        }
+    }
+
+    const noticeConfirm = async (noticeId: string) => {
+        if (my) {
+            try {
+                // 게시글 존재 확인
+                const noticeDoc = await getDoc(doc(db, 'users', my.uid, 'noticeList', noticeId));
+                if (!noticeDoc.exists()) {
+                    alert('해당 게시글을 찾을 수 없습니다.')
+                    return;
+                }
+                // 삭제 권한 확인
+                await deleteDoc(doc(db, 'users', my.uid, 'noticeList', noticeId));
+                console.log('알림 확인')
+
+                // noticeLists 상태에서 해당 알림 제거
+                setNoticeLists((prevNotices) =>
+                    prevNotices.filter((notice) => notice.noticeId !== noticeId)
+                );
+            } catch (error) {
+                console.error('게시글 삭제 중 오류가 발생했습니다.' + error)
+                alert('게시글 삭제 중 오류가 발생했습니다.')
+            }
+        } else {
+            console.log('유저 확인 실패')
+        }
+    }
+
     return (
         <ProfileWrap>
             {/* 프로필 상단 */}
@@ -400,21 +456,28 @@ export default function UserProfile() {
                         < div className="profile_menu_wrap">
                             <div className="memo_box">
                                 <div className="menu_profile" css={css`
-                    background-image : url(${userPhoto});
-                    background-size : cover;
-                    background-position : center;
-                    width : 32px;
-                    height : 32px;
-                    border : 1px solid #333;
-                    border-radius : 50%;
-                `}></div>
+                                    background-image : url(${userPhoto});
+                                    background-size : cover;
+                                    background-position : center;
+                                    width : 32px;
+                                    height : 32px;
+                                    border : 1px solid #333;
+                                    border-radius : 50%;
+                                `}></div>
                                 <p>새 메모를 작성하세요</p>
                                 <button className="memo_btn">메모</button>
                             </div>
 
-                            <div className="my_post_wrap">
-                                <div>
-                                </div>
+                            <div className="my_alarm_wrap">
+                                {noticeLists.map((notice) => (
+                                    <div key={notice.noticeId}>
+                                        <p>{notice.noticeId}</p>
+                                        <p>{notice.noticeText}</p>
+                                        <p>{notice.noticeType}</p>
+                                        <p>{formatDate(notice.noticeAt)}</p>
+                                        <button onClick={() => noticeConfirm(notice.noticeId)}>알림 확인</button>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </>

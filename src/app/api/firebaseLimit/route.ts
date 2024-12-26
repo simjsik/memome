@@ -1,13 +1,13 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import { getFirestore } from "firebase-admin/firestore";
+import { NextRequest, NextResponse } from "next/server";
 
 const db = getFirestore();
 
-export default async function requestCheckLimit(req: NextApiRequest, res: NextApiResponse) {
-    const userId = req.headers['user-id'] as string;
+export async function POST(req: NextRequest,) {
+    const userId = req.headers.get('user-id');
 
     if (!userId) {
-        return res.status(401).json({ error: '유저가 없습니다.' });
+        return NextResponse.json({ error: '유저가 없습니다.' }, { status: 401 });
     }
 
     const currentTime = new Date();
@@ -27,13 +27,13 @@ export default async function requestCheckLimit(req: NextApiRequest, res: NextAp
             if (lastUpdate != today) {
                 // 날짜가 변하면 카운트 초기화
                 await userDocRef.set({
-                    readCount: 1,
+                    readCount: 0,
                     lastUpdate: today,
                 })
 
-            } else if (readCount >= 5000) {
+            } else if (readCount >= 100) {
                 // 사용량 초과
-                return res.status(429).json({ error: 'Usage limit exceeded' });
+                return NextResponse.json({ error: 'Usage limit exceeded' }, { status: 403 });
             } else {
                 // 카운트 증가
                 await userDocRef.update({
@@ -41,11 +41,10 @@ export default async function requestCheckLimit(req: NextApiRequest, res: NextAp
                 });
             }
         }
-        // --------------------------------------------------------------------
 
-        return res.status(200).json({ message: '요청 허용' });
+        return NextResponse.json({ message: '요청 허용' });
     } catch (error) {
         console.error('사용량 제한 처리 중 오류:', error);
-        return res.status(500).json({ error: '서버 오류' });
+        return NextResponse.json({ error: '서버 오류' }, { status: 500 });
     }
 }

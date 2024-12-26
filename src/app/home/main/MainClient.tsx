@@ -3,12 +3,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { ADMIN_ID, newNoticeState, noticeState, PostData, PostState, postStyleState, storageLoadState, userData, userState } from '../../state/PostState';
+import { ADMIN_ID, newNoticeState, noticeList, noticeState, noticeType, PostData, PostState, postStyleState, storageLoadState, UsageLimitState, userData, userState } from '../../state/PostState';
 import { useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { PostWrap, TitleHeader } from '../../styled/PostComponents';
-import { collection, deleteDoc, doc, getCountFromServer, getDoc, limit, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getCountFromServer, getDoc, getDocs, limit, onSnapshot, orderBy, query, startAfter, Timestamp, where } from 'firebase/firestore';
 import { auth, db } from '../../DB/firebaseConfig';
 import { selectedMenuState } from '../../state/LayoutState';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -20,7 +20,9 @@ import { Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
-import useUpdateChecker from '@/app/hook/ClientPolling';
+import { usePostUpdateChecker } from '@/app/hook/ClientPolling';
+import socket from '@/app/api/websocket/route';
+import { Socket } from 'socket.io-client';
 SwiperCore.use([Pagination]);
 
 const postDeleteBtn = css`
@@ -248,6 +250,7 @@ interface MainHomeProps {
 export default function MainHome({ posts: initialPosts, initialNextPage }: MainHomeProps) {
     // 포스트 스테이트
     const [posts, setPosts] = useRecoilState<PostData[]>(PostState)
+    const [newPosts, setNewPosts] = useState<PostData[]>([])
     const [noticePosts, setNoticePosts] = useState<PostData[]>([])
 
     // 포스트 길이
@@ -256,11 +259,13 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     // 불러온 마지막 데이터
     const [lastParams, setLastParams] = useState<[boolean, Timestamp] | null>(null);
     const [noticeLastParams, setNoticeLastParams] = useState<[boolean, Timestamp] | null>(null);
+    const [lastFetchedAt, setLastFetchedAt] = useState(null); // 마지막으로 문서 가져온 시간
 
     // 공지사항 스테이트
     const [notice, setNotice] = useRecoilState<boolean>(noticeState);
     const [noticeHide, setNoticeHide] = useState<boolean>(false);
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
+    const [noticeLists, setNoticeLists] = useRecoilState<noticeType[]>(noticeList);
     const [postStyle, setPostStyle] = useRecoilState<boolean>(postStyleState)
 
     // 스토리지 기본 값 설정 용
@@ -271,32 +276,92 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     // 메뉴 선택 값
     const [selectedMenu] = useRecoilValue<string>(selectedMenuState);
     const ADMIN = useRecoilValue(ADMIN_ID);
+
+    const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+
     // state
     const router = useRouter();
     const swiperRef = useRef<SwiperCore | null>(null);
     const observerLoadRef = useRef(null);
 
-    const { hasUpdate, clearUpdate } = useUpdateChecker();
+    const socketRef = useRef<Socket | null>(null);
+    useEffect(() => {
+        // socket 객체를 초기화
+        socketRef.current = socket; // socket은 외부에서 가져온 웹소켓 인스턴스
+
+        const sockets = socketRef.current;
+
+        sockets.on("connect", () => {
+            console.log("WebSocket 연결 성공");
+        });
+
+        // 새 공지 수신
+        sockets.on("new-notice", (data) => {
+            console.log("새 공지 알림:", data);
+            setNewNotice(true);
+        });
+
+        // 새 알림 수신
+        sockets.on("initial-notices", (data) => {
+            console.log("새 알림:", data);
+            setNoticeLists(data);
+        });
+
+        // 컴포넌트 언마운트 시 이벤트 제거
+        return () => {
+            sockets.off("new-notice");
+            sockets.off("initial-notice");
+            sockets.off("connect");
+            sockets.off("disconnect");
+        };
+    }, []);
+
+    // 유저가 로그인 되었을 때 uid를 웹소켓에 전송
+    useEffect(() => {
+        socketRef.current = socket;
+
+        const sockets = socketRef.current;
+        if (currentUser) {
+            sockets.emit("register", { uid: currentUser?.uid }); // UID를 서버에 전송
+        }
+    }, [currentUser])
+
     // 무한 스크롤 로직
+
     const {
         data,
         fetchNextPage,
         hasNextPage,
-        isFetchingNextPage,
-        isLoading,
-        isError,
     } = useInfiniteQuery({
         queryKey: ['posts'],
-        queryFn: ({ pageParam }) => fetchPosts(pageParam, 4, 0), // pageParam 전달
-        getNextPageParam: (lastPage) => lastPage.nextPage || undefined,
+        queryFn: async ({ pageParam }) => {
+            try {
+                return fetchPosts(currentUser?.uid, pageParam, 4, 0); // pageParam 전달
+            } catch (error: any) {
+                if (error.message) {
+                    setUsageLimit(true); // 에러 상태 업데이트
+                    throw error; // 에러를 다시 던져서 useInfiniteQuery가 에러 상태를 인식하게 함
+                }
+            }
+        },
+        getNextPageParam: (lastPage) => {
+            // 사용량 초과 시 페이지 요청 중단
+            if (usageLimit|| !lastPage.nextPage) {
+                return;
+            }
+            return lastPage.nextPage;
+        },
         staleTime: 5 * 60 * 1000, // 5분 동안 캐시 유지
         initialPageParam: initialNextPage, // 초기 페이지 파라미터 설정
         initialData: {
             pages: [{ data: initialPosts, nextPage: initialNextPage }],
             pageParams: [initialNextPage],
-
         },
     });
+
+    useEffect(() => {
+        console.log(usageLimit, '사용제한')
+    }, [usageLimit])
 
     // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
     useEffect(() => {
@@ -306,7 +371,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
             new Map(data.pages.flatMap((page) => page.data as PostData[]).map(post => [post.id, post])).values()
         );
 
-        setPosts(uniquePosts);
+        setPosts([...newPosts, ...uniquePosts]);
 
         if (lastPage?.nextPage) {
             const [notice, createAt] = lastPage.nextPage;
@@ -351,24 +416,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
             setPostLength([totalPages, totalPostLength])
         }
     }
-
-    // 초기 포스트 길이 가져오기
-    useEffect(() => {
-        if (auth.currentUser) {
-            setCurrentUser(
-                {
-                    uid: auth.currentUser.uid,
-                    email: auth.currentUser.email,
-                    name: auth.currentUser.displayName,
-                    photo: auth.currentUser.photoURL,
-                }
-            )
-        }
-
-        if (!postStyle) {
-            getTotalPost(notice);
-        }
-    }, [])
 
     // 공지사항 탭 시 데이터 변경
     useEffect(() => {
@@ -422,14 +469,14 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
         // 공지사항 요청
         if (notice && noticeLastParams) {
-            const newPosts = await fetchPosts(noticeLastParams, pageSize, noticePosts.length);
+            const newPosts = await fetchPosts(currentUser?.uid, noticeLastParams, pageSize, noticePosts.length);
 
             setNoticePosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
             setNoticeLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
         }
         // 일반 포스트 요청
         else if (lastParams) {
-            const newPosts = await fetchPosts(lastParams, pageSize, posts.length);
+            const newPosts = await fetchPosts(currentUser?.uid, lastParams, pageSize, posts.length);
 
             setPosts((prevPosts) => [...prevPosts, ...newPosts.data as PostData[]]); // 기존 데이터에 추가
             setLastParams(newPosts.nextPage as any); // 다음 페이지 정보 업데이트
@@ -442,47 +489,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
             handleClickPagenation(1);
         }
     }, [postStyle])
-
-    // 공지사항 알림
-    useEffect(() => {
-        let lastNoticeTimestamp: number | null = null;
-
-        const unsubscribe = onSnapshot(query(collection(db, 'posts'), where('notice', '==', true), orderBy('createAt', 'desc')),
-            (snapshot) => {
-                const newDocs = snapshot.docChanges().filter((change) => change.type === 'added');
-
-                if (newDocs.length > 0) {
-                    const timeNewDocs = newDocs.some(
-                        (doc) =>
-                            lastNoticeTimestamp === null || doc.doc.data().createAt.toMillis() > lastNoticeTimestamp
-                    );
-
-                    if (timeNewDocs) {
-                        setNewNotice(true);
-                        lastNoticeTimestamp = newDocs[0].doc.data().createAt.toMillis();
-                    }
-                }
-            })
-        return () => unsubscribe();
-    }, [])
-
-    // // 포스트 리스트 변경 시 실시간 반영
-    useEffect(() => {
-
-        // const q = query(collection(db, 'posts'), orderBy('notice', 'desc'), orderBy('createAt', 'desc'));
-
-        // const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        //     const fetchedPosts: PostData[] = []; // 타입 설정
-        //     querySnapshot.forEach((doc) => {
-        //         const postData = { id: doc.id, ...doc.data() } as PostData;
-        //         postData.images = extractImageUrls(postData.content);
-        //         fetchedPosts.push(postData);
-        //     });
-        //     setPosts(fetchedPosts);
-        // });
-
-        // return () => unsubscribe();
-    }, []);
 
     // 포스트 삭제
     const deletePost = async (postId: string) => {
@@ -554,17 +560,73 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     const noticeHideToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
         setNoticeHide(e.target.checked)
     }
-    // function
 
-    // 포스팅 저장된 내용 확인. 있어야 이미지 불러와짐
     useEffect(() => {
+        // 포스팅 저장된 내용 확인. 있어야 이미지 불러와짐
         const savedData = JSON.parse(localStorage.getItem('unsavedPost')!);
+
         if (savedData) {
             setStorageLoad(true);
         } else {
             setStorageLoad(false);
         }
+
+        // 초기 포스트 길이 가져오기
+        if (!postStyle) {
+            getTotalPost(notice);
+        }
+
     }, [])
+
+    useEffect(() => {
+        if (posts[0]?.createAt) {
+            let lastPost = null
+
+            lastPost = posts[0].createAt
+            setLastFetchedAt(lastPost)
+        }
+    }, [posts])
+    // 새 문서 가져오기
+
+    const fetchNewPosts = async () => {
+        try {
+            const postsRef = collection(db, "posts");
+
+            const postsQuery = query(
+                postsRef,
+                where('notice', '==', false),
+                orderBy('createAt', 'asc'),
+                startAfter(lastFetchedAt) // 마지막 시간 이후
+            );
+
+            const querySnapshot = await getDocs(postsQuery);
+
+            const newPosts = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            })) as PostData[];
+
+
+            if (newPosts.length > 0) {
+                const newPostList = newPosts
+                setNewPosts(newPostList);
+                setPosts([...newPostList, ...posts]);
+                console.log('포스트 추가', newPostList)
+            }
+
+            // 업데이트 플래그 초기화
+            clearUpdate();
+        } catch (error) {
+            console.error("Error fetching new posts:", error);
+        }
+    };
+
+    // 버튼 클릭 시 새 데이터 로드
+    const handleUpdateClick = () => {
+        fetchNewPosts();
+    };
+
+    const { hasUpdate, clearUpdate } = usePostUpdateChecker();
 
     return (
         <>
@@ -580,9 +642,9 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                     border: none;
                     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
                     cursor: pointer;
-                    `} onClick={clearUpdate}>새로운 업데이트 확인</button>}
+                    `} onClick={handleUpdateClick}>새로운 업데이트 확인</button>}
             {/* 공지사항 전체 페이지네이션*/}
-            {notice &&
+            {!usageLimit && notice &&
                 <>
                     <NoticeWrap>
                         {/* 페이지네이션 타이틀 */}
@@ -651,7 +713,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                 </>
             }
             {/* 공지사항 제외 전체 포스트 */}
-            {!notice &&
+            {!usageLimit && !notice &&
                 <PostWrap postStyle={postStyle}>
                     <>
                         {!postStyle ?

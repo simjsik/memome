@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 'use clients';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { css } from "@emotion/react";
 import { useRecoilState, useSetRecoilState } from "recoil";
@@ -16,7 +16,7 @@ import {
     NaverButton,
     OtherLoginWrap
 } from "../styled/LoginComponents";
-import { getAuth, signInWithCustomToken } from "firebase/auth";
+import { getAuth, signInWithCustomToken, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
 
 const LoginWrap = css`
@@ -83,79 +83,56 @@ export default function LoginBox() {
 
     const handleLogin = async (email: string, password: string) => {
         try {
-            const response = await fetch("/api/auth/loginApi", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email, password }),
-            });
 
-            const customToken = await response.json();
-
-            if (response.ok) {
-                const userCredential = await signInWithCustomToken(auths, customToken);
-
-                const userData = userCredential.user
-                const idToken = await userCredential.user.getIdToken();
-
-                if (idToken) {
-                    // 서버에 ID 토큰 전달하여 쿠키 저장 요청
-                    await fetch("/api/utils/validateAuthToken", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        credentials: "include", // 쿠키를 요청 및 응답에 포함
-                        body: JSON.stringify({ idToken }),
-                    });
-                }
-
-                setUser({
-                    name: userData.displayName,
-                    email: userData.email,
-                    photo: userData.photoURL,
-                    uid: userData.uid,
+            const userCredential = await signInWithEmailAndPassword(auths, email, password);
+            const user = userCredential.user;
+            if (user) {
+                const response = await fetch("/api/auth/loginApi", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email, password }),
                 });
 
-                setHasLogin(true);
-                setLoginToggle(false);
-                alert("Login successful!");
-            } else {
-                alert("Login failed. Please check your credentials.");
-            }
+                const customToken = await response.json();
 
+                if (response.ok) {
+                    const userCredential = await signInWithCustomToken(auths, customToken);
+
+                    const userData = userCredential.user
+                    const idToken = await userCredential.user.getIdToken();
+
+                    if (idToken) {
+                        // 서버에 ID 토큰 전달하여 쿠키 저장 요청
+                        await fetch("/api/utils/validateAuthToken", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            credentials: "include", // 쿠키를 요청 및 응답에 포함
+                            body: JSON.stringify({ idToken }),
+                        });
+                    }
+
+                    setUser({
+                        name: userData.displayName,
+                        email: userData.email,
+                        photo: userData.photoURL,
+                        uid: userData.uid,
+                    });
+
+                    setHasLogin(true);
+                    setLoginToggle(false);
+                    alert("Login successful!");
+                } else {
+                    alert("Login failed. Please check your credentials.");
+                }
+            }
         } catch (error) {
             console.error("Error during login:", error);
             alert("An error occurred during login.");
             return;
         }
     }
-
-    // 토큰 갱신
-    const refreshTokenIfExpired = async () => {
-        const user = auth.currentUser;
-
-        if (user) {
-            try {
-                const newToken = await user.getIdToken(true); // 강제 재발급
-                console.log("토큰 재발급 완료:", newToken);
-
-                // 서버에 새 토큰 전송
-                const response = await fetch("/api/validateAuthToken", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ token: newToken }),
-                });
-
-                if (response.ok) {
-                    console.log("서버 검증 성공");
-                } else {
-                    console.error("서버 검증 실패");
-                }
-            } catch (error) {
-                console.error("토큰 갱신 실패:", error);
-            }
-        }
-    };
 
     // Function
     return (
