@@ -317,7 +317,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
 
     const { hasUpdate, clearUpdate } = useCommentUpdateChecker();
 
-    // function
     useEffect(() => {
         if (commentList) {
             setCommentCount(commentList.length)
@@ -333,24 +332,24 @@ export default function MemoStatus({ post }: ClientPostProps) {
     const fetchComment = async () => {
         console.log(userCache, "유저 캐시", post, "포스트");
         if (!post) return;
-    
+
         try {
             const commentRef = collection(db, "posts", post, "comments");
             const Q = query(commentRef, orderBy("createAt", "asc"), startAfter(lastFetchedAt)); // 마지막 시간 이후
-    
+
             const snapshot = await getDocs(Q);
-    
+
             // 댓글 데이터 생성
             const newComments = snapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
             })) as Comment[];
-                    // `lastFetchedAt` 업데이트
-                    const lastDoc = snapshot.docs[snapshot.docs.length - 1];
-                    setLastFetchedAt(lastDoc.data().createAt);
-        
-                    // 상태 업데이트
-                    setCommentList((prev) => [...prev, ...newComments]);
+            // `lastFetchedAt` 업데이트
+            const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+            setLastFetchedAt(lastDoc.data().createAt);
+
+            // 상태 업데이트
+            setCommentList((prev) => [...prev, ...newComments]);
 
             // 업데이트 플래그 초기화
             clearUpdate();
@@ -363,6 +362,8 @@ export default function MemoStatus({ post }: ClientPostProps) {
     const handleUpdateClick = () => {
         fetchComment();
     };
+    // function
+
     return (
         <MemoBox btnStatus={btnStatus}>
             {hasUpdate &&
