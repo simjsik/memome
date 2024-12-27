@@ -153,6 +153,12 @@ export const memoCommentState = atom<Comment[]>({
     default: [],
 })
 
+// 포스트 댓글 수
+export const memoCommentCount = atom<number>({
+    key: 'memoCommentCount',
+    default: 0,
+})
+
 // 새 공지사항 알림 토글
 export const newNoticeState = atom<boolean>({
     key: 'newNoticeState',

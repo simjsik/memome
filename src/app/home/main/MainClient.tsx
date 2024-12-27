@@ -327,7 +327,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     }, [currentUser])
 
     // 무한 스크롤 로직
-
     const {
         data,
         fetchNextPage,
@@ -346,7 +345,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         },
         getNextPageParam: (lastPage) => {
             // 사용량 초과 시 페이지 요청 중단
-            if (usageLimit|| !lastPage.nextPage) {
+            if (usageLimit || !lastPage.nextPage) {
                 return;
             }
             return lastPage.nextPage;
@@ -358,10 +357,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
             pageParams: [initialNextPage],
         },
     });
-
-    useEffect(() => {
-        console.log(usageLimit, '사용제한')
-    }, [usageLimit])
 
     // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
     useEffect(() => {
@@ -575,7 +570,6 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
         if (!postStyle) {
             getTotalPost(notice);
         }
-
     }, [])
 
     useEffect(() => {
@@ -630,7 +624,9 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
     return (
         <>
-            {hasUpdate && <button css={css`
+            {hasUpdate &&
+                <button css={
+                    css`
                     padding: 8px;
                     position: absolute;
                     top: 20px;
@@ -642,7 +638,8 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                     border: none;
                     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
                     cursor: pointer;
-                    `} onClick={handleUpdateClick}>새로운 업데이트 확인</button>}
+                    `} onClick={handleUpdateClick}>새로운 업데이트 확인
+                </button>}
             {/* 공지사항 전체 페이지네이션*/}
             {!usageLimit && notice &&
                 <>
@@ -688,11 +685,11 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                             </div>
                                             <div className='post_right_wrap'>
                                                 <p className='user_id'>
-                                                    {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
+                                                    관리자
                                                 </p>
                                                 <p className='post_date'>{formatDate(post.createAt)}</p>
                                             </div>
-                                            {post.userId === auth.currentUser?.uid &&
+                                            {post.userId === currentUser?.uid &&
                                                 <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
                                             }
                                         </div>
@@ -762,11 +759,11 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                                     </div>
                                                     <div className='post_right_wrap'>
                                                         <p className='user_id'>
-                                                            {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
+                                                            관리자
                                                         </p>
                                                         <p className='post_date'>{formatDate(post.createAt)}</p>
                                                     </div>
-                                                    {post.userId === auth.currentUser?.uid &&
+                                                    {post.userId === currentUser?.uid &&
                                                         <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
                                                     }
                                                 </div>
@@ -808,11 +805,11 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                                                 </div>
                                                                 <div className='post_right_wrap'>
                                                                     <p className='user_id'>
-                                                                        {post.userId === '8KGNsQPu22Mod8QrXh6On0A8R5E2' ? '관리자 ' : post.userId}
+                                                                        {post.displayName}
                                                                     </p>
                                                                     <p className='post_date'>{formatDate(post.createAt)}</p>
                                                                 </div>
-                                                                {post.userId === auth.currentUser?.uid &&
+                                                                {post.userId === currentUser?.uid &&
                                                                     <button className='post_delete_btn' css={postDeleteBtn} onClick={() => deletePost(post.id)}></button>
                                                                 }
                                                             </div>

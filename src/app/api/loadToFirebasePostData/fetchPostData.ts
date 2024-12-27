@@ -7,8 +7,17 @@ import { extractImageUrls } from "../utils/extractImageUrls";
 // 포스트의 댓글
 export const fetchComments = async (postId: string) => {
     const userCache = new Map<string, { nickname: string; photo: string | null }>();
+    let commentCount = 0; // 댓글 수 초기화
 
     try {
+        // 포스트 댓글 수 가져오기
+        const commentCountRef = doc(db, 'posts', postId);
+        const commentCountSnap = await getDoc(commentCountRef);
+
+        if (commentCountSnap.exists()) {
+            commentCount = commentCountSnap.data().commentCount || 0; // 댓글 수가 저장된 필드 이름
+        }
+
         // 포스트 댓글 가져오기
         const commentRef = collection(db, 'posts', postId, 'comments');
         const commentQuery = query(commentRef, orderBy('createAt', 'asc')); // 오름차순 정렬
@@ -20,8 +29,8 @@ export const fetchComments = async (postId: string) => {
                 const commentData = {
                     ...commentDoc.data(),
                     id: commentDoc.id,
-                    createAt: new Date(commentDoc.data().createAt.seconds * 1000).toISOString(), // 개별 댓글의 createAt 변환} as PostData;
-                } as Comment
+                    createAt: new Date(commentDoc.data().createAt.seconds * 1000).toISOString(), // 개별 댓글의 createAt 변환
+                } as Comment;
 
                 // 포스트 데이터에 유저 이름 매핑하기
                 if (!userCache.has(commentData.user)) {
@@ -34,7 +43,6 @@ export const fetchComments = async (postId: string) => {
                             nickname: userData.displayName,
                             photo: userData.photoURL || null,
                         });
-
                     } else {
                         userCache.set(commentData.user, {
                             nickname: "Unknown",
@@ -43,19 +51,22 @@ export const fetchComments = async (postId: string) => {
                     }
                 }
 
-                const userData = userCache.get(commentData.user) || { nickname: 'Unknown', photo: null }
+                const userData = userCache.get(commentData.user) || { nickname: 'Unknown', photo: null };
                 commentData.displayName = userData.nickname;
                 commentData.PhotoURL = userData.photo;
 
                 return commentData;
             })
         );
-        return commentUser;
+
+        return { commentCounts: commentCount, comments: commentUser };
 
     } catch (error) {
         console.error("Error fetching data:", error);
+        return { commentCounts: 0, comments: [] }; // 에러 발생 시 기본값 반환
     }
 }
+
 
 // 포스트 페이지 입장 시 '작성자'의 모든 글
 export const fetchPostList = async (postId: string, userId: string) => {

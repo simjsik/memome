@@ -3,7 +3,7 @@
 
 import { fetchComments, fetchPostList } from "@/app/api/loadToFirebasePostData/fetchPostData";
 import StatusBox from "@/app/components/StatusBox";
-import { ADMIN_ID, Comment, memoCommentState, memoList, memoState } from "@/app/state/PostState";
+import { ADMIN_ID, Comment, memoCommentCount, memoCommentState, memoList, memoState } from "@/app/state/PostState";
 import { HomeBtn } from "@/app/styled/RouterComponents";
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
@@ -15,6 +15,11 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
 interface ClientPostProps {
     post: DocumentData;
+}
+
+interface CommentsResponse {
+    commentCounts: number; // 댓글 수
+    comments: Comment[]; // 댓글 배열
 }
 
 const PostDetailWrap = styled.div`
@@ -95,11 +100,12 @@ export default function Memo({ post }: ClientPostProps) {
     const ADMIN = useRecoilValue(ADMIN_ID)
     const [memo, setMemo] = useRecoilState<memoList>(memoState)
     const setCommentList = useSetRecoilState<Comment[]>(memoCommentState)
+    const setCommentCount = useSetRecoilState<number>(memoCommentCount)
     // state
 
     // 포스트 데이터
 
-    const { data: comments = [] } = useQuery({
+    const { data: commentsData = {} as CommentsResponse } = useQuery({
         queryKey: ['comments', post.postId],
         queryFn: () => fetchComments(post.postId),
         staleTime: 5 * 60 * 1000,
@@ -112,10 +118,11 @@ export default function Memo({ post }: ClientPostProps) {
     }); // 포스트 데이터
 
     useEffect(() => {
-        if (comments) {
-            setCommentList(comments);
+        if (commentsData) {
+            setCommentList(commentsData.comments);
+            setCommentCount(commentsData.commentCounts);
         }
-    }, [comments]);
+    }, [commentsData]);
 
     useEffect(() => {
         if (postlist.length > 0 && (memo.list !== postlist || memo.user !== post.userId)) {

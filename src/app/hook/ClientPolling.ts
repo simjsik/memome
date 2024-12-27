@@ -1,17 +1,16 @@
 import { useState, useEffect } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../DB/firebaseConfig";
-
-
+import { useRecoilValue } from "recoil";
+import { userState } from "../state/PostState";
 
 const useUpdateChecker = (statusPath: string) => {
     const [hasUpdate, setHasUpdate] = useState(false);
-
-    const user = auth.currentUser?.uid
+    const currentUser = useRecoilValue(userState)
     useEffect(() => {
         const fetchUpdateStatus = async () => {
             try {
-                const docRef = doc(db, `users/${user}/${statusPath}`);
+                const docRef = doc(db, `users/${currentUser?.uid}/${statusPath}`);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     setHasUpdate(docSnap.data().hasUpdate || false);
@@ -27,13 +26,14 @@ const useUpdateChecker = (statusPath: string) => {
         const interval = setInterval(fetchUpdateStatus, 60000); // 1분 주기로 상태 확인
 
         fetchUpdateStatus(); // 컴포넌트 마운트 시 즉시 상태 확인
+
         return () => clearInterval(interval); // 컴포넌트 언마운트 시 인터벌 제거
-    }, [statusPath]);
+    }, [statusPath, currentUser]);
 
     const clearUpdate = async () => {
         try {
-            if (user) {
-                const docRef = doc(db, `users/${user}/${statusPath}`);
+            if (currentUser) {
+                const docRef = doc(db, `users/${currentUser.uid}/${statusPath}`);
                 await updateDoc(docRef, { hasUpdate: false });
                 setHasUpdate(false);
                 console.log('업데이트 완료')
