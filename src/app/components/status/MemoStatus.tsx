@@ -330,9 +330,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
 
     // 댓글  반영
     const fetchComment = async () => {
-        console.log(userCache, "유저 캐시", post, "포스트");
-        if (!post) return;
-
         try {
             const commentRef = collection(db, "posts", post, "comments");
             const Q = query(commentRef, orderBy("createAt", "asc"), startAfter(lastFetchedAt)); // 마지막 시간 이후
