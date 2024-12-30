@@ -554,3 +554,12 @@ background : none;
 cursor : pointer;
 }
 `
+
+export const BookmarkWrap = styled.div`
+width:860px;
+margin-left : 420px;
+padding : 10px 20px;
+border-left : 1px solid #dedede;
+border-right : 1px solid #dedede;
+background : #fff
+`

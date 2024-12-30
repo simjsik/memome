@@ -32,16 +32,15 @@ background : red;
 function LayoutContent({ children }: LayoutProps) {
   const pathName = usePathname();
   const isMain = pathName === '/';
+  const isPost = pathName === '/home/post'
+  const isLogin = pathName === '/login'
   // 위치
 
   const loginToggle = useRecoilValue<boolean>(loginToggleState)
   const [postStyle, setPostStyle] = useRecoilState<boolean>(postStyleState)
   const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
   const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
-
   // State
-
-  const path = usePathname();
 
   // 사용량 확인
   useEffect(() => {
@@ -67,15 +66,16 @@ function LayoutContent({ children }: LayoutProps) {
     setPostStyle((prev) => !prev);
   }
 
-
   // Function
 
   return (
     <>
       {usageLimit && <UsageLimit />}
-      <NavWrap></NavWrap>
-      {path !== '/home/post' &&
-        <StatusBox></StatusBox>
+      {(!isPost && !isLogin) &&
+        <>
+          <NavWrap></NavWrap>
+          <StatusBox></StatusBox>
+        </>
       }
       {loginToggle && <LoginBox />}
       {isMain && <PostStyleBtn onClick={handlePostStyle} />}

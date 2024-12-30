@@ -1,26 +1,17 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { auth, db } from "@/app/DB/firebaseConfig";
-import { ADMIN_ID, BookmarkPostData, PostData } from "@/app/state/PostState";
-import { PostListStyle, TitleHeader } from "@/app/styled/PostComponents";
+import { ADMIN_ID, BookmarkPostData, bookMarkState } from "@/app/state/PostState";
+import { PostListStyle } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
-import { collection, deleteDoc, doc, DocumentData, getDoc, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, onSnapshot, orderBy, query } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 interface ClientBookmarkProps {
     bookmark: BookmarkPostData[]
 }
-
-const BookmarkWrap = css`
-width:860px;
-margin-left : 420px;
-padding : 10px 20px;
-border-left : 1px solid #dedede;
-border-right : 1px solid #dedede;
-background : #fff
-`
 
 const BookmarkAllBtn = css`
 padding: 6px;
@@ -47,7 +38,7 @@ color : #fff
 `
 export default function Bookmark({ bookmark }: ClientBookmarkProps) {
     const ADMIN = useRecoilValue(ADMIN_ID);
-    const [bookmarkedPosts, setBookmarkedPosts] = useState<BookmarkPostData[]>([]);
+    const [bookmarkedPosts, setBookmarkedPosts] = useRecoilState<BookmarkPostData[]>(bookMarkState);
     const [selectAll, setSelectAll] = useState<boolean>(false);
     const [selectBookmark, setSelectBookmark] = useState<string[]>([])
     const router = useRouter();
@@ -160,15 +151,7 @@ export default function Bookmark({ bookmark }: ClientBookmarkProps) {
     }, [bookmark])
 
     return (
-        <div css={BookmarkWrap}>
-            <TitleHeader>
-                <p className='all_post'>내 북마크</p>
-                <div className='post_header'>
-                    <p className='h_title'>제목</p>
-                    <p className='h_user'>작성자</p>
-                    <p className='h_date'>북마크 날짜</p>
-                </div>
-            </TitleHeader>
+        <>
             {bookmarkedPosts.length === 0 ?
                 <p>북마크가 존재하지 않습니다.</p>
                 :
@@ -194,6 +177,6 @@ export default function Bookmark({ bookmark }: ClientBookmarkProps) {
                 </button>
                 <button className="bookmark_select_delete_btn" onClick={() => deleteBookmark(selectBookmark)}>북마크 해제</button>
             </div>
-        </div>
+        </>
     )
 }

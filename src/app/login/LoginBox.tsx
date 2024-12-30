@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
-'use clients';
+'use client';
 import { useState } from "react";
-
 import { css } from "@emotion/react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState, userData, userState } from "../state/PostState";
@@ -18,6 +17,8 @@ import {
 } from "../styled/LoginComponents";
 import { getAuth, signInWithCustomToken, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
+import { LoginOr, LoginSpan, LoginTitle } from "../styled/LoginStyle";
+import { useRouter } from "next/navigation";
 
 const LoginWrap = css`
 position : fixed;
@@ -39,33 +40,18 @@ right : auto;
 transform: translate(-50%, -50%);
 `
 
-const loginTitle = css`
-  font-size : 24px;
-  font-family : var(--font-pretendard-bold);
-  font-weight: 700;
-`;
-
-const loginOr = css`
-  font-size : 14px;
-  color : #c7c7c7;
-  font-family : var(--font-pretendard-light);
-  font-weight: 500;
-  text-align : center;
-`;
-
 const LoginButton = css`
 width: 100%;
 height : 52px;
 margin-top : 20px;
 border : none;
 border-radius : 4px;
-background : #4cc9bf;
+background : #272D2D;
 color: #fff;
 font-size : 16px;
 font-family : var(--font-pretendard-medium);
 `
 export default function LoginBox() {
-
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -73,7 +59,7 @@ export default function LoginBox() {
     const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
     // State
     const auths = getAuth();
-    const currentUser = auth.currentUser;
+    const router = useRouter();
     loginListener();
     // hook
 
@@ -123,6 +109,7 @@ export default function LoginBox() {
                     setHasLogin(true);
                     setLoginToggle(false);
                     alert("Login successful!");
+                    router.push('/home/main')
                 } else {
                     alert("Login failed. Please check your credentials.");
                 }
@@ -139,7 +126,7 @@ export default function LoginBox() {
         <div css={LoginWrap}>
             <div css={LoginBg} onClick={() => setLoginToggle(false)}></div>
             <LoginButtonWrap css={PopupLoginWrap}>
-                <h2 css={loginTitle}>로그인</h2>
+                <LoginTitle>로그인</LoginTitle>
                 <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
                     <LoginInputWrap>
                         <div>
@@ -151,17 +138,12 @@ export default function LoginBox() {
                             <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
                         </div>
                     </LoginInputWrap>
-                    <span css={css`
-              font-size : 14px;
-              margin-right : 4px;
-              font-family : var(--font-pretendard-medium);
-              font-weight: 500;
-               `}>처음 이신가요?</span>
+                    <LoginSpan>처음 이신가요?</LoginSpan >
                     <CreateButton>회원가입</CreateButton>
                     <button type="submit" css={LoginButton}>로그인</button>
                 </form>
                 <OtherLoginWrap>
-                    <h2 css={loginOr}>또는</h2>
+                    <LoginOr>또는</LoginOr>
                     <div>
                         <GoogleButton>Google 계정으로 로그인</GoogleButton>
                         <NaverButton>네이버 계정으로 로그인</NaverButton>

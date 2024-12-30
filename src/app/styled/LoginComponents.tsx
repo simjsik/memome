@@ -1,5 +1,4 @@
 /** @jsxImportSource @emotion/react */
-
 "use client";
 import styled from "@emotion/styled";
 
@@ -24,11 +23,11 @@ export const LoginButtonWrap = styled.div`
 `
 
 export const LoginInputWrap = styled.div`
-    border : 1px solid #bdbdbd;
     margin-top: 10px;
     padding : 0px;
     border-radius : 4px;
-
+    border : 1px solid #ededed;
+    
     div {
     padding: 8px 10px;
     }
@@ -36,7 +35,7 @@ export const LoginInputWrap = styled.div`
     div:nth-of-type(2) {
     width: 100%;
     height: 100%;
-    border-top : 1px solid #bdbdbd;
+    border-top : 1px solid #ededed;
     }
 
     p{

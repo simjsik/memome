@@ -2,6 +2,7 @@ import { collection, doc, getDoc, getDocs, orderBy, query } from 'firebase/fires
 import ClientBookmark from './ClientBookmark'
 import { db } from '@/app/DB/firebaseConfig';
 import { BookmarkPostData } from '@/app/state/PostState';
+import { BookmarkWrap, TitleHeader } from '@/app/styled/PostComponents';
 
 interface BookMarkProps {
     params: {
@@ -22,7 +23,8 @@ export default async function Bookmark({ params }: BookMarkProps) {
             postId: doc.id,
         }));
 
-        const postContentLoad = bookmarkPosts.map(async (bookmark) => {
+
+        const postContentLoad = await Promise.all(bookmarkPosts.map(async (bookmark) => {
             // 포스트 제목 타이틀.
             const postDoc = await getDoc(doc(db, 'posts', bookmark.postId));
 
@@ -37,19 +39,30 @@ export default async function Bookmark({ params }: BookMarkProps) {
                     title: data.title,
                     userId: data.userId,
                     comment: postComments.size,
+                    createAt: data.createAt
                 } as BookmarkPostData
             }
-        })
+            return null; // 포스트가 존재하지 않을 경우 null 반환
+        }));
 
-        // 북마크 데이터 한번에 처리 및 null 값 필터링
-        return (await Promise.all(postContentLoad)).filter(Boolean);
-    }
+        return postContentLoad.filter((post): post is BookmarkPostData => post !== null);
+    };
 
 
     const bookmarks = await fetchBookmark();
     return (
         <>
-            <ClientBookmark bookmark={bookmarks} />
+            <BookmarkWrap>
+                <TitleHeader>
+                    <p className='all_post'>내 북마크</p>
+                    <div className='post_header'>
+                        <p className='h_title'>제목</p>
+                        <p className='h_user'>작성자</p>
+                        <p className='h_date'>북마크 날짜</p>
+                    </div>
+                </TitleHeader>
+                <ClientBookmark bookmark={bookmarks} />
+            </BookmarkWrap>
         </>
     )
 }

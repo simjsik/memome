@@ -60,6 +60,7 @@ export interface noticeType {
     noticeText: string,
     noticeAt: any,
 }
+
 // 사용량 제한 알림
 export const UsageLimitState = atom<boolean>({
     key: 'UsageLimit',
@@ -84,11 +85,18 @@ export const PostState = atom<PostData[]>({
     default: []
 })
 
+// firebase에 저장된 포스트 데이터
+export const bookMarkState = atom<BookmarkPostData[]>({
+    key: 'bookMarkState',
+    default: []
+})
+
 // 로그인 유무 확인
 export const DidYouLogin = atom<boolean>({
     key: 'DidYouLogin',
     default: false
 })
+
 // 공지사항 스테이트
 export const noticeState = atom<boolean>({
     key: 'noticeState',
