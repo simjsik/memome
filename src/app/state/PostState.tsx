@@ -67,6 +67,12 @@ export const UsageLimitState = atom<boolean>({
     default: false
 })
 
+// 사용량 제한 토글
+export const UsageLimitToggle = atom<boolean>({
+    key: 'UsageLimitToggle',
+    default: false
+})
+
 // 관리자 아이디
 export const ADMIN_ID = atom<string>({
     key: 'ADMIN_USER_ID',

@@ -39,16 +39,15 @@ cursor : pointer;
 
 const PostStyleBtn = styled.button`
 position : fixed;
-right : 580px;
-top : 0;
+left: 18px;
+bottom: 20px;
 width : 42px;
 height : 42px;
 background-repeat: no-repeat;
 background-size: cover;
 background-color : #fff;
-border : none;
+border : 1px solid #ededed;
 border-radius : 8px;
-box-shadow : 0px 0px 10px rgba(0,0,0,0.1);
 cursor : pointer;
 `
 
@@ -284,6 +283,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
     const swiperRef = useRef<SwiperCore | null>(null);
     const observerLoadRef = useRef(null);
 
+    // 웹소켓 연결
     const socketRef = useRef<Socket | null>(null);
     useEffect(() => {
         // socket 객체를 초기화
@@ -315,6 +315,28 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
             sockets.off("disconnect");
         };
     }, []);
+
+    useEffect(() => {
+        if (usageLimit) {
+            const sockets = socketRef.current;
+
+            // 소켓 연결 종료
+            if (sockets) {
+                sockets.close(); // 소켓 연결 종료
+                socketRef.current = null; // 소켓 참조 초기화
+            }
+
+            return () => {
+                // 이벤트 제거 (필요한 경우)
+                if (sockets) {
+                    sockets.off("new-notice");
+                    sockets.off("initial-notice");
+                    sockets.off("connect");
+                    sockets.off("disconnect");
+                }
+            };
+        }
+    }, [usageLimit])
 
     // 유저가 로그인 되었을 때 uid를 웹소켓에 전송
     useEffect(() => {
@@ -376,6 +398,8 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
+        if (usageLimit) return console.log('함수 요청 안함.');
+
         const obsever = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && hasNextPage) {
@@ -456,7 +480,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
         const pageSize = 10 * page;
 
-        if ((posts.length >= pageSize || (!lastParams && !noticeLastParams) || posts.length >= postLength[1]))
+        if ((posts.length >= pageSize || (!lastParams && !noticeLastParams) || posts.length >= postLength[1]) || usageLimit)
             return console.log('함수 요청 안함.');
         // `현재 포스트 길이가 페이지 최대 수`와 같거나 크면 또는
         // `마지막 포스트 데이터가 없으면` 또는
@@ -832,7 +856,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                             <>
                                 {/* 무한 스크롤 구조 */}
                                 {posts.map((post) => (
-                                    <div key={post.id} className='post_box' onClick={() => handlePostClick(post.id)}>
+                                    <div key={post.id} className='post_box'>
                                         {/* 작성자 프로필 */}
                                         <div className='post_profile'>
                                             <div className='user_profile'
@@ -848,7 +872,7 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
                                         {/* 포스트 제목 */}
                                         <div className='post_title_wrap'>
                                             <span className='post_tag'>[{post.tag}]</span>
-                                            <h2 className='post_title'>{post.title}</h2>
+                                            <h2 className='post_title' onClick={() => handlePostClick(post.id)}>{post.title}</h2>
                                         </div>
                                         {/* 포스트 내용 */}
                                         <div className='post_content_wrap'>

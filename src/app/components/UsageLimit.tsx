@@ -2,8 +2,14 @@
 'use clients';
 
 import styled from "@emotion/styled";
+import { DidYouLogin, loginToggleState, UsageLimitState, UsageLimitToggle, userData, userState } from "../state/PostState";
+import { useRecoilState, useSetRecoilState } from "recoil";
+import { signOut } from "firebase/auth";
+import { auth } from "../DB/firebaseConfig";
+import { useEffect, useState } from "react";
 
-export const UsageWrap = styled.div`
+export const UsageWrap = styled.div<{ Limit: boolean }>`
+    display : ${(props) => (props.Limit ? 'block' : 'none')};
     position: absolute;
     top: 0;
     left: 0;
@@ -46,6 +52,7 @@ export const UsageWrap = styled.div`
         border: 1px solid #ededed;
         background: #fff;
         border-radius : 6px;
+        cursor : pointer;
     }
 
     button:nth-of-type(2){
@@ -57,19 +64,82 @@ export const UsageWrap = styled.div`
         font-family: var(--font-pretendard-medium);
         font-size: 14px;
         border-radius : 6px;
+        cursor : pointer;
     }
 `
 export default function UsageLimit() {
+    const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
+    const [user, setUser] = useRecoilState<userData | null>(userState)
+    const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+    const [limitToggle, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
 
+    useEffect(() => {
+        if (usageLimit) {
+            setLimitToggle(true);
+        } else {
+            setLimitToggle(false);
+        }
+    }, [usageLimit])
+    const handleLogout = async () => {
+        try {
+            const confirmed = confirm('로그아웃 하시겠습니까?')
+            if (confirmed) {
+                await signOut(auth);
+                const response = await fetch("/api/utils/logoutDeleteToken", {
+                    method: "POST",
+                });
+
+                if (response.ok) {
+                    setUser(null); // 로그아웃 상태로 초기화
+                    setHasLogin(false)
+                } else {
+                    alert("Failed to logout.");
+                }
+            }
+        } catch (error) {
+            console.error("Error during logout:", error);
+            alert("An error occurred during logout.");
+        }
+    }
+    const handleUsageBox = async () => {
+        setLimitToggle(false);
+    }
+    const [timeLeft, setTimeLeft] = useState('');
+
+    useEffect(() => {
+        const calculateTimeLeft = () => {
+            const now = new Date();
+            const nextDay = new Date();
+            nextDay.setDate(now.getDate() + 1);
+            nextDay.setHours(17, 0, 0, 0); // 다음날 오후 5시 설정
+
+            const difference: number = nextDay.getTime() - now.getTime();
+
+            if (difference > 0) {
+                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                setTimeLeft(`${hours}시간 ${minutes}분 ${seconds}초`);
+            } else {
+                setTimeLeft('타이머가 종료되었습니다.');
+            }
+        };
+
+        // 타이머를 1초마다 업데이트
+        const timer = setInterval(calculateTimeLeft, 1000);
+
+        // 컴포넌트 언마운트 시 타이머 정리
+        return () => clearInterval(timer);
+    }, []);
     // Function
     return (
-        <UsageWrap>
+        <UsageWrap Limit={limitToggle}>
             <div className="usage_box">
                 <p>일일 제공 사용량이 초과되었습니다.</p>
-                <span>초기화 까지 남은 시간 : ㅋ</span>
+                <span>초기화 까지 남은 시간 : {timeLeft}</span>
                 <div className="usage_btn_wrap">
-                    <button>로그아웃</button>
-                    <button>현 상태로 둘러보기</button>
+                    <button onClick={handleLogout}>로그아웃</button>
+                    <button onClick={handleUsageBox}>현 상태로 둘러보기</button>
                 </div>
             </div>
         </UsageWrap>

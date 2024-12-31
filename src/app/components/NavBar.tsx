@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
-import { DidYouLogin, loginToggleState, newNoticeState, noticeState, searchState, userData, userState } from '../state/PostState';
+import { DidYouLogin, loginToggleState, newNoticeState, noticeState, searchState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css } from '@emotion/react';
 import SearchComponent from './SearchComponent';
@@ -73,6 +73,8 @@ export default function NavBar() {
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const [notice, setNotice] = useRecoilState<boolean>(noticeState);
     const [searchToggle, setSearchToggle] = useRecoilState<boolean>(searchState)
+    const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+    const [limitToggle, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
 
 
     // State
@@ -112,8 +114,20 @@ export default function NavBar() {
 
     // 포스팅 메뉴 클릭 시 이동 및 제어
     const handlePosting = () => {
-        if (yourLogin) {
+        if (yourLogin && !usageLimit) {
             router.push('/home/post');
+        } else if (usageLimit) {
+            return setLimitToggle(true);
+        } else {
+            setLoginToggle(true);
+        }
+    };
+
+    const handleSearch = () => {
+        if (yourLogin && !usageLimit) {
+            setSearchToggle(true)
+        } else if (usageLimit) {
+            return setLimitToggle(true);
         } else {
             setLoginToggle(true);
         }
@@ -195,7 +209,7 @@ export default function NavBar() {
                     </NavMenu>
 
                     {/* 검색 */}
-                    <NavMenu isActive={false} onClick={() => setSearchToggle(true)}>
+                    <NavMenu isActive={false} onClick={handleSearch}>
                         <div className='menu_icon'>
                             <svg width="40" height="40" viewBox="0 0 40 40">
                                 <g>

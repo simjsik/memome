@@ -20,7 +20,7 @@ export async function POST(req: NextRequest,) {
 
         if (!userDocSnap.exists) {
             // 유저가 처음 요청 시
-            await userDocRef.set({ readCount: 1, lastUpdate: today });
+            await userDocRef.set({ readCount: 0, lastUpdate: today });
         } else {
             const { readCount, lastUpdate } = userDoc;
 

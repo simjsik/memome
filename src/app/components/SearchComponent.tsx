@@ -2,14 +2,15 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { Configure, Index, InstantSearch, Pagination, SearchBox, useHits, useSearchBox } from "react-instantsearch";
-import { Hits } from 'react-instantsearch';
+import { Configure, Index, InstantSearch, Pagination, SearchBox, SearchBoxProps, useHits, useSearchBox } from "react-instantsearch";
 import { searchClient } from "../api/algolia";
 import { TitleHeader } from "../styled/PostComponents";
-import { css } from "@emotion/react";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { searchState } from "../state/PostState";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../DB/firebaseConfig";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 // 검색 창 css
 const SearchWrap = styled.div`
@@ -46,6 +47,26 @@ z-index: 1;
     border-radius: 16px;
     }
 
+    .search_close_btn{
+    position: absolute;
+    right: 10px;
+    border: none;
+    background: none;
+    width: 24px;
+    height: 24px;
+
+        polyline{
+            fill: none;
+        }
+
+        line {
+            width: 24px;
+            height: 24px;
+            stroke : #272D2D;
+            stroke-width : 2px;
+            stroke-linecap: round;
+        }
+    }
     .search_bar{
     flex: 1 0 100%;
     display: flex;
@@ -56,7 +77,7 @@ z-index: 1;
 
     // 검색 창
     .search_input_wrap{
-    flex: 0 0 65%;
+    width : 100%;
     height : 42px;
     margin-right : 4px;
 
@@ -66,20 +87,60 @@ z-index: 1;
         height: 32px;
         background: red;
         margin: 5px 10px;
+        z-index : 1;
         }
-
+        .ais-SearchBox-form{
+        position : relative;
+        }
         .ais-SearchBox-input{
         width: 100%;
         height: 42px;
-        padding-left: 46px;
+        padding: 0px 10px 0px 46px;
         line-height: 42px;
         border: 1px solid #ededed;
         border-radius: 8px;
         font-size : 16px;
+
+            &:focus {
+            outline : 1px solid #272D2D;
+            }
         }
-        .ais-SearchBox-submit,
+
+        .ais-SearchBox-input::-webkit-search-decoration,
+        .ais-SearchBox-input::-webkit-search-results-button,
+        .ais-SearchBox-input::-webkit-search-results-decoration {
+            display: none; /* 기본 리셋 버튼 숨기기 */
+        }
+
+        .ais-SearchBox-submit{
+            width: 42px;
+            height: 42px;
+            position: absolute;
+            left: 0;
+            border: none;
+            background: none;
+
+            svg{
+                width: 24px;
+                height: 16px;
+            }
+        }
+
         .ais-SearchBox-reset{
-        display : none;
+            position: absolute;
+            top: 7px;
+            right: 10px;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 50%;
+            background-color : #272D2D;
+
+            svg {
+                    fill: #fff;
+                    stroke: #fff;
+                }
         }
     }
     // ----------------------------------------------------------------------
@@ -154,7 +215,7 @@ z-index: 1;
             // 포스터 제목란
             .result_post_title{
             display: flex;
-            flex: 0 0 54%;
+            flex: 0 0 59.5%;
             margin-right: 4px;
 
                 .result_img_icon{
@@ -191,7 +252,7 @@ z-index: 1;
             
             // 유저
             .result_user{
-            flex: 0 0 18%;
+            flex: 0 0 20%;
             font-size: 14px;
             margin-right: 4px;
             text-overflow: ellipsis;
@@ -206,6 +267,86 @@ z-index: 1;
             font-size: 14px;
             line-height: 26px;
             }
+        }
+    }
+    // ---------------------------------------------------
+        .post_result{
+            width: 100%;
+            margin-top : 10px;
+            >p{
+            font-size : 14px;
+            }
+            .search_result_wrap{
+            position: relative;
+            margin-top: 10px;
+            min-height: 250px;
+            }
+            .ais-Pagination-list{
+            display: flex;
+
+                .ais-Pagination-item--firstPage{
+                    margin-right : 4px;
+                }
+                .ais-Pagination-item--previousPage{
+                    margin-right : 4px;
+                }
+                .ais-Pagination-item--page{
+                    padding : 0px 8px;
+                    color :rgb(173, 173, 173);
+                    font-family : var(--font-pretendard-light);
+                }
+                .ais-Pagination-item--nextPage{
+                    margin-right : 4px;
+                }
+                .ais-Pagination-item--disabled{
+                    opacity : 30%
+                }
+                .ais-Pagination-item--selected{
+                    color : #4759A8;
+                    font-family : var(--font-pretendard-medium);
+                }
+            }
+            .ais-Pagination{
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+    }
+    // ---------------------------------------------------
+    .user_result{
+    width: 100%;
+    margin-top: 10px;
+
+        >p{
+            font-size: 14px;
+        }
+
+        .swiper{
+            height: 110px;
+        }
+        .search_result{
+            flex-wrap: wrap;
+            cursor: pointer;
+        }
+        .result_user_photo{
+            width: 42px;
+            height: 42px;
+            margin: 0 auto;
+            border: 1px solid #ededed;
+            border-radius: 50%;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        
+        .result_name{
+            font-size: 16px;
+            flex: 1 0 100%;
+            margin-top: 8px;
+            text-align: center;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
         }
     }
     // ---------------------------------------------------
@@ -236,79 +377,97 @@ function formatDate(createAt: any) {
     }
 }
 
-const UserHitComponent = ({ hit }: { hit: { displayName: string; photoURL: string } }) => (
-    <div className="search_result_wrap">
-        <div className="search_result">
-            <div
-                className="result_user_photo"
-                style={{
-                    width: '24px',
-                    height: '24px',
-                    backgroundImage: `url(${hit.photoURL})`,
-                }}
-            ></div>
-            <h2 className="result_name">{hit.displayName}</h2>
-        </div>
-    </div>
-);
 
+// 유저 검색 결과
+const SwiperHits = ({ onUserClick }: { onUserClick: (uid: string) => void }) => {
+    const { items } = useHits();
 
+    const UserHitComponent = ({ hit }: { hit: { displayName: string; photoURL: string; userId: string } }) => (
+        <div className="search_result_wrap"
+            onClick={() => onUserClick(hit.userId)} // 유저 클릭 시 UID 전달
+        >
+            <div className="search_result">
+                <div
+                    className="result_user_photo"
+                    style={{
+                        backgroundImage: `url(${hit.photoURL})`,
+                    }}
+                ></div>
+                <p className="result_name">{hit.displayName}</p>
+                <p className="result_name">{hit.userId}</p>
+            </div>
+        </div >
+    );
 
-// 검색 결과 및 검색어 상태 처리
+    return (
+        <>
+            <Swiper
+                spaceBetween={16} // 슬라이드 간격
+                slidesPerView={5} // 화면에 보이는 슬라이드 개수
+                pagination={{ clickable: true }} // 페이지네이션 활성화
+                navigation // 네비게이션 활성화
+            >
+                {items.map((hit: any, index: number) => (
+                    <SwiperSlide key={index}>
+                        <UserHitComponent hit={hit} />
+                    </SwiperSlide>
+                ))}
+            </Swiper>
+        </>
+    );
+};
+
+// 포스트 검색 결과
 const SearchResults = () => {
-    const { query, refine } = useSearchBox(); // 검색어 가져오기
     const { items } = useHits(); // 검색 결과 가져오기
 
-    // 검색 결과 대기
-    const [debouncedQuery, setDebouncedQuery] = useState(query);
-    const [searchLoading, setSearchLoading] = useState(false); // 로딩 상태 추가
+    const [userMap, setUserMap] = useState<Record<string, { displayName: string; photoURL: string }> | null>(null);
 
+    // 사용자 데이터 가져오기
     useEffect(() => {
-        if (query.trim()) {
-            setSearchLoading(true);
-        } else {
-            setDebouncedQuery('');
-            setSearchLoading(false);
+        const uniqueUserIds = [...new Set(items.map((hit: any) => hit.userId))];
+
+        const fetchUserData = async () => {
+            try {
+                const userDocs = await Promise.all(
+                    uniqueUserIds.map((id) => getDoc(doc(db, 'users', id)))
+                );
+
+                const fetchedUserMap = userDocs.reduce((acc, userDoc) => {
+                    if (userDoc.exists()) {
+                        acc[userDoc.id] = userDoc.data() as { displayName: string; photoURL: string };;
+                    }
+                    return acc;
+                }, {} as Record<string, { displayName: string; photoURL: string }>);
+
+                setUserMap(fetchedUserMap);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+
+        if (uniqueUserIds.length > 0) {
+            fetchUserData();
         }
+    }, [items]);
 
-        const timer = setTimeout(() => {
-            setDebouncedQuery(query);
-            refine(query);
-            setSearchLoading(false);
-        }, 500);
+    const PostHitComponent = ({ hit }: { hit: { title: string; tag: string; commentCount: number; createAt: string; userId: string } }) => {
+        const userData = userMap ? userMap[hit.userId] : null;
 
-        return () => clearTimeout(timer);
-    }, [query, refine])
-
-
-    // 검색어가 비어 있는 경우
-    if (!debouncedQuery.trim()) {
-        return <p>검색어를 입력해주세요</p>;
-    }
-
-    // 로딩 중 상태 표시
-    if (searchLoading) {
-        return <p>Loading...</p>; // 로딩 텍스트나 스피너
-    }
-
-    // 검색 결과가 없는 경우
-    if (debouncedQuery && items.length === 0) {
-        return <p>검색결과가 없습니다.</p>;
-    }
-
-    const PostHitComponent = ({ hit }: { hit: { title: string; tag: string; commentCount: number; createAt: string } }) => (
-        <div className="search_result_wrap">
+        return (
             <div className="search_result" >
                 <div className="result_post_title">
                     <div className="result_img_icon"></div>
                     <p className="result_title">{hit.title}</p>
                     <span className="result_comment">[{hit.commentCount}]</span>
                 </div>
-                <p className="result_user">유저명</p>
+                <p className="result_user">
+                    {userData ? userData.displayName : '알 수 없음'}
+                </p>
                 <p className="result_date">{formatDate(hit.createAt)}</p>
             </div >
-        </div>
-    );
+        )
+    };
 
     return (
         <>
@@ -321,41 +480,75 @@ const SearchResults = () => {
     )
 };
 
+const queryHook: SearchBoxProps['queryHook'] = (query, search) => {
+    search(query);
+};
+
+function CustomSearchBox() {
+    const { refine } = useSearchBox();
+
+    const handleButtonClick = () => {
+        // 버튼 클릭 시 변경할 쿼리
+        const newQuery = '새로운 검색어';
+        refine(newQuery); // SearchBox의 쿼리를 변경
+    };
+
+    return (
+        <div>
+            <SearchBox />
+            <button onClick={handleButtonClick}>검색어 변경</button>
+        </div>
+    );
+}
 export default function SearchComponent() {
     const [searchToggle, setSearchToggle] = useRecoilState<boolean>(searchState)
-    // state
+    const [userFilter, setUserFilter] = useState<string | null>(null);
     // functon
     return (
         <SearchWrap>
-            <button onClick={() => setSearchToggle(false)}>X</button>
-            <InstantSearch searchClient={searchClient} indexName="post_index">
+            <InstantSearch
+                searchClient={searchClient}
+                indexName="post_index">
                 <div className="search_box">
+                    <button className="search_close_btn" onClick={() => setSearchToggle(false)}>
+                        <svg viewBox="0 0 40 40">
+                            <g>
+                                <polyline className="close_polyline" points="40 40 0 40 0 0" />
+                                <line className="close_line" x1="8" y1="32" x2="32" y2="8" />
+                                <line className="close_line" x1="8" y1="8" x2="32" y2="32" />
+                            </g>
+                        </svg>
+                    </button>
                     <h2>메모 검색</h2>
                     <div className="search_bar">
                         <div className="search_input_wrap">
-                            <div className="search_img"></div>
-                            <SearchBox />
+                            <SearchBox queryHook={queryHook} searchAsYouType={false} placeholder="작성자 및 제목 검색" />
                         </div>
-                        <button className="search_btn">검색</button>
                     </div>
-
                     {/* 유저 검색 결과 */}
                     <Index indexName="user_index">
-                        <p>작성자 검색 결과</p>
-                        <Hits hitComponent={UserHitComponent} />
-                        <Pagination />
+                        <div className="user_result">
+                            <p>작성자</p>
+                            <SwiperHits onUserClick={(uid) => setUserFilter(uid)} />
+                        </div>
                     </Index>
 
                     {/* 게시글 결과 */}
-                    <p>게시글 검색 결과</p>
-                    <TitleHeader>
-                        <div className='post_header'>
-                            <p className='h_title'>제목</p>
-                            <p className='h_user'>작성자</p>
-                            <p className='h_date'>날짜</p>
+                    <Index indexName="post_index">
+                        <div className="post_result" >
+                            <p>게시글</p>
+                            <TitleHeader>
+                                <div className='post_header'>
+                                    <p className='h_title'>제목</p>
+                                    <p className='h_user'>작성자</p>
+                                    <p className='h_date'>날짜</p>
+                                </div>
+                            </TitleHeader>
+                            <div className="search_result_wrap">
+                                <SearchResults />
+                            </div>
                         </div>
-                    </TitleHeader>
-                    <SearchResults />
+                    </Index>
                 </div>
             </InstantSearch>
         </SearchWrap>
