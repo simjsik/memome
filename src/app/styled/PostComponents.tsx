@@ -10,7 +10,7 @@ left : ${(props) => (props.postStyle ? '500px' : '420px')};
 top : ${(props) => (props.postStyle ? '40px' : '0px')};
 display : flex;
 flex-wrap : wrap;
-width: ${(props) => (props.postStyle ? '700px' : '860px')};
+width: ${(props) => (props.postStyle ? '600px' : '860px')};
 padding :${(props) => (props.postStyle ? '0px' : '10px 20px')};
 border-radius : 4px;
 border : none;

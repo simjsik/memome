@@ -79,7 +79,7 @@ outline : none;
 .post_btn{
     position: absolute;
     z-index: 1;
-    bottom: 100px;
+    top: 820px;
     left: -72px;
     width: 64px;
     height: 32px;
@@ -127,7 +127,7 @@ position: absolute;
 z-index: 1;
 left: -72px;
 width: 64px;
-height: calc(100% - 230px);
+height: fit-content;
 padding: 0px 8px;
 background: #fff;
 border-radius: 8px;
@@ -789,7 +789,8 @@ export default function PostMenu() {
             if (!file) return;
 
             const currentImages = quillRef.current?.getEditor().root.querySelectorAll('img');
-            if (currentImages && currentImages.length >= MAX_IMG_COUNT) {
+            console.log(currentImages)
+            if (currentImages && currentImages.length > MAX_IMG_COUNT) {
                 alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 업로드 가능합니다.`);
                 return;
             }

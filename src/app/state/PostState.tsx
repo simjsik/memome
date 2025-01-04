@@ -14,10 +14,10 @@ export interface PostData {
     PhotoURL: string | null,
 }
 export interface userData {
-    name: any;
-    email: any;
-    photo: any;
-    uid: any;
+    name: string | null;
+    email: string | null;
+    photo: string | null;
+    uid: string;
 }
 
 export interface Comment {
@@ -26,7 +26,6 @@ export interface Comment {
     user: string;
     commentText: string;
     createAt: any;
-    localTimestamp: any;
     replies: Comment[];
     parentId: string | null;
     displayName: string,
@@ -122,7 +121,7 @@ export const userState = atom<userData | null>({
         uid: "",
         email: "",
         name: "",
-        photo: null,
+        photo: "",
     },
 })
 

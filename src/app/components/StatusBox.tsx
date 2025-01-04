@@ -3,8 +3,7 @@ import Logout from './Logout';
 import MemoStatus from './status/MemoStatus';
 import { useParams, usePathname, } from 'next/navigation';
 import UserProfile from './status/UserProfile';
-
-
+import SearchComponent from './SearchComponent';
 
 const PostListWrap = styled.div`
 position : fixed;
@@ -43,6 +42,7 @@ export default function StatusBox() {
     // Function
     return (
         <PostListWrap >
+            <SearchComponent></SearchComponent>
             {
                 path !== `/home/memo/${params?.postId}` && <UserProfile></UserProfile >
             }

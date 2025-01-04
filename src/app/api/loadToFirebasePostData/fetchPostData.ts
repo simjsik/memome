@@ -67,22 +67,39 @@ export const fetchComments = async (postId: string) => {
     }
 }
 
-
 // 포스트 페이지 입장 시 '작성자'의 모든 글
-export const fetchPostList = async (postId: string, userId: string) => {
+export const fetchPostList = async (userId: string) => {
 
     try {
+        const response = await fetch('http://localhost:3000/api/firebaseLimit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'user-id': userId || '',
+            }
+        });
+
+        if (response.status === 403) {
+            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+        }
+
         // 현재 포스트 작성자의 모든 글 가져오기
         const postlistRef = collection(db, 'posts');
         const postlistQuery = query(postlistRef, where('userId', '==', userId), orderBy('createAt', 'desc'));
         const postlistSnapshot = await getDocs(postlistQuery);
 
         return postlistSnapshot.docs.map((doc) => ({
-            id: doc.id,
             tag: doc.data().tag,
             title: doc.data().title,
+            id: doc.id,
+            userId: doc.data().userId,
+            notice: doc.data().notice,
+            content: doc.data().content,
             images: doc.data().images,
+            commentCount: doc.data().commentCount,
             createAt: new Date(doc.data().createAt.seconds * 1000).toISOString(),
+            displayName: '',
+            PhotoURL: null,
         }))
     } catch (error) {
         console.error("Error fetching data:", error);
@@ -95,7 +112,7 @@ export const fetchPosts = async (
     pageSize: number = 4, // 페이지, 무한 스크롤 시 가져올 데이터 수.
     existingPostCount: number = 0 // 무한 스크롤 때 이미 로드된 데이터 수.
 ) => {
-    console.log(userId, '받은 유저')
+    // console.log(userId, '받은 유저')
     try {
         const response = await fetch('http://localhost:3000/api/firebaseLimit', {
             method: 'POST',

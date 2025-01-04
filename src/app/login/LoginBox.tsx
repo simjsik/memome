@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 'use client';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { css } from "@emotion/react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState, userData, userState } from "../state/PostState";
@@ -15,10 +15,11 @@ import {
     NaverButton,
     OtherLoginWrap
 } from "../styled/LoginComponents";
-import { getAuth, signInWithCustomToken, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithCustomToken, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
 import { LoginOr, LoginSpan, LoginTitle } from "../styled/LoginStyle";
 import { useRouter } from "next/navigation";
+import { saveNewGoogleUser, saveNewUser } from "../api/utils/saveUserProfile";
 
 const LoginWrap = css`
 position : fixed;
@@ -57,11 +58,38 @@ export default function LoginBox() {
     const [password, setPassword] = useState('')
     const [user, setUser] = useRecoilState<userData | null>(userState)
     const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
+    const [csrfToken, setCsrfToken] = useState<string | null>(null)
     // State
     const auths = getAuth();
     const router = useRouter();
     loginListener();
     // hook
+
+    useEffect(() => {
+        const getCsrfToken = async () => {
+            try {
+                const csrfResponse = await fetch("/api/auth/validateCsrfToken", {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                if (!csrfResponse.ok) {
+                    console.error("CSRF 토큰 발급 실패:", await csrfResponse.text());
+                    throw new Error("CSRF 토큰 발급 실패");
+                }
+                const { csrfToken } = await csrfResponse.json();
+                setCsrfToken(csrfToken);
+
+                // 쿠키 설정 후 약간의 지연을 추가
+                await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms
+                console.log("CSRF 토큰 발급 성공:", csrfToken);
+            } catch (error) {
+                console.error("CSRF 토큰 요청 중 오류:", error);
+            }
+        };
+
+        getCsrfToken();
+    }, []);
 
     const handleGuest = () => {
         setLoginToggle(false);
@@ -69,47 +97,37 @@ export default function LoginBox() {
 
     const handleLogin = async (email: string, password: string) => {
         try {
-
             const userCredential = await signInWithEmailAndPassword(auths, email, password);
             const user = userCredential.user;
+
             if (user) {
-                const response = await fetch("/api/auth/loginApi", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ email, password }),
-                });
+                const idToken = await userCredential.user.getIdToken();
 
-                const customToken = await response.json();
-
-                if (response.ok) {
-                    const userCredential = await signInWithCustomToken(auths, customToken);
-
-                    const userData = userCredential.user
-                    const idToken = await userCredential.user.getIdToken();
-
-                    if (idToken) {
-                        // 서버에 ID 토큰 전달하여 쿠키 저장 요청
-                        await fetch("/api/utils/validateAuthToken", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            credentials: "include", // 쿠키를 요청 및 응답에 포함
-                            body: JSON.stringify({ idToken }),
-                        });
-                    }
-
-                    setUser({
-                        name: userData.displayName,
-                        email: userData.email,
-                        photo: userData.photoURL,
-                        uid: userData.uid,
+                if (idToken) {
+                    // 서버로 ID 토큰 전송
+                    const csrfResponse = await fetch("/api/utils/validateAuthToken", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "include", // 쿠키를 요청 및 응답에 포함
+                        body: JSON.stringify({ idToken, csrfToken }),
                     });
 
-                    setHasLogin(true);
-                    setLoginToggle(false);
-                    alert("Login successful!");
-                    router.push('/home/main')
+                    if (csrfResponse.ok) {
+                        setUser({
+                            name: user.displayName,
+                            email: user.email,
+                            photo: user.photoURL,
+                            uid: user.uid,
+                        });
+
+                        setHasLogin(true);
+                        setLoginToggle(false);
+                        saveNewUser(user.uid);
+                        alert("Login successful!");
+                        router.push('/home/main')
+                    } else {
+                        alert("CSRF Token validation failed. Please try again.");
+                    }
                 } else {
                     alert("Login failed. Please check your credentials.");
                 }
@@ -120,6 +138,50 @@ export default function LoginBox() {
             return;
         }
     }
+
+    const handleGoogleLogin = async () => {
+        try {
+            const provider = new GoogleAuthProvider();
+
+            // Google 로그인 팝업
+            const result = await signInWithPopup(auths, provider);
+            const user = result.user;
+
+            if (user) {
+                // ID 토큰 가져오기
+                const idToken = await user.getIdToken();
+
+                // 서버에 ID 토큰 전달하여 쿠키 저장 요청
+                const csrfResponse = await fetch("/api/utils/validateAuthToken", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include", // 쿠키를 요청 및 응답에 포함
+                    body: JSON.stringify({ idToken, csrfToken }),
+                });
+
+                if (!csrfResponse.ok) {
+                    alert("CSRF Token validation failed. Please try again.");
+                }
+
+                // 사용자 데이터 설정
+                setUser({
+                    name: user.displayName,
+                    email: user.email,
+                    photo: user.photoURL,
+                    uid: user.uid,
+                });
+
+                setHasLogin(true);
+                setLoginToggle(false);
+                saveNewGoogleUser(user.uid, user.displayName, user.photoURL);
+                alert("Google Login successful!");
+                router.push('/home/main'); // 메인 페이지로 이동
+            }
+        } catch (error) {
+            console.error("Error during Google login:", error);
+            alert("Google login failed. Please try again.");
+        }
+    };
 
     // Function
     return (
@@ -145,7 +207,7 @@ export default function LoginBox() {
                 <OtherLoginWrap>
                     <LoginOr>또는</LoginOr>
                     <div>
-                        <GoogleButton>Google 계정으로 로그인</GoogleButton>
+                        <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>
                         <NaverButton>네이버 계정으로 로그인</NaverButton>
                         <GuestButton onClick={handleGuest}>게스트 로그인</GuestButton>
                     </div>

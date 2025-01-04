@@ -2,25 +2,19 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { Configure, Index, InstantSearch, Pagination, SearchBox, SearchBoxProps, useHits, useSearchBox } from "react-instantsearch";
+import { InstantSearch, SearchBox, useHits, useSearchBox } from "react-instantsearch";
 import { searchClient } from "../api/algolia";
 import { TitleHeader } from "../styled/PostComponents";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { searchState } from "../state/PostState";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../DB/firebaseConfig";
 import { Swiper, SwiperSlide } from "swiper/react";
-
+import { Pagination, Scrollbar } from 'swiper/modules';
+import { useRouter } from "next/navigation";
 // 검색 창 css
 const SearchWrap = styled.div`
-position: fixed;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-background: rgba(0, 0, 0, 0.8);
-z-index: 1;
+position: relative;
+
 
     // 메모 검색
     h2{
@@ -33,18 +27,13 @@ z-index: 1;
 
     // 검색 박스
     .search_box{
-    position: absolute;
-    left: 50%;
-    top: 40px;
-    transform: translateX(-50%);
+    top: 20px;
     display: flex;
     flex-wrap: wrap;
-    width: 600px;
+    width: 100%;
     height: fit-content;
-    padding : 8px;
+    margin-top: 10px;
     background: #fff;
-    border: 1px solid #ededed;
-    border-radius: 16px;
     }
 
     .search_close_btn{
@@ -270,50 +259,6 @@ z-index: 1;
         }
     }
     // ---------------------------------------------------
-        .post_result{
-            width: 100%;
-            margin-top : 10px;
-            >p{
-            font-size : 14px;
-            }
-            .search_result_wrap{
-            position: relative;
-            margin-top: 10px;
-            min-height: 250px;
-            }
-            .ais-Pagination-list{
-            display: flex;
-
-                .ais-Pagination-item--firstPage{
-                    margin-right : 4px;
-                }
-                .ais-Pagination-item--previousPage{
-                    margin-right : 4px;
-                }
-                .ais-Pagination-item--page{
-                    padding : 0px 8px;
-                    color :rgb(173, 173, 173);
-                    font-family : var(--font-pretendard-light);
-                }
-                .ais-Pagination-item--nextPage{
-                    margin-right : 4px;
-                }
-                .ais-Pagination-item--disabled{
-                    opacity : 30%
-                }
-                .ais-Pagination-item--selected{
-                    color : #4759A8;
-                    font-family : var(--font-pretendard-medium);
-                }
-            }
-            .ais-Pagination{
-                position: absolute;
-                bottom: 0;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-    }
-    // ---------------------------------------------------
     .user_result{
     width: 100%;
     margin-top: 10px;
@@ -324,10 +269,15 @@ z-index: 1;
 
         .swiper{
             height: 110px;
+            cursor: pointer;
+
+            .swiper-pagination{
+                bottom: 0px;
+            }
         }
+        
         .search_result{
             flex-wrap: wrap;
-            cursor: pointer;
         }
         .result_user_photo{
             width: 42px;
@@ -349,44 +299,67 @@ z-index: 1;
             white-space: nowrap;
         }
     }
+                .ais-SearchBox-loadingIndicator{
+                position: absolute;
+                left: 50%;
+                top: 70px;
+                transform: translateX(-50%);
+                width: 42px;
+                height: 42px;
+
+                svg{
+                width : 100%;
+                height : 100%;
+            }
+        }
     // ---------------------------------------------------
 `
-function formatDate(createAt: any) {
-    if (createAt?.toDate) {
-        return createAt.toDate().toLocaleString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-        }).replace(/\. /g, '.');
-    } else if (createAt?.seconds) {
-        return new Date(createAt.seconds * 1000).toLocaleDateString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-        }).replace(/\. /g, '.');
-    } else {
-        const date = new Date(createAt);
-
-        const format = date.toLocaleDateString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-        })
-
-        return format;
-    }
-}
-
 
 // 유저 검색 결과
-const SwiperHits = ({ onUserClick }: { onUserClick: (uid: string) => void }) => {
+const SwiperHits = () => {
+    const { query, refine } = useSearchBox();
     const { items } = useHits();
+    const router = useRouter();
+    // 검색 결과 대기
+    const [debouncedQuery, setDebouncedQuery] = useState(query);
+    const [searchLoading, setSearchLoading] = useState(false); // 로딩 상태 추가
+
+    useEffect(() => {
+        if (query.trim()) {
+            setSearchLoading(true);
+        } else {
+            setDebouncedQuery('');
+            setSearchLoading(false);
+        }
+
+        const timer = setTimeout(() => {
+            setDebouncedQuery(query);
+            refine(query);
+            setSearchLoading(false);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [query, refine])
+
+    if (!query) return <p>작성자 및 키워드를 입력해 검색해 보세요.</p>
+
+    if (searchLoading) {
+        return;
+    }
+
+    // 검색어가 비어 있는 경우
+    if (!debouncedQuery.trim()) {
+        return <p>작성자 및 키워드를 입력해 검색해 보세요.</p>;
+    }
+
+    const handleUserPage = (userId: string) => {
+        router.push(`user/${userId}`)
+    }
 
     const UserHitComponent = ({ hit }: { hit: { displayName: string; photoURL: string; userId: string } }) => (
-        <div className="search_result_wrap"
-            onClick={() => onUserClick(hit.userId)} // 유저 클릭 시 UID 전달
-        >
-            <div className="search_result">
+        <div className="search_result_wrap">
+            <div className="search_result"
+                onClick={() => handleUserPage(hit.userId)}>
                 <div
                     className="result_user_photo"
                     style={{
@@ -394,7 +367,6 @@ const SwiperHits = ({ onUserClick }: { onUserClick: (uid: string) => void }) => 
                     }}
                 ></div>
                 <p className="result_name">{hit.displayName}</p>
-                <p className="result_name">{hit.userId}</p>
             </div>
         </div >
     );
@@ -402,10 +374,13 @@ const SwiperHits = ({ onUserClick }: { onUserClick: (uid: string) => void }) => 
     return (
         <>
             <Swiper
-                spaceBetween={16} // 슬라이드 간격
-                slidesPerView={5} // 화면에 보이는 슬라이드 개수
-                pagination={{ clickable: true }} // 페이지네이션 활성화
-                navigation // 네비게이션 활성화
+                spaceBetween={8} // 슬라이드 간격
+                slidesPerView={3.5} // 화면에 보이는 슬라이드 개수
+                loop={true}
+                pagination={{
+                    clickable: true,
+                }}
+                navigation={true}
             >
                 {items.map((hit: any, index: number) => (
                     <SwiperSlide key={index}>
@@ -417,138 +392,23 @@ const SwiperHits = ({ onUserClick }: { onUserClick: (uid: string) => void }) => 
     );
 };
 
-// 포스트 검색 결과
-const SearchResults = () => {
-    const { items } = useHits(); // 검색 결과 가져오기
-
-    const [userMap, setUserMap] = useState<Record<string, { displayName: string; photoURL: string }> | null>(null);
-
-    // 사용자 데이터 가져오기
-    useEffect(() => {
-        const uniqueUserIds = [...new Set(items.map((hit: any) => hit.userId))];
-
-        const fetchUserData = async () => {
-            try {
-                const userDocs = await Promise.all(
-                    uniqueUserIds.map((id) => getDoc(doc(db, 'users', id)))
-                );
-
-                const fetchedUserMap = userDocs.reduce((acc, userDoc) => {
-                    if (userDoc.exists()) {
-                        acc[userDoc.id] = userDoc.data() as { displayName: string; photoURL: string };;
-                    }
-                    return acc;
-                }, {} as Record<string, { displayName: string; photoURL: string }>);
-
-                setUserMap(fetchedUserMap);
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            }
-        };
-
-        if (uniqueUserIds.length > 0) {
-            fetchUserData();
-        }
-    }, [items]);
-
-    const PostHitComponent = ({ hit }: { hit: { title: string; tag: string; commentCount: number; createAt: string; userId: string } }) => {
-        const userData = userMap ? userMap[hit.userId] : null;
-
-        return (
-            <div className="search_result" >
-                <div className="result_post_title">
-                    <div className="result_img_icon"></div>
-                    <p className="result_title">{hit.title}</p>
-                    <span className="result_comment">[{hit.commentCount}]</span>
-                </div>
-                <p className="result_user">
-                    {userData ? userData.displayName : '알 수 없음'}
-                </p>
-                <p className="result_date">{formatDate(hit.createAt)}</p>
-            </div >
-        )
-    };
-
-    return (
-        <>
-            {items.map((hit: any, index: number) => (
-                <PostHitComponent key={index} hit={hit} />
-            ))}
-            <Pagination />
-            <Configure hitsPerPage={5} />
-        </>
-    )
-};
-
-const queryHook: SearchBoxProps['queryHook'] = (query, search) => {
-    search(query);
-};
-
-function CustomSearchBox() {
-    const { refine } = useSearchBox();
-
-    const handleButtonClick = () => {
-        // 버튼 클릭 시 변경할 쿼리
-        const newQuery = '새로운 검색어';
-        refine(newQuery); // SearchBox의 쿼리를 변경
-    };
-
-    return (
-        <div>
-            <SearchBox />
-            <button onClick={handleButtonClick}>검색어 변경</button>
-        </div>
-    );
-}
 export default function SearchComponent() {
-    const [searchToggle, setSearchToggle] = useRecoilState<boolean>(searchState)
-    const [userFilter, setUserFilter] = useState<string | null>(null);
     // functon
     return (
         <SearchWrap>
             <InstantSearch
                 searchClient={searchClient}
-                indexName="post_index">
+                indexName="user_index">
                 <div className="search_box">
-                    <button className="search_close_btn" onClick={() => setSearchToggle(false)}>
-                        <svg viewBox="0 0 40 40">
-                            <g>
-                                <polyline className="close_polyline" points="40 40 0 40 0 0" />
-                                <line className="close_line" x1="8" y1="32" x2="32" y2="8" />
-                                <line className="close_line" x1="8" y1="8" x2="32" y2="32" />
-                            </g>
-                        </svg>
-                    </button>
-                    <h2>메모 검색</h2>
                     <div className="search_bar">
                         <div className="search_input_wrap">
-                            <SearchBox queryHook={queryHook} searchAsYouType={false} placeholder="작성자 및 제목 검색" />
+                            <SearchBox placeholder="검색" />
                         </div>
                     </div>
                     {/* 유저 검색 결과 */}
-                    <Index indexName="user_index">
-                        <div className="user_result">
-                            <p>작성자</p>
-                            <SwiperHits onUserClick={(uid) => setUserFilter(uid)} />
-                        </div>
-                    </Index>
-
-                    {/* 게시글 결과 */}
-                    <Index indexName="post_index">
-                        <div className="post_result" >
-                            <p>게시글</p>
-                            <TitleHeader>
-                                <div className='post_header'>
-                                    <p className='h_title'>제목</p>
-                                    <p className='h_user'>작성자</p>
-                                    <p className='h_date'>날짜</p>
-                                </div>
-                            </TitleHeader>
-                            <div className="search_result_wrap">
-                                <SearchResults />
-                            </div>
-                        </div>
-                    </Index>
+                    <div className="user_result">
+                        <SwiperHits />
+                    </div>
                 </div>
             </InstantSearch>
         </SearchWrap>

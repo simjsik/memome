@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { DidYouLogin, loginToggleState, newNoticeState, noticeState, searchState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css } from '@emotion/react';
-import SearchComponent from './SearchComponent';
+import { auth } from '../DB/firebaseConfig';
 
 const NavBarWrap = styled.div`
 position: fixed;
@@ -72,7 +72,6 @@ export default function NavBar() {
     const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const [notice, setNotice] = useRecoilState<boolean>(noticeState);
-    const [searchToggle, setSearchToggle] = useRecoilState<boolean>(searchState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [limitToggle, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
 
@@ -125,7 +124,7 @@ export default function NavBar() {
 
     const handleSearch = () => {
         if (yourLogin && !usageLimit) {
-            setSearchToggle(true)
+            router.push(`/home/user/${auth.currentUser?.uid}`)
         } else if (usageLimit) {
             return setLimitToggle(true);
         } else {
@@ -236,9 +235,6 @@ export default function NavBar() {
                     </NavMenu>
                 </div>
             </NavBarWrap>
-            {searchToggle &&
-                <SearchComponent></SearchComponent >
-            }
         </>
     );
 }

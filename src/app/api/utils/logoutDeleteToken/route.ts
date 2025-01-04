@@ -7,6 +7,7 @@ export async function POST(request: Request) {
 
         // httpOnly 쿠키 삭제
         response.cookies.delete("authToken")
+        response.cookies.delete("csrfToken")
 
         return response;
     } catch (error) {

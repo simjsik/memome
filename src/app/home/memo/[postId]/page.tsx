@@ -1,6 +1,7 @@
 import { db } from "@/app/DB/firebaseConfig";
-import {  doc, getDoc, } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, orderBy, query, } from "firebase/firestore";
 import ClientPost from './ClientPost';
+import { Comment } from "@/app/state/PostState";
 
 interface MemoPageProps {
     params: {
@@ -8,6 +9,7 @@ interface MemoPageProps {
     };
 }
 
+export const revalidate = 0;
 // 서버 컴포넌트
 export default async function MemoPage({ params }: MemoPageProps) {
     const userCache = new Map<string, { nickname: string; photo: string | null }>();
@@ -21,6 +23,7 @@ export default async function MemoPage({ params }: MemoPageProps) {
     if (!postSnap.exists()) {
         throw new Error('해당 포스터를 찾을 수 없습니다.');
     }
+    
     const post = postSnap.data();
     const userId = post.userId;
 
@@ -54,6 +57,26 @@ export default async function MemoPage({ params }: MemoPageProps) {
         photoURL: userData.photo,
     }
 
+    // 포스트 댓글 가져오기
+    const postCommentRef = collection(db, 'posts', postId, 'comments');
+    const postCommentQuery = query(postCommentRef, orderBy('createAt', 'asc'));
+    const postCommentSnap = await getDocs(postCommentQuery);
+
+    const comments: Comment[] = postCommentSnap.docs.map((doc) => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            replyId: data.replyId,
+            user: data.user,
+            commentText: data.commentText,
+            createAt: data.createAt,
+            replies: data.replies || [],
+            parentId: data.parentId,
+            displayName: data.displayName,
+            PhotoURL: data.PhotoURL || null,
+        }
+    });
+
     const postAddComment = {
         ...transformedPost,
     }
@@ -61,7 +84,7 @@ export default async function MemoPage({ params }: MemoPageProps) {
     // Function
     return (
         <>
-            <ClientPost post={postAddComment} />
+            <ClientPost post={postAddComment} comment={comments} />
         </>
     )
 }

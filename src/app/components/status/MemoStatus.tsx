@@ -2,9 +2,9 @@
 "use client";
 
 import { auth, db } from "@/app/DB/firebaseConfig";
-import { ADMIN_ID, Comment, DidYouLogin, memoCommentCount, memoCommentState, memoList, memoState, postStyleState, userState } from "@/app/state/PostState";
+import { ADMIN_ID, Comment, DidYouLogin, memoCommentCount, memoCommentState, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, increment, onSnapshot, orderBy, query, serverTimestamp, startAfter, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, increment, orderBy, query, serverTimestamp, startAfter, Timestamp, updateDoc, where } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -58,15 +58,16 @@ display : flex;
 width : 100%;
 }
 
-.memo_btn_wrap button{
-width : 50%;
-background : #fff;
-font-size : 14px;
-line-height : 38px;
-cursor : pointer;
+.memo_btn_wrap div{
+    width: 100%;
+    padding-left: 10px;
+    text-align: left;
+    background: #fff;
+    font-size: 16px;
+    line-height: 38px;
 }
 
-.comment_btn{
+.comment_wrap{
 border: none;
 border-bottom : ${(props) => (props.btnStatus ? '2px solid #191919' : '2px solid #dedede')};
 }
@@ -152,11 +153,9 @@ font-size : 14px;
 }
 `
 export default function MemoStatus({ post }: ClientPostProps) {
-    const router = useRouter();
-    const memo = useRecoilValue<memoList>(memoState)
     const [commentList, setCommentList] = useRecoilState<Comment[]>(memoCommentState)
     const [commentCount, setCommentCount] = useRecoilState<number>(memoCommentCount)
-    const [lastFetchedAt, setLastFetchedAt] = useState(null); // 마지막으로 문서 가져온 시간
+    const [lastFetchedAt, setLastFetchedAt] = useState<Timestamp | { seconds: number; nanoseconds: number } | null>(null); // 마지막으로 문서 가져온 시간
     const [btnStatus, setBtnStatus] = useState<boolean>(true)
     const [commentText, setCommentText] = useState<string>('')
     const [replyText, setReplyText] = useState<string>('')
@@ -196,10 +195,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
 
             return format;
         }
-    }
-
-    const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
-        router.push(`memo/${postId}`)
     }
 
     const addComment = async (parentId: string | null = null, commentId: string) => {
@@ -326,14 +321,27 @@ export default function MemoStatus({ post }: ClientPostProps) {
         }
     }, [commentList])
 
-    const userCache = new Map<string, { nickname: string; photo: string | null }>();
+    useEffect(() => {
+        clearUpdate();
+    }, [])
 
     // 댓글  반영
     const fetchComment = async () => {
         try {
             const commentRef = collection(db, "posts", post, "comments");
-            const Q = query(commentRef, orderBy("createAt", "asc"), startAfter(lastFetchedAt)); // 마지막 시간 이후
+            console.log("Last fetched at:", lastFetchedAt);
 
+            const Q = lastFetchedAt
+                ? query(
+                    commentRef,
+                    orderBy("createAt", "asc"),
+                    startAfter(
+                        lastFetchedAt instanceof Timestamp
+                            ? lastFetchedAt.toDate()
+                            : new Timestamp(lastFetchedAt.seconds, lastFetchedAt.nanoseconds).toDate()
+                    )
+                )
+                : query(commentRef, orderBy("createAt", "asc"));
             const snapshot = await getDocs(Q);
 
             // 댓글 데이터 생성
@@ -341,15 +349,27 @@ export default function MemoStatus({ post }: ClientPostProps) {
                 id: doc.id,
                 ...doc.data(),
             })) as Comment[];
+
             // `lastFetchedAt` 업데이트
             const lastDoc = snapshot.docs[snapshot.docs.length - 1];
-            setLastFetchedAt(lastDoc.data().createAt);
+            console.log("Last document data:", lastDoc.data());
+            console.log("Type of createAt:", typeof lastDoc?.data()?.createAt);
 
-            // 상태 업데이트
-            setCommentList((prev) => [...prev, ...newComments]);
+            if (lastDoc) {
+                const lastDocData = lastDoc.data() as { createAt: Timestamp };
+                setLastFetchedAt(lastDocData.createAt); // `Timestamp`로 저장
 
-            // 업데이트 플래그 초기화
-            clearUpdate();
+                // 상태 업데이트
+                setCommentList((prev) => {
+                    const uniqueComments = new Map(prev.concat(newComments).map((comment) => [comment.id, comment]));
+                    return Array.from(uniqueComments.values());
+                });
+                // 업데이트 플래그 초기화
+                clearUpdate();
+            } else {
+                clearUpdate();
+                console.error("댓글을 가져오는 중 오류 발생: lastDoc undefinded. 최신 댓글이 없습니다.");
+            }
         } catch (error) {
             console.error("댓글을 가져오는 중 오류 발생:", error);
         }
@@ -382,129 +402,107 @@ export default function MemoStatus({ post }: ClientPostProps) {
                 </button>
             }
             <div className="memo_btn_wrap">
-                <button className="comment_btn" onClick={() => setBtnStatus(true)}>댓글 {commentCount}</button>
-                <button className="memo_btn" onClick={() => setBtnStatus(false)}>작성자 메모 {memo.list.length}</button>
+                <div className="comment_wrap">댓글 {commentCount}</div>
             </div>
             <div className="status_wrap">
-                {btnStatus ?
-                    <PostCommentStyle>
-                        {commentCount > 0 ?
-                            // parentId가 없는 댓글(최상위 댓글)만 필터링
-                            <>
-                                {commentList.filter(comment => !comment.parentId).map(comment => (
-                                    <div key={comment.id} className="memo_comment_wrap">
-                                        <div className="user_profile">
-                                            <div className="user_photo"
-                                                css={css`
+                <PostCommentStyle>
+                    {commentCount > 0 ?
+                        // parentId가 없는 댓글(최상위 댓글)만 필터링
+                        <>
+                            {commentList.filter(comment => !comment.parentId).map(comment => (
+                                <div key={comment.id} className="memo_comment_wrap">
+                                    <div className="user_profile">
+                                        <div className="user_photo"
+                                            css={css`
                                                 background-image : url(${comment.PhotoURL})
                                                 `}
-                                            ></div>
-                                            <p className="memo_comment_id">{comment.displayName}</p>
-                                            <button className="comment_delete_btn" onClick={() => deleteComment(comment.id)}></button>
+                                        ></div>
+                                        <p className="memo_comment_id">{comment.displayName}</p>
+                                        <button className="comment_delete_btn" onClick={() => deleteComment(comment.id)}></button>
+                                    </div>
+                                    <p className="memo_comment">{comment.commentText}</p>
+                                    <p className="memo_comment_date">{formatDate(comment.createAt)}</p>
+                                    <button className="comment_reply_btn" onClick={() => toggleReply(comment.id)}>답글</button>
+                                    {activeReply === comment.id && (
+                                        <div className="reply_input_wrap">
+                                            <textarea
+                                                className="comment_input"
+                                                placeholder="답글 입력"
+                                                value={replyText}
+                                                onChange={(e) => setReplyText(e.target.value)}
+                                            />
+                                            <button
+                                                className="comment_upload_btn"
+                                                onClick={() => addComment(comment.id, comment.id)}
+                                            >
+                                                등록
+                                            </button>
                                         </div>
-                                        <p className="memo_comment">{comment.commentText}</p>
-                                        <p className="memo_comment_date">{formatDate(comment.createAt)}</p>
-                                        <button className="comment_reply_btn" onClick={() => toggleReply(comment.id)}>답글</button>
-                                        {activeReply === comment.id && (
-                                            <div className="reply_input_wrap">
-                                                <textarea
-                                                    className="comment_input"
-                                                    placeholder="답글 입력"
-                                                    value={replyText}
-                                                    onChange={(e) => setReplyText(e.target.value)}
-                                                />
-                                                <button
-                                                    className="comment_upload_btn"
-                                                    onClick={() => addComment(comment.id, comment.id)}
-                                                >
-                                                    등록
-                                                </button>
-                                            </div>
-                                        )}
+                                    )}
 
-                                        {commentList
-                                            .filter(reply => reply.parentId === comment.id) // 현재 댓글의 답글 필터링
-                                            .map(reply => (
-                                                <div className="reply_wrap" key={reply.id}>
-                                                    <div className="user_profile">
-                                                        <div className="user_photo"
-                                                            css={css`
+                                    {commentList
+                                        .filter(reply => reply.parentId === comment.id) // 현재 댓글의 답글 필터링
+                                        .map(reply => (
+                                            <div className="reply_wrap" key={reply.id}>
+                                                <div className="user_profile">
+                                                    <div className="user_photo"
+                                                        css={css`
                                                             background-image : url(${reply.PhotoURL})
                                                             `}
-                                                        ></div>
-                                                        <p className="memo_comment_id">{reply.displayName}</p>
-                                                        <button className="comment_delete_btn" onClick={() => deleteComment(reply.id)}></button>
-                                                    </div>
-                                                    <span className="memo_reply_id">@{reply.displayName}</span>
-                                                    <p className="memo_reply">{reply.commentText}</p>
-                                                    <p className="memo_comment_date">{formatDate(reply.createAt)}</p>
-                                                    <button className="comment_reply_btn" onClick={() => toggleReply(reply.id)}>답글</button>
-                                                    {activeReply === reply.id && (
-                                                        <div className="reply_input_wrap">
-                                                            <input
-                                                                className="comment_input"
-                                                                type="text"
-                                                                placeholder="답글 입력"
-                                                                value={replyText}
-                                                                onChange={(e) => setReplyText(e.target.value)}
-                                                            />
-                                                            <button
-                                                                className="comment_upload_btn"
-                                                                onClick={() => addComment(reply.parentId, reply.id)}
-                                                            >
-                                                                등록
-                                                            </button>
-                                                        </div>
-                                                    )}
-
+                                                    ></div>
+                                                    <p className="memo_comment_id">{reply.displayName}</p>
+                                                    <button className="comment_delete_btn" onClick={() => deleteComment(reply.id)}></button>
                                                 </div>
-                                            ))}
-                                    </div>
-                                ))}
-                            </>
-                            :
-                            <div>
-                                <p>안녕하세요 댓글이 엄서요 첫 댓글을 달아보세용</p>
-                            </div>
-                        }
-                        < div className="post_bottom">
-                            <div className="post_menu_wrap">
-                                <BookmarkBtn postId={post} />
-                            </div>
-                            <PostCommentInputStyle>
-                                <div className="login_user_profile">
-                                    <div className="login_user_photo"
-                                        css={css`
+                                                <span className="memo_reply_id">@{reply.displayName}</span>
+                                                <p className="memo_reply">{reply.commentText}</p>
+                                                <p className="memo_comment_date">{formatDate(reply.createAt)}</p>
+                                                <button className="comment_reply_btn" onClick={() => toggleReply(reply.id)}>답글</button>
+                                                {activeReply === reply.id && (
+                                                    <div className="reply_input_wrap">
+                                                        <input
+                                                            className="comment_input"
+                                                            type="text"
+                                                            placeholder="답글 입력"
+                                                            value={replyText}
+                                                            onChange={(e) => setReplyText(e.target.value)}
+                                                        />
+                                                        <button
+                                                            className="comment_upload_btn"
+                                                            onClick={() => addComment(reply.parentId, reply.id)}
+                                                        >
+                                                            등록
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                            </div>
+                                        ))}
+                                </div>
+                            ))}
+                        </>
+                        :
+                        <div>
+                            <p>안녕하세요 댓글이 엄서요 첫 댓글을 달아보세용</p>
+                        </div>
+                    }
+                    < div className="post_bottom">
+                        <div className="post_menu_wrap">
+                            <BookmarkBtn postId={post} />
+                        </div>
+                        <PostCommentInputStyle>
+                            <div className="login_user_profile">
+                                <div className="login_user_photo"
+                                    css={css`
                                         background-image : url(${user?.photo})
                                         `}
-                                    ></div>
-                                    <p className="login_user_id">{user?.name}</p>
-                                </div>
-                                <textarea className="comment_input" placeholder="댓글 입력" value={commentText} onChange={(e) => setCommentText(e.target.value)} />
-                                <button className="comment_upload_btn" onClick={() => addComment(null, 'comment')}>등록</button>
-                            </PostCommentInputStyle>
-                        </div>
-
-
-                    </PostCommentStyle>
-                    :
-                    memo.list.map((memos) => (
-                        <div key={memos.id} className="status_post_list">
-                            <div className="memo_title_wrap">
-                                {(memos.images && memos.images.length > 0) ?
-                                    <div className="memo_img_tag"></div>
-                                    :
-                                    <div className="memo_img_void"></div>
-                                }
-                                <span className="memo_tag">[{memos.tag}]</span>
-                                <p className="memo_title" onClick={() => handlePostClick(memos.id)}>{memos.title}</p>
+                                ></div>
+                                <p className="login_user_id">{user?.name}</p>
                             </div>
-                            <div className="memo_date">
-                                <span>{formatDate(memos.createAt)}</span>
-                            </div>
-                        </div>
-                    ))
-                }
+                            <textarea className="comment_input" placeholder="댓글 입력" value={commentText} onChange={(e) => setCommentText(e.target.value)} />
+                            <button className="comment_upload_btn" onClick={() => addComment(null, 'comment')}>등록</button>
+                        </PostCommentInputStyle>
+                    </div>
+                </PostCommentStyle>
             </div>
         </MemoBox >
     )

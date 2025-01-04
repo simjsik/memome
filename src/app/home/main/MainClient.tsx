@@ -477,11 +477,12 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
     // 페이지네이션 로직
     const handleClickPagenation = async (page: number) => {
-
         const pageSize = 10 * page;
 
-        if ((posts.length >= pageSize || (!lastParams && !noticeLastParams) || posts.length >= postLength[1]) || usageLimit)
-            return console.log('함수 요청 안함.');
+        if ((posts.length >= pageSize || (!lastParams && !noticeLastParams) || posts.length >= postLength[1]) || usageLimit) {
+            console.log('함수 요청 안함.', posts.length >= pageSize, !lastParams && !noticeLastParams, posts.length >= postLength[1], usageLimit);
+        }
+
         // `현재 포스트 길이가 페이지 최대 수`와 같거나 크면 또는
         // `마지막 포스트 데이터가 없으면` 또는
         // `전체 포스트 수`보다 같거나 커지면 요청 X
@@ -604,8 +605,8 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
             setLastFetchedAt(lastPost)
         }
     }, [posts])
-    // 새 문서 가져오기
 
+    // 새 문서 가져오기
     const fetchNewPosts = async () => {
         try {
             const postsRef = collection(db, "posts");
@@ -619,11 +620,39 @@ export default function MainHome({ posts: initialPosts, initialNextPage }: MainH
 
             const querySnapshot = await getDocs(postsQuery);
 
-            const newPosts = querySnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            })) as PostData[];
+            const userCache = new Map<string, { nickname: string; photo: string | null }>();
 
+            const newPosts = await Promise.all(
+                querySnapshot.docs.map(async (docs) => {
+                    const postData = { id: docs.id, ...docs.data() } as PostData;
+
+                    // 유저 정보 캐싱 및 가져오기
+                    if (!userCache.has(postData.userId)) {
+                        const userDocRef = doc(db, "users", postData.userId);
+                        const userDoc = await getDoc(userDocRef);
+
+                        if (userDoc.exists()) {
+                            const userData = userDoc.data() as { displayName: string; photoURL: string | null };
+                            userCache.set(postData.userId, {
+                                nickname: userData.displayName,
+                                photo: userData.photoURL || null,
+                            });
+                        } else {
+                            userCache.set(postData.userId, {
+                                nickname: "Unknown",
+                                photo: null,
+                            });
+                        }
+                    }
+
+                    // 매핑된 유저 정보 추가
+                    const userData = userCache.get(postData.userId) || { nickname: "Unknown", photo: null };
+                    postData.displayName = userData.nickname;
+                    postData.PhotoURL = userData.photo;
+
+                    return postData;
+                })
+            );
 
             if (newPosts.length > 0) {
                 const newPostList = newPosts

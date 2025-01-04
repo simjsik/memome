@@ -1,26 +1,23 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { fetchComments, fetchPostList } from "@/app/api/loadToFirebasePostData/fetchPostData";
-import StatusBox from "@/app/components/StatusBox";
-import { ADMIN_ID, Comment, memoCommentCount, memoCommentState, memoList, memoState } from "@/app/state/PostState";
+import { fetchComments } from "@/app/api/loadToFirebasePostData/fetchPostData";
+import { checkUsageLimit } from "@/app/api/utils/checkUsageLimit";
+import { ADMIN_ID, Comment, memoCommentCount, memoCommentState, memoList, memoState, UsageLimitState, userData, userState } from "@/app/state/PostState";
 import { HomeBtn } from "@/app/styled/RouterComponents";
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 import { useQuery } from "@tanstack/react-query";
 import { DocumentData, } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
 interface ClientPostProps {
     post: DocumentData;
+    comment: Comment[];
 }
 
-interface CommentsResponse {
-    commentCounts: number; // 댓글 수
-    comments: Comment[]; // 댓글 배열
-}
 
 const PostDetailWrap = styled.div`
 position : absolute;
@@ -95,41 +92,41 @@ height : 24px;
 background : red;
 }
 `
-export default function Memo({ post }: ClientPostProps) {
+export default function Memo({ post, comment }: ClientPostProps) {
     const router = useRouter();
-    const ADMIN = useRecoilValue(ADMIN_ID)
-    const [memo, setMemo] = useRecoilState<memoList>(memoState)
     const setCommentList = useSetRecoilState<Comment[]>(memoCommentState)
     const setCommentCount = useSetRecoilState<number>(memoCommentCount)
+    const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
+    const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+
     // state
 
-    // 포스트 데이터
-
-    const { data: commentsData = {} as CommentsResponse } = useQuery({
-        queryKey: ['comments', post.postId],
-        queryFn: () => fetchComments(post.postId),
-        staleTime: 5 * 60 * 1000,
-    }); // 댓글 데이터
-
-    const { data: postlist = [] } = useQuery({
-        queryKey: ['postlist', post.userId],
-        queryFn: () => fetchPostList(post.postId, post.userId),
-        staleTime: 5 * 60 * 1000,
-    }); // 포스트 데이터
+    // 사용량 확인
+    useEffect(() => {
+        if (currentUser) {
+            const checkLimit = async () => {
+                try {
+                    await checkUsageLimit(currentUser.uid);
+                } catch (err: any) {
+                    if (err.message.includes('사용량 제한')) {
+                        setUsageLimit(true);
+                    } else {
+                        console.log('사용량을 불러오는 중 에러가 발생했습니다.');
+                    }
+                }
+            }
+            checkLimit();
+        } else {
+            console.log('제한 안함')
+        }
+    }, [])
 
     useEffect(() => {
-        if (commentsData) {
-            setCommentList(commentsData.comments);
-            setCommentCount(commentsData.commentCounts);
+        if (comment) {
+            setCommentList(comment);
+            setCommentCount(comment.length);
         }
-    }, [commentsData]);
-
-    useEffect(() => {
-        if (postlist.length > 0 && (memo.list !== postlist || memo.user !== post.userId)) {
-            setMemo({ list: postlist, user: post.userId });
-        }
-        // console.log(postlist)
-    }, [postlist]);
+    }, [comment]);
 
     const handleHomeBtn = () => {
         router.push('/home/main')
