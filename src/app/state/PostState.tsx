@@ -1,3 +1,4 @@
+import { Timestamp } from "firebase/firestore";
 import { atom } from "recoil"
 
 export interface PostData {
@@ -89,6 +90,11 @@ export const PostState = atom<PostData[]>({
     key: 'PostState',
     default: []
 })
+// firebase에 저장된 포스트 데이터
+export const noticeState = atom<PostData[]>({
+    key: 'noticeState',
+    default: []
+})
 
 // firebase에 저장된 포스트 데이터
 export const bookMarkState = atom<BookmarkPostData[]>({
@@ -99,12 +105,6 @@ export const bookMarkState = atom<BookmarkPostData[]>({
 // 로그인 유무 확인
 export const DidYouLogin = atom<boolean>({
     key: 'DidYouLogin',
-    default: false
-})
-
-// 공지사항 스테이트
-export const noticeState = atom<boolean>({
-    key: 'noticeState',
     default: false
 })
 
@@ -183,3 +183,10 @@ export const searchState = atom<boolean>({
     key: 'searchState',
     default: false,
 })
+
+// 스크롤 위치
+export const currentScrollState = atom<number>({
+    key: 'currentScrollState',
+    default: 0,
+})
+

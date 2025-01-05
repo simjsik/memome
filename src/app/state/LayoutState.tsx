@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 
-export const selectedMenuState = atom<string>({
+export const selectedMenuState = atom<number>({
     key: 'selectedMenuState',
-    default: 'allPost'
+    default: 2
 })

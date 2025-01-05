@@ -6,11 +6,11 @@ export default async function Home() {
 
   // 포스트 불러오기
 
-  const { nextPage: initialNextPage } = await fetchPosts(null, null, 4, 0);
+  const { nextPage: initialNextPage } = await fetchPosts(null, null, 4);
 
   return (
     <>
-      <MainHome posts={[]} initialNextPage={initialNextPage} />;
+      <MainHome post={[]} initialNextPage={initialNextPage} />;
     </>
   )
 }

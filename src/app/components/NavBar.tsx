@@ -68,13 +68,11 @@ background : #f9f9f9;
 export default function NavBar() {
     const yourLogin = useRecoilValue(DidYouLogin)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
-    const [selectedMenu, setSelectedMenu] = useRecoilState<string>(selectedMenuState);
+    const [selectedMenu, setSelectedMenu] = useRecoilState<number>(selectedMenuState);
     const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
-    const [notice, setNotice] = useRecoilState<boolean>(noticeState);
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [limitToggle, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
-
 
     // State
     const router = useRouter();
@@ -84,28 +82,29 @@ export default function NavBar() {
         if (path) {
             const pathSegment = path?.split('/').filter(Boolean);
             if (pathSegment[1] === 'main') {
-                setSelectedMenu('allPost');
+                setSelectedMenu(2);
             } else if (pathSegment[1] === 'bookmark') {
-                setSelectedMenu('bookmark');
+                setSelectedMenu(3);
+            } else if (pathSegment[1] === 'profile') {
+                setSelectedMenu(4);
+            } else if (pathSegment[1] === 'notice') {
+                setSelectedMenu(1);
             }
         }
     }, [path])
 
     // 내비 클릭 시 선택 메뉴 설정
-    const handleNavClick = (NavTitle: string) => {
-        if (NavTitle === 'allPost') {
+    const handleNavClick = (NavTitle: number) => {
+        if (NavTitle === 2) {
             router.push('/home/main');
-            setNotice(false);
-        } else if (NavTitle === 'bookmark') {
+        } else if (NavTitle === 3) {
             if (yourLogin) {
                 router.push(`/home/bookmark/${currentUser}`);
-                setNotice(false);
             } else {
                 return alert('로그인이 필요한 기능입니다.');
             }
-        } else if (NavTitle === 'notice') {
-            router.push('/home/main');
-            setNotice(true);
+        } else if (NavTitle === 1) {
+            router.push('/home/notice');
             setNewNotice(false);
         }
         setSelectedMenu(NavTitle);
@@ -139,10 +138,10 @@ export default function NavBar() {
             <NavBarWrap>
                 <div>
                     {/* 공지사항 */}
-                    <NavMenu isActive={'notice' === selectedMenu} onClick={() => handleNavClick('notice')}>
+                    <NavMenu isActive={1 === selectedMenu} onClick={() => handleNavClick(1)}>
                         <div className='post_alarm' css={css`${newNotice ? 'background : red' : 'background : none'}`}></div>
                         <div className='menu_icon'>
-                            {'notice' === selectedMenu ?
+                            {1 === selectedMenu ?
 
                                 <svg width="40" height="40" viewBox="0 0 40 40">
                                     <g>
@@ -167,10 +166,10 @@ export default function NavBar() {
                     </NavMenu>
 
                     {/* 메인 / 전체 포스트 */}
-                    <NavMenu isActive={'allPost' === selectedMenu} onClick={() => handleNavClick('allPost')}>
+                    <NavMenu isActive={2 === selectedMenu} onClick={() => handleNavClick(2)}>
                         <div className='post_alarm'></div>
                         <div className='menu_icon'>
-                            {'allPost' === selectedMenu ?
+                            {2 === selectedMenu ?
                                 <svg width="40" height="40" viewBox="0 0 40 40">
                                     <g>
                                         <path d="M17.524,9.65,7.642,18.462A2.4,2.4,0,0,0,7,20.144v8.6a2.217,2.217,0,0,0,2.118,2.3h4.765A2.217,2.217,0,0,0,16,28.743V23.2a2.209,2.209,0,0,1,2.118-2.291h1.722A2.209,2.209,0,0,1,21.957,23.2v5.544a2.217,2.217,0,0,0,2.118,2.3h4.807A2.217,2.217,0,0,0,31,28.743v-8.6a2.4,2.4,0,0,0-.649-1.66L20.468,9.672a2.059,2.059,0,0,0-2.943-.022Z" transform="translate(1.5 0.458)" fill="#050505" />
@@ -188,9 +187,9 @@ export default function NavBar() {
                     </NavMenu>
 
                     {/* 북마크 */}
-                    <NavMenu isActive={'bookmark' === selectedMenu} onClick={() => handleNavClick('bookmark')}>
+                    <NavMenu isActive={3 === selectedMenu} onClick={() => handleNavClick(3)}>
                         <div className='menu_icon'>
-                            {'bookmark' === selectedMenu ?
+                            {3 === selectedMenu ?
                                 <svg width="40" height="40" viewBox="0 0 39 40">
                                     <g>
                                         <path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z" fill="#050505" />
@@ -207,8 +206,8 @@ export default function NavBar() {
                         </div>
                     </NavMenu>
 
-                    {/* 검색 */}
-                    <NavMenu isActive={false} onClick={handleSearch}>
+                    {/* 프로필 */}
+                    <NavMenu isActive={4 === selectedMenu} onClick={() => handleNavClick(4)}>
                         <div className='menu_icon'>
                             <svg width="40" height="40" viewBox="0 0 40 40">
                                 <g>

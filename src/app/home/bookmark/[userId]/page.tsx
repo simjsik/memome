@@ -48,7 +48,6 @@ export default async function Bookmark({ params }: BookMarkProps) {
         return postContentLoad.filter((post): post is BookmarkPostData => post !== null);
     };
 
-
     const bookmarks = await fetchBookmark();
     return (
         <>

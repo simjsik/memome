@@ -4,19 +4,16 @@
 import styled from "@emotion/styled";
 
 export const PostWrap = styled.div<{ postStyle: boolean }>`
-// 포스트 리스트 스타일 별 우측이 목록별로
+// 포스트 리스트 스타일 별 우측이 간소화
 position : absolute;
-left : ${(props) => (props.postStyle ? '500px' : '420px')};
-top : ${(props) => (props.postStyle ? '40px' : '0px')};
+left : 500px;
+top : 40px;
 display : flex;
 flex-wrap : wrap;
-width: ${(props) => (props.postStyle ? '600px' : '860px')};
-padding :${(props) => (props.postStyle ? '0px' : '10px 20px')};
+width:  600px;
+padding :0px;
 border-radius : 4px;
 border : none;
-border-left : ${(props) => (props.postStyle ? 'none' : '1px solid #ededed')};
-border-right : ${(props) => (props.postStyle ? 'none' : '1px solid #ededed')};
-background :${(props) => (props.postStyle ? 'none' : '#fff')};
 
     // 포스트 박스
     .post_box{
@@ -317,6 +314,87 @@ background :${(props) => (props.postStyle ? 'none' : '#fff')};
     :
     'url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1734335094/%EC%8A%A4%ED%81%AC%EB%A1%A4_xermsf.svg)')};
 }
+`
+export const NoticeWrap = styled.div`
+position : absolute;
+left : 500px;
+top : 40px;
+display : flex;
+flex-wrap : wrap;
+width:  600px;
+padding :0px;
+border-radius : 4px;
+border : none;
+
+    .post_box{
+        width: 100%;
+        border-bottom: 1px solid #ededed;
+        padding: 20px;
+    }
+
+    .post_profile{
+        display: flex;
+    }
+
+    .user_profile{
+        width: 36px;
+        height: 36px;
+        margin-right: 8px;
+        border-radius: 50%;
+        border: 2px solid #ededed;
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+
+    .user_id{
+        line-height: 36px;
+        margin-right: 10px;
+    }
+
+    .post_date{
+        line-height: 36px;
+    }
+
+    .post_title_wrap{
+        margin-top: 10px;
+    }
+
+    .post_tag{
+        width: fit-content;
+        display: block;
+        padding: 4px 6px;
+        border: 1px solid #ffc6c9;
+        background-color: #ffe3e4;
+        color: #ff4e59;
+        font-size: 14px;
+        font-family: '__PretendardBold_73a78b';
+        border-radius: 4px;
+    }
+
+    .post_title{
+        font-size: 16px;
+        margin-top: 8px;
+        font-family: '__PretendardMedium_979b24';
+        color: red;
+    }
+
+    .post_bottom_wrap{
+        margin-top: 16px;
+    }
+
+    .post_comment{
+        display: flex;
+        line-height: 32px;
+    }
+
+    .post_comment_icon{
+        width: 32px;
+        height: 32px;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background: red;
+        margin-right: 8px;
+    }
 `
 export const TitleHeader = styled.div`
 width: 100%;

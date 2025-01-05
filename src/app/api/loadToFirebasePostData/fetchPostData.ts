@@ -108,11 +108,10 @@ export const fetchPostList = async (userId: string) => {
 
 export const fetchPosts = async (
     userId: string | null = null,
-    pageParam: [boolean, Timestamp] | null = null,
-    pageSize: number = 4, // 페이지, 무한 스크롤 시 가져올 데이터 수.
-    existingPostCount: number = 0 // 무한 스크롤 때 이미 로드된 데이터 수.
+    pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
+    pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
 ) => {
-    // console.log(userId, '받은 유저')
+    console.log(userId, '받은 유저')
     try {
         const response = await fetch('http://localhost:3000/api/firebaseLimit', {
             method: 'POST',
@@ -126,21 +125,15 @@ export const fetchPosts = async (
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
 
-
-        // 기존 로직 계속 수행
-        const postsToFetch = pageSize - existingPostCount;
-
         // 닉네임 매핑을 위한 캐시 초기화
         const userCache = new Map<string, { nickname: string; photo: string | null }>();
-
-        if (postsToFetch <= 0) return { commentSnapshot: [], nextPage: null }; // 추가로 데이터 요청 필요 X
         const queryBase = pageParam?.at(0) ?
             query(
                 collection(db, 'posts'),
                 where('notice', '==', true),
                 orderBy('notice', 'desc'),
                 orderBy('createAt', 'desc'),
-                limit(postsToFetch) // 필요한 수 만큼 데이터 가져오기
+                limit(pageSize) // 필요한 수 만큼 데이터 가져오기
             )
             :
             query(
@@ -148,12 +141,13 @@ export const fetchPosts = async (
                 where('notice', '==', false),
                 orderBy('notice', 'desc'),
                 orderBy('createAt', 'desc'),
-                limit(postsToFetch) // 필요한 수 만큼 데이터 가져오기
+                limit(pageSize) // 필요한 수 만큼 데이터 가져오기
             )
 
-        // console.log(pageParam?.at(0), '= 공지사항 여부', pageSize, '= 페이지 사이즈', existingPostCount, '= 현재 데이터 사이즈', postsToFetch, '= 보내줄 데이터 수', '받은 인자')
 
-        const postQuery = pageParam
+        console.log(pageParam?.at(0), '= 공지사항 여부', pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
+
+        const postQuery = (pageParam && pageParam.at(1))
             ?
             query(
                 queryBase,
@@ -204,12 +198,12 @@ export const fetchPosts = async (
         );
 
         const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
-        // console.log(postWithComment, lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
+        console.log(postWithComment, lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
 
         return {
             data: postWithComment,
             nextPage: lastVisible
-                ? [lastVisible.data().notice, lastVisible.data().createAt] // 정렬 필드 값 배열로 반환
+                ? [lastVisible.data().notice, lastVisible.data().createAt as Timestamp] // 정렬 필드 값 배열로 반환
                 : null,
         };
     } catch (error: any) {
