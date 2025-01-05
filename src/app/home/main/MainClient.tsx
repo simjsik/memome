@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { ADMIN_ID, currentScrollState, newNoticeState, noticeList, noticeState, noticeType, PostData, PostState, storageLoadState, UsageLimitState, userData, userState } from '../../state/PostState';
+import { ADMIN_ID, newNoticeState, noticeList, noticeState, noticeType, PostData, PostState, storageLoadState, UsageLimitState, userData, userState } from '../../state/PostState';
 import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -70,7 +70,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
     const ADMIN = useRecoilValue(ADMIN_ID);
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
-    const [currentScrollY, setCurrentScrollY] = useRecoilState<number>(currentScrollState)
+    const [currentScrollY, setCurrentScrollY] = useState<number>(0)
     // state
     const router = useRouter();
     const pathName = usePathname();
@@ -78,6 +78,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
     // 웹소켓 연결
     const socketRef = useRef<Socket | null>(null);
+
     useEffect(() => {
         // socket 객체를 초기화
         socketRef.current = socket; // socket은 외부에서 가져온 웹소켓 인스턴스
@@ -118,24 +119,6 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
             sockets.off("disconnect");
         };
     }, []);
-
-    useEffect(() => {
-        const handleRouteChange = () => {
-            setCurrentScrollY(window.scrollY); // 현재 스크롤 위치 저장
-            console.log('현재 스크롤 저장')
-        };
-
-        if (pathName) {
-            router.prefetch(pathName); // 미리 라우팅 준비
-            handleRouteChange(); // 현재 상태 저장
-        }
-    }, [pathName]);
-
-    useEffect(() => {
-        if (currentScrollY > 0) {
-            window.scrollTo(0, currentScrollY); // 저장된 스크롤 위치로 이동
-        }
-    }, [currentScrollY]);
 
     useEffect(() => {
         if (usageLimit) {
@@ -207,11 +190,16 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
     // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
     useEffect(() => {
         const uniquePosts = Array.from(
-            new Map(data.pages.flatMap((page) => page.data as PostData[]).map(post => [post.id, post])).values()
+            new Map(
+                [
+                    ...posts, // fetchNewPosts로 가져온 최신 데이터
+                    ...data.pages.flatMap((page) => page.data as PostData[]) // 무한 스크롤 데이터
+                ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
+            ).values()
         );
 
-        setPosts([...newPosts, ...uniquePosts]);
-    }, [data.pages])
+        setPosts(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
+    }, [newPosts, data.pages]);
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
@@ -302,10 +290,10 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
     }
 
     useEffect(() => {
-        if (posts[0]?.createAt) {
+        if (posts) {
             let lastPost = null
 
-            lastPost = posts[0].createAt
+            lastPost = posts[0]?.createAt
             setLastFetchedAt(lastPost)
         }
     }, [posts])
@@ -321,12 +309,12 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                 orderBy('createAt', 'asc'),
                 startAfter(lastFetchedAt) // 마지막 시간 이후
             );
-
+            console.log(lastFetchedAt, '마지막 포스트 시간')
             const querySnapshot = await getDocs(postsQuery);
 
             const userCache = new Map<string, { nickname: string; photo: string | null }>();
 
-            const newPosts = await Promise.all(
+            const newPostlist = await Promise.all(
                 querySnapshot.docs.map(async (docs) => {
                     const postData = { id: docs.id, ...docs.data() } as PostData;
 
@@ -358,14 +346,13 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                 })
             );
 
-            if (newPosts.length > 0) {
-                const updatedPosts = [...newPosts, ...posts].sort((a, b) => {
+            if (newPostlist.length > 0) {
+                const updatedPosts = [...newPostlist].sort((a, b) => {
                     const dateA = a.createAt?.toDate ? a.createAt.toDate() : a.createAt;
                     const dateB = b.createAt?.toDate ? b.createAt.toDate() : b.createAt;
                     return dateB - dateA; // 최신순으로 정렬
                 });
                 setPosts([...updatedPosts, ...posts]);
-                console.log('포스트 추가', updatedPosts)
             }
 
             // 업데이트 플래그 초기화
@@ -381,6 +368,39 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
     };
 
     const { hasUpdate, clearUpdate } = usePostUpdateChecker();
+
+    useEffect(() => {
+        const saveScrollPosition = () => {
+            const scrollY = window.scrollY
+            if (pathName) {
+                sessionStorage.setItem(pathName, scrollY.toString());
+            }
+        };
+
+        window.addEventListener("popstate", saveScrollPosition);
+        return () => window.removeEventListener("popstate", saveScrollPosition);
+    }, [pathName]);
+
+    useEffect(() => {
+        const resetScrollPosition = () => {
+            if (pathName) {
+                sessionStorage.setItem(pathName, '0');
+            }
+        };
+
+        window.addEventListener("beforeunload", resetScrollPosition);
+        return () => window.removeEventListener("beforeunload", resetScrollPosition);
+    }, []);
+
+    // 페이지 재진입 시 스크롤 위치 복원
+    useEffect(() => {
+        if (pathName) {
+            const savedScrollPosition = sessionStorage.getItem(pathName);
+            if (savedScrollPosition) {
+                window.scrollTo(0, parseInt(savedScrollPosition, 10));
+            }
+        }
+    }, []);
 
     return (
         <>

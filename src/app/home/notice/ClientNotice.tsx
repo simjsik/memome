@@ -63,10 +63,15 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
     // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
     useEffect(() => {
         const uniqueNotices = Array.from(
-            new Map(data.pages.flatMap((page) => page.data as PostData[]).map(post => [post.id, post])).values()
+            new Map(
+                [
+                    ...notices, // fetchNewPosts로 가져온 최신 데이터
+                    ...data.pages.flatMap((page) => page.data as PostData[]) // 무한 스크롤 데이터
+                ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
+            ).values()
         );
 
-        setNotices([...newNotices, ...uniqueNotices]);
+        setNotices(uniqueNotices); // 중복 제거된 포스트 배열을 posts에 저장
     }, [data.pages])
 
     // 스크롤 끝나면 포스트 요청
