@@ -4,12 +4,8 @@
 import styled from "@emotion/styled";
 import { InstantSearch, SearchBox, useHits, useSearchBox } from "react-instantsearch";
 import { searchClient } from "../api/algolia";
-import { TitleHeader } from "../styled/PostComponents";
 import { useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
-import { searchState } from "../state/PostState";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Scrollbar } from 'swiper/modules';
 import { useRouter } from "next/navigation";
 // 검색 창 css
 const SearchWrap = styled.div`
@@ -192,7 +188,9 @@ position: relative;
     // 검색결과
     .search_result_wrap{
     flex: 1 0 100%;
+    height : 100%;
     margin-top : 10px;
+    cursor: pointer;
 
         // 검색된 포스터
         .search_result{
@@ -267,18 +265,29 @@ position: relative;
             font-size: 14px;
         }
 
-        .swiper{
+        .swiper {
             height: 110px;
-            cursor: pointer;
+            overflow: hidden;
 
-            .swiper-pagination{
+            .swiper-pagination {
                 bottom: 0px;
             }
+
+            .swiper-wrapper{
+                display: flex;
+                height: 100%;
+            }
         }
-        
-        .search_result{
+
+        .swiper-slide{
+            width: auto;
+            flex-shrink: 0;
+        }
+
+        .search_result {
             flex-wrap: wrap;
         }
+
         .result_user_photo{
             width: 42px;
             height: 42px;
@@ -315,11 +324,13 @@ position: relative;
     // ---------------------------------------------------
 `
 
+
 // 유저 검색 결과
 const SwiperHits = () => {
+    const router = useRouter();
+
     const { query, refine } = useSearchBox();
     const { items } = useHits();
-    const router = useRouter();
     // 검색 결과 대기
     const [debouncedQuery, setDebouncedQuery] = useState(query);
     const [searchLoading, setSearchLoading] = useState(false); // 로딩 상태 추가
@@ -374,9 +385,9 @@ const SwiperHits = () => {
     return (
         <>
             <Swiper
-                spaceBetween={8} // 슬라이드 간격
+                spaceBetween={16} // 슬라이드 간격
                 slidesPerView={3.5} // 화면에 보이는 슬라이드 개수
-                loop={true}
+                freeMode={true}
                 pagination={{
                     clickable: true,
                 }}
@@ -392,7 +403,26 @@ const SwiperHits = () => {
     );
 };
 
+
+
 export default function SearchComponent() {
+    const router = useRouter();
+    
+    const handleSearch = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        // 엔터키를 감지
+        if (event.key === 'Enter') {
+            const inputElement = event.target as HTMLInputElement;
+
+            // input 요소에서 검색어를 가져옴
+            const query = inputElement.value.trim();
+
+            if (query) {
+                // 검색어가 비어있지 않다면 'home/search'로 이동
+                router.push(`/home/search?query=${encodeURIComponent(query)}`);
+            }
+        }
+    };
+    
     // functon
     return (
         <SearchWrap>
@@ -402,7 +432,9 @@ export default function SearchComponent() {
                 <div className="search_box">
                     <div className="search_bar">
                         <div className="search_input_wrap">
-                            <SearchBox placeholder="검색" />
+                            <SearchBox placeholder="검색"
+                                onKeyDown={(event) => handleSearch(event)}
+                            />
                         </div>
                     </div>
                     {/* 유저 검색 결과 */}
