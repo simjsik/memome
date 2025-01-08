@@ -8,7 +8,7 @@ import { NoticeWrap, PostWrap } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 interface MainHomeProps {
@@ -17,6 +17,7 @@ interface MainHomeProps {
 }
 
 export default function ClientNotice({ post: initialPosts, initialNextPage }: MainHomeProps) {
+
     // 포스트 스테이트
     const [notices, setNotices] = useRecoilState<PostData[]>(noticeState)
     const [newNotices, setNewNotices] = useState<PostData[]>([])
@@ -25,6 +26,7 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
     const currentUser = useRecoilValue(userState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
 
+    const pathName = usePathname();
     const observerLoadRef = useRef(null);
     // 무한 스크롤 로직
     const {
@@ -95,6 +97,38 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
             if (observerLoadRef.current) obsever.unobserve(observerLoadRef.current);
         };
     }, [hasNextPage, fetchNextPage])
+
+    useEffect(() => {
+        console.log('페이지 이동')
+        // 페이지 진입 시 스크롤 위치 복원
+        const savedScroll = sessionStorage.getItem(`scroll-${pathName}`);
+
+        if (savedScroll) {
+            window.scrollTo(0, parseInt(savedScroll, 10));
+        }
+
+        // 페이지 이탈 시 스크롤 위치 저장
+        const saveScrollPosition = () => {
+            sessionStorage.setItem(`scroll-${pathName}`, window.scrollY.toString());
+            history.go(-1);
+        };
+
+        // 새로고침 및 창닫기 시 스크롤 위치 제거
+        const resetScrollPosition = () => {
+            sessionStorage.setItem(`scroll-${pathName}`, '0');
+        };
+
+
+        // 뒤로가기로 페이지 이탈 시 스크롤 위치 저장
+        window.addEventListener('popstate', saveScrollPosition);
+        window.addEventListener('beforeunload', resetScrollPosition);
+
+        // 클린업
+        return () => {
+            window.removeEventListener('beforeunload', resetScrollPosition);
+            window.removeEventListener('popstate', saveScrollPosition);
+        };
+    }, [pathName]);
     return (
         <>
             <NoticeWrap>
@@ -125,16 +159,18 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
                                 <div className='post_pr_img_wrap'>
                                     {(post.images && post.images.length > 0) && (
                                         post.images.map((imageUrl, index) => (
-                                            <div className='post_pr_img' key={index}
-                                                css={css`
-                                                            background-image : url(${imageUrl});
-                                                            height : ${post.images?.length === 1 ? '400px'
-                                                        :
-                                                        post.images?.length === 2 ? '300px'
+                                            <div className='post_pr_img'
+                                                key={index}
+                                                css={
+                                                    css`background-image : url(${imageUrl});
+                                                        height : 
+                                                            ${(post.images && post.images?.length === 1) ? '400px'
                                                             :
-                                                            '140px'
-                                                    };
-                                                            `}></div>
+                                                            (post.images && post.images?.length === 2) ? '300px'
+                                                                :
+                                                                '140px'
+                                                        };`}>
+                                            </div>
                                         ))
                                     )}
                                 </div>

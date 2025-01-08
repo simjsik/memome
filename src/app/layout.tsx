@@ -4,7 +4,7 @@ import { ReactNode, useEffect } from 'react';
 import "./globals.css";
 import { PretendardBold, PretendardMedium, PretendardLight } from './styled/FontsComponets';
 import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil';
-import { usePathname } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { loginToggleState, postStyleState, UsageLimitState, userData, userState } from './state/PostState';
 
 import LoginBox from './login/LoginBox';
@@ -31,6 +31,7 @@ background : red;
 
 function LayoutContent({ children }: LayoutProps) {
   const pathName = usePathname();
+  const params = useParams();
   const isMain = pathName === '/';
   const isPost = pathName === '/home/post'
   const isLogin = pathName === '/login'

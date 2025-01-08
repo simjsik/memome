@@ -719,7 +719,7 @@ export default function PostMenu() {
                     title: postTitle,
                     userId: auth.currentUser.uid, // uid로 사용자 ID 사용
                     content: optContentUrls,
-                    images: optImageUrls,
+                    images: optImageUrls ? false : optImageUrls,
                     createAt: Timestamp.now(),
                     commentCount: 0,
                     notice: checkedNotice,
@@ -901,15 +901,7 @@ export default function PostMenu() {
         if (!postingComplete) {
             if (/\S/.test(posting) || /\S/.test(postTitle)) {
                 const handleBeforeUnload = () => {
-                    const loadConfirmed = confirm('입력하신 내용이 있습니다. 저장하시겠습니까?')
-                    if (loadConfirmed) {
-                        localStorage.setItem('unsavedPost', JSON.stringify({ tag: selectTag, title: postTitle, content: posting, date: new Date(), images: imageUrls }));
-                    } else {
-                        setPostTitle('');
-                        setPosting('');
-                        setImageUrls([])
-                        localStorage.removeItem('unsavedPost');
-                    }
+                    localStorage.setItem('unsavedPost', JSON.stringify({ tag: selectTag, title: postTitle, content: posting, date: new Date(), images: imageUrls }));
                 }
                 window.addEventListener('beforeunload', handleBeforeUnload);
                 // 새로고침.

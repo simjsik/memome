@@ -1,7 +1,6 @@
 import { db } from "@/app/DB/firebaseConfig";
 import { Comment, PostData } from "@/app/state/PostState";
 import { collection, getDoc, doc, getDocs, limit, orderBy, query, startAfter, Timestamp, where } from "firebase/firestore";
-import { extractImageUrls } from "../utils/extractImageUrls";
 
 
 // 포스트의 댓글
@@ -68,8 +67,11 @@ export const fetchComments = async (postId: string) => {
 }
 
 // 포스트 페이지 입장 시 '작성자'의 모든 글
-export const fetchPostList = async (userId: string) => {
-
+export const fetchPostList = async (
+    userId: string,
+    pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
+    pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
+) => {
     try {
         const response = await fetch('http://localhost:3000/api/firebaseLimit', {
             method: 'POST',
@@ -83,35 +85,56 @@ export const fetchPostList = async (userId: string) => {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
 
-        // 현재 포스트 작성자의 모든 글 가져오기
-        const postlistRef = collection(db, 'posts');
-        const postlistQuery = query(postlistRef, where('userId', '==', userId), orderBy('createAt', 'desc'));
-        const postlistSnapshot = await getDocs(postlistQuery);
+        if (response.ok) {
+            // 현재 포스트 작성자의 모든 글 가져오기
+            const postlistRef = collection(db, 'posts');
+            const postlistQuery = query(postlistRef, where('userId', '==', userId), orderBy('createAt', 'desc'), limit(pageSize));
+            const postQuery = (pageParam && pageParam.at(1))
+                ?
+                query(
+                    postlistQuery,
+                    startAfter(...pageParam),
+                )
+                :
+                postlistQuery
 
-        return postlistSnapshot.docs.map((doc) => ({
-            tag: doc.data().tag,
-            title: doc.data().title,
-            id: doc.id,
-            userId: doc.data().userId,
-            notice: doc.data().notice,
-            content: doc.data().content,
-            images: doc.data().images,
-            commentCount: doc.data().commentCount,
-            createAt: new Date(doc.data().createAt.seconds * 1000).toISOString(),
-            displayName: '',
-            PhotoURL: null,
-        }))
+            const postlistSnapshot = await getDocs(postQuery);
+
+            const postListData: PostData[] = await Promise.all(
+                postlistSnapshot.docs.map(async (document) => {
+                    // 포스트 가져오기
+                    const postData = { id: document.id, ...document.data() } as PostData;
+
+                    // 댓글 개수 가져오기
+                    const commentRef = collection(db, 'posts', document.id, 'comments');
+                    const commentSnapshot = await getDocs(commentRef);
+                    postData.commentCount = commentSnapshot.size;
+
+                    return postData;
+                })
+            );
+
+            const lastVisible = postlistSnapshot.docs.at(-1); // 마지막 문서
+
+            return {
+                data: postListData,
+                nextPage: lastVisible
+                    ? [lastVisible.data().notice, lastVisible.data().createAt as Timestamp] // 정렬 필드 값 배열로 반환
+                    : null,
+            };
+        }
     } catch (error) {
         console.error("Error fetching data:", error);
     };
 }
 
+// 일반 포스트 무한 스크롤 로직
 export const fetchPosts = async (
     userId: string | null = null,
     pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
     pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
 ) => {
-    console.log(userId, '받은 유저')
+    // console.log(userId, '받은 유저')
     try {
         const response = await fetch('http://localhost:3000/api/firebaseLimit', {
             method: 'POST',
@@ -145,7 +168,7 @@ export const fetchPosts = async (
             )
 
 
-        console.log(pageParam?.at(0), '= 공지사항 여부', pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
+        // console.log(pageParam?.at(0), '= 공지사항 여부', pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
 
         const postQuery = (pageParam && pageParam.at(1))
             ?
@@ -162,7 +185,6 @@ export const fetchPosts = async (
             postSnapshot.docs.map(async (document) => {
                 // 포스트 가져오기
                 const postData = { id: document.id, ...document.data() } as PostData;
-                postData.images = extractImageUrls(postData.content);
 
                 // 댓글 개수 가져오기
                 const commentRef = collection(db, 'posts', document.id, 'comments');
@@ -198,7 +220,7 @@ export const fetchPosts = async (
         );
 
         const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
-        console.log(postWithComment, lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
+        // console.log(postWithComment, lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
 
         return {
             data: postWithComment,
@@ -208,6 +230,52 @@ export const fetchPosts = async (
         };
     } catch (error: any) {
         console.error('Error in fetchPosts:', error.message);
+        return error;
+    }
+};
+
+// 이미지 포스트 무한 스크롤 로직
+export const fetchPostsWithImages = async (
+    userId: string,
+    pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
+    pageSize: number = 6, // 무한 스크롤 시 가져올 데이터 수
+) => {
+    try {
+        const queryBase = query(
+            collection(db, 'posts'),
+            where('notice', '==', false),
+            where('userId', '==', userId),
+            where('images', '!=', false), // images 필드가 false가 아닌 문서만 필터링
+            orderBy('createAt', 'desc'),
+            limit(pageSize) // 필요한 수 만큼 데이터 가져오기
+        );
+
+        const postQuery = (pageParam && pageParam.at(1))
+            ? query(queryBase, startAfter(pageParam.at(1)))
+            : queryBase;
+
+        const postSnapshot = await getDocs(postQuery);
+
+        const data = postSnapshot.docs.map((document) => {
+            const { images } = document.data();
+            return {
+                id: document.id,
+                images: Array.isArray(images) ? images : [], // images가 배열인지 확인 후 반환
+            };
+        });
+
+        const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
+
+        // console.log(data, '보내는 인자')
+
+        return {
+            data,
+            nextPage: lastVisible
+                ? [lastVisible.data().images, lastVisible.data().createAt as Timestamp] // 정렬 필드 값 배열로 반환
+                : null,
+        };
+    } catch (error: any) {
+        console.error('Error in fetchPostsWithImages:', error.message);
         return error;
     }
 };

@@ -1,5 +1,5 @@
 .user_wrap {
-    width: 700px;
+    width: 650px;
     height: fit-content;
     margin: 40px 0px 0px 500px;
     padding: 20px;
@@ -24,6 +24,7 @@
 
 .user_profile_wrap {
     display: flex;
+    height: 800px;
 }
 
 .user_name {

@@ -85,7 +85,7 @@ export default function NavBar() {
                 setSelectedMenu(2);
             } else if (pathSegment[1] === 'bookmark') {
                 setSelectedMenu(3);
-            } else if (pathSegment[1] === 'profile') {
+            } else if (pathSegment[1] === 'user') {
                 setSelectedMenu(4);
             } else if (pathSegment[1] === 'notice') {
                 setSelectedMenu(1);
@@ -95,17 +95,33 @@ export default function NavBar() {
 
     // 내비 클릭 시 선택 메뉴 설정
     const handleNavClick = (NavTitle: number) => {
-        if (NavTitle === 2) {
+        if (NavTitle === 2 || NavTitle === 1) {
+            // 현재 스크롤 위치를 sessionStorage에 저장
+            sessionStorage.setItem(
+                `scroll-${path}`,
+                window.scrollY.toString()
+            );
+        }
+
+        if (NavTitle === 1) {
+            router.push('/home/notice');
+            setNewNotice(false);
+        } else if (NavTitle === 2) {
             router.push('/home/main');
         } else if (NavTitle === 3) {
             if (yourLogin) {
-                router.push(`/home/bookmark/${currentUser}`);
+                console.log(currentUser, '유저')
+                router.push(`/home/bookmark/${currentUser?.uid}`);
             } else {
                 return alert('로그인이 필요한 기능입니다.');
             }
-        } else if (NavTitle === 1) {
-            router.push('/home/notice');
-            setNewNotice(false);
+        } else if (NavTitle === 4) {
+            if (yourLogin) {
+                console.log(currentUser, '유저')
+                router.push(`/home/user/${currentUser?.uid}`);
+            } else {
+                return alert('로그인이 필요한 기능입니다.');
+            }
         }
         setSelectedMenu(NavTitle);
     }

@@ -632,7 +632,6 @@ background : none;
 cursor : pointer;
 }
 `
-
 export const BookmarkWrap = styled.div`
 width:860px;
 margin-left : 420px;

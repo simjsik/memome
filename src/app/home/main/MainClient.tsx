@@ -1,10 +1,10 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { ADMIN_ID, newNoticeState, noticeList, noticeState, noticeType, PostData, PostState, storageLoadState, UsageLimitState, userData, userState } from '../../state/PostState';
-import { usePathname, useRouter } from 'next/navigation';
+import { ADMIN_ID, newNoticeState, noticeList, noticeType, PostData, PostState, storageLoadState, UsageLimitState, userData, userState } from '../../state/PostState';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { PostWrap } from '../../styled/PostComponents';
@@ -49,6 +49,8 @@ interface MainHomeProps {
 }
 
 export default function MainHome({ post: initialPosts, initialNextPage }: MainHomeProps) {
+    window.history.scrollRestoration = 'manual'
+
     // 포스트 스테이트
     const [posts, setPosts] = useRecoilState<PostData[]>(PostState)
     const [newPosts, setNewPosts] = useState<PostData[]>([])
@@ -70,7 +72,6 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
     const ADMIN = useRecoilValue(ADMIN_ID);
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
-    const [currentScrollY, setCurrentScrollY] = useState<number>(0)
     // state
     const router = useRouter();
     const pathName = usePathname();
@@ -80,24 +81,27 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
     const socketRef = useRef<Socket | null>(null);
 
     useEffect(() => {
+        // 설정 해주지 않으면 popstate 이벤트가 실행 안됨.
+        window.history.pushState(null, "", window.location.pathname);
+
         // socket 객체를 초기화
         socketRef.current = socket; // socket은 외부에서 가져온 웹소켓 인스턴스
 
         const sockets = socketRef.current;
 
         sockets.on("connect", () => {
-            console.log("WebSocket 연결 성공");
+            // console.log("WebSocket 연결 성공");
         });
 
         // 새 공지 수신
         sockets.on("new-notice", (data) => {
-            console.log("새 공지 알림:", data);
+            // console.log("새 공지 알림:", data);
             setNewNotice(true);
         });
 
         // 새 알림 수신
         sockets.on("initial-notices", (data) => {
-            console.log("새 알림:", data);
+            // console.log("새 알림:", data);
             setNoticeLists(data);
         });
 
@@ -370,37 +374,36 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
     const { hasUpdate, clearUpdate } = usePostUpdateChecker();
 
     useEffect(() => {
-        const saveScrollPosition = () => {
-            const scrollY = window.scrollY
-            if (pathName) {
-                sessionStorage.setItem(pathName, scrollY.toString());
-            }
-        };
+        console.log('페이지 이동')
+        // 페이지 진입 시 스크롤 위치 복원
+        const savedScroll = sessionStorage.getItem(`scroll-${pathName}`);
 
-        window.addEventListener("popstate", saveScrollPosition);
-        return () => window.removeEventListener("popstate", saveScrollPosition);
-    }, [pathName]);
-
-    useEffect(() => {
-        const resetScrollPosition = () => {
-            if (pathName) {
-                sessionStorage.setItem(pathName, '0');
-            }
-        };
-
-        window.addEventListener("beforeunload", resetScrollPosition);
-        return () => window.removeEventListener("beforeunload", resetScrollPosition);
-    }, []);
-
-    // 페이지 재진입 시 스크롤 위치 복원
-    useEffect(() => {
-        if (pathName) {
-            const savedScrollPosition = sessionStorage.getItem(pathName);
-            if (savedScrollPosition) {
-                window.scrollTo(0, parseInt(savedScrollPosition, 10));
-            }
+        if (savedScroll) {
+            window.scrollTo(0, parseInt(savedScroll, 10));
         }
-    }, []);
+
+        // 페이지 이탈 시 스크롤 위치 저장
+        const saveScrollPosition = () => {
+            sessionStorage.setItem(`scroll-${pathName}`, window.scrollY.toString());
+            history.go(-1);
+        };
+
+        // 새로고침 및 창닫기 시 스크롤 위치 제거
+        const resetScrollPosition = () => {
+            sessionStorage.setItem(`scroll-${pathName}`, '0');
+        };
+
+
+        // 뒤로가기로 페이지 이탈 시 스크롤 위치 저장
+        window.addEventListener('popstate', saveScrollPosition);
+        window.addEventListener('beforeunload', resetScrollPosition);
+
+        // 클린업
+        return () => {
+            window.removeEventListener('beforeunload', resetScrollPosition);
+            window.removeEventListener('popstate', saveScrollPosition);
+        };
+    }, [pathName]);
 
     return (
         <>
@@ -438,6 +441,13 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                                     <p className='post_date'>
                                         · {formatDate(post.createAt)}
                                     </p>
+                                    <button className='post_drop_menu_btn'>
+                                        <ul>
+                                            <li className='post_drop_menu'>
+                                                <button onClick={() => deletePost(post.id)} className='post_dlt_btn'>게시글 삭제</button>
+                                            </li>
+                                        </ul>
+                                    </button>
                                 </div>
                                 {/* 포스트 제목 */}
                                 <div className='post_title_wrap'>
@@ -454,9 +464,9 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                                                 <div className='post_pr_img' key={index}
                                                     css={css`
                                                             background-image : url(${imageUrl});
-                                                            height : ${post.images?.length === 1 ? '400px'
+                                                            height : ${(post.images && post.images?.length === 1) ? '400px'
                                                             :
-                                                            post.images?.length === 2 ? '300px'
+                                                            (post.images && post.images?.length === 2) ? '300px'
                                                                 :
                                                                 '140px'
                                                         };

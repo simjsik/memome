@@ -7,13 +7,14 @@ export interface PostData {
     id: string;
     userId: string;
     content: string;
-    images?: string[];
+    images?: string[] | false;
     createAt: any;
     commentCount: number,
     notice: boolean,
     displayName: string,
     PhotoURL: string | null,
 }
+
 export interface userData {
     name: string | null;
     email: string | null;
@@ -183,10 +184,3 @@ export const searchState = atom<boolean>({
     key: 'searchState',
     default: false,
 })
-
-// 스크롤 위치
-export const currentScrollState = atom<number>({
-    key: 'currentScrollState',
-    default: 0,
-})
-

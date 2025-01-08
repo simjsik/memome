@@ -20,6 +20,52 @@ export const UserPostWrap = styled.div`
     }
     // user_post_list_wrap
 
+    .user_image_post_wrap{
+        display: flex;
+        flex-wrap: wrap;
+
+        .user_image_wrap{
+            position:relative;
+            min-width: 200px;
+            height: 200px;
+            background-size: cover;
+            background-repeat: no-repeat;
+            margin-right: 4px;
+
+            .image_post_img{
+                background-size: cover;
+                background-repeat: no-repeat;
+                width: 100%;
+                height: 200px;
+
+                .image_list_icon{
+                    position: absolute;
+                    bottom: 6px;
+                    right: 6px;
+                    background: red;
+                    width: 28px;
+                    height: 28px;
+                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+                }
+            }
+
+            .image_post_img:nth-of-type(n+2){
+                display:none;
+            }
+
+            &:hover{
+                cursor:pointer;
+            }
+        }
+
+        .user_image_wrap:nth-of-type(3n){
+            margin-right :0px;
+        }
+        .user_image_wrap:nth-of-type(n + 3){
+            margin-top : 4px
+        }
+    }
+    // user_image_post_wrap
     .memo_tab,
     .image_tab{
         flex: 0 0 50%;
@@ -62,7 +108,7 @@ export const UserPostWrap = styled.div`
 
         .post_more{
             position: relative;
-            width: 36px;
+            min-width: 36px;
             height: 36px;
             margin-top: 6px;
         }
@@ -123,22 +169,25 @@ export const UserPostWrap = styled.div`
         overflow : hidden;
 
         img{
-        display : none;
+            display : none;
         }
     }
     // user_post_content
 
     .user_post_img{
+        display: flex;
         width: 100%;
         height: 180px;
-        padding-left : 52px;
+        padding: 0px 0px 0px 52px;
 
         div{
-            width: 130px;
+            width: 120px;
             height: 100%;
             background-size: cover;
             background-repeat: no-repeat;
-            border-radius : 8px;
+            border-radius: 8px;
+            border: 1px solid #ededed;
+            margin-right: 12px;
         }
     }
     // user_post_img
