@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 const SearchWrap = styled.div`
 position: relative;
 
-
     // 메모 검색
     h2{
     flex: 1 0 100%;
@@ -324,7 +323,6 @@ position: relative;
     // ---------------------------------------------------
 `
 
-
 // 유저 검색 결과
 const SwiperHits = () => {
     const router = useRouter();
@@ -402,8 +400,6 @@ const SwiperHits = () => {
         </>
     );
 };
-
-
 
 export default function SearchComponent() {
     const router = useRouter();
