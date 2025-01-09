@@ -389,6 +389,7 @@ export default function UserProfile() {
         }
     }
 
+    console.log(noticeLists)
     return (
         <ProfileWrap>
             {/* 프로필 상단 */}
@@ -467,7 +468,6 @@ export default function UserProfile() {
                                 <p>새 메모를 작성하세요</p>
                                 <button className="memo_btn">메모</button>
                             </div>
-
                             <div className="my_alarm_wrap">
                                 {noticeLists.map((notice) => (
                                     <div key={notice.noticeId}>

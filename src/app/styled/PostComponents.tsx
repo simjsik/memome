@@ -7,92 +7,118 @@ export const PostWrap = styled.div<{ postStyle: boolean }>`
 // 포스트 리스트 스타일 별 우측이 간소화
 position : absolute;
 left : 500px;
-top : 40px;
 display : flex;
 flex-wrap : wrap;
 width:  600px;
-padding :0px;
+padding : 0px;
+background : #fff;
 border-radius : 4px;
 border : none;
+border-left : 1px solid #ededed;
+border-right : 1px solid #ededed;
 
     // 포스트 박스
     .post_box{
-    position: relative;
-    display : ${(props) => (props.postStyle ? 'block' : 'flex')};
-    justify-content: space-between;
-    flex : 1 0 100%;
-    min-height :${(props) => (props.postStyle ? '360px' : '36px')};
-    margin-bottom : ${(props) => (props.postStyle ? '20px' : '0px')};
-    padding: ${(props) => (props.postStyle ? '20px' : '0')};
-    border-radius : ${(props) => (props.postStyle ? '8px' : '4px')};;
-    border-bottom : 1px solid #ededed;
-    line-height :   ${(props) => (props.postStyle ? '10px' : 'auto')};
-    background: #fff;
-    box-shadow : ${(props) => (props.postStyle ? '0px 0px 10px rgba(0,0,0,0.1)' : 'none')};
+      position: relative;
+      display : ${(props) => (props.postStyle ? 'block' : 'flex')};
+      flex : 1 0 100%;
+      background: #fff;
+      padding : 20px;
+      border-bottom : 1px solid #ededed;
+      cursor : pointer;
     }
 
-    .notice {
-    background : rgba(255, 78, 90, 0.05);
-        
-      .post_tag,
-      .post_title{
-        color : #ff4e59;
+    // 포스트 프로필 박스
+      .post_profile_wrap{
+        display:flex;
+        justify-content: space-between;
+
+        .post_drop_menu_btn{
+            position : relative;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background-color: #fff;
+            cursor: pointer;
+
+            div{
+              position: absolute;
+              top: 36px;
+              width: 100px;
+              box-shadow : 0px 0px 10px rgba(0,0,0,0.1);
+            }
+
+            li{
+              width: 100%;
+              height: 42px;
+            }
+
+            .post_dlt_btn{
+              width: 100%;
+              height: 42px;
+              border: 1px solid #ededed;
+              background: #fff;
+              border-radius: 8px;
+              color : red;
+            }
+              
+            button{
+              cursor : pointer;
+            }
+        }
       }
 
-      .post_tag{
-      margin-right : 4px;
+      .user_profile{
+        display:flex;
       }
 
-    }
-
-      .post_box:last-child{
-      margin-bottom : 40px;
+      .user_photo{
+        width : 36px;
+        height : 36px;
+        margin-right : 8px;
+        border-radius: 50%;
+        background-size : cover;
+        background-repeat : no-repeat;
+        border : 1px solid #ededed;
       }
-      .post_box:nth-of-type(odd){
-        // margin-right : 20px;
-      }
-
-      // 포스트 제목
-      .post_title_wrap,
-      .post_right_wrap{
+      
+    // 포스트 제목
+    .post_title_wrap,
+    .post_right_wrap{
       display: flex;
-      }
+    }
 
-      .post_title_wrap{
+    .post_title_wrap{
       flex: 0 0 60%;
-      flex-wrap:${(props) => (props.postStyle ? 'wrap' : 'nowrap')};
-      margin-top : ${(props) => (props.postStyle ? '8px' : '0px')};
-      padding-left : ${(props) => (props.postStyle ? '0px' : '20px')};
-      padding-bottom : ${(props) => (props.postStyle ? '10px' : '0px')};
-      border-bottom : ${(props) => (props.postStyle ? '1px solid #ededed' : 'none')};
-      }
+      flex-wrap: wrap;
+      padding-left: 0px;
+      padding-bottom: 10px;
+    }
 
-      .post_right_wrap{
+    .post_right_wrap{
       display:flex;
       flex: 0 0 40%;
-      }
+    }
 
       // 포스트 태그
       .post_tag{
-      width : ${(props) => (props.postStyle ? '100%' : 'auto')};
-      margin-right : 4px;
-      font-size : 14px;
-      line-height : ${(props) => (props.postStyle ? '24px' : '36px')};
-      color : #555;
+        width: 100%;
+        margin-right: 4px;
+        font-size: 14px;
+        line-height: 24px;
+        color: #555;
       }
     
       // 포스트 제목
       .post_title{
-      font-size : ${(props) => (props.postStyle ? '20px' : '14px')};
-      font-family : var(--font-pretendard-light);
-      line-height : 36px;
-      border-bottom : none;
+        font-size: 16px;
+        border-bottom: none;
+        margin-top: 8px;
       }
 
       // 포스트 내용
       .post_content_wrap{
-        margin-top : 20px;
-        min-height: 120px;
+        padding: 10px 0px 20px 44px;
       }
 
       // 유저 이름, 포스트 날짜, 포스트 댓글
@@ -113,111 +139,71 @@ border : none;
       }
 
       .post_bottom_wrap{
-      display: flex;
-      border-top: 1px solid #ededed;
-      margin-top: 20px;
-      padding-top: 10px;
+        display: flex;
+        margin-top: 20px;
+        margin-left: -6px;
+        padding-top: 10px;
       }
 
       .post_comment_icon{
-      width: 32px;
-      height: 32px;
-      background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1734333987/%EB%8C%93%EA%B8%80_b7k0iv.svg);
-      margin-right : 4px
+        width: 24px;
+        height: 24px;
+        background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449945/%EB%8C%93%EA%B8%80%EC%95%84%EC%9D%B4%EC%BD%98_xbunym.svg);
+        margin : 4px 8px 4px 4px;
       }
 
       .post_comment{
-
-      font-family : ${(props) => (props.postStyle ? 'var(--font-pretendard-medium)' : 'var(--font-pretendard-bold)')};
-      font-size : ${(props) => (props.postStyle ? '16px' : '14px')};
-      color: ${(props) => (props.postStyle ? '#191919' : 'red')};
-      margin-left : ${(props) => (props.postStyle ? '0px' : '4px')};
-      display : ${(props) => (props.postStyle ? 'flex' : 'block')};
-      line-height : 32px;
+        font-family : ${(props) => (props.postStyle ? 'var(--font-pretendard-medium)' : 'var(--font-pretendard-bold)')};
+        font-size : ${(props) => (props.postStyle ? '16px' : '14px')};
+        color: ${(props) => (props.postStyle ? '#191919' : 'red')};
+        margin-left : ${(props) => (props.postStyle ? '0px' : '4px')};
+        display : ${(props) => (props.postStyle ? 'flex' : 'block')};
+        line-height : 32px;
       }
 
       & .user_id:hover,
       .post_title:hover{
-
-      text-decoration : underline;
-      cursor: pointer;
-      }
-
-      // 포스트 프로필 박스
-      .post_profile{
-
-      display:flex;
-      }
-
-      .user_profile{
-      width : 36px;
-      height : 36px;
-      margin-right : 4px;
-      border-radius: 50%;
-      background-size : cover;
-      background-repeat : no-repeat;
-      border : 1px solid #ededed;
+        text-decoration : underline;
+        cursor: pointer;
       }
 
        // 포스트 이미지 있을 때 표시
       .post_img_icon{
-      width : 16px;
-      height : 16px;
-      margin : 11px 4px 0px;
-      background-size : cover;
-      background-repeat : no-repeat;
+        width : 16px;
+        height : 16px;
+        margin : 11px 4px 0px;
+        background-size : cover;
+        background-repeat : no-repeat;
       }
 
       // 포스트 이미지 감추기
       .post_text img{
-
-      display : none;
+        display : none;
       }
 
       // 포스트 내용
       .post_text{
-
-        max-height: 300px;
+        height: 80px;
         overflow: hidden;
-        max-width: 580px;
       }
-
-      .post_text p{
-
-      line-height : 36px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-      }
-
-      .post_text p:nth-of-type(n+3){
-
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-      }
-
       .post_text p:nth-of-type(n+5){
-
         display : none
       }
 
       // 포스트 이미지 미리보기
-    
       .post_pr_img_wrap{
-
-          display:flex
+        display: flex;
+        height: 180px;
+        justify-content: space-between;
       }
 
       .post_pr_img{
-
-      max-width : 300px;
-      flex : 1 0 24%;
-      min-height: 120px;
-      margin-right : 8px;
-      background-size : cover;
-      border-radius : 4px;
-      box-shadow : 0px 0px 10px rgba(0,0,0,0.1)
+        width: 120px;
+        height: 100%;
+        border-radius : 8px;
+        background-size: cover;
+        background-repeat: no-repeat;
+        border : 1px solid #ededed;
       }
 
       .post_pr_img:last-child{
@@ -316,15 +302,17 @@ border : none;
 }
 `
 export const NoticeWrap = styled.div`
-position : absolute;
-left : 500px;
-top : 40px;
-display : flex;
-flex-wrap : wrap;
-width:  600px;
-padding :0px;
-border-radius : 4px;
-border : none;
+    position: absolute;
+    left: 500px;
+    display: flex;
+    flex-wrap: wrap;
+    width: 600px;
+    padding: 0px;
+    background: #fff;
+    border-radius: 4px;
+    border: none;
+    border-left: 1px solid #ededed;
+    border-right: 1px solid #ededed;
 
     .post_box{
         width: 100%;
@@ -337,8 +325,8 @@ border : none;
     }
 
     .user_profile{
-        width: 36px;
-        height: 36px;
+        width: 42px;
+        height: 42px;
         margin-right: 8px;
         border-radius: 50%;
         border: 2px solid #ededed;
@@ -380,20 +368,43 @@ border : none;
 
     .post_bottom_wrap{
         margin-top: 16px;
+        margin-left: -10px;
+    }
+
+    .post_content_wrap{
+        padding: 0px 0px 10px 52px;
+
+        .post_content{
+            height: 80px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .post_pr_img_wrap{
+            width: 100%;
+            display: flex;
+            height: 180px;
+        }
     }
 
     .post_comment{
         display: flex;
-        line-height: 32px;
+        line-height: 42px;
     }
 
-    .post_comment_icon{
-        width: 32px;
-        height: 32px;
-        background-size: cover;
-        background-repeat: no-repeat;
-        background: red;
-        margin-right: 8px;
+    .post_comment_icon_wrap{
+        width: 42px;
+        height: 42px;
+        margin-right: 4px;
+        cursor: pointer;
+
+        .post_comment_icon{
+          width: 24px;
+          height: 24px;
+          background-size: cover;
+          background-repeat: no-repeat;
+          margin: 10px;
+        }
     }
 `
 export const TitleHeader = styled.div`
@@ -639,4 +650,27 @@ padding : 10px 20px;
 border-left : 1px solid #dedede;
 border-right : 1px solid #dedede;
 background : #fff
+`
+export const NoMorePost = styled.div`
+    width: 100%;
+    height: 240px;
+    padding: 40px;
+    text-align: center;
+
+    .no_more_icon{
+      width: 108px;
+      height: 108px;
+      background-size: cover;
+      background-repeat: no-repeat;
+      margin: 0 auto;
+    }
+
+    p{
+      font-size: 20px;
+    }
+
+    span{
+      color: #999;
+      font-size: 14px;
+    }
 `
