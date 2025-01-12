@@ -674,3 +674,49 @@ export const NoMorePost = styled.div`
       font-size: 14px;
     }
 `
+export const NewPostBtn = styled.button`
+    position: fixed;
+    left: 730px;
+    top: 20px;
+    z-index: 1;
+    padding: 12px 10px;
+    border-radius: 8px;
+    border: none;
+    background: #0087ff;
+    color: #fff;
+    font-family: '__PretendardBold_73a78b';
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+`
+
+export const MyAlarmWrap = styled.div`
+    margin-top: 32px;
+
+    .my_alarm{
+      padding: 10px;
+      border: 1px solid #ededed;
+      border-radius: 8px;
+    }
+
+    h2{
+      font-size: 14px;
+    }
+
+    .alarm_title{
+      margin-top: 16px;
+    }
+
+    .alram_date{
+      margin-top: 4px;
+      font-size: 14px;
+    }
+
+    button{
+      width: 100%;
+      height: 32px;
+      margin-top: 4px;
+      border: none;
+      background: #0087ff;
+      border-radius: 4px;
+      color: #fff;
+    }
+`

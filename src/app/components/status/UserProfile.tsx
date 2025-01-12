@@ -9,6 +9,8 @@ import { auth, db } from "@/app/DB/firebaseConfig";
 import { updateProfile } from "firebase/auth";
 import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { css } from "@emotion/react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { MyAlarmWrap } from "@/app/styled/PostComponents";
 
 const ProfileWrap = styled.div`
 padding-top : 20px;
@@ -203,9 +205,6 @@ margin-top : 20px;
 
 
 `
-interface MyPostListProps {
-    post: PostData[];
-}
 
 export default function UserProfile() {
     const user = useRecoilValue<userData | null>(userState)
@@ -389,7 +388,6 @@ export default function UserProfile() {
         }
     }
 
-    console.log(noticeLists)
     return (
         <ProfileWrap>
             {/* 프로필 상단 */}
@@ -468,17 +466,30 @@ export default function UserProfile() {
                                 <p>새 메모를 작성하세요</p>
                                 <button className="memo_btn">메모</button>
                             </div>
-                            <div className="my_alarm_wrap">
-                                {noticeLists.map((notice) => (
-                                    <div key={notice.noticeId}>
-                                        <p>{notice.noticeId}</p>
-                                        <p>{notice.noticeText}</p>
-                                        <p>{notice.noticeType}</p>
-                                        <p>{formatDate(notice.noticeAt)}</p>
-                                        <button onClick={() => noticeConfirm(notice.noticeId)}>알림 확인</button>
-                                    </div>
-                                ))}
-                            </div>
+                            <MyAlarmWrap className="my_alarm_wrap">
+                                <Swiper
+                                    spaceBetween={16} // 슬라이드 간격
+                                    slidesPerView={3} // 화면에 보이는 슬라이드 개수
+                                    freeMode={true}
+                                    pagination={{
+                                        clickable: true,
+                                    }}
+                                    navigation={true}
+                                >
+                                    {noticeLists.map((notice) => (
+                                        <SwiperSlide key={notice.noticeId}>
+                                            <div className="my_alarm">
+                                                <h2>알림</h2>
+                                                <div className="alarm_title">
+                                                    <p>{notice.noticeType}</p>
+                                                </div>
+                                                <p className="alram_date">{formatDate(notice.noticeAt)}</p>
+                                                <button onClick={() => noticeConfirm(notice.noticeId)}>알림 확인</button>
+                                            </div>
+                                        </SwiperSlide>
+                                    ))}
+                                </Swiper>
+                            </MyAlarmWrap>
                         </div>
                     </>
 

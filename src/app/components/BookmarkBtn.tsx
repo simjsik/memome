@@ -2,10 +2,11 @@
 "use client";
 import styled from "@emotion/styled";
 import { auth, db } from "../DB/firebaseConfig";
-import { deleteDoc, doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
+import { arrayRemove, arrayUnion, deleteDoc, doc, getDoc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
-import { memoList, memoState } from "../state/PostState";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { bookMarkState, memoList, memoState, PostData, userState } from "../state/PostState";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Bookmark = styled.button`
 width : 32px;
@@ -20,80 +21,92 @@ interface PostId {
     // userId: string;
 }
 export default function BookmarkBtn({ postId }: PostId) {
-    const [currentBookmark, setCurrentBookmark] = useState<boolean>(false)
-    const [currentPostData, setCurrentPostData] = useState<any>()
+    const [bookmarked, setBookmarked] = useState<boolean>(false)
+    const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
+
+    const currentUser = useRecoilValue(userState)
     // state
-    const userId = auth.currentUser?.uid;
+
     useEffect(() => {
         const checkBookmark = async () => {
-            if (userId) {
-                try {
-                    const bookmarkRef = doc(db, 'users', userId, 'bookmarks', postId);
-                    const postRef = doc(db, 'posts', postId);
+            const isBookmarked = currentBookmark.includes(postId);
 
-                    const bookmarkDoc = await getDoc(bookmarkRef)
-                    const postDoc = await getDoc(postRef)
-                    // console.log(bookmarkDoc.exists(), '북마크 확인')
-
-                    if (bookmarkDoc.exists()) {
-                        setCurrentBookmark(true);
-                    } else {
-                        setCurrentBookmark(false);
-                    }
-
-                    if (postDoc.exists()) {
-                        setCurrentPostData({
-                            tag: postDoc.data().tag,
-                            title: postDoc.data().title,
-                            createAt: postDoc.data().createAt,
-                        })
-                    } else {
-                        setCurrentPostData(null);
-                    }
-
-                } catch (error) {
-                    console.error('북마크 확인 중 에러', error)
-                }
+            if (isBookmarked) {
+                setBookmarked(true)
+            } else {
+                setBookmarked(false);
             }
         };
 
         checkBookmark();
-    }, [userId, postId])
+    }, [currentUser, postId])
 
+    const queryClient = useQueryClient();
 
     const addBookmark = async (postId: string) => {
-        if (!userId) {
-            alert('로그인 후 이용 가능합니다!');
-            return;
-        }
-
         if (!postId) {
-            alert('유효하지 않은 포스트 입니다.')
+            alert('존재하지 않은 포스트 입니다.')
             return;
         }
 
-        const bookmarkRef = doc(db, 'users', userId, 'bookmarks', postId);
+        if (currentUser) {
+            const bookmarkRef = doc(db, `users/${currentUser.uid}/bookmarks/bookmarkId`);
 
-        if (!currentBookmark) {
-            setCurrentBookmark(true);
-            await setDoc(bookmarkRef, { postId, userId, tag: currentPostData.tag, title: currentPostData.title, createAt: Timestamp.now(), })
-            alert('북마크 추가 완료!');
-        } else if (currentBookmark) {
-            const deleteBookmark = confirm('북마크를 해제 하시겠습니까?')
+            const isBookmarked = currentBookmark.includes(postId);
 
-            if (deleteBookmark) {
-                setCurrentBookmark(false);
-                await deleteDoc(bookmarkRef)
-                alert('북마크가 해제되었습니다.');
+            if (!isBookmarked) {
+                setBookmarked(true);
+                await updateDoc(bookmarkRef,
+                    {
+                        bookmarkId: arrayUnion(postId),
+                    }).catch(async (error) => {
+                        if (error.code === 'not-found') {
+                            // 북마크가 없었을 때.
+                            console.log('북마크 없음. 추가 실행')
+                            await setDoc(bookmarkRef, {
+                                bookmarkId: [postId],
+                            });
+                        } else {
+                            throw (error + '북마크 추가 실패')
+                        }
+                    })
+                alert('북마크 추가 완료!');
+                setCurrentBookmark((prev) => [...prev, postId]);
+            } else {
+                const deleteBookmark = confirm('북마크를 해제 하시겠습니까?')
+
+                if (deleteBookmark) {
+                    await updateDoc(bookmarkRef, {
+                        bookmarkId: arrayRemove(postId),
+                    }); // 배열 형태일 때 현재 포스트 id 삭제.
+                    setBookmarked(false);
+
+                    // 북마크 해제 후 북마크 state 업데이트
+                    setCurrentBookmark((prev) => prev.filter((id) => id !== postId));
+
+                    // 캐싱된 데이터를 수동으로 업데이트
+                    queryClient.setQueryData(['bookmarks', currentUser.uid, currentBookmark], (oldData: any) => {
+                        if (!oldData) return oldData;
+
+                        return {
+                            ...oldData,
+                            pages: oldData.pages.map((page: any) =>
+                                page.data.filter((post: PostData) => post.id !== postId)
+                            ),
+                        };
+                    });
+                    alert('북마크가 해제되었습니다.');
+                }
             }
         }
     }
+
     // function
     return (
         <Bookmark onClick={() => addBookmark(postId)}>
             <svg width="32" height="32" viewBox="0 0 39 40">
                 <g>
-                    {currentBookmark ?
+                    {bookmarked ?
                         <>
                             <path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z" fill="#4cc9bf" stroke="#4cc9bf" strokeWidth="2.5">
                             </path>

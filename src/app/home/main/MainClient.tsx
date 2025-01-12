@@ -3,11 +3,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { ADMIN_ID, newNoticeState, noticeList, noticeType, PostData, PostState, storageLoadState, UsageLimitState, userData, userState } from '../../state/PostState';
+import { ADMIN_ID, bookMarkState, newNoticeState, noticeList, noticeType, PostData, PostState, storageLoadState, UsageLimitState, userData, userState } from '../../state/PostState';
 import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { NoMorePost, PostWrap } from '../../styled/PostComponents';
+import { NewPostBtn, NoMorePost, PostWrap } from '../../styled/PostComponents';
 import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, where } from 'firebase/firestore';
 import { auth, db } from '../../DB/firebaseConfig';
 import { useInfiniteQuery } from '@tanstack/react-query';
@@ -17,6 +17,7 @@ import { fetchPosts } from '../../api/loadToFirebasePostData/fetchPostData';
 import { usePostUpdateChecker } from '@/app/hook/ClientPolling';
 import socket from '@/app/api/websocket/route';
 import { Socket } from 'socket.io-client';
+import BookmarkBtn from '@/app/components/BookmarkBtn';
 
 const postDeleteBtn = css`
 position : absolute;
@@ -45,7 +46,7 @@ cursor : pointer;
 
 interface MainHomeProps {
     post: PostData[],
-    initialNextPage: any;
+    initialNextPage: any,
 }
 
 export default function MainHome({ post: initialPosts, initialNextPage }: MainHomeProps) {
@@ -55,7 +56,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
     const [posts, setPosts] = useRecoilState<PostData[]>(PostState)
     const [newPosts, setNewPosts] = useState<PostData[]>([])
     const [dropToggle, setDropToggle] = useState<string>('')
-
+    const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
     // 불러온 마지막 데이터
     const [lastFetchedAt, setLastFetchedAt] = useState(null); // 마지막으로 문서 가져온 시간
 
@@ -72,6 +73,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
     const ADMIN = useRecoilValue(ADMIN_ID);
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+
     // state
     const router = useRouter();
     const pathName = usePathname();
@@ -153,8 +155,12 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
         const sockets = socketRef.current;
         if (currentUser) {
+
             sockets.emit("register", { uid: currentUser?.uid }); // UID를 서버에 전송
+
+            if (!currentUser.uid) return console.log('유저 없음');
         }
+
     }, [currentUser])
 
     // 무한 스크롤 로직
@@ -424,21 +430,8 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
     return (
         <>
             {hasUpdate &&
-                <button css={
-                    css`
-                    padding: 8px;
-                    position: absolute;
-                    top: 20px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    z-index: 1;
-                    background: red;
-                    color: #fff;
-                    border: none;
-                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-                    cursor: pointer;
-                    `} onClick={handleUpdateClick}>새로운 업데이트 확인
-                </button>}
+                <NewPostBtn className='new_post_btn' onClick={handleUpdateClick}>새로운 업데이트 확인</NewPostBtn>
+            }
             {/* 공지사항 제외 전체 포스트 */}
             {!usageLimit &&
                 <PostWrap postStyle={postStyle}>
@@ -504,6 +497,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                                             <div className='post_comment_icon'></div>
                                             <p>{post.commentCount}</p>
                                         </div>
+                                        <BookmarkBtn postId={post.id}></BookmarkBtn>
                                     </div>
                                 </div>
                             </div >

@@ -95,7 +95,7 @@ export default function NavBar() {
 
     // 내비 클릭 시 선택 메뉴 설정
     const handleNavClick = (NavTitle: number) => {
-        if (NavTitle === 2 || NavTitle === 1) {
+        if (NavTitle === 2 || NavTitle === 1 || NavTitle === 3) {
             // 현재 스크롤 위치를 sessionStorage에 저장
             sessionStorage.setItem(
                 `scroll-${path}`,
@@ -110,17 +110,17 @@ export default function NavBar() {
             router.push('/home/main');
         } else if (NavTitle === 3) {
             if (yourLogin) {
-                console.log(currentUser, '유저')
                 router.push(`/home/bookmark/${currentUser?.uid}`);
             } else {
-                return alert('로그인이 필요한 기능입니다.');
+                return setLoginToggle(true);
             }
         } else if (NavTitle === 4) {
-            if (yourLogin) {
-                console.log(currentUser, '유저')
-                router.push(`/home/user/${currentUser?.uid}`);
+            if (yourLogin && !usageLimit) {
+                router.push(`/home/user/${auth.currentUser?.uid}`)
+            } else if (usageLimit) {
+                return setLimitToggle(true);
             } else {
-                return alert('로그인이 필요한 기능입니다.');
+                return setLoginToggle(true);
             }
         }
         setSelectedMenu(NavTitle);
@@ -136,17 +136,6 @@ export default function NavBar() {
             setLoginToggle(true);
         }
     };
-
-    const handleSearch = () => {
-        if (yourLogin && !usageLimit) {
-            router.push(`/home/user/${auth.currentUser?.uid}`)
-        } else if (usageLimit) {
-            return setLimitToggle(true);
-        } else {
-            setLoginToggle(true);
-        }
-    };
-
 
     // Function
     return (

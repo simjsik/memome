@@ -5,7 +5,7 @@ import "./globals.css";
 import { PretendardBold, PretendardMedium, PretendardLight } from './styled/FontsComponets';
 import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil';
 import { useParams, usePathname } from 'next/navigation';
-import { loginToggleState, postStyleState, UsageLimitState, userData, userState } from './state/PostState';
+import { bookMarkState, loginToggleState, postStyleState, UsageLimitState, userData, userState } from './state/PostState';
 
 import LoginBox from './login/LoginBox';
 import StatusBox from './components/StatusBox';
@@ -14,6 +14,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import NavWrap from './components/NavWrap';
 import { checkUsageLimit } from './api/utils/checkUsageLimit';
 import UsageLimit from './components/UsageLimit';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from './DB/firebaseConfig';
 
 type LayoutProps = {
   children: ReactNode;
@@ -40,6 +42,7 @@ function LayoutContent({ children }: LayoutProps) {
   const loginToggle = useRecoilValue<boolean>(loginToggleState)
   const [postStyle, setPostStyle] = useRecoilState<boolean>(postStyleState)
   const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
+  const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
   const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
   // State
 
@@ -57,6 +60,27 @@ function LayoutContent({ children }: LayoutProps) {
           }
         }
       }
+
+
+      const loadBookmarks = async () => {
+        try {
+          const bookmarks = await getDoc(doc(db, `users/${currentUser.uid}/bookmarks/bookmarkId`));
+          if (bookmarks.exists()) {
+            // 북마크 데이터가 있을 경우
+            const data = bookmarks.data() as { bookmarkId: string[] };
+            console.log(data.bookmarkId, '북마크 데이터')
+            setCurrentBookmark(data.bookmarkId); // Recoil 상태 업데이트
+          } else {
+            // 북마크 데이터가 없을 경우
+            setCurrentBookmark([]); // 빈 배열로 설정
+          }
+        } catch (error) {
+          console.error("북마크 데이터를 가져오는 중 오류 발생:", error);
+          setCurrentBookmark([]); // 오류 시에도 빈 배열로 설정
+        }
+      }
+
+      loadBookmarks();
       checkLimit();
     } else {
       console.log('제한 안함')

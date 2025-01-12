@@ -46,15 +46,6 @@ export interface memoList {
     user: string
 }
 
-export interface BookmarkPostData {
-    tag: string;
-    id: string;
-    title: string;
-    userId: string;
-    comment: number;
-    createAt: any;
-}
-
 export interface noticeType {
     noticeId: string,
     noticeType: string,
@@ -91,15 +82,21 @@ export const PostState = atom<PostData[]>({
     key: 'PostState',
     default: []
 })
-// firebase에 저장된 포스트 데이터
+// firebase에 저장된 공지사항 데이터
 export const noticeState = atom<PostData[]>({
     key: 'noticeState',
     default: []
 })
 
-// firebase에 저장된 포스트 데이터
-export const bookMarkState = atom<BookmarkPostData[]>({
+// firebase에 저장된 북마크 데이터
+export const bookMarkState = atom<string[]>({
     key: 'bookMarkState',
+    default: []
+})
+
+// 북마크 페이지 데이터
+export const userBookMarkState = atom<PostData[]>({
+    key: 'userBookMarkState',
     default: []
 })
 
@@ -118,12 +115,7 @@ export const noticeList = atom<noticeType[]>({
 // 유저 ID
 export const userState = atom<userData | null>({
     key: 'userState',
-    default: {
-        uid: "",
-        email: "",
-        name: "",
-        photo: "",
-    },
+    default: null
 })
 
 // 로그인 창 토글
