@@ -16,287 +16,322 @@ import { auth, db } from '@/app/DB/firebaseConfig';
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
 width : 860px;
-padding : 20px 0px;
+padding : 20px 0px 0px;
 margin : 0 auto;
 
-// quill 에디터 랩
-.quill_wrap{
-    width : 100%;
-    height : 100%;
-    padding: 10px;
-    background : #fff;
-    border : none;
-    border-radius : 8px;
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
-}
-
-// 포스트 탑 태그, 제목
-
-.posting_top{
-    position :relative;
-    display: flex;
-    width: 100%;
-    height : 70px;
-    padding-bottom: 20px;
-    border-bottom : 1px solid #ededed;
-}
-
-// 공지사항 토글
-.notice_btn{
-    position : relative;
-    width: 49px;
-    height: 49px;
-    margin-right: 10px;
-    border: ${(props) => (props.notice ? '1px solid #fa5741' : '1px solid #ededed')};
-    border-radius: 8px;
-    background: #fff;
-    cursor: pointer;
-
-    p{
-        position: absolute;
-        left : 50%;
-        bottom: ${(props) => (props.notice ? '3px' : '4px')};
-        text-align: center;
-        transform: translateX(-50%);
-        font-size: 10px;
-        color : ${(props) => (props.notice ? '#fa5741' : '#bbb')};
-    }
-    
-}
-
-.tag_sel{
-    flex : 1 0 25%;
-    margin-right : 10px;
-    padding : 0px 12px;
-    outline : none;
-    border: 1px solid #ededed;
-    border-radius : 8px;
-}
-
-.title_input_wrap{
-    flex : 1 0 65%;
-    padding : 0px 12px;
-    font-size : 16px;
-    outline : none;
-    border: 1px solid #ededed;
-    border-radius : 8px;
-
-    .title_input{
+    // quill 에디터 랩
+    .quill_wrap{
         width : 100%;
         height : 100%;
-        font-size : 16px;
-        outline : none;
-        border: none;
-        border-radius : 8px;
-        color : transparent;
-        caret-color: #999;
+        padding: 10px;
+        background : #fff;
+        border : 1px solid #ededed;
+        border-bottom : none;
+        border-radius : 8px 8px 0px 0px;
         font-family : var(--font-pretendard-medium);
+    }
 
-        &::selection {  
-            color: transparent;  
-            background-color:rgb(76, 131, 250);
+    // 포스트 탑 태그, 제목
+    .posting_top{
+        position :relative;
+        display: flex;
+        width: 100%;
+        height : 70px;
+        padding-bottom: 20px;
+        border-bottom : 1px solid #ededed;
+        font-family : var(--font-pretendard-medium);
+    }
+
+    // 공지사항 토글
+    .notice_btn{
+        position : relative;
+        width: 49px;
+        height: 49px;
+        margin-right: 10px;
+        border: ${(props) => (props.notice ? '1px solid #fa5741' : '1px solid #ededed')};
+        border-radius: 8px;
+        background: #fff;
+        cursor: pointer;
+
+        p{
+            position: absolute;
+            left : 50%;
+            bottom: 4px;
+            text-align: center;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color : ${(props) => (props.notice ? '#fa5741' : '#bbb')};
+            font-family : var(--font-pretendard-medium);
         }
     }
 
-    .title_input
-    & .title_input:focus{
+    .tag_sel{
+        flex : 1 0 25%;
+        margin-right : 10px;
+        padding : 0px 12px;
         outline : none;
+        border: 1px solid #ededed;
+        border-radius : 8px;
     }
 
-    .title_input_value{
-        position: absolute;
-        top: 0;
-        display: flex;
-        line-height: 49px;
-    }
+    .title_input_wrap{
+        flex : 1 0 65%;
+        padding : 0px 12px;
+        font-size : 16px;
+        outline : none;
+        border: 1px solid #ededed;
+        border-radius : 8px;
 
-    .title_limit{
-        position: absolute;
-        right: 10px;
-        line-height: 49px;
-        font-size: 14px;
-    }
+        .title_input{
+            width : 100%;
+            height : 100%;
+            font-size : 16px;
+            outline : none;
+            border: none;
+            border-radius : 8px;
+            color : transparent;
+            caret-color: #999;
+            font-family : var(--font-pretendard-medium);
 
-    .title_error{
-        font-size: 14px;
-        color: #fa5741;
-        margin-top : 2px;
+            &::selection {  
+                color: transparent;  
+                background-color:rgb(76, 131, 250);
+            }
+        }
+
+        .title_input &.title_input:focus{
+            outline : none;
+        }
+
+        .title_input_value{
+            position: absolute;
+            top: 0;
+            display: flex;
+            line-height: 49px;
+        }
+
+        .title_limit{
+            position: absolute;
+            right: 10px;
+            line-height: 49px;
+            font-size: 14px;
+        }
+
+        .title_error{
+            font-size: 14px;
+            color: #fa5741;
+            margin-top : 2px;
+            font-family : var(--font-pretendard-medium);
+        }
     }
-}
 
 
 
 
 
 // 포스트 발행 버튼
-.post_btn{
-    position: absolute;
-    z-index: 1;
-    top: 820px;
-    left: -72px;
-    width: 64px;
-    height: 32px;
-    line-height: 32px;
-    border: none;
-    border-radius: 4px;
-    background: #0087ff;
-    font-size: 12px;
-    color: #fff;
-    cursor: pointer;
-}
+    .post_btn{
+        position: absolute;
+        z-index: 1;
+        top: 830px;
+        left: -41px;
+        width: 42px;
+        height: 70px;
+        border: 2px solid #1a5bf5;
+        border-right: #fff;
+        border-radius: 4px 0px 0px 4px;
+        background: #0087ff;
+        font-size: 16px;
+        color: #fff;
+        cursor: pointer;
+        writing-mode: vertical-rl;
+        font-family: 'var(--font-pretendard-medium)';
+        text-align: center;
+    }
+    .go_main_btn{
+        position: absolute;
+        top: 24px;
+        left: -63px;
+        width: 64px;
+        height: 64px;
+        padding: 15px;
+        border: 1px solid #ededed;
+        border-right: #fff;
+        background: #fff;
+        border-radius: 8px 0px 0px 8px;
+        cursor : pointer
+    }
+    // 에디터 박스
+    .quill{
+        width : 100%;
+        margin : 0 auto;
+    }
 
-// 에디터 박스
-.quill{
-width : 100%;
-margin : 0 auto;
-}
+    // 에디터 snow 스타일
+    .ql-container.ql-snow{
+        margin-top : 20px;
+        border : none;
+        padding-bottom: 100px;
+    }
 
-// 에디터 snow 스타일
-.ql-container.ql-snow{
-margin-top : 20px;
-border : none;
-}
+    .ql-snow .ql-image,
+    .ql-snow .ql-link{
+        width : 42px;
+        height : 42px;
+        margin-left : 3px;
+    }
 
-.ql-snow .ql-image,
-.ql-snow .ql-link{
-width : 42px;
-height : 42px;
-margin-left : 3px;
-}
-
-// 에디터 입력 칸
-.ql-editor{
-min-height: calc(100vh - 140px);
-border-radius : 8px;
-overflow: visible;
-padding : 0px 20px 100px;
-}
-
-
-
-// 커스텀 도구
-#custom_toolbar{
-position: absolute;
-z-index: 1;
-left: -72px;
-width: 64px;
-height: fit-content;
-padding: 0px 8px;
-background: #fff;
-border-radius: 8px;
-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-#toolbar span{
-font-size : 12px;
-}
-
-// 삽입 도구
-.ql_submit_wrap{
-    padding-bottom: 10px;
-    border-bottom: 1px solid #ededed;
-}
-
-.ql_link_wrap{
-margin-top : 10px;
-}
-
-.ql-image svg,
-.ql-link svg{
-width: 100%;
-}
-
-.ql-image rect,
-.ql-link path,
-.ql-image circle,
-.ql-link line{
-stroke-width : 1px;
-}
-
-// 아래 도구
-#toolbar-bottom{
-display : block;
-width: 100%;
-padding: 10px 8px;
-}
-
-// 폰트 사이즈 , 줄 간격
-.ql_size_wrap,
-.ql_lineheight_wrap{
-display : flex;
-position : relative;
-}
-
-// 도구 버튼
-.ql_size_toggle,
-.ql_lineheight_toggle,
-.ql_color_toggle,
-.ql_background_toggle,
-.ql_align_toggle{
-min-width: 32px;
-height: 32px;
-background : red;
-border : none;
-}
-
-.ql_lineheight_toggle,
-.ql_color_toggle,
-.ql_background_toggle,
-.ql_align_toggle{
-margin-top: 4px;
-}
+    // 에디터 입력 칸
+    .ql-editor{
+        min-height: calc(100vh - 231px);
+        overflow: visible;
+        padding: 0px 20px;
+        border-bottom: 1px solid #ededed;
+    }
 
 
-.ql_style_wrap{
-padding : 0px 8px;
-}
 
-.ql_style_wrap button{
-min-width : 32px;
-height : 32px;
-margin-top : 4px;
-border : none;
-padding : 6px;
-}
+    // 커스텀 도구
+    #custom_toolbar{
+        position: absolute;
+        z-index: 1;
+        left: -63px;
+        width: 64px;
+        height: -webkit-fit-content;
+        height: -moz-fit-content;
+        height: fit-content;
+        padding: 0px 8px;
+        background: #fff;
+        border: 1px solid #ededed;
+        border-right: 1px solid #fff;
+        border-radius: 8px 0px 0px 8px;
+    }
 
-.ql-snow .ql_style_wrap svg{
-width : 20px;
-height : 20px;
-}
+    #toolbar span{
+    font-size : 12px;
+    }
 
-.ql_size_list,
-.ql_lineheight_list{
-position: absolute;
-top: 0px;
-left: 48px;
-width: 80px;
-padding: 8px 0px;
-background: #fff;
-border: 1px solid #ededed;
-border-radius: 4px;
-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-.ql_size_list{
-    top: -60px;
-}
+    // 삽입 도구
+    .ql_submit_wrap{
+        padding-bottom: 10px;
+        border-bottom: 1px solid #ededed;
+    }
 
-.ql_size_item,
-.ql_lineheight_item{
+    .ql_link_wrap{
+    margin-top : 10px;
+    }
+
+    .ql-image svg,
+    .ql-link svg{
     width: 100%;
-    height: 32px;
-}
+    }
 
-.ql_size_btn,
-.ql_lineheight_btn{
-    width: 100%;
-    height: 100%;
-    text-align: left;
-    border: none;
-    background: none;
-    cursor: pointer;
-    padding-left: 8px;
-    color: #333;
-}
+    .ql-image rect,
+    .ql-link path,
+    .ql-image circle,
+    .ql-link line{
+    stroke-width : 1px;
+    }
+
+    // 아래 도구
+    #toolbar-bottom{
+        display : block;
+        width: 100%;
+        padding: 10px 8px;
+    }
+
+    // 폰트 사이즈 , 줄 간격
+    .ql_size_wrap,
+    .ql_lineheight_wrap{
+        display : flex;
+        position : relative;
+    }
+
+    // 도구 버튼
+    .ql_size_toggle,
+    .ql_lineheight_toggle,
+    .ql_color_toggle,
+    .ql_background_toggle,
+    .ql_align_toggle{
+        min-width: 32px;
+        height: 32px;
+        background : #fff;
+        border : none;
+        font-family : var(--font-pretendard-medium);
+        cursor : pointer;
+    }
+
+    .ql_lineheight_toggle,
+    .ql_color_toggle,
+    .ql_background_toggle,
+    .ql_align_toggle{
+        margin-top: 4px;
+    }
+        
+    .ql_background_toggle{
+        padding : 6px;
+
+        svg{
+            border: 1px solid;
+            border-radius : 2px;
+        }
+    }
+
+    .ql_align_toggle{
+        padding :4px;
+    }
+
+    .ql_style_wrap{
+        padding : 0px 8px;
+    }
+
+    .ql_style_wrap button{
+        min-width : 32px;
+        height : 32px;
+        margin-top : 4px;
+        border : none;
+        padding : 6px;
+    }
+
+    .ql-snow .ql_style_wrap svg{
+        width : 20px;
+        height : 20px;
+    }
+
+    .ql_size_list,
+    .ql_lineheight_list{
+        position: absolute;
+        top: 0px;
+        left: 48px;
+        width: 80px;
+        padding: 8px 0px;
+        background: #fff;
+        border: 1px solid #ededed;
+        border-radius: 4px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .ql_size_list{
+        top: -60px;
+    }
+
+    .ql_size_item,
+    .ql_lineheight_item{
+        width: 100%;
+        height: 32px;
+    }
+
+    .ql_size_btn,
+    .ql_lineheight_btn{
+        width: 100%;
+        height: 100%;
+        text-align: left;
+        border: none;
+        background: none;
+        cursor: pointer;
+        padding-left: 8px;
+        color: #333;
+    }
 
     & .ql_size_btn:hover,
     & .ql_lineheight_btn:hover{
@@ -308,149 +343,156 @@ box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     color : #0087ff;
     }
 
-.ql-lineheight{
-margin-top : 4px;
-}
+    .ql-lineheight{
+    margin-top : 4px;
+    }
 
-.ql-color,
-.ql-background,
-.ql-align{
-display : flex;
-width : fit-content
-}
+    .ql-color,
+    .ql-background,
+    .ql-align{
+        display : flex;
+        width : fit-content
+    }
 
-.ql-color span,
-.ql-background span{
-display : none;
-}
+    .ql-color span,
+    .ql-background span{
+        display : none;
+    }
 
-.ql_color_list,
-.ql_background_list
-{
-    position: absolute;
-    left: 50px;
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    width: 176px;
-    margin-top: 4px;
-    margin-left: 14px;
-    background: #fff;
-    border: 1px solid #ededed;
-    border-radius: 4px;
-    padding: 8px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
-}
+    .ql_color_list,
+    .ql_background_list
+    {
+        position: absolute;
+        left: 50px;
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        width: 176px;
+        margin-top: 4px;
+        margin-left: 14px;
+        background: #fff;
+        border: 1px solid #ededed;
+        border-radius: 4px;
+        padding: 8px;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    }
 
-.ql-color .ql_color_pallete,
-.ql-background .ql_background_pallete{
-width : 100%;
-height : 100%;
-border : none;
-}
+    .ql-color .ql_color_pallete,
+    .ql-background .ql_background_pallete{
+        width : 100%;
+        height : 100%;
+        border : none;
+    }
 
-.ql-color .ql_color_item,
-.ql-background .ql_background_item{
-width : 14px;
-height : 14px;
-margin-right: 2px
-}
+    .ql-color .ql_color_item,
+    .ql-background .ql_background_item{
+        width : 14px;
+        height : 14px;
+        margin-right: 2px
+    }
 
-.ql-color .ql_color_item:nth-of-type(10n),
-.ql-background .ql_background_item:nth-of-type(10n){
-margin-right : 0px;
-}
-.ql-color .ql_color_item:nth-of-type(n+11),
-.ql-background .ql_background_item:nth-of-type(n+11){
-margin-top : 2px;
-}
+    .ql-color .ql_color_item:nth-of-type(10n),
+    .ql-background .ql_background_item:nth-of-type(10n){
+        margin-right : 0px;
+    }
+    .ql-color .ql_color_item:nth-of-type(n+11),
+        .ql-background .ql_background_item:nth-of-type(n+11){
+        margin-top : 2px;
+    }
 
-.ql_color_item:nth-of-type(1) .ql_color_pallete,
-.ql_background_item:nth-of-type(1) .ql_background_pallete{
-border : 2px solid #ededed;
-vertical-align: top; 
-}
+    .ql_color_item:nth-of-type(1) .ql_color_pallete,
+    .ql_background_item:nth-of-type(1) .ql_background_pallete{
+        border : 2px solid #ededed;
+        vertical-align: top; 
+    }
 
-.ql_color_pallete,
-.ql_background_pallete,
-.ql_align_btn
- {
-cursor:pointer
-}
+    .ql_color_pallete,
+    .ql_background_pallete,
+    .ql_align_btn
+    {
+        cursor:pointer
+    }
 
-.ql_image_wrap,
-.ql_link_wrap{
-width: 48px;
-text-align : center;
-}
+    .ql_image_wrap,
+    .ql_link_wrap{
+        width: 48px;
+        text-align : center;
+    }
 
-.ql_align_list{
-    position: absolute;
-    left: 50px;
-    display: flex;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    width: 140px;
-    margin-top: 4px;
-    margin-left: 4px;
-    background: #fff;
-    border: 1px solid #ededed;
-    border-radius: 4px;
-    padding: 4px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
-}
+    .ql_align_list{
+        position: absolute;
+        left: 50px;
+        display: flex;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        width: 140px;
+        margin-top: 4px;
+        margin-left: 4px;
+        background: #fff;
+        border: 1px solid #ededed;
+        border-radius: 4px;
+        padding: 4px;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    }
 
-.ql_align_item{
-display : block;
-}
+    .ql_align_item{
+        display : block;
+    }
 
-.ql_align_btn{
-width : 32px;
-height : 32px;
-}
+    .ql_align_btn{
+        width : 32px;
+        height : 32px;
+        border: none;
+        background: #fff;
+        padding: 4px;
+    }
 
-#toolbar {
-    display: block;
-    width: 100%;
-    padding: 10px 0px 10px;
-    border: none;
-}
+    .setAlign line{
+        stroke : #0087ff;
+    }
+
+    #toolbar {
+        display: block;
+        width: 100%;
+        padding: 10px 0px 10px;
+        border: none;
+    }
 
 
 
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="10px"]::before {
-  content: "10px";
-}
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before {
-  content: "12px";
-}
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="14px"]::before {
-  content: "14px";
-}
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="16px"]::before {
-  content: "16px";
-}
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="18px"]::before {
-  content: "18px";
-}
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="20px"]::before {
-  content: "20px";
-}
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="24px"]::before {
-  content: "24px";
-}
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="28px"]::before {
-  content: "28px";
-}
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="32px"]::before {
-  content: "32px";
-}
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="36px"]::before {
-  content: "36px";
-}
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="40px"]::before {
-  content: "40px";
-}
+    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="10px"]::before {
+        content: "10px";
+    }
+    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before {
+        content: "12px";
+    }
+    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="14px"]::before {
+        content: "14px";
+    }
+    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="16px"]::before {
+        content: "16px";
+    }
+    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="18px"]::before {
+        content: "18px";
+    }
+    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="20px"]::before {
+        content: "20px";
+    }
+    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="24px"]::before {
+        content: "24px";
+    }
+    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="28px"]::before {
+        content: "28px";
+    }
+    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="32px"]::before {
+        content: "32px";
+    }
+    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="36px"]::before {
+        content: "36px";
+    }
+    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="40px"]::before {
+        content: "40px";
+    }
 
 `
 const LoadModal = css`
@@ -541,7 +583,10 @@ export default function PostMenu() {
     // tool toggle state
     const [toolToggle, setToolToggle] = useState<string>('');
     const [selectFontSize, setSelectedFontSize] = useState<string>('14px');
-    const [selectLineheight, setSelectedLineheight] = useState<string>('1.5');
+    const [selectColor, setSelectedColor] = useState<string>('#191919');
+    const [selectBgColor, setSelectedBgColor] = useState<string>('#ffffff');
+    const [selectLineheight, setSelectedLineHeight] = useState<string>('1.5');
+    const [selectAlign, setSelectedAlign] = useState<string>('left');
 
     //  State
 
@@ -562,6 +607,7 @@ export default function PostMenu() {
 
     const fontsize = ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px', '36px', '40px']
     const lineheight = ['1', '1.5', '2', '2.5', '3', '4', '5']
+    const align = ['left', 'center', 'right', 'justify']
     const [quillLoaded, setQuillLoaded] = useState(false);
 
     // quill 모듈 로드
@@ -625,6 +671,7 @@ export default function PostMenu() {
         if (range) {
             const colorValue = color === '색상 없음' ? null : color
             editor.format('color', colorValue);
+            setSelectedColor(color)
         }
     };
 
@@ -634,6 +681,7 @@ export default function PostMenu() {
         if (range) {
             const colorValue = color === '색상 없음' ? null : color
             editor.format('background', colorValue);
+            setSelectedBgColor(color)
         }
     };
 
@@ -642,7 +690,20 @@ export default function PostMenu() {
         const range = editor.getSelection();
         if (range && height) {
             editor.format('lineheight', height);
-            setSelectedLineheight(height);
+            setSelectedLineHeight(height);
+        }
+    };
+
+    const handleAlignChange = (align: string) => {
+        const editor = quillRef.current.getEditor();
+        const range = editor.getSelection();
+        if (range) {
+            if (align === 'left') {
+                editor.format('align', false); // 기본값으로 설정
+            } else {
+                editor.format('align', align); // 다른 align 스타일 적용
+            }
+            setSelectedAlign(align);
         }
     };
 
@@ -956,15 +1017,29 @@ export default function PostMenu() {
             setImageUrls(currentImageUrls.slice(0, MAX_IMG_COUNT)); // 상태 업데이트
         };
 
+        // 텍스트 커서 및 선택 범위 변경 시 도구에 반영
+        const handleCursorChange = () => {
+            const range = editor.getSelection(); // 현재 커서 범위
+            if (range) {
+                const currentFormats = editor.getFormat(range); // 커서 위치의 스타일 정보
+                setSelectedFontSize(currentFormats.size || '14px'); // 폰트 크기
+                setSelectedLineHeight(currentFormats.lineheight || '1'); // 줄 높이
+                setSelectedColor(currentFormats.color || '#191919'); // 글자 색
+                setSelectedBgColor(currentFormats.background || '#191919'); // 배경 색
+                setSelectedAlign(currentFormats.align || 'left'); // 정렬
+            }
+        };
+
         // Quill 이벤트 등록
         editor.on('text-change', handleImageLimit);
-
+        editor.on('selection-change', handleCursorChange);
         return () => {
             // 정리 작업
             editor.clipboard.matchers = [];
             editor.off('text-change', handleImageLimit);
+            editor.off('selection-change', handleCursorChange);
         };
-    }, [quillRef, imageUrls, setImageUrls, storageLoad]);
+    }, [quillRef, storageLoad, imageUrls]);
 
     useEffect(() => {
         if (!postingComplete) {
@@ -1001,8 +1076,8 @@ export default function PostMenu() {
         if (savedData) setConfirmed(true);
     }, [])
 
-    // 도구 외 클릭 시 닫기
     useEffect(() => {
+        // 도구 외 클릭 시 닫기
         const clickOutside = (event: MouseEvent) => {
             if (styleToolRef.current && !styleToolRef.current.contains(event.target as Node)) {
                 setToolToggle('');
@@ -1015,6 +1090,8 @@ export default function PostMenu() {
             document.removeEventListener('mousedown', clickOutside);
         }
     }, [])
+
+
     // Function
     const SetModules = useMemo(
         () =>
@@ -1062,6 +1139,7 @@ export default function PostMenu() {
         'background',
         'align',
         'font',
+        'align',
         'lineheight', // 줄간격 추가
     ];
 
@@ -1073,6 +1151,15 @@ export default function PostMenu() {
         <>
             <QuillStyle notice={checkedNotice}>
                 <div className='quill_wrap'>
+                    <button className='go_main_btn' onClick={() => router.push('/home/main')}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22.18 22.18">
+                            <g id="Layer_2" data-name="Layer 2">
+                                <polyline points="8.55 8.72 3.37 14.49 8.55 19.68" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1} />
+                                <path d="M3.37,14.49h8.27a8.54,8.54,0,0,0,4.18-1,5.45,5.45,0,0,0,3-5,5.48,5.48,0,0,0-3-5,8.63,8.63,0,0,0-4.23-1H9.51" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1} />
+                                <rect width="22.18" height="22.18" fill='none' />
+                            </g>
+                        </svg>
+                    </button>
                     <div className='posting_top'>
                         <button className='notice_btn' onClick={HandleCheckedNotice}>
                             {checkedNotice ?
@@ -1166,7 +1253,9 @@ export default function PostMenu() {
                         <div id='toolbar-bottom' ref={styleToolRef}>
                             {/* <!-- Font Size --> */}
                             <div className='ql_size_wrap'>
-                                <button className='ql_size_toggle' onClick={() => toolToggleHandle('fontsize')}></button>
+                                <button className='ql_size_toggle' onClick={() => toolToggleHandle('fontsize')}>
+                                    {selectFontSize}
+                                </button>
                                 {toolToggle === 'fontsize' &&
                                     <ul className='ql_size_list'>
                                         {fontsize.map((size, ftIndex) => (
@@ -1187,7 +1276,18 @@ export default function PostMenu() {
 
                             {/* <!-- Line Height --> */}
                             <div className='ql_lineheight_wrap'>
-                                <button className='ql_lineheight_toggle' onClick={() => toolToggleHandle('lineheight')}></button>
+                                <button className='ql_lineheight_toggle' onClick={() => toolToggleHandle('lineheight')}>
+                                    <svg viewBox="0 0 32 32">
+                                        <g data-name="레이어 2">
+                                            <rect width="32" height="32" fill='none' />
+                                            <line x1="8" y1="8" x2="24" y2="8" fill='none' stroke='#191919' strokeWidth={1.5} />
+                                            <line x1="8" y1="24" x2="24" y2="24" fill='none' stroke='#191919' strokeWidth={1.5} />
+                                            <polyline points="14.21 12.55 16.25 10.4 18.4 12.55" fill='none' stroke='#191919' strokeWidth={1.5} />
+                                            <line x1="16.25" y1="10.32" x2="16.25" y2="21.6" fill='none' stroke='#191919' strokeWidth={1.5} />
+                                            <polyline points="18.35 19.45 16.31 21.6 14.15 19.45" fill='none' stroke='#191919' strokeWidth={1.5} />
+                                        </g>
+                                    </svg>
+                                </button>
                                 {toolToggle === 'lineheight' &&
                                     <ul className='ql_lineheight_list'>
                                         {lineheight.map((height, lhIndex) => (
@@ -1208,7 +1308,14 @@ export default function PostMenu() {
 
                             {/* <!-- Font Color --> */}
                             <div className='ql-color' >
-                                <button className='ql_color_toggle' onClick={() => toolToggleHandle('color')}></button>
+                                <button className='ql_color_toggle' onClick={() => toolToggleHandle('color')}>
+                                    <svg viewBox="0 0 32 32">
+                                        <g data-name="Layer 2">
+                                            <rect width="32" height="32" fill='none' />
+                                            <path xmlns="http://www.w3.org/2000/svg" d="M20.73,9h-13a.24.24,0,0,0-.25.23v2.88h.69a2.43,2.43,0,0,1,.43-1.09H13a.24.24,0,0,1,.25.22V23.7a.24.24,0,0,0,.25.23H15a.24.24,0,0,0,.25-.23V11.28a.25.25,0,0,1,.26-.22h4a2.19,2.19,0,0,1,.8,1.46H21V9.27A.24.24,0,0,0,20.73,9Z" fill='#191919' />                                            <rect x="19.74" y="19.43" width="4.5" height="4.5" rx="0.3" fill='#191919' />
+                                        </g>
+                                    </svg>
+                                </button>
                                 {toolToggle === 'color' &&
                                     <ul className='ql_color_list'>
                                         {colorPallete.color.map((color, clIndex) => (
@@ -1232,7 +1339,15 @@ export default function PostMenu() {
 
                             {/* <!-- Background Color --> */}
                             <div className="ql-background">
-                                <button className='ql_color_toggle' onClick={() => toolToggleHandle('background')}></button>
+                                <button className='ql_background_toggle' onClick={() => toolToggleHandle('background')}>
+                                    <svg viewBox="0 0 32 32">
+                                        <g data-name="레이어 2">
+                                            <g id="Layer_2" data-name="Layer 2">
+                                                <rect width="32" height="32" fill='none' />
+                                                <path d="M25.62,6H6.37A.35.35,0,0,0,6,6.31v3.86H7a3.2,3.2,0,0,1,.64-1.46h6.5a.34.34,0,0,1,.37.3V25.69a.35.35,0,0,0,.38.31h2.25a.35.35,0,0,0,.38-.31V9a.33.33,0,0,1,.37-.3h5.88a2.88,2.88,0,0,1,1.19,2h1V6.31A.35.35,0,0,0,25.62,6Z" fill='#191919' />                                            </g>
+                                        </g>
+                                    </svg>
+                                </button>
                                 {toolToggle === 'background' &&
                                     <ul className='ql_background_list'>
                                         {colorPallete.background.map((bgColor, bgIndex) => (
@@ -1257,20 +1372,126 @@ export default function PostMenu() {
 
                             {/* <!-- Text Align --> */}
                             <div className="ql-align">
-                                <button className='ql_color_toggle' onClick={() => toolToggleHandle('align')}></button>
+                                <button className='ql_align_toggle' onClick={() => toolToggleHandle('align')}>
+                                    {selectAlign === 'left' ?
+                                        <svg viewBox="0 0 32 32">
+                                            <g id="레이어_2" data-name="레이어 2">
+                                                <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1.5} />
+                                                <line x1="6" y1="11.25" x2="18" y2="11.25" stroke='#191919' strokeWidth={1.5} />
+                                                <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1.5} />
+                                                <line x1="6" y1="20.75" x2="18" y2="20.75" stroke='#191919' strokeWidth={1.5} />
+                                                <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1.5} />
+                                                <rect width="32" height="32" fill='none' />
+                                            </g>
+                                        </svg>
+                                        : selectAlign === 'center' ?
+                                            <svg viewBox="0 0 32 32">
+                                                <g id="Layer_2" data-name="Layer 2">
+                                                    <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
+                                                    <line x1="10" y1="11.25" x2="22" y2="11.25" stroke='#191919' strokeWidth={1} />
+                                                    <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
+                                                    <line x1="10" y1="20.75" x2="22" y2="20.75" stroke='#191919' strokeWidth={1} />
+                                                    <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1} />
+                                                    <rect width="32" height="32" fill='none' />
+                                                </g>
+                                            </svg>
+                                            : selectAlign === 'right' ?
+                                                <svg viewBox="0 0 32 32">
+                                                    <g id="Layer_2" data-name="Layer 2">
+                                                        <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="14" y1="11.25" x2="26" y2="11.25" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="14" y1="20.75" x2="26" y2="20.75" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1} />
+                                                        <rect width="32" height="32" fill='none' />
+                                                    </g>
+                                                </svg>
+                                                :
+                                                <svg viewBox="0 0 32 32">
+                                                    <g id="Layer_2" data-name="Layer 2">
+                                                        <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="11.25" x2="26" y2="11.25" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="20.75" x2="26" y2="20.75" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1} />
+                                                        <rect width="32" height="32" fill='none' />
+                                                    </g>
+                                                </svg>
+                                    }
+                                </button>
                                 {toolToggle === 'align' &&
                                     <ul className='ql_align_list'>
                                         <li className='ql_align_item'>
-                                            <button className='ql_align_btn' data-align-value="left"></button>
+                                            <button
+                                                className={selectAlign === 'left' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
+                                                data-align-value='left'
+                                                onClick={() => { handleAlignChange('left') }}
+                                            >
+                                                <svg viewBox="0 0 32 32">
+                                                    <g id="레이어_2" data-name="레이어 2">
+                                                        <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1.5} />
+                                                        <line x1="6" y1="11.25" x2="18" y2="11.25" stroke='#191919' strokeWidth={1.5} />
+                                                        <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1.5} />
+                                                        <line x1="6" y1="20.75" x2="18" y2="20.75" stroke='#191919' strokeWidth={1.5} />
+                                                        <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1.5} />
+                                                        <rect width="32" height="32" fill='none' />
+                                                    </g>
+                                                </svg>
+                                            </button>
                                         </li>
                                         <li className='ql_align_item'>
-                                            <button className='ql_align_btn' data-align-value="center"></button>
+                                            <button
+                                                className={selectAlign === 'center' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
+                                                data-align-value='center'
+                                                onClick={() => { handleAlignChange('center') }}
+                                            >
+                                                <svg viewBox="0 0 32 32">
+                                                    <g id="Layer_2" data-name="Layer 2">
+                                                        <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="10" y1="11.25" x2="22" y2="11.25" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="10" y1="20.75" x2="22" y2="20.75" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1} />
+                                                        <rect width="32" height="32" fill='none' />
+                                                    </g>
+                                                </svg>
+                                            </button>
                                         </li>
                                         <li className='ql_align_item'>
-                                            <button className='ql_align_btn' data-align-value="right"></button>
+                                            <button
+                                                className={selectAlign === 'right' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
+                                                data-align-value='right'
+                                                onClick={() => { handleAlignChange('right') }}
+                                            >
+                                                <svg viewBox="0 0 32 32">
+                                                    <g id="Layer_2" data-name="Layer 2">
+                                                        <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="14" y1="11.25" x2="26" y2="11.25" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="14" y1="20.75" x2="26" y2="20.75" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1} />
+                                                        <rect width="32" height="32" fill='none' />
+                                                    </g>
+                                                </svg>
+                                            </button>
                                         </li>
                                         <li className='ql_align_item'>
-                                            <button className='ql_align_btn' data-align-value="justify"></button>
+                                            <button
+                                                className={selectAlign === 'justify' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
+                                                data-align-value='justify'
+                                                onClick={() => { handleAlignChange('justify') }}
+                                            >
+                                                <svg viewBox="0 0 32 32">
+                                                    <g id="Layer_2" data-name="Layer 2">
+                                                        <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="11.25" x2="26" y2="11.25" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="20.75" x2="26" y2="20.75" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1} />
+                                                        <rect width="32" height="32" fill='none' />
+                                                    </g>
+                                                </svg>
+                                            </button>
                                         </li>
                                     </ul>
                                 }

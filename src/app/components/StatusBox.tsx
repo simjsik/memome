@@ -12,7 +12,7 @@ right : 160px;
 width : 400px;
 height: calc(100vh - 80px);
 padding : 0px 20px;
-border : 1px solid #dedede;
+border : 1px solid #ededed;
 border-radius : 8px;
 background : #fff;
 
