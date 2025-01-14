@@ -214,12 +214,24 @@ export default function NavBar() {
                     {/* 프로필 */}
                     <NavMenu isActive={4 === selectedMenu} onClick={() => handleNavClick(4)}>
                         <div className='menu_icon'>
-                            <svg width="40" height="40" viewBox="0 0 40 40">
-                                <g>
-                                    <rect width="40" height="40" fill="none" />
-                                    <path d="M31.466,28.906l-4.084-4.084-.068-.053a10.691,10.691,0,1,0-2.545,2.545l.053.068,4.084,4.084a1.81,1.81,0,1,0,2.56-2.56ZM10.145,18.628A8.484,8.484,0,1,1,18.628,27.1a8.484,8.484,0,0,1-8.484-8.476Z" fill='#ccc' />
-                                </g>
-                            </svg>
+                            {4 === selectedMenu ?
+                                <svg viewBox="0 0 36 36">
+                                    <g id="Layer_2" data-name="Layer 2">
+                                        <circle cx="18" cy="11.5" r="4" fill="#050505" stroke="none"/>
+                                        <path d="M27.3,28.5a2,2,0,0,0,1.6-2.62C27.6,21.63,23.22,18.5,18,18.5S8.4,21.63,7.1,25.88A2,2,0,0,0,8.7,28.5Z" fill="#050505" stroke='none' strokeWidth={'2.5'} />
+                                        <rect width="40" height="40" fill="none" stroke='none' />
+                                    </g>
+                                </svg>
+                                :
+                                <svg viewBox="0 0 36 36">
+                                    <g id="Layer_2" data-name="Layer 2">
+                                        <circle cx="18" cy="11.5" r="4" fill="none" stroke='#ccc' strokeWidth={'2.5'} />
+                                        <path d="M27.3,28.5a2,2,0,0,0,1.6-2.62C27.6,21.63,23.22,18.5,18,18.5S8.4,21.63,7.1,25.88A2,2,0,0,0,8.7,28.5Z" fill="none" stroke='#ccc' strokeWidth={'2.5'} />
+                                        <rect width="40" height="40" fill="none" stroke='none' />
+                                    </g>
+                                </svg>
+                            }
+
                         </div>
                     </NavMenu>
 

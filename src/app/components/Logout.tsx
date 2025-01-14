@@ -14,7 +14,20 @@ const LogoutButton = css`
     bottom: 20px;
     width : calc(100% - 40px);
     height : 52px;
-    background : #4cc9bf;
+    background : #fff;
+    color : #191919;
+    border : 1px solid #ededed;
+    border-radius : 4px;
+    font-size : 16px;
+    font-family : var(--font-pretendard-medium)
+    cursor : pointer;
+`
+const LogInButton = css`
+    position : absolute;
+    bottom: 20px;
+    width : calc(100% - 40px);
+    height : 52px;
+    background : #0087ff;
     color : #fff;
     border : none;
     border-radius : 4px;
@@ -65,7 +78,7 @@ export default function Logout() {
                     <button onClick={handleLogout} css={LogoutButton}>로그아웃</button>
                 </div>
                 :
-                <button onClick={handleLoginToggle} css={LogoutButton}>로그인</button>
+                <button onClick={handleLoginToggle} css={LogInButton}>로그인</button>
             }
         </>
     )

@@ -21,13 +21,13 @@ margin : 0 auto;
 
 // quill 에디터 랩
 .quill_wrap{
-width : 100%;
-height : 100%;
-padding: 10px;
-background : #fff;
-border : none;
-border-radius : 8px;
-box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+    width : 100%;
+    height : 100%;
+    padding: 10px;
+    background : #fff;
+    border : none;
+    border-radius : 8px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
 }
 
 // 포스트 탑 태그, 제목
@@ -36,44 +36,97 @@ box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
     position :relative;
     display: flex;
     width: 100%;
-    height : 60px;
-    padding-bottom: 10px;
+    height : 70px;
+    padding-bottom: 20px;
     border-bottom : 1px solid #ededed;
 }
 
 // 공지사항 토글
 .notice_btn{
-width: 46px;
-height: 46px;
-margin-right: 10px;
-border: none;
-border-radius: 8px;
-background: ${(props) => (props.notice ? '#eb2e21' : '#fff')};
-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-cursor: pointer;
+    position : relative;
+    width: 49px;
+    height: 49px;
+    margin-right: 10px;
+    border: ${(props) => (props.notice ? '1px solid #fa5741' : '1px solid #ededed')};
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+
+    p{
+        position: absolute;
+        left : 50%;
+        bottom: ${(props) => (props.notice ? '3px' : '4px')};
+        text-align: center;
+        transform: translateX(-50%);
+        font-size: 10px;
+        color : ${(props) => (props.notice ? '#fa5741' : '#bbb')};
+    }
+    
 }
 
 .tag_sel{
-flex : 1 0 25%;
-margin-right : 10px;
-padding : 0px 12px;
-outline : none;
-border: 1px solid #ededed;
+    flex : 1 0 25%;
+    margin-right : 10px;
+    padding : 0px 12px;
+    outline : none;
+    border: 1px solid #ededed;
+    border-radius : 8px;
 }
 
-.title_input{
-flex : 1 0 65%;
-padding : 0px 12px;
-font-size : 16px;
-outline : none;
-border: 1px solid #ededed;
+.title_input_wrap{
+    flex : 1 0 65%;
+    padding : 0px 12px;
+    font-size : 16px;
+    outline : none;
+    border: 1px solid #ededed;
+    border-radius : 8px;
+
+    .title_input{
+        width : 100%;
+        height : 100%;
+        font-size : 16px;
+        outline : none;
+        border: none;
+        border-radius : 8px;
+        color : transparent;
+        caret-color: #999;
+        font-family : var(--font-pretendard-medium);
+
+        &::selection {  
+            color: transparent;  
+            background-color:rgb(76, 131, 250);
+        }
+    }
+
+    .title_input
+    & .title_input:focus{
+        outline : none;
+    }
+
+    .title_input_value{
+        position: absolute;
+        top: 0;
+        display: flex;
+        line-height: 49px;
+    }
+
+    .title_limit{
+        position: absolute;
+        right: 10px;
+        line-height: 49px;
+        font-size: 14px;
+    }
+
+    .title_error{
+        font-size: 14px;
+        color: #fa5741;
+        margin-top : 2px;
+    }
 }
 
 
 
-& .title_input:focus{
-outline : none;
-}
+
 
 // 포스트 발행 버튼
 .post_btn{
@@ -86,7 +139,7 @@ outline : none;
     line-height: 32px;
     border: none;
     border-radius: 4px;
-    background: #4cc9bf;
+    background: #0087ff;
     font-size: 12px;
     color: #fff;
     cursor: pointer;
@@ -247,12 +300,12 @@ box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 
     & .ql_size_btn:hover,
     & .ql_lineheight_btn:hover{
-    color : #4cc9bf;
+    color : #0087ff;
     }
 
     .setFont,
     .setLineheight {
-    color : #4cc9df;
+    color : #0087ff;
     }
 
 .ql-lineheight{
@@ -458,8 +511,8 @@ cursor:pointer;
 }
 .load_ok_btn{
 margin-right : 10px;
-border: 1px solid #4cc9bf;
-color : #4cc9bf;
+border: 1px solid #0087ff;
+color : #0087ff;
 font-family : var(--font-pretendard-bold);
 }
 .load_no_btn{
@@ -476,6 +529,7 @@ export default function PostMenu() {
 
     const [postingComplete, setPostingComplete] = useState<boolean>(false);
     const [postTitle, setPostTitle] = useState<string>('');
+    const [titleError, setTitleError] = useState<string>('');
     const [storageLoad, setStorageLoad] = useRecoilState<boolean>(storageLoadState);
     const [posting, setPosting] = useRecoilState<string>(PostingState);
     const [postDate, setPostDate] = useState<string>('');
@@ -615,8 +669,22 @@ export default function PostMenu() {
     }
 
     // 포스팅 제목.
+    const title_limit_count = 20; // 글자수 제한
+    const title_limit_max = 30; // 글자 입력 맥스
     const handlePostingTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setPostTitle(e.target.value);
+
+        const value = e.target.value;
+
+        // 입력이 최대 길이 초과 시 차단
+        if (value.length > title_limit_max) {
+            return;
+        }
+
+        if (value.length > title_limit_count) {
+            setTitleError('제목을 최대 20자 내외로 작성해주세요.');
+        }
+
+        setPostTitle(value);
     }
 
     // Cloudinary에 이미지 업로드 요청
@@ -776,6 +844,7 @@ export default function PostMenu() {
     const MAX_IMG_SIZE = 2 * 1024 * 1024;
     // 이미지 최대 수
     const MAX_IMG_COUNT = 4;
+
     // 이미지 삽입 시 이미지 배열 관리
     const imageHandler = async (url: string) => { // Quill 이미지 입력 시 imagesUrls 상태에 추가.
         const input = document.createElement('input');
@@ -1005,7 +1074,33 @@ export default function PostMenu() {
             <QuillStyle notice={checkedNotice}>
                 <div className='quill_wrap'>
                     <div className='posting_top'>
-                        <button className='notice_btn' onClick={HandleCheckedNotice}></button>
+                        <button className='notice_btn' onClick={HandleCheckedNotice}>
+                            {checkedNotice ?
+                                <>
+                                    <svg width="32" height="32" viewBox="0 8 40 40">
+                                        <g>
+                                            <path className='notice_path_01' d="M29.55,26.26,28.36,25a1.14,1.14,0,0,1-.3-.77V19.26a8.29,8.29,0,0,0-7-8.32,8.09,8.09,0,0,0-9.14,8v5.23a1.14,1.14,0,0,1-.3.77l-1.19,1.31a1.72,1.72,0,0,0,1.26,2.87H28.29A1.72,1.72,0,0,0,29.55,26.26Z" fill="none" stroke='#fa5741' strokeWidth={'2'} />
+                                            <path className='notice_path_02' d="M17.51,29.13a.34.34,0,0,0-.35.37,2.86,2.86,0,0,0,5.68,0,.34.34,0,0,0-.35-.37Z" fill="none" stroke='#fa5741' strokeWidth={'2'} />
+                                            <circle cx="20" cy="9.15" r="1.15" fill="none" stroke='#fa5741' strokeWidth={'2'} />
+                                            <rect width="32" height="32" fill="none" />
+                                        </g>
+                                    </svg>
+                                    <p>공지</p>
+                                </>
+                                :
+                                <>
+                                    <svg width="32" height="32" viewBox="0 8 40 40">
+                                        <g>
+                                            <path className='notice_path_01' d="M29.55,26.26,28.36,25a1.14,1.14,0,0,1-.3-.77V19.26a8.29,8.29,0,0,0-7-8.32,8.09,8.09,0,0,0-9.14,8v5.23a1.14,1.14,0,0,1-.3.77l-1.19,1.31a1.72,1.72,0,0,0,1.26,2.87H28.29A1.72,1.72,0,0,0,29.55,26.26Z" fill="none" stroke='#ccc' strokeWidth={'2'} />
+                                            <path className='notice_path_02' d="M17.51,29.13a.34.34,0,0,0-.35.37,2.86,2.86,0,0,0,5.68,0,.34.34,0,0,0-.35-.37Z" fill="none" stroke='#ccc' strokeWidth={'2'} />
+                                            <circle cx="20" cy="9.15" r="1.15" fill="none" stroke='#ccc' strokeWidth={'2'} />
+                                            <rect width="32" height="32" fill="none" />
+                                        </g>
+                                    </svg>
+                                    <p>공지</p>
+                                </>
+                            }
+                        </button>
                         {checkedNotice ?
                             <select ref={tagRef} className='tag_sel' defaultValue={'공지사항'}>
                                 <option value="공지사항">공지사항</option>
@@ -1018,8 +1113,18 @@ export default function PostMenu() {
                                 <option value="일상">일상</option>
                             </select>
                         }
+                        <div className='title_input_wrap'>
+                            <input className='title_input' type="text" placeholder='제목' value={postTitle} onChange={handlePostingTitle} />
+                            <div className='title_input_value'>
+                                <p>{postTitle.slice(0, title_limit_count)}</p>
+                                <p style={{ color: '#fa5741' }}>{postTitle.slice(title_limit_count)}</p>
+                            </div>
+                            <span className='title_limit'>{postTitle.length} / 20</span>
+                            {postTitle.length > 20 &&
+                                <p className='title_error'>{titleError}</p>
+                            }
+                        </div>
 
-                        <input className='title_input' type="text" placeholder='제목' value={postTitle} onChange={handlePostingTitle} />
                     </div>
                     {/* <!-- Quill Custom Toolbar --> */}
                     <div id="custom_toolbar">

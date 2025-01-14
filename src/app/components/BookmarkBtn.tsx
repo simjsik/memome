@@ -84,7 +84,7 @@ export default function BookmarkBtn({ postId }: PostId) {
 
                     // 북마크 해제 후 북마크 state 업데이트
                     setCurrentBookmark((prev) => prev.filter((id) => id !== postId));
-                    
+
                     // **userBookmarks에서 해당 포스트 제거**
                     setUserBookmarks((prev) =>
                         prev.filter((post) => post.id !== postId)
@@ -118,20 +118,20 @@ export default function BookmarkBtn({ postId }: PostId) {
     // function
     return (
         <Bookmark onClick={(event) => { event.preventDefault(); event.stopPropagation(); addBookmark(postId); }}>
-            <svg width="32" height="32" viewBox="0 0 39 40">
+            <svg width="28" height="28" viewBox="0 0 39 40">
                 <g>
                     {bookmarked ?
                         <>
-                            <path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z" fill="#4cc9bf" stroke="#4cc9bf" strokeWidth="2.5">
+                            <path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z" fill="#0087ff" stroke="#0087ff" strokeWidth="2.5">
                             </path>
-                            <rect width="32" height="32" fill="none" stroke="none">
+                            <rect width="28" height="28" fill="none" stroke="none">
                             </rect>
                         </>
                         :
                         <>
                             <path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z" fill="none" stroke="#ccc" strokeWidth="2.5">
                             </path>
-                            <rect width="32" height="32" fill="none" stroke="none">
+                            <rect width="28" height="28" fill="none" stroke="none">
                             </rect>
                         </>
                     }

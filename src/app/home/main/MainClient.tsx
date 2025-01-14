@@ -493,7 +493,10 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                                     {/* 포스트 댓글, 북마크 등 */}
                                     <div className='post_bottom_wrap'>
                                         <div className='post_comment'>
-                                            <div className='post_comment_icon'></div>
+                                            <button className='post_comment_btn'>
+                                                <div className='post_comment_icon'>
+                                                </div>
+                                            </button>
                                             <p>{post.commentCount}</p>
                                         </div>
                                         <BookmarkBtn postId={post.id}></BookmarkBtn>

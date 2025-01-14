@@ -143,11 +143,20 @@ border-right : 1px solid #ededed;
         margin-top: 20px;
         margin-left: -6px;
         padding-top: 10px;
+        justify-content: space-between;
       }
 
+      .post_comment_btn{
+        width: 32px;
+        height: 32px;
+        border : none;
+        border-radius : 4px;
+        background : #fff;
+        cursor : pointer
+      }
       .post_comment_icon{
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
         background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449945/%EB%8C%93%EA%B8%80%EC%95%84%EC%9D%B4%EC%BD%98_xbunym.svg);
         margin : 4px 8px 4px 4px;
       }
@@ -389,21 +398,21 @@ export const NoticeWrap = styled.div`
 
     .post_comment{
         display: flex;
-        line-height: 42px;
+        line-height: 32px;
     }
 
     .post_comment_icon_wrap{
-        width: 42px;
-        height: 42px;
+        width: 32px;
+        height: 32px;
         margin-right: 4px;
+        padding: 6px;
         cursor: pointer;
 
         .post_comment_icon{
-          width: 24px;
-          height: 24px;
+          width: 20px;
+          height: 20px;
           background-size: cover;
           background-repeat: no-repeat;
-          margin: 10px;
         }
     }
 `
@@ -556,7 +565,7 @@ margin-top : 4px;
 display: block;
 width: fit-content;
 margin-top: 8px;
-color: #4cc9bf;
+color: #0087ff;
 background-color: #c8fffd;
 }
 
