@@ -6,7 +6,7 @@ import { auth, db } from "@/app/DB/firebaseConfig";
 import { ADMIN_ID, bookMarkState, PostData, UsageLimitState, userBookMarkState, userData, userState } from "@/app/state/PostState";
 import { NoMorePost, PostListStyle, PostWrap } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -17,10 +17,7 @@ export default function Bookmark() {
     const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
     const [userBookmarks, setUserBookmarks] = useRecoilState<PostData[]>(userBookMarkState)
     const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
-    const [selectAll, setSelectAll] = useState<boolean>(false);
-    const [selectBookmark, setSelectBookmark] = useState<string[]>([])
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
-
     const router = useRouter();
     const observerLoadRef = useRef(null);
 
@@ -28,8 +25,9 @@ export default function Bookmark() {
         data: bookmarkPages,
         fetchNextPage,
         hasNextPage,
+        refetch,
     } = useInfiniteQuery({
-        queryKey: ['bookmarks', currentUser?.uid, currentBookmark],
+        queryKey: ['bookmarks', currentUser?.uid],
         queryFn: async ({ pageParam = 0 }) => {
             const result = await fetchBookmarks(
                 currentUser?.uid!,
@@ -58,8 +56,8 @@ export default function Bookmark() {
     useEffect(() => {
         if (usageLimit) return console.log('함수 요청 안함.');
 
-        if (currentBookmark.length > 0) {
-            const obsever = new IntersectionObserver(
+        if (currentBookmark.length > 0 || bookmarkPages.pages.length > 0) {
+            const observer = new IntersectionObserver(
                 (entries) => {
                     if (entries[0].isIntersecting && hasNextPage) {
                         fetchNextPage();
@@ -69,18 +67,27 @@ export default function Bookmark() {
             );
 
             if (observerLoadRef.current) {
-                obsever.observe(observerLoadRef.current);
+                observer.observe(observerLoadRef.current);
             }
 
             return () => {
-                if (observerLoadRef.current) obsever.unobserve(observerLoadRef.current);
+                if (observerLoadRef.current) observer.unobserve(observerLoadRef.current);
+                observer.disconnect();
             };
         }
-    }, [hasNextPage, fetchNextPage])
+
+    }, [hasNextPage, fetchNextPage, currentBookmark, bookmarkPages]);
+
 
     useEffect(() => {
-        if (currentBookmark.length > 0) {
+        if (bookmarkPages.pages.length > 0) {
             fetchNextPage();
+        }
+    }, [])
+    
+    useEffect(() => {
+        if (currentBookmark.length > 0) {
+            refetch();
         }
     }, [currentBookmark])
 

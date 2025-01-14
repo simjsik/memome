@@ -172,7 +172,6 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
         queryKey: ['posts'],
         queryFn: async ({ pageParam }) => {
             try {
-                console.log(pageParam.at(1), '보내는 시간')
                 return fetchPosts(currentUser?.uid, pageParam, 5);
             } catch (error: any) {
                 if (error.message) {

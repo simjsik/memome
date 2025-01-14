@@ -70,16 +70,11 @@ function LayoutContent({ children }: LayoutProps) {
             const data = bookmarks.data() as { bookmarkId: string[] };
             console.log(data.bookmarkId, '북마크 데이터')
             setCurrentBookmark(data.bookmarkId); // Recoil 상태 업데이트
-          } else {
-            // 북마크 데이터가 없을 경우
-            setCurrentBookmark([]); // 빈 배열로 설정
           }
         } catch (error) {
           console.error("북마크 데이터를 가져오는 중 오류 발생:", error);
-          setCurrentBookmark([]); // 오류 시에도 빈 배열로 설정
         }
       }
-
       loadBookmarks();
       checkLimit();
     } else {

@@ -5,7 +5,7 @@ import { auth, db } from "../DB/firebaseConfig";
 import { arrayRemove, arrayUnion, deleteDoc, doc, getDoc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { bookMarkState, memoList, memoState, PostData, userState } from "../state/PostState";
+import { bookMarkState, memoList, memoState, PostData, userBookMarkState, userState } from "../state/PostState";
 import { useQueryClient } from "@tanstack/react-query";
 
 const Bookmark = styled.button`
@@ -23,6 +23,7 @@ interface PostId {
 export default function BookmarkBtn({ postId }: PostId) {
     const [bookmarked, setBookmarked] = useState<boolean>(false)
     const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
+    const [userBookmarks, setUserBookmarks] = useRecoilState<PostData[]>(userBookMarkState)
 
     const currentUser = useRecoilValue(userState)
     // state
@@ -83,18 +84,31 @@ export default function BookmarkBtn({ postId }: PostId) {
 
                     // 북마크 해제 후 북마크 state 업데이트
                     setCurrentBookmark((prev) => prev.filter((id) => id !== postId));
+                    
+                    // **userBookmarks에서 해당 포스트 제거**
+                    setUserBookmarks((prev) =>
+                        prev.filter((post) => post.id !== postId)
+                    );
 
                     // 캐싱된 데이터를 수동으로 업데이트
-                    queryClient.setQueryData(['bookmarks', currentUser.uid, currentBookmark], (oldData: any) => {
+                    queryClient.setQueryData(['bookmarks', currentUser.uid], (oldData: any) => {
+                        // console.log("Before update:", oldData); // 업데이트 이전 데이터 확인
                         if (!oldData) return oldData;
 
-                        return {
+                        const newData = {
                             ...oldData,
-                            pages: oldData.pages.map((page: any) =>
-                                page.data.filter((post: PostData) => post.id !== postId)
-                            ),
+                            pages: oldData.pages.map((page: any) => {
+                                // console.log("Before filter:", page.data.pages); // 필터링 전 데이터 확인
+                                const filteredData = page.data.filter((post: PostData) => post.id !== postId);
+                                // console.log("After filter:", filteredData); // 필터링 후 데이터 확인
+                                return { ...page, data: filteredData };
+                            }),
                         };
+
+                        // console.log("After update:", newData.pages); // 업데이트 이후 데이터 확인
+                        return newData;
                     });
+
                     alert('북마크가 해제되었습니다.');
                 }
             }
@@ -103,7 +117,7 @@ export default function BookmarkBtn({ postId }: PostId) {
 
     // function
     return (
-        <Bookmark onClick={() => addBookmark(postId)}>
+        <Bookmark onClick={(event) => { event.preventDefault(); event.stopPropagation(); addBookmark(postId); }}>
             <svg width="32" height="32" viewBox="0 0 39 40">
                 <g>
                     {bookmarked ?

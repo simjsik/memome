@@ -646,7 +646,7 @@ cursor : pointer;
 export const BookmarkWrap = styled.div`
 width:860px;
 margin-left : 420px;
-padding : 10px 20px;
+padding : 120px 20px;
 border-left : 1px solid #dedede;
 border-right : 1px solid #dedede;
 background : #fff
@@ -687,7 +687,6 @@ export const NewPostBtn = styled.button`
     font-family: '__PretendardBold_73a78b';
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 `
-
 export const MyAlarmWrap = styled.div`
     margin-top: 32px;
 
