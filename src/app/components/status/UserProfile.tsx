@@ -178,6 +178,10 @@ margin-top : 20px;
     padding : 8px;
     border-radius : 8px;
     text-align : right;
+        
+        >p{
+            font-size: 14px;
+        }
 
         .reset_update_btn{
         padding: 8px 18px;
@@ -194,7 +198,7 @@ margin-top : 20px;
         .update_btn{
         padding: 8px 18px;
         border: none;
-        background: #333;
+        background: #0087ff;
         color: #fff;
         border-radius: 8px;
         cursor : pointer; 
@@ -209,25 +213,14 @@ margin-top : 20px;
 export default function UserProfile() {
     const user = useRecoilValue<userData | null>(userState)
     const [updateToggle, setUpdateToggle] = useState<boolean>(false)
-    const [userEmail, setUserEmail] = useState<string | null>('')
-    const [updateUserName, setUpdateUserName] = useState<string>('')
+    const [updateUserName, setUpdateUserName] = useState<string | null>(null)
     const [updateUserPhoto, setUpdateUserPhoto] = useState<File | null>(null)
-    const [userName, setUserName] = useState<string | null>(null)
-    const [userPhoto, setUserPhoto] = useState<string | null>(null)
     const [loading, setLoading] = useState(false);
     const [noticeLists, setNoticeLists] = useRecoilState<noticeType[]>(noticeList);
     // state
     const updatePhotoRef = useRef<HTMLInputElement | null>(null)
     // ref
     const my = auth.currentUser
-
-    useEffect(() => {
-        if (user) {
-            setUserName(user.name)
-            setUserEmail(user.email)
-            setUserPhoto(user.photo)
-        }
-    }, [user])
 
     // File 타입을 base64로 변경하기 위한 함수
     const fileToBase64 = (file: File): Promise<string> => {
@@ -287,8 +280,8 @@ export default function UserProfile() {
                     { merge: true }
                 );
 
-                setUserName(name)
-                setUserPhoto(profileImageUrl)
+                // setUserName(name)
+                // setUserPhoto(profileImageUrl)
                 alert('프로필 업데이트 성공!')
             } catch (error) {
                 alert('프로필 사진 업로드에 실패' + error)
@@ -324,8 +317,8 @@ export default function UserProfile() {
     }
 
     const handleProfileReset = () => {
-        if (userName && userPhoto) {
-            setUpdateUserName(userName)
+        if (user && user.photo && user.name) {
+            setUpdateUserName(user.name)
             setUpdateUserPhoto(null)
         }
 
@@ -386,18 +379,27 @@ export default function UserProfile() {
         }
     }
 
+    const handleUpdateToggle = () => {
+        setUpdateToggle((prev) => !prev)
+    }
+
+    useEffect(() => {
+        if (updateToggle && user) {
+            setUpdateUserName(user.name)
+        }
+    }, [updateToggle])
     return (
         <ProfileWrap>
             {/* 프로필 상단 */}
             <div className="profile_top">
                 <div className="profile_id">
-                    <p className="user_name">{userName}</p>
+                    <p className="user_name">{user?.name}</p>
                     <span className="user_uid">
-                        {userEmail}
+                        {user?.email}
                     </span>
                 </div>
                 <div className="user_photo" css={css`
-                        background-image : url(${userPhoto});
+                        background-image : url(${user?.photo});
                         background-size : cover;
                         background-position : center;
                         width : 72px;
@@ -405,7 +407,7 @@ export default function UserProfile() {
                         border : 1px solid #333;
                         border-radius : 50%;
                     `}></div>
-                <button className="update_toggle_btn" onClick={() => setUpdateToggle((prev) => !prev)}>
+                <button className="update_toggle_btn" onClick={handleUpdateToggle}>
                     {updateToggle ?
                         '프로필 수정 취소'
                         :
@@ -421,7 +423,7 @@ export default function UserProfile() {
                             <div className="update_box">
                                 <div className="user_name_change_wrap">
                                     <label>별명</label>
-                                    <input onChange={handleNameChange} type="text" value={updateUserName || ''} placeholder={userName || '새 유저 별명'} />
+                                    <input onChange={handleNameChange} type="text" value={updateUserName || ''} placeholder={user?.name || '새 유저 별명'} />
                                     <p>{updateUserName?.length}/12</p>
                                 </div>
                                 <div className="user_photo_change_wrap">
@@ -433,9 +435,9 @@ export default function UserProfile() {
                                     <input id="photo_input" ref={updatePhotoRef} onChange={handlePhotoChange} type="file" accept="image/*" />
                                 </div>
                                 {/* 업데이트 감지 시 버튼 */}
-                                {(updateUserName !== userName || Boolean(updateUserPhoto)) &&
+                                {(updateUserName !== user?.name || Boolean(updateUserPhoto)) &&
                                     <div className="update_btn_wrap">
-                                        <p>{loading ? '변경 사항이 있습니다!' : ''}</p>
+                                        <p>{loading ? '저장하지 않은 변경 사항이 있습니다!' : ''}</p>
                                         <button className="reset_update_btn" onClick={handleProfileReset}>
                                             되돌리기
                                         </button>
@@ -453,7 +455,7 @@ export default function UserProfile() {
                         < div className="profile_menu_wrap">
                             <div className="memo_box">
                                 <div className="menu_profile" css={css`
-                                    background-image : url(${userPhoto});
+                                    background-image : url(${user?.photo});
                                     background-size : cover;
                                     background-position : center;
                                     width : 32px;

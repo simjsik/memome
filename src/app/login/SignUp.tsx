@@ -8,6 +8,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { LoginTitle } from "../styled/LoginStyle";
 import { CreateInput, LoginButton, LoginButtonWrap } from "../styled/LoginComponents";
 import { css } from "@emotion/react";
+import { saveNewUser } from "../api/utils/saveUserProfile";
 
 const SignUpForm = css`
     margin-top : 10px;
@@ -53,12 +54,7 @@ export default function SignUp() {
             const user = userCredential.user;
 
             // 사용자 정보 저장 (users 컬렉션)
-            await setDoc(doc(db, 'users', user.uid), {
-                userId: user.uid,
-                displayName: displayName,
-                photoURL: photoURL || '', // 기본 프로필 이미지
-                email: email,
-            });
+            saveNewUser(user.uid)
 
             // 이메일 인증 메일 전송
             await sendEmailVerification(user);

@@ -50,7 +50,7 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
     const [signUpToggle, setSignUpToggle] = useState<boolean>(false)
     const modalRef = useRef<HTMLDivElement>(null);
     const [modal, setModal] = useRecoilState<boolean>(modalState);
-    const [loginError, setLoginError] = useState<string | Error | null>(null);
+    const [loginError, setLoginError] = useState<string | null>(null);
     // State
     const auths = getAuth();
     const router = useRouter();
@@ -86,6 +86,20 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
         setLoginToggle(false);
     }
 
+    const firebaseErrorMessages: Record<string, string> = {
+        "auth/user-not-found": "해당 계정을 찾을 수 없습니다. 이메일을 확인해주세요.",
+        "auth/wrong-password": "비밀번호가 올바르지 않습니다. 다시 시도해주세요.",
+        "auth/email-already-in-use": "이미 사용 중인 이메일입니다.",
+        "auth/invalid-email": "유효하지 않은 이메일 형식입니다.",
+        "auth/weak-password": "비밀번호는 최소 6자 이상이어야 합니다.",
+        "auth/network-request-failed": "네트워크 오류가 발생했습니다. 연결을 확인해주세요.",
+        "auth/too-many-requests": "잠시 후 다시 시도해주세요. 요청이 너무 많습니다.",
+        "auth/operation-not-allowed": "이 작업은 현재 허용되지 않습니다. 관리자에게 문의하세요.",
+        "auth/invalid-credential": "입력하신 이메일 주소와 비밀번호를 다시 한 번 확인해 주세요.",
+        "auth/missing-password": "비밀번호를 입력해주세요.",
+        // 추가적인 에러 코드 필요 시 확장 가능
+    };
+
     const handleLogin = async (email: string, password: string) => {
         try {
             const userCredential = await signInWithEmailAndPassword(auths, email, password);
@@ -120,19 +134,24 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
                         setHasLogin(true);
                         setLoginToggle(false);
                         saveNewUser(user.uid);
-                        alert("Login successful!");
                         router.push('/home/main')
                     } else {
-                        alert("CSRF Token validation failed. Please try again.");
+                        setLoginError("로그인 요청 실패. 잠시 후 다시 시도해주세요.");
                         getCsrfToken();
                     }
                 } else {
-                    alert("Login failed. Please check your credentials.");
+                    setLoginError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
                 }
             }
-        } catch (error) {
-            console.error("Error during login:", error);
-            setLoginError(error);
+        } catch (error: any) {
+            console.error("로그인 중 오류 발생:", error);
+
+            // Firebase 에러 코드별 메시지 처리
+            if (error.code && firebaseErrorMessages[error.code]) {
+                setLoginError(firebaseErrorMessages[error.code]);
+            } else {
+                setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+            }
             return;
         }
     }
@@ -231,9 +250,7 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
                         </LoginInputWrap>
                         {
                             loginError &&
-                            <div>
-                                <p>{loginError}</p>
-                            </div>
+                            <p className="login_error">{loginError}</p>
                         }
                         <LoginButton type="submit">로그인</LoginButton>
                     </form>

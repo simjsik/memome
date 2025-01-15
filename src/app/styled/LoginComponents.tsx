@@ -20,6 +20,12 @@ export const LoginButtonWrap = styled.div`
   padding: 40px;
   border-radius: 8px;
   box-shadow : 0px 0px 10px rgba(0,0,0,0.2);
+
+  .login_error{
+    font-size : 14px;
+    color : #fa5741;
+    margin-top: 4px;
+  }
 `
 
 export const LoginInputWrap = styled.div`
