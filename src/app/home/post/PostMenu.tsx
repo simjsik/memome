@@ -124,26 +124,33 @@ margin : 0 auto;
             font-family : var(--font-pretendard-medium);
         }
     }
+    .ql_content{
+        position: relative;
+        margin-bottom: 60px;
 
-
-
-
-
+        span{
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+        }
+    }
 // 포스트 발행 버튼
     .post_btn{
         position: absolute;
         z-index: 1;
-        top: 830px;
-        left: -41px;
-        width: 42px;
-        height: 70px;
+        top: 24px;
+        right: -63px;
+        width: 64px;
+        height: 64px;
         border: 2px solid #1a5bf5;
-        border-right: #fff;
-        border-radius: 4px 0px 0px 4px;
+        border-left: #fff;
+        border-radius: 0px 8px 8px 0px;
         background: #0087ff;
         font-size: 16px;
         color: #fff;
         cursor: pointer;
+        -webkit-writing-mode: vertical-rl;
+        -ms-writing-mode: tb-rl;
         writing-mode: vertical-rl;
         font-family: 'var(--font-pretendard-medium)';
         text-align: center;
@@ -163,15 +170,16 @@ margin : 0 auto;
     }
     // 에디터 박스
     .quill{
-        width : 100%;
-        margin : 0 auto;
+        width: 100%;
+        margin: 0 auto;
+        padding-bottom: 39px;
+        border-bottom: 1px solid #ededed;
     }
 
     // 에디터 snow 스타일
     .ql-container.ql-snow{
-        margin-top : 20px;
-        border : none;
-        padding-bottom: 100px;
+        margin-top: 20px;
+        border: none;
     }
 
     .ql-snow .ql-image,
@@ -186,7 +194,6 @@ margin : 0 auto;
         min-height: calc(100vh - 231px);
         overflow: visible;
         padding: 0px 20px;
-        border-bottom: 1px solid #ededed;
     }
 
 
@@ -725,15 +732,27 @@ export default function PostMenu() {
     }
 
     // 포스트 내용 입력 시 해당 스테이트에 저장
+    const content_limit_count = 2500; // 글자수 제한
+    const content_limit_max = 2510; // 글자 입력 맥스
+
     const handlePostingEditor = (content: string) => {
-        setPosting(content)
+        // 입력이 최대 길이 초과 시 차단
+        if (content.length > content_limit_max) {
+            return;
+        }
+
+        if (content.length > content_limit_count) {
+            setTitleError('제목을 최대 20자 내외로 작성해주세요.');
+        }
+
+        setPosting(content);
     }
 
     // 포스팅 제목.
     const title_limit_count = 20; // 글자수 제한
     const title_limit_max = 30; // 글자 입력 맥스
-    const handlePostingTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
 
+    const handlePostingTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
 
         // 입력이 최대 길이 초과 시 차단
@@ -822,6 +841,14 @@ export default function PostMenu() {
 
         if (imageUrls.length > MAX_IMG_COUNT) {
             alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 업로드 가능합니다.`)
+            return;
+        }
+        if (postTitle.length > title_limit_count) {
+            alert(`제목을 20자 이내로 작성해 주세요.`)
+            return;
+        }
+        if (posting.length > content_limit_count) {
+            alert(`최대 2500자의 내용만 작성 가능합니다.`)
             return;
         }
 
@@ -1240,7 +1267,7 @@ export default function PostMenu() {
                                 <button className="ql-italic"></button>
                                 <button className="ql-underline"></button>
                                 <button className="ql-strike"></button>
-
+                                <button className='ql-code-block'></button>
                                 {/* <!-- Subscript / Superscript --> */}
                                 <button className="ql-script" value="sub"></button>
                                 <button className="ql-script" value="super"></button>
@@ -1498,7 +1525,10 @@ export default function PostMenu() {
                             </div>
                         </div>
                     </div>
-                    <ReactQuill ref={quillRef} formats={formats} value={posting} onChange={handlePostingEditor} modules={SetModules} />
+                    <div className='ql_content'>
+                        <ReactQuill ref={quillRef} formats={formats} value={posting} onChange={handlePostingEditor} modules={SetModules} />
+                        <span>{posting.length}/{content_limit_count}</span>
+                    </div>
                     <button className='post_btn' onClick={uploadThisPost}>발행</button>
                 </div>
             </QuillStyle>

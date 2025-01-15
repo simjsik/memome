@@ -26,7 +26,7 @@ export function validateCsrfToken(token: string) {
     console.log('CSRF 토큰 검증 중')
     if (!expiresAt || Date.now() > expiresAt) {
         csrfTokens.delete(token); // 만료된 토큰 삭제
-        console.log('CSRF 토큰 만료 삭제', Date.now() > expiresAt)
+        console.log('CSRF 토큰 만료 삭제', Date.now() > expiresAt, token)
         return false;
     }
     csrfTokens.delete(token); // 사용한 토큰 삭제

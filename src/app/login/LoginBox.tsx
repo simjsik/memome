@@ -16,7 +16,7 @@ import {
     NaverButton,
     OtherLoginWrap
 } from "../styled/LoginComponents";
-import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, sendEmailVerification, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { LoginOr, LoginSpan, LoginTitle } from "../styled/LoginStyle";
 import { useRouter } from "next/navigation";
 import { saveNewGoogleUser, saveNewUser } from "../api/utils/saveUserProfile";
@@ -50,35 +50,35 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
     const [signUpToggle, setSignUpToggle] = useState<boolean>(false)
     const modalRef = useRef<HTMLDivElement>(null);
     const [modal, setModal] = useRecoilState<boolean>(modalState);
+    const [loginError, setLoginError] = useState<string | Error | null>(null);
     // State
     const auths = getAuth();
     const router = useRouter();
     loginListener();
     // hook
+    const getCsrfToken = async () => {
+        try {
+            const csrfResponse = await fetch("/api/auth/validateCsrfToken", {
+                method: "GET",
+                credentials: "include",
+            });
+
+            if (!csrfResponse.ok) {
+                console.error("CSRF 토큰 발급 실패:", await csrfResponse.text());
+                throw new Error("CSRF 토큰 발급 실패");
+            }
+            const { csrfToken } = await csrfResponse.json();
+            setCsrfToken(csrfToken);
+
+            // 쿠키 설정 후 약간의 지연을 추가
+            await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms
+            console.log("CSRF 토큰 발급 성공:", csrfToken);
+        } catch (error) {
+            console.error("CSRF 토큰 요청 중 오류:", error);
+        }
+    };
 
     useEffect(() => {
-        const getCsrfToken = async () => {
-            try {
-                const csrfResponse = await fetch("/api/auth/validateCsrfToken", {
-                    method: "GET",
-                    credentials: "include",
-                });
-
-                if (!csrfResponse.ok) {
-                    console.error("CSRF 토큰 발급 실패:", await csrfResponse.text());
-                    throw new Error("CSRF 토큰 발급 실패");
-                }
-                const { csrfToken } = await csrfResponse.json();
-                setCsrfToken(csrfToken);
-
-                // 쿠키 설정 후 약간의 지연을 추가
-                await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms
-                console.log("CSRF 토큰 발급 성공:", csrfToken);
-            } catch (error) {
-                console.error("CSRF 토큰 요청 중 오류:", error);
-            }
-        };
-
         getCsrfToken();
     }, []);
 
@@ -91,11 +91,11 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
             const userCredential = await signInWithEmailAndPassword(auths, email, password);
             const user = userCredential.user;
 
-            // if (!user.emailVerified) {
-            //     alert("이메일 인증이 완료되지 않았습니다. 인증 메일을 확인해주세요.");
-            //     // 이메일 인증을 위한 리디렉션 로직 추가 가능
-            //     return;
-            // }
+            if (!user.emailVerified) {
+                setLoginError('이메일 인증이 필요한 계정입니다.')
+                await sendEmailVerification(user); // 이메일 인증 메일 재전송
+                return;
+            }
 
             if (user) {
                 const idToken = await userCredential.user.getIdToken();
@@ -124,6 +124,7 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
                         router.push('/home/main')
                     } else {
                         alert("CSRF Token validation failed. Please try again.");
+                        getCsrfToken();
                     }
                 } else {
                     alert("Login failed. Please check your credentials.");
@@ -131,7 +132,7 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
             }
         } catch (error) {
             console.error("Error during login:", error);
-            alert("An error occurred during login.");
+            setLoginError(error);
             return;
         }
     }
@@ -228,6 +229,12 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
                                 <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
                             </div>
                         </LoginInputWrap>
+                        {
+                            loginError &&
+                            <div>
+                                <p>{loginError}</p>
+                            </div>
+                        }
                         <LoginButton type="submit">로그인</LoginButton>
                     </form>
                     <LoginSpan>처음 이신가요?</LoginSpan >

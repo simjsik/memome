@@ -64,7 +64,7 @@ export const fetchComments = async (postId: string) => {
         console.error("Error fetching data:", error);
         return { commentCounts: 0, comments: [] }; // 에러 발생 시 기본값 반환
     }
-}
+};
 
 // 포스트 페이지 입장 시 '작성자'의 모든 글
 export const fetchPostList = async (
@@ -72,7 +72,6 @@ export const fetchPostList = async (
     pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
     pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
 ) => {
-    console.log(userId, '받은 유저')
     try {
         const response = await fetch('http://localhost:3000/api/firebaseLimit', {
             method: 'POST',
@@ -86,27 +85,26 @@ export const fetchPostList = async (
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
 
+
         // 현재 포스트 작성자의 모든 글 가져오기
         const postlistRef = collection(db, 'posts');
-        const postlistQuery = query(
+
+        const queryBase = query(
             postlistRef,
             where('userId', '==', userId),
             orderBy('createAt', 'desc'),
             limit(pageSize)
         );
 
+        // console.log(pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
+
         const postQuery = (pageParam && pageParam.at(1))
-            ?
-            query(
-                postlistQuery,
-                startAfter(pageParam.at(1)),
-            )
-            :
-            postlistQuery
+            ? query(queryBase, startAfter(pageParam.at(1)))
+            : queryBase;
 
         const postlistSnapshot = await getDocs(postQuery);
 
-        const postListData: PostData[] = await Promise.all(
+        const postWithComment: PostData[] = await Promise.all(
             postlistSnapshot.docs.map(async (document) => {
                 // 포스트 가져오기
                 const postData = { id: document.id, ...document.data() } as PostData;
@@ -121,9 +119,10 @@ export const fetchPostList = async (
         );
 
         const lastVisible = postlistSnapshot.docs.at(-1); // 마지막 문서
+        // console.log(postWithComment, lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
 
         return {
-            data: postListData,
+            data: postWithComment,
             nextPage: lastVisible
                 ? [lastVisible.data().notice, lastVisible.data().createAt as Timestamp] // 정렬 필드 값 배열로 반환
                 : null,
@@ -132,7 +131,7 @@ export const fetchPostList = async (
         console.error("Error fetching data:", error);
         return error;
     };
-}
+};
 
 // 일반 포스트 무한 스크롤 로직
 export const fetchPosts = async (
@@ -140,7 +139,6 @@ export const fetchPosts = async (
     pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
     pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
 ) => {
-    // console.log(userId, '받은 유저')
     try {
         const response = await fetch('http://localhost:3000/api/firebaseLimit', {
             method: 'POST',

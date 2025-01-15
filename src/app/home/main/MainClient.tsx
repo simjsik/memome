@@ -8,7 +8,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { NewPostBtn, NoMorePost, PostWrap } from '../../styled/PostComponents';
-import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, where } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, where } from 'firebase/firestore';
 import { auth, db } from '../../DB/firebaseConfig';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchPosts } from '../../api/loadToFirebasePostData/fetchPostData';

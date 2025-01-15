@@ -8,7 +8,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { UserPostWrap } from "./userStyle";
 import { auth, db } from "@/app/DB/firebaseConfig";
-import { deleteDoc, doc, getDoc } from "firebase/firestore";
+import { deleteDoc, doc, getDoc, Timestamp } from "firebase/firestore";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
@@ -40,10 +40,10 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         fetchNextPage,
         hasNextPage,
     } = useInfiniteQuery({
-        queryKey: ['postlist'],
+        queryKey: ['postList'],
         queryFn: async ({ pageParam }) => {
             try {
-                return fetchPostList(user.uid, pageParam, 4);
+                return fetchPostList(user.uid, pageParam, 5);
             } catch (error: any) {
                 if (error.message) {
                     setUsageLimit(true); // 에러 상태 업데이트
@@ -51,11 +51,12 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
                 }
             }
         },
-        getNextPageParam: (lastPage) => {
+        getNextPageParam: (lastPage: any) => {
             // 사용량 초과 시 페이지 요청 중단
             if (usageLimit || !lastPage.nextPage) {
                 return;
             }
+            console.log(lastPage.nextPage, '마지막 페이지 데이터')
             return lastPage.nextPage;
         },
         staleTime: 5 * 60 * 1000, // 5분 동안 캐시 유지
@@ -76,7 +77,6 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         queryKey: ['imagePostlist'],
         queryFn: async ({ pageParam }) => {
             try {
-                console.log(pageParam.at(1), '이미지 요청 시간');
                 return fetchPostsWithImages(user.uid, pageParam, 4);
             } catch (error: any) {
                 if (error.message) {
@@ -106,7 +106,7 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         const uniquePosts = Array.from(
             new Map(
                 [
-                    ...data.pages.flatMap((page) => page.data as PostData[]) // 무한 스크롤 데이터
+                    ...data.pages.flatMap((page: any) => page.data as PostData[]) // 무한 스크롤 데이터
                 ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
             ).values()
         );
