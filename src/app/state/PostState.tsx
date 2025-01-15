@@ -176,3 +176,10 @@ export const searchState = atom<boolean>({
     key: 'searchState',
     default: false,
 })
+
+// 모달
+
+export const modalState = atom<boolean>({
+    key: 'modalState',
+    default: false
+})

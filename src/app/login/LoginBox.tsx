@@ -1,25 +1,26 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 'use client';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { css } from "@emotion/react";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState, userData, userState } from "../state/PostState";
+import { DidYouLogin, loginToggleState, modalState, userData, userState } from "../state/PostState";
 import loginListener from "../hook/LoginHook";
 import {
     CreateButton,
     GoogleButton,
     GuestButton,
+    LoginButton,
     LoginButtonWrap,
     LoginInput,
     LoginInputWrap,
     NaverButton,
     OtherLoginWrap
 } from "../styled/LoginComponents";
-import { getAuth, GoogleAuthProvider, signInWithCustomToken, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth } from "../DB/firebaseConfig";
+import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { LoginOr, LoginSpan, LoginTitle } from "../styled/LoginStyle";
 import { useRouter } from "next/navigation";
 import { saveNewGoogleUser, saveNewUser } from "../api/utils/saveUserProfile";
+import SignUp from "./SignUp";
 
 const LoginWrap = css`
 position : fixed;
@@ -35,30 +36,20 @@ height : 100%;
 background : rgba(0,0,0,0.8);
 `
 
-const PopupLoginWrap = css`
-left : 50%;
-right : auto;
-transform: translate(-50%, -50%);
-`
-
-const LoginButton = css`
-width: 100%;
-height : 52px;
-margin-top : 20px;
-border : none;
-border-radius : 4px;
-background : #272D2D;
-color: #fff;
-font-size : 16px;
-font-family : var(--font-pretendard-medium);
-`
-export default function LoginBox() {
+interface ModalProps {
+    isOpen: boolean;
+    onClose?: () => void | null;
+}
+export default function LoginBox({ isOpen, onClose }: ModalProps) {
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [user, setUser] = useRecoilState<userData | null>(userState)
     const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
     const [csrfToken, setCsrfToken] = useState<string | null>(null)
+    const [signUpToggle, setSignUpToggle] = useState<boolean>(false)
+    const modalRef = useRef<HTMLDivElement>(null);
+    const [modal, setModal] = useRecoilState<boolean>(modalState);
     // State
     const auths = getAuth();
     const router = useRouter();
@@ -99,6 +90,12 @@ export default function LoginBox() {
         try {
             const userCredential = await signInWithEmailAndPassword(auths, email, password);
             const user = userCredential.user;
+
+            // if (!user.emailVerified) {
+            //     alert("이메일 인증이 완료되지 않았습니다. 인증 메일을 확인해주세요.");
+            //     // 이메일 인증을 위한 리디렉션 로직 추가 가능
+            //     return;
+            // }
 
             if (user) {
                 const idToken = await userCredential.user.getIdToken();
@@ -183,36 +180,70 @@ export default function LoginBox() {
         }
     };
 
+    // ESC 키 및 배경 클릭 핸들러
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && onClose) {
+            onClose();
+        }
+    };
+
+    const handleBackgroundClick = (e: MouseEvent) => {
+        if (modalRef.current && !modalRef.current.contains(e.target as Node) && onClose) {
+            onClose();
+        }
+    };
+
+    // Mount/Unmount 상태 감지 및 이벤트 등록
+    useEffect(() => {
+        if (isOpen) {
+            setModal(true); // 모달이 열릴 때 modal 상태 true로 설정
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('mousedown', handleBackgroundClick);
+        }
+
+        return () => {
+            setModal(false); // 모달이 닫힐 때 modal 상태 false로 설정
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('mousedown', handleBackgroundClick);
+        };
+    }, [isOpen]);
+
+    // 모달이 열리지 않았을 경우 null 반환
+    if (!isOpen) return null;
     // Function
     return (
         <div css={LoginWrap}>
-            <div css={LoginBg} onClick={() => setLoginToggle(false)}></div>
-            <LoginButtonWrap css={PopupLoginWrap}>
-                <LoginTitle>로그인</LoginTitle>
-                <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
-                    <LoginInputWrap>
-                        <div>
-                            <p>이메일 또는 아이디</p>
-                            <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
-                        </div>
-                        <div>
-                            <p>패스워드</p>
-                            <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
-                        </div>
-                    </LoginInputWrap>
+            <div css={LoginBg}></div>
+            {!signUpToggle ?
+                <LoginButtonWrap ref={modalRef}>
+                    <LoginTitle>로그인</LoginTitle>
+                    <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
+                        <LoginInputWrap>
+                            <div>
+                                <p>이메일 또는 아이디</p>
+                                <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
+                            </div>
+                            <div>
+                                <p>패스워드</p>
+                                <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
+                            </div>
+                        </LoginInputWrap>
+                        <LoginButton type="submit">로그인</LoginButton>
+                    </form>
                     <LoginSpan>처음 이신가요?</LoginSpan >
-                    <CreateButton>회원가입</CreateButton>
-                    <button type="submit" css={LoginButton}>로그인</button>
-                </form>
-                <OtherLoginWrap>
-                    <LoginOr>또는</LoginOr>
-                    <div>
-                        <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>
-                        <NaverButton>네이버 계정으로 로그인</NaverButton>
-                        <GuestButton onClick={handleGuest}>게스트 로그인</GuestButton>
-                    </div>
-                </OtherLoginWrap>
-            </LoginButtonWrap>
+                    <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
+
+                    <OtherLoginWrap>
+                        <LoginOr>또는</LoginOr>
+                        <div>
+                            <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>
+                            <GuestButton onClick={handleGuest}>게스트 로그인</GuestButton>
+                        </div>
+                    </OtherLoginWrap>
+                </LoginButtonWrap>
+                :
+                <SignUp />
+            }
         </div >
     )
 }

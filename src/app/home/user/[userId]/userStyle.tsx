@@ -16,7 +16,7 @@ export const UserPostWrap = styled.div`
 
     .user_post_list_wrap{
         border-bottom: 1px solid #ededed;
-        padding-bottom: 20px;
+        padding: 20px;
     }
     // user_post_list_wrap
 
@@ -79,8 +79,8 @@ export const UserPostWrap = styled.div`
         padding-top: 16px;
 
         .user_post_photo{
-            width: 42px;
-            height: 42px;
+            min-width: 36px;
+            height: 36px;
             margin-right: 10px;
             border: 2px solid #ededed;
             border-radius: 50%;
@@ -89,9 +89,14 @@ export const UserPostWrap = styled.div`
         }
         
         .user_post_name{
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
             display: flex;
+            -webkit-flex: 0 0 86.5%;
+            -ms-flex: 0 0 86.5%;
             flex: 0 0 86.5%;
-            line-height: 48px;
+            line-height: 36px;
             font-family: var(--font-pretendard-bold);
         }
 
@@ -106,11 +111,45 @@ export const UserPostWrap = styled.div`
             font-family: var(--font-pretendard-light);
         }
 
+
         .post_more{
             position: relative;
             min-width: 36px;
             height: 36px;
-            margin-top: 6px;
+
+            .post_drop_menu_btn{
+            position : relative;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background-color: #fff;
+            cursor: pointer;
+
+            div{
+              position: absolute;
+              top: 36px;
+              width: 100px;
+              box-shadow : 0px 0px 10px rgba(0,0,0,0.1);
+            }
+
+            li{
+              width: 100%;
+              height: 42px;
+            }
+
+            .post_dlt_btn{
+              width: 100%;
+              height: 42px;
+              border: 1px solid #ededed;
+              background: #fff;
+              border-radius: 8px;
+              color : red;
+            }
+              
+            button{
+              cursor : pointer;
+            }
+        }
         }
 
         .post_more_btn{
@@ -143,7 +182,8 @@ export const UserPostWrap = styled.div`
 
     .user_post_title_wrap{
         padding-left: 52px;
-
+        margin-top: 10px;
+        
         .user_post_tag{
             font-size: 14px;
             font-family: var(--font-pretendard-light);
@@ -194,19 +234,27 @@ export const UserPostWrap = styled.div`
 
     .user_post_bottom{
         display: flex;
-        padding: 36px 36px 0px 52px;
+        padding: 36px 0px 0px 52px;
         justify-content: space-between;
 
         .user_post_comment{
             display: flex;
         }
-
-        .user_post_comment_icon{
+        .post_comment_btn{
             width: 32px;
             height: 32px;
-            background: red;
-            margin-right: 4px;
-            cursor: pointer;
+            border : none;
+            border-radius : 4px;
+            background : #fff;
+            cursor : pointer
+        }
+        .user_post_comment_icon{
+            width: 20px;
+            height: 20px;
+            background-size : cover;
+            background-repeat : no-repeat;
+            background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449945/%EB%8C%93%EA%B8%80%EC%95%84%EC%9D%B4%EC%BD%98_xbunym.svg);
+            margin : 4px 8px 4px 4px;
         }
 
         p{

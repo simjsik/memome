@@ -10,6 +10,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { db } from "@/app/DB/firebaseConfig";
+import BookmarkBtn from "@/app/components/BookmarkBtn";
+import { NoMorePost } from "@/app/styled/PostComponents";
 
 
 const formatDate = (createAt: any) => {
@@ -45,12 +47,20 @@ function CustomInfiniteHits() {
 
     // 검색어가 없을 때
     if (!query.trim()) {
-        return <p className="no_query_message">검색어를 입력해주세요</p>;
+        return <NoMorePost>
+            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+            <p>검색어를 입력 해주세요.</p>
+            <span>사용자나 아이디 또는 메모 제목을 검색 해보세요.</span>
+        </NoMorePost>;
     }
 
     // 검색 결과가 없을 때
     if (items.length === 0) {
-        return <p className="no_results_message">검색 결과가 없습니다</p>;
+        return <NoMorePost>
+            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+            <p>'{query}'에 대한 검색결과 없음.</p>
+            <span className="no_result_span">다른 용어를 검색해 보거나 검색어가 정확한지 확인해 보세요.</span>
+        </NoMorePost>;
     }
 
     return (
@@ -61,7 +71,7 @@ function CustomInfiniteHits() {
                 ))}
             </ul>
             {!isLastPage && (
-                <button onClick={showMore}>Show More</button>
+                <button onClick={showMore}>더 보기</button>
             )}
         </div>
     );
@@ -104,7 +114,8 @@ function PostHit({ hit }: { hit: any }) {
                     className="ais_user_photo"
                     style={{ backgroundImage: `url(${userData.photoURL})` }}
                 ></div>
-                <p className="ais_user_name">{userData.displayName} · {formatDate(hit.createAt)}</p>
+                <p className="ais_user_name">{userData.displayName}</p>
+                <span className="ais_user_uid">@{hit.userId.slice(0, 6)}... · {formatDate(hit.createAt)}</span>
             </div>
             <div className="ais_post_content_wrap">
                 <h2 className="ais_post_title">{hit.title}</h2>
@@ -120,8 +131,14 @@ function PostHit({ hit }: { hit: any }) {
                         ))}
                 </div>
                 <div className="ais_post_comment_wrap">
-                    <div className="comment_icon"></div>
-                    <p className="ais_comment_count">{hit.commentCount}</p>
+                    <div className='post_comment'>
+                        <button className='post_comment_btn'>
+                            <div className='post_comment_icon'>
+                            </div>
+                        </button>
+                        <p>{hit.commentCount}</p>
+                    </div>
+                    <BookmarkBtn postId={hit.id}></BookmarkBtn>
                 </div>
             </div>
         </li>
@@ -162,7 +179,7 @@ const CustomSearch = () => {
     }, [query, refine]);
 
     return (
-        <SearchBox defaultValue={query} searchAsYouType={false} onKeyDown={(event) => handleSearch(event)} />
+        <SearchBox placeholder="검색" defaultValue={query} searchAsYouType={false} onKeyDown={(event) => handleSearch(event)} />
     );
 };
 

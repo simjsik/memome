@@ -2,11 +2,11 @@
 'use clients';
 
 import styled from "@emotion/styled";
-import { DidYouLogin, loginToggleState, UsageLimitState, UsageLimitToggle, userData, userState } from "../state/PostState";
+import { DidYouLogin, loginToggleState, modalState, UsageLimitState, UsageLimitToggle, userData, userState } from "../state/PostState";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const UsageWrap = styled.div<{ Limit: boolean }>`
     display : ${(props) => (props.Limit ? 'block' : 'none')};
@@ -67,11 +67,19 @@ export const UsageWrap = styled.div<{ Limit: boolean }>`
         cursor : pointer;
     }
 `
-export default function UsageLimit() {
+
+interface ModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+export default function UsageLimit({ isOpen, onClose }: ModalProps) {
     const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
     const [user, setUser] = useRecoilState<userData | null>(userState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [limitToggle, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
+    const [modal, setModal] = useRecoilState<boolean>(modalState);
+    const modalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (usageLimit) {
@@ -80,6 +88,7 @@ export default function UsageLimit() {
             setLimitToggle(false);
         }
     }, [usageLimit])
+
     const handleLogout = async () => {
         try {
             const confirmed = confirm('로그아웃 하시겠습니까?')
@@ -101,9 +110,31 @@ export default function UsageLimit() {
             alert("An error occurred during logout.");
         }
     }
+
+    // ESC 키 및 배경 클릭 핸들러
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+            onClose();
+        }
+    };
+
+    // Mount/Unmount 상태 감지 및 이벤트 등록
+    useEffect(() => {
+        if (isOpen) {
+            setModal(true); // 모달이 열릴 때 modal 상태 true로 설정
+            document.addEventListener('keydown', handleKeyDown);
+        }
+
+        return () => {
+            setModal(false); // 모달이 닫힐 때 modal 상태 false로 설정
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen]);
+
     const handleUsageBox = async () => {
         setLimitToggle(false);
     }
+    
     const [timeLeft, setTimeLeft] = useState('');
 
     useEffect(() => {
@@ -131,6 +162,7 @@ export default function UsageLimit() {
         // 컴포넌트 언마운트 시 타이머 정리
         return () => clearInterval(timer);
     }, []);
+
     // Function
     return (
         <UsageWrap Limit={limitToggle}>

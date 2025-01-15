@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { fetchPosts, fetchPostsWithImages } from "@/app/api/loadToFirebasePostData/fetchPostData";
+import { fetchPostList, fetchPosts, fetchPostsWithImages } from "@/app/api/loadToFirebasePostData/fetchPostData";
 import { ADMIN_ID, PostData, UsageLimitState, userData } from "@/app/state/PostState";
 import { css } from "@emotion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -11,6 +11,8 @@ import { auth, db } from "@/app/DB/firebaseConfig";
 import { deleteDoc, doc, getDoc } from "firebase/firestore";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { useRouter } from "next/navigation";
+import BookmarkBtn from "@/app/components/BookmarkBtn";
+import { NoMorePost } from "@/app/styled/PostComponents";
 
 interface ClientUserProps {
     user: userData,
@@ -27,7 +29,8 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [posts, setPosts] = useState<PostData[]>([])
     const [postTab, setPostTab] = useState<boolean>(true)
-
+    const [dropToggle, setDropToggle] = useState<string>('')
+    const dropdownRef = useRef<HTMLDivElement>(null);
     const observerLoadRef = useRef(null);
     const observerImageLoadRef = useRef(null);
 
@@ -40,8 +43,7 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         queryKey: ['postlist'],
         queryFn: async ({ pageParam }) => {
             try {
-                console.log(pageParam.at(1), '보내는 시간')
-                return fetchPosts(user.uid, pageParam, 4);
+                return fetchPostList(user.uid, pageParam, 4);
             } catch (error: any) {
                 if (error.message) {
                     setUsageLimit(true); // 에러 상태 업데이트
@@ -240,6 +242,21 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         router.push(`/home/memo/${userId}`)
     }
 
+    // 외부 클릭 감지 로직
+    useEffect(() => {
+        const handleOutsideClick = (event: MouseEvent) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target as Node) // 클릭된 위치가 드롭다운 내부가 아닌 경우
+            ) {
+                setDropToggle(''); // 드롭다운 닫기
+            }
+        };
+
+        document.addEventListener('mousedown', handleOutsideClick); // 이벤트 리스너 추가
+        return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
+    }, []);
+
     return (
         <>
             <UserPostWrap>
@@ -260,10 +277,21 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
                                         <span>@{user.uid.slice(0, 8)}... · {formatDate(post.createAt)}</span>
                                     </div>
                                     <div className="post_more">
-                                        <button className="post_more_btn"></button>
-                                        <div className="post_more_list">
-                                            <button className="post_delete_btn" onClick={() => deletePost(post.id)}>게시글 삭제</button>
-                                        </div>
+                                        <button
+                                            className='post_drop_menu_btn'
+                                            css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
+                                            onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
+                                        >
+                                            {dropToggle === post.id &&
+                                                <div ref={dropdownRef}>
+                                                    <ul>
+                                                        <li className='post_drop_menu'>
+                                                            <button onClick={(event) => { event.preventDefault(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</button>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            }
+                                        </button>
                                     </div>
                                 </div>
                                 <div className="user_post_title_wrap">
@@ -282,17 +310,35 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
                                 )}
                                 <div className="user_post_bottom">
                                     <div className="user_post_comment">
-                                        <div className="user_post_comment_icon"></div>
+                                        <button className='post_comment_btn'>
+                                            <div className="user_post_comment_icon">
+                                            </div>
+                                        </button>
                                         <p>
                                             {post.commentCount}
                                         </p>
                                     </div>
-                                    <button className="user_post_bookmark"></button>
+                                    <BookmarkBtn postId={post.id}></BookmarkBtn>
                                 </div>
                             </div>
                         ))}
                         {postTab && < div className="postObserver" ref={observerLoadRef} style={{ height: '1px' }} />}
-                        {!hasNextPage && <p>제일 최근 메모입니다.</p>}
+                        {
+                            !hasNextPage &&
+                            <NoMorePost>
+                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+                                <p>모두 확인했습니다.</p>
+                                <span>전체 메모를 전부 확인했습니다.</span>
+                            </NoMorePost>
+                        }
+                        {
+                            posts.length === 0 &&
+                            <NoMorePost>
+                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+                                <p>메모가 없습니다.</p>
+                                <span>새 메모를 작성 해보세요.</span>
+                            </NoMorePost>
+                        }
                     </>
                     :
                     <>

@@ -72,6 +72,7 @@ export const fetchPostList = async (
     pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
     pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
 ) => {
+    console.log(userId, '받은 유저')
     try {
         const response = await fetch('http://localhost:3000/api/firebaseLimit', {
             method: 'POST',
@@ -85,46 +86,51 @@ export const fetchPostList = async (
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
 
-        if (response.ok) {
-            // 현재 포스트 작성자의 모든 글 가져오기
-            const postlistRef = collection(db, 'posts');
-            const postlistQuery = query(postlistRef, where('userId', '==', userId), orderBy('createAt', 'desc'), limit(pageSize));
-            const postQuery = (pageParam && pageParam.at(1))
-                ?
-                query(
-                    postlistQuery,
-                    startAfter(...pageParam),
-                )
-                :
-                postlistQuery
+        // 현재 포스트 작성자의 모든 글 가져오기
+        const postlistRef = collection(db, 'posts');
+        const postlistQuery = query(
+            postlistRef,
+            where('userId', '==', userId),
+            orderBy('createAt', 'desc'),
+            limit(pageSize)
+        );
 
-            const postlistSnapshot = await getDocs(postQuery);
+        const postQuery = (pageParam && pageParam.at(1))
+            ?
+            query(
+                postlistQuery,
+                startAfter(pageParam.at(1)),
+            )
+            :
+            postlistQuery
 
-            const postListData: PostData[] = await Promise.all(
-                postlistSnapshot.docs.map(async (document) => {
-                    // 포스트 가져오기
-                    const postData = { id: document.id, ...document.data() } as PostData;
+        const postlistSnapshot = await getDocs(postQuery);
 
-                    // 댓글 개수 가져오기
-                    const commentRef = collection(db, 'posts', document.id, 'comments');
-                    const commentSnapshot = await getDocs(commentRef);
-                    postData.commentCount = commentSnapshot.size;
+        const postListData: PostData[] = await Promise.all(
+            postlistSnapshot.docs.map(async (document) => {
+                // 포스트 가져오기
+                const postData = { id: document.id, ...document.data() } as PostData;
 
-                    return postData;
-                })
-            );
+                // 댓글 개수 가져오기
+                const commentRef = collection(db, 'posts', document.id, 'comments');
+                const commentSnapshot = await getDocs(commentRef);
+                postData.commentCount = commentSnapshot.size;
 
-            const lastVisible = postlistSnapshot.docs.at(-1); // 마지막 문서
+                return postData;
+            })
+        );
 
-            return {
-                data: postListData,
-                nextPage: lastVisible
-                    ? [lastVisible.data().notice, lastVisible.data().createAt as Timestamp] // 정렬 필드 값 배열로 반환
-                    : null,
-            };
-        }
+        const lastVisible = postlistSnapshot.docs.at(-1); // 마지막 문서
+
+        return {
+            data: postListData,
+            nextPage: lastVisible
+                ? [lastVisible.data().notice, lastVisible.data().createAt as Timestamp] // 정렬 필드 값 배열로 반환
+                : null,
+        };
     } catch (error) {
         console.error("Error fetching data:", error);
+        return error;
     };
 }
 

@@ -362,7 +362,7 @@ const SwiperHits = () => {
     }
 
     const handleUserPage = (userId: string) => {
-        router.push(`user/${userId}`)
+        router.push(`/user/${userId}`)
     }
 
     const UserHitComponent = ({ hit }: { hit: { displayName: string; photoURL: string; userId: string } }) => (

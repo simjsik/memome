@@ -95,7 +95,7 @@ export default function NavBar() {
 
     // 내비 클릭 시 선택 메뉴 설정
     const handleNavClick = (NavTitle: number) => {
-        if (NavTitle === 2 || NavTitle === 1 || NavTitle === 3) {
+        if (NavTitle) {
             // 현재 스크롤 위치를 sessionStorage에 저장
             sessionStorage.setItem(
                 `scroll-${path}`,
@@ -217,7 +217,7 @@ export default function NavBar() {
                             {4 === selectedMenu ?
                                 <svg viewBox="0 0 36 36">
                                     <g id="Layer_2" data-name="Layer 2">
-                                        <circle cx="18" cy="11.5" r="4" fill="#050505" stroke="none"/>
+                                        <circle cx="18" cy="11.5" r="4" fill="#050505" stroke="none" />
                                         <path d="M27.3,28.5a2,2,0,0,0,1.6-2.62C27.6,21.63,23.22,18.5,18,18.5S8.4,21.63,7.1,25.88A2,2,0,0,0,8.7,28.5Z" fill="#050505" stroke='none' strokeWidth={'2.5'} />
                                         <rect width="40" height="40" fill="none" stroke='none' />
                                     </g>

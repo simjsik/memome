@@ -2,7 +2,7 @@
 "use client";
 
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState, userData, userState } from "../state/PostState";
+import { DidYouLogin, loginToggleState, modalState, userData, userState } from "../state/PostState";
 import { css } from "@emotion/react";
 import loginListener from "../hook/LoginHook";
 import { useRouter } from "next/navigation";
@@ -39,6 +39,7 @@ export default function Logout() {
     const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
     const [user, setUser] = useRecoilState<userData | null>(userState)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const [modal, setModal] = useRecoilState<boolean>(modalState);
     // State
     const router = useRouter();
     loginListener();
@@ -69,7 +70,10 @@ export default function Logout() {
 
     const handleLoginToggle = () => {
         setLoginToggle(true);
+        setModal(true);
     }
+
+    
     // Function
     return (
         <>

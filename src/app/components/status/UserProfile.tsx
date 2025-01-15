@@ -208,7 +208,6 @@ margin-top : 20px;
 
 export default function UserProfile() {
     const user = useRecoilValue<userData | null>(userState)
-    const [myPostList, setMyPostList] = useState<PostData[]>([])
     const [updateToggle, setUpdateToggle] = useState<boolean>(false)
     const [userEmail, setUserEmail] = useState<string | null>('')
     const [updateUserName, setUpdateUserName] = useState<string>('')
@@ -217,7 +216,6 @@ export default function UserProfile() {
     const [userPhoto, setUserPhoto] = useState<string | null>(null)
     const [loading, setLoading] = useState(false);
     const [noticeLists, setNoticeLists] = useRecoilState<noticeType[]>(noticeList);
-    const ADMIN = useRecoilValue(ADMIN_ID)
     // state
     const updatePhotoRef = useRef<HTMLInputElement | null>(null)
     // ref

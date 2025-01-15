@@ -154,6 +154,7 @@ border-right : 1px solid #ededed;
         background : #fff;
         cursor : pointer
       }
+
       .post_comment_icon{
         width: 20px;
         height: 20px;
@@ -653,12 +654,17 @@ cursor : pointer;
 }
 `
 export const BookmarkWrap = styled.div`
-width:860px;
-margin-left : 420px;
-padding : 120px 20px;
-border-left : 1px solid #dedede;
-border-right : 1px solid #dedede;
-background : #fff
+    width: 600px;
+    margin-left: 500px;
+    border-left: 1px solid #dedede;
+    border-right: 1px solid #dedede;
+    background: #fff;
+
+    .all_post{
+        padding: 16px;
+        border-bottom: 1px solid #ededed;
+        text-align: center;
+    }
 `
 export const NoMorePost = styled.div`
     width: 100%;
@@ -679,8 +685,10 @@ export const NoMorePost = styled.div`
     }
 
     span{
+      display : block;
       color: #999;
       font-size: 14px;
+      margin-top : 4px;
     }
 `
 export const NewPostBtn = styled.button`

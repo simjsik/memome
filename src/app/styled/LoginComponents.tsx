@@ -12,8 +12,8 @@ background-size : cover;
 export const LoginButtonWrap = styled.div`
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
-  right: 80px;
+  left : 50%;
+  transform: translate(-50%, -50%);
   width: 520px;
   height: 720px;
   background: #fff;
@@ -57,6 +57,23 @@ export const LoginInput = styled.input`
             outline: none;
             }
 `
+
+export const CreateInput = styled.input`
+            width: 100%;
+            height : 42px;
+            margin: 0px;
+            margin-top : 8px;
+            padding: 4px 0px;
+            border : 1px solid #ededed;
+            border-radius : 8px;
+            font-size: 16px;
+            font-family : var(--font-pretendard-medium);
+            font-weight: 500;
+
+            &:focus{
+            outline: none;
+            }
+`
 export const OtherLoginWrap = styled.div`
 margin-top : 60px;
 border-top : 1px solid #e6e6ea;
@@ -64,7 +81,7 @@ padding-top : 10px;
 `
 
 export const CreateButton = styled.button`
-background: none;
+    background: none;
     border: none;
     color : #5688FF;
     font-size : 14px;
@@ -73,6 +90,19 @@ background: none;
     border-bottom: 1px solid #5688FF;
     cursor: pointer;
 `
+
+export const LoginButton = styled.button`
+width: 100%;
+height : 52px;
+margin: 20px 0px 4px 0px;
+border : none;
+border-radius : 4px;
+background : #272D2D;
+color: #fff;
+font-size : 16px;
+font-family : var(--font-pretendard-medium);
+`
+
 export const GoogleButton = styled.button`
     width: 100%;
     height : 48px;

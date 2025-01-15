@@ -14,6 +14,7 @@ height : 32px;
 cursor : pointer;
 border : none;
 background : none;
+padding : 2px;
 `
 
 interface PostId {
@@ -118,7 +119,7 @@ export default function BookmarkBtn({ postId }: PostId) {
     // function
     return (
         <Bookmark onClick={(event) => { event.preventDefault(); event.stopPropagation(); addBookmark(postId); }}>
-            <svg width="28" height="28" viewBox="0 0 39 40">
+            <svg width="28" height="28" viewBox="0 0 38 38">
                 <g>
                     {bookmarked ?
                         <>

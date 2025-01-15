@@ -1,11 +1,11 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import "./globals.css";
 import { PretendardBold, PretendardMedium, PretendardLight } from './styled/FontsComponets';
 import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil';
-import { useParams, usePathname } from 'next/navigation';
-import { bookMarkState, loginToggleState, postStyleState, UsageLimitState, userData, userState } from './state/PostState';
+import { useParams, usePathname, useRouter } from 'next/navigation';
+import { bookMarkState, loginToggleState, modalState, postStyleState, UsageLimitState, userData, userState } from './state/PostState';
 
 import LoginBox from './login/LoginBox';
 import StatusBox from './components/StatusBox';
@@ -33,7 +33,6 @@ background : red;
 
 function LayoutContent({ children }: LayoutProps) {
   const pathName = usePathname();
-  const params = useParams();
   const isMain = pathName === '/';
   const isPost = pathName === '/home/post'
   const isLogin = pathName === '/login'
@@ -44,6 +43,8 @@ function LayoutContent({ children }: LayoutProps) {
   const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
   const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
   const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+  const [modal, setModal] = useRecoilState<boolean>(modalState);
+  const router = useRouter();
   // State
 
   // 사용량 확인
@@ -61,7 +62,6 @@ function LayoutContent({ children }: LayoutProps) {
         }
       }
 
-
       const loadBookmarks = async () => {
         try {
           const bookmarks = await getDoc(doc(db, `users/${currentUser.uid}/bookmarks/bookmarkId`));
@@ -75,10 +75,11 @@ function LayoutContent({ children }: LayoutProps) {
           console.error("북마크 데이터를 가져오는 중 오류 발생:", error);
         }
       }
+
       loadBookmarks();
       checkLimit();
     } else {
-      console.log('제한 안함')
+      // router.push('/login');
     }
   }, [currentUser])
 
@@ -86,18 +87,28 @@ function LayoutContent({ children }: LayoutProps) {
     setPostStyle((prev) => !prev);
   }
 
+  useEffect(() => {
+    const htmlElement = document.documentElement; // <html> 태그 선택
+    if (modal) {
+      htmlElement.classList.add('modal-active'); // 모달 활성화 시 클래스 추가
+    } else {
+      htmlElement.classList.remove('modal-active'); // 모달 비활성화 시 클래스 제거
+    }
+  }, [modal]);
   // Function
 
+  // 모달 닫기 함수
+  const closeModal = () => setModal(false);
   return (
     <>
-      {usageLimit && <UsageLimit />}
+      {usageLimit && <UsageLimit isOpen={modal} onClose={closeModal} />}
       {(!isPost && !isLogin) &&
         <>
           <NavWrap></NavWrap>
           <StatusBox></StatusBox>
         </>
       }
-      {loginToggle && <LoginBox />}
+      {loginToggle && <LoginBox isOpen={modal} onClose={closeModal} />}
       {isMain && <PostStyleBtn onClick={handlePostStyle} />}
       {children}
     </>
@@ -107,6 +118,7 @@ function LayoutContent({ children }: LayoutProps) {
 const queryClient = new QueryClient();
 
 export default function RootLayout({ children }: LayoutProps) {
+
   return (
     <QueryClientProvider client={queryClient}>
       <RecoilRoot>

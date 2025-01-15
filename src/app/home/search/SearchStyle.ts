@@ -6,6 +6,7 @@ import styled from "@emotion/styled";
 export const SearchBoxWrap = styled.div` 
     position: relative;
     width: 650px;
+    min-height: 100vh;
     margin-left: 500px;
     border-left: 1px solid #ededed;
     border-right: 1px solid #ededed;
@@ -55,9 +56,13 @@ export const SearchBoxWrap = styled.div`
     .ais-SearchBox-input{
         width: 100%;
         height: 100%;
-        border-radius: 30px;
+        border-radius: 8px;
         border: 1px solid #ededed;
         padding: 0px 10px 0px 46px;
+
+        &:focus {
+        outline : 1px solid #191919;
+        }
     }
 
     .ais_result_wrap{
@@ -67,15 +72,26 @@ export const SearchBoxWrap = styled.div`
 
     .ais_profile_wrap{
         display: flex;
-        line-height: 42px;
+        line-height: 36px;
     }
 
     .ais_user_photo{
-        width: 42px;
-        height: 42px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         border: 2px solid #ededed;
         margin-right: 8px;
+        background-size : cover;
+        background-repeat : no-repeat;
+    }
+
+    .ais_user_name{
+        margin-right : 4px;
+    }
+
+    .ais_user_uid{
+        font-family : var(--font-pretendard-light);
+        font-size : 14px;
     }
 
     .ais_post_content_wrap{
@@ -119,16 +135,31 @@ export const SearchBoxWrap = styled.div`
         display: flex;
         margin-top: 16px;
         line-height: 36px;
+        justify-content: space-between;
 
-        .comment_icon{
-            width: 36px;
-            height: 36px;
-            background: red;
-            margin-right: 4px;
+        .post_comment_btn{
+            width: 32px;
+            height: 32px;
+            border : none;
+            border-radius : 4px;
+            background : #fff;
+            cursor : pointer
+        }
+        
+        .post_comment_icon{
+            width: 20px;
+            height: 20px;
+            background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449945/%EB%8C%93%EA%B8%80%EC%95%84%EC%9D%B4%EC%BD%98_xbunym.svg);
+            margin : 4px 8px 4px 4px;
         }
 
-        .ais_comment_count{
-            font-size: 14px;
+        .post_comment{
+            font-family : var(--font-pretendard-medium);
+            font-size : 14px;
+            color: #191919;
+            margin-left : 0px;
+            display : flex;
+            line-height : 32px;
         }
     }
 
