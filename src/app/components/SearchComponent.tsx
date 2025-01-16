@@ -7,6 +7,8 @@ import { searchClient } from "../api/algolia";
 import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useRouter } from "next/navigation";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { DidYouLogin, loginToggleState, modalState, UsageLimitState, UsageLimitToggle } from "../state/PostState";
 // 검색 창 css
 const SearchWrap = styled.div`
 position: relative;
@@ -326,6 +328,11 @@ position: relative;
 // 유저 검색 결과
 const SwiperHits = () => {
     const router = useRouter();
+    const yourLogin = useRecoilValue(DidYouLogin)
+    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const setModal = useSetRecoilState<boolean>(modalState);
+    const usageLimit = useRecoilValue<boolean>(UsageLimitState)
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
 
     const { query, refine } = useSearchBox();
     const { items } = useHits();
@@ -362,7 +369,15 @@ const SwiperHits = () => {
     }
 
     const handleUserPage = (userId: string) => {
-        router.push(`/user/${userId}`)
+        if (yourLogin && !usageLimit) {
+            router.push(`/user/${userId}`)
+        } else if (usageLimit) {
+            return setLimitToggle(true);
+        } else {
+            setLoginToggle(true);
+            setModal(true);
+            return;
+        }
     }
 
     const UserHitComponent = ({ hit }: { hit: { displayName: string; photoURL: string; userId: string } }) => (
@@ -403,9 +418,24 @@ const SwiperHits = () => {
 
 export default function SearchComponent() {
     const router = useRouter();
-    
+    const yourLogin = useRecoilValue(DidYouLogin)
+    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const setModal = useSetRecoilState<boolean>(modalState);
+    const [usageLimit, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
+
     const handleSearch = (event: React.KeyboardEvent<HTMLDivElement>) => {
         // 엔터키를 감지
+        if (!yourLogin || usageLimit) {
+            if (usageLimit) {
+                return setLimitToggle(true);
+            }
+            if (!yourLogin) {
+                setLoginToggle(true);
+                setModal(true);
+                return;
+            }
+        }
+
         if (event.key === 'Enter') {
             const inputElement = event.target as HTMLInputElement;
 
@@ -418,7 +448,7 @@ export default function SearchComponent() {
             }
         }
     };
-    
+
     // functon
     return (
         <SearchWrap>

@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
-import { DidYouLogin, loginToggleState, newNoticeState, noticeState, searchState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
+import { DidYouLogin, loginToggleState, modalState, newNoticeState, noticeState, searchState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css } from '@emotion/react';
 import { auth } from '../DB/firebaseConfig';
@@ -67,13 +67,12 @@ background : #f9f9f9;
 
 export default function NavBar() {
     const yourLogin = useRecoilValue(DidYouLogin)
+    const currentUser = useRecoilValue<userData | null>(userState)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const setModal = useSetRecoilState<boolean>(modalState);
     const [selectedMenu, setSelectedMenu] = useRecoilState<number>(selectedMenuState);
-    const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
-    const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
-    const [limitToggle, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
-
+    const [usageLimit, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
     // State
     const router = useRouter();
     const path = usePathname();
@@ -112,15 +111,21 @@ export default function NavBar() {
             if (yourLogin) {
                 router.push(`/home/bookmark/${currentUser?.uid}`);
             } else {
-                return setLoginToggle(true);
+                setLoginToggle(true);
+                setModal(true);
+                return;
             }
         } else if (NavTitle === 4) {
             if (yourLogin && !usageLimit) {
                 router.push(`/home/user/${auth.currentUser?.uid}`)
             } else if (usageLimit) {
-                return setLimitToggle(true);
+                setLimitToggle(true);
+                setModal(true);
+                return;
             } else {
-                return setLoginToggle(true);
+                setLoginToggle(true);
+                setModal(true);
+                return;
             }
         }
         setSelectedMenu(NavTitle);
@@ -134,6 +139,8 @@ export default function NavBar() {
             return setLimitToggle(true);
         } else {
             setLoginToggle(true);
+            setModal(true);
+            return;
         }
     };
 

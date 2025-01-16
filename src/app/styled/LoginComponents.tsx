@@ -21,13 +21,42 @@ export const LoginButtonWrap = styled.div`
   border-radius: 8px;
   box-shadow : 0px 0px 10px rgba(0,0,0,0.2);
 
-  .login_error{
-    font-size : 14px;
-    color : #fa5741;
+  .login_error_wrap{
+    display: flex;
     margin-top: 4px;
-  }
-`
 
+    button{
+        text-decoration: underline;
+        border: none;
+        background: none;
+        line-height: 15px;
+        font-family: 'var(--font-pretendard-light)';
+        cursor: pointer;
+    }
+  }
+
+  .login_error,
+  .sign_error{
+    font-size: 14px;
+    color: #fa5741;
+    margin-right: 4px;
+  }
+
+    .login_back{
+        width: 100%;
+        height: 52px;
+        margin: 20px 0px 4px 0px;
+        border: 1px solid #0087ff;
+        border-radius: 4px;
+        background: #fff;
+        color: #0087ff;
+        font-size: 16px;
+        font-family: var(--font-pretendard-medium);
+        cursor: pointer;
+    }
+
+    
+`
 export const LoginInputWrap = styled.div`
     margin-top: 10px;
     padding : 0px;
@@ -63,13 +92,12 @@ export const LoginInput = styled.input`
             outline: none;
             }
 `
-
 export const CreateInput = styled.input`
             width: 100%;
-            height : 42px;
+            height : 52px;
             margin: 0px;
             margin-top : 8px;
-            padding: 4px 0px;
+            padding: 4px 8px;
             border : 1px solid #ededed;
             border-radius : 8px;
             font-size: 16px;
@@ -85,7 +113,6 @@ margin-top : 60px;
 border-top : 1px solid #e6e6ea;
 padding-top : 10px;
 `
-
 export const CreateButton = styled.button`
     background: none;
     border: none;
@@ -96,19 +123,18 @@ export const CreateButton = styled.button`
     border-bottom: 1px solid #5688FF;
     cursor: pointer;
 `
-
 export const LoginButton = styled.button`
-width: 100%;
-height : 52px;
-margin: 20px 0px 4px 0px;
-border : none;
-border-radius : 4px;
-background : #272D2D;
-color: #fff;
-font-size : 16px;
-font-family : var(--font-pretendard-medium);
+    width: 100%;
+    height : 52px;
+    margin: 20px 0px 4px 0px;
+    border : none;
+    border-radius : 4px;
+    background : #0087ff;
+    color: #fff;
+    font-size : 16px;
+    font-family : var(--font-pretendard-medium);
+    cursor: pointer;
 `
-
 export const GoogleButton = styled.button`
     width: 100%;
     height : 48px;
@@ -123,21 +149,7 @@ export const GoogleButton = styled.button`
     font-size : 14px;
     font-family : var(--font-pretendard-medium);
     font-weight: 500;
-`
-export const NaverButton = styled.button`
-    width: 100%;
-    height : 48px;
-    margin-top : 20px;
-    padding : 0px 8px;
-    background-color : #fff;
-    color : #191919;
-    border : 1px solid #e6e6ea;
-    border-radius : 4px;
-    cursor : pointer;
-    line-height : 18px;
-    font-size : 14px;
-    font-family : var(--font-pretendard-medium);
-    font-weight: 500;
+    cursor: pointer;
 `
 export const GuestButton = styled.button`
 width: 100%;
@@ -153,5 +165,6 @@ width: 100%;
     font-size : 14px;
     font-family : var(--font-pretendard-medium);
     font-weight: 500;
+    cursor: pointer;
 `
 

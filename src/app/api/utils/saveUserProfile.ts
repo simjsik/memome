@@ -1,17 +1,20 @@
 import { db } from "@/app/DB/firebaseConfig";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
-export async function saveNewUser(uid: string) {
+export async function saveNewUser(uid: string, displayName: string | null = null) {
     const userRef = doc(db, "users", uid);
     const userSnapshot = await getDoc(userRef);
     console.log(userSnapshot.exists(), '유저 데이터 확인')
     if (!userSnapshot.exists()) {
         const randomName = `user${Math.random().toString(36).substring(2, 10)}`;
+        const setDisplay = displayName ? displayName : randomName
+
         await setDoc(userRef, {
-            displayName: randomName,
+            setDisplay,
             photoURL: "",
             userId: uid,
         });
+        
         console.log(`New user created: ${randomName}`);
     }
 }

@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { ADMIN_ID, bookMarkState, newNoticeState, noticeList, noticeType, PostData, PostState, storageLoadState, UsageLimitState, userData, userState } from '../../state/PostState';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { ADMIN_ID, bookMarkState, DidYouLogin, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, PostState, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
 import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -52,6 +52,10 @@ interface MainHomeProps {
 export default function MainHome({ post: initialPosts, initialNextPage }: MainHomeProps) {
     window.history.scrollRestoration = 'manual'
 
+    const yourLogin = useRecoilValue(DidYouLogin)
+    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const setModal = useSetRecoilState<boolean>(modalState);
+
     // 포스트 스테이트
     const [posts, setPosts] = useRecoilState<PostData[]>(PostState)
     const [newPosts, setNewPosts] = useState<PostData[]>([])
@@ -73,6 +77,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
     const ADMIN = useRecoilValue(ADMIN_ID);
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
 
     // state
     const router = useRouter();
@@ -215,6 +220,17 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
     useEffect(() => {
         if (usageLimit) return console.log('함수 요청 안함.');
 
+        if (!yourLogin || usageLimit) {
+            if (usageLimit) {
+                return setLimitToggle(true);
+            }
+            if (!yourLogin) {
+                setLoginToggle(true);
+                setModal(true);
+                return;
+            }
+        }
+
         const obsever = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && hasNextPage) {
@@ -235,12 +251,18 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
     // 포스트 삭제
     const deletePost = async (postId: string) => {
-        if (!auth.currentUser) {
-            alert('로그인이 필요합니다.');
-            return;
+        if (!yourLogin || usageLimit) {
+            if (usageLimit) {
+                return setLimitToggle(true);
+            }
+            if (!yourLogin) {
+                setLoginToggle(true);
+                setModal(true);
+                return;
+            }
         }
 
-        const currentUserId = auth.currentUser.uid;
+        const currentUserId = currentUser?.uid;
 
         try {
             // 게시글 존재 확인
@@ -270,6 +292,16 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
     // 포스트 보기
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
+        if (!yourLogin || usageLimit) {
+            if (usageLimit) {
+                return setLimitToggle(true);
+            }
+            if (!yourLogin) {
+                setLoginToggle(true);
+                setModal(true);
+                return;
+            }
+        }
         router.push(`memo/${postId}`)
     }
 

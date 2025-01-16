@@ -178,8 +178,13 @@ export const searchState = atom<boolean>({
 })
 
 // 모달
-
 export const modalState = atom<boolean>({
     key: 'modalState',
+    default: false
+})
+
+// 회원가입 토글
+export const signUpState = atom<boolean>({
+    key: 'signUpState',
     default: false
 })

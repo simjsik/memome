@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { ADMIN_ID, DidYouLogin, noticeList, noticeType, PostData, userData, userState } from "@/app/state/PostState";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { ADMIN_ID, DidYouLogin, loginToggleState, modalState, noticeList, noticeType, PostData, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
 import { auth, db } from "@/app/DB/firebaseConfig";
 import { updateProfile } from "firebase/auth";
@@ -11,6 +11,7 @@ import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { css } from "@emotion/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { MyAlarmWrap } from "@/app/styled/PostComponents";
+import { useRouter } from "next/navigation";
 
 const ProfileWrap = styled.div`
 padding-top : 20px;
@@ -50,8 +51,10 @@ height : 100%;
     width: 100%;
     padding: 8px;
     border: 1px solid #ededed;
+    border-radius : 4px;
     background: #fff;
     margin-top: 20px;
+    cursor: pointer;
 }
 
 // 프로필 하단
@@ -88,6 +91,7 @@ height : 100%;
     padding: 4px 10px;
     border: 1px solid #ededed;
     background: #fff;
+    cursor :pointer;
 }
 
 // 프로필 업데이트
@@ -99,7 +103,7 @@ margin-top : 20px;
         display: flex;
         flex-wrap: wrap;
         
-        label{
+        >label{
         flex: 1 0 100%;
         font-size: 14px;
         }
@@ -128,7 +132,7 @@ margin-top : 20px;
     font-size: 14px;
     flex-wrap: wrap;
 
-        label:first-child{
+        >label{
         flex: 1 0 100%;
         }
 
@@ -137,30 +141,35 @@ margin-top : 20px;
         }
 
         .photo_btn_wrap{
-        display : flex;
-        flex: 1 0 100%;
-        margin-top : 10px;
+            display: flex;
+            flex: 0 0 60%;
+            margin-top: 10px;
 
             .photo_update{
-            display: block;
-            flex : 0 0 40%;
-            padding: 10px;
-            border: 1px solid #ededed;
-            border-radius: 8px;
-            background-color : #fff;
-            text-align: center;
-            margin-right : 8px;
-            cursor:pointer
+                display: block;
+                width: 120px;
+                height: 40px;
+                padding: 10px;
+                border: 1px solid #ededed;
+                border-radius: 8px;
+                background-color: #fff;
+                text-align: center;
+                margin-right: 8px;
+                cursor: pointer;
             }
 
             .photo_reset{
-            flex : 0 0 30%;
-            padding: 10px;
-            border: none;
-            background : none;
-            line-height : 18px;
-            text-align: center;
-            cursor:pointer
+                width: 72px;
+                height: 42px;
+                padding: 10px;
+                border: none;
+                background: none;
+                line-height: 18px;
+                text-align: center;
+                -webkit-text-decoration: underline;
+                text-decoration: underline;
+                font-family: var(--font-pretendard-light);
+                cursor: pointer;
             }
 
             .photo_reset:hover{
@@ -168,6 +177,15 @@ margin-top : 20px;
             }
         }
 
+        .photo_preview{
+            width: 62px;
+            height: 62px;
+            border: 2px solid #ededed;
+            border-radius: 50%;
+            background-size: cover;
+            background-repeat : no-repeat;
+            background-position : center;
+        }
     }
     // --------------------------------------
 
@@ -212,14 +230,22 @@ margin-top : 20px;
 
 export default function UserProfile() {
     const user = useRecoilValue<userData | null>(userState)
+    const yourLogin = useRecoilValue(DidYouLogin)
+    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const setModal = useSetRecoilState<boolean>(modalState);
+    const [noticeLists, setNoticeLists] = useRecoilState<noticeType[]>(noticeList);
+    const [usageLimit, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
     const [updateToggle, setUpdateToggle] = useState<boolean>(false)
     const [updateUserName, setUpdateUserName] = useState<string | null>(null)
+    const [updateUserNameError, setUpdateUserNameError] = useState<string | null>(null)
     const [updateUserPhoto, setUpdateUserPhoto] = useState<File | null>(null)
+    const [updateUserPhotoError, setUpdateUserPhotoError] = useState<string | null>(null)
+    const [updateUserPhotoPreview, setUpdateUserPhotoPreview] = useState<string | null>(null)
     const [loading, setLoading] = useState(false);
-    const [noticeLists, setNoticeLists] = useRecoilState<noticeType[]>(noticeList);
     // state
     const updatePhotoRef = useRef<HTMLInputElement | null>(null)
     // ref
+    const router = useRouter();
     const my = auth.currentUser
 
     // File 타입을 base64로 변경하기 위한 함수
@@ -292,34 +318,53 @@ export default function UserProfile() {
 
     // 유저 프로필 사진 변경 시 설정
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            if (e.target.files[0].size > 2 * 1024 * 1024) {
-                alert('이미지 크기는 2MB를 초과 할 수 없습니다.')
-                return
-            } else {
-                setUpdateUserPhoto(e.target.files[0]);
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (!file.type.startsWith("image/")) {
+                setUpdateUserPhotoError("이미지만 업로드할 수 있습니다.");
+                return;
             }
+
+            if (file.size > 2 * 1024 * 1024) {
+                setUpdateUserPhotoError('이미지 크기는 2MB를 초과 할 수 없습니다.')
+                return;
+            }
+
+            const imageUrl = URL.createObjectURL(file);
+            setUpdateUserPhotoPreview(imageUrl)
+            setUpdateUserPhoto(e.target.files[0]);
         }
         setLoading(true);
     }
+
+    const handleResetPhoto = () => {
+        setUpdateUserPhotoPreview('baseImage'); // 기본 이미지 URL 적용
+        setUpdateUserPhoto(null);  // 선택된 파일 초기화
+    };
 
     // 유저 별명 변경 시 설정
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
 
         if (e.target.value.length > 12) {
-            alert('별명은 최대 12자 이내로 가능합니다.')
-            setUpdateUserName(e.target.value)
-            return
+            setUpdateUserNameError('별명은 최대 12자 이내로 가능합니다.')
         }
+
+        if (e.target.value.length > 18) {
+            return;
+        }
+
         setUpdateUserName(e.target.value)
         setLoading(true);
     }
 
     const handleProfileReset = () => {
-        if (user && user.photo && user.name) {
+        if (user && user.name) {
             setUpdateUserName(user.name)
             setUpdateUserPhoto(null)
+            setUpdateUserNameError(null)
+            setUpdateUserPhotoError(null)
+            setUpdateUserPhotoPreview(null)
         }
 
         if (updatePhotoRef.current) {
@@ -380,7 +425,27 @@ export default function UserProfile() {
     }
 
     const handleUpdateToggle = () => {
-        setUpdateToggle((prev) => !prev)
+        if (yourLogin && !usageLimit) {
+            setUpdateToggle((prev) => !prev)
+        } else if (usageLimit) {
+            return setLimitToggle(true);
+        } else {
+            setLoginToggle(true);
+            setModal(true);
+            return;
+        }
+    }
+
+    const handleMemoClick = () => {
+        if (yourLogin && !usageLimit) {
+            router.push('/home/post');
+        } else if (usageLimit) {
+            return setLimitToggle(true);
+        } else {
+            setLoginToggle(true);
+            setModal(true);
+            return;
+        }
     }
 
     useEffect(() => {
@@ -426,14 +491,17 @@ export default function UserProfile() {
                                     <input onChange={handleNameChange} type="text" value={updateUserName || ''} placeholder={user?.name || '새 유저 별명'} />
                                     <p>{updateUserName?.length}/12</p>
                                 </div>
+                                <span className="update_error">{updateUserNameError}</span>
                                 <div className="user_photo_change_wrap">
                                     <label>사진</label>
                                     <div className="photo_btn_wrap">
                                         <label className="photo_update" htmlFor={'photo_input'}>사진 변경</label>
-                                        <button className="photo_reset">사진 제거</button>
+                                        <button className="photo_reset" onClick={handleResetPhoto}>사진 제거</button>
                                     </div>
+                                    <div className="photo_preview" css={css`background-image : url(${updateUserPhotoPreview})`}></div>
                                     <input id="photo_input" ref={updatePhotoRef} onChange={handlePhotoChange} type="file" accept="image/*" />
                                 </div>
+                                <span className="update_error">{updateUserPhotoError}</span>
                                 {/* 업데이트 감지 시 버튼 */}
                                 {(updateUserName !== user?.name || Boolean(updateUserPhoto)) &&
                                     <div className="update_btn_wrap">
@@ -464,7 +532,7 @@ export default function UserProfile() {
                                     border-radius : 50%;
                                 `}></div>
                                 <p>새 메모를 작성하세요</p>
-                                <button className="memo_btn">메모</button>
+                                <button className="memo_btn" onClick={handleMemoClick}>메모</button>
                             </div>
                             <MyAlarmWrap className="my_alarm_wrap">
                                 <Swiper

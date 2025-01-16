@@ -78,8 +78,6 @@ function LayoutContent({ children }: LayoutProps) {
 
       loadBookmarks();
       checkLimit();
-    } else {
-      // router.push('/login');
     }
   }, [currentUser])
 
@@ -135,4 +133,3 @@ export default function RootLayout({ children }: LayoutProps) {
     </QueryClientProvider>
   );
 }
-

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { css } from "@emotion/react";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState, modalState, userData, userState } from "../state/PostState";
+import { DidYouLogin, loginToggleState, modalState, signUpState, userData, userState } from "../state/PostState";
 import loginListener from "../hook/LoginHook";
 import {
     CreateButton,
@@ -13,10 +13,9 @@ import {
     LoginButtonWrap,
     LoginInput,
     LoginInputWrap,
-    NaverButton,
     OtherLoginWrap
 } from "../styled/LoginComponents";
-import { getAuth, GoogleAuthProvider, sendEmailVerification, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, sendEmailVerification, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth";
 import { LoginOr, LoginSpan, LoginTitle } from "../styled/LoginStyle";
 import { useRouter } from "next/navigation";
 import { saveNewGoogleUser, saveNewUser } from "../api/utils/saveUserProfile";
@@ -47,10 +46,12 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
     const [user, setUser] = useRecoilState<userData | null>(userState)
     const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
     const [csrfToken, setCsrfToken] = useState<string | null>(null)
-    const [signUpToggle, setSignUpToggle] = useState<boolean>(false)
+    const [signUpToggle, setSignUpToggle] = useRecoilState<boolean>(signUpState);
     const modalRef = useRef<HTMLDivElement>(null);
     const [modal, setModal] = useRecoilState<boolean>(modalState);
     const [loginError, setLoginError] = useState<string | null>(null);
+    const [verifyReSend, setVerifyReSend] = useState<boolean>(false);
+    const [unverifedUser, setUnverifiedUser] = useState<User | null>(null);
     // State
     const auths = getAuth();
     const router = useRouter();
@@ -100,14 +101,33 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
         // 추가적인 에러 코드 필요 시 확장 가능
     };
 
+    const handleVerifyReSend = async (user: User) => {
+        try {
+            setLoginError("인증 메일이 재전송되었습니다. 이메일을 확인해주세요.");
+            setVerifyReSend(false);
+
+            await sendEmailVerification(user);
+            // 버튼 비활성화 타이머 설정
+            setTimeout(() => {
+                setVerifyReSend(true);;
+            }, 60000); // 60초
+        }
+        catch (error) {
+            setLoginError("인증 메일 전송에 실패했습니다. 다시 시도해주세요.");
+        }
+    }
+
     const handleLogin = async (email: string, password: string) => {
         try {
+            setVerifyReSend(false);
             const userCredential = await signInWithEmailAndPassword(auths, email, password);
             const user = userCredential.user;
 
+
             if (!user.emailVerified) {
                 setLoginError('이메일 인증이 필요한 계정입니다.')
-                await sendEmailVerification(user); // 이메일 인증 메일 재전송
+                setVerifyReSend(true);
+                setUnverifiedUser(user); // 상태에 user 저장
                 return;
             }
 
@@ -136,7 +156,7 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
                         saveNewUser(user.uid);
                         router.push('/home/main')
                     } else {
-                        setLoginError("로그인 요청 실패. 잠시 후 다시 시도해주세요.");
+                        setLoginError("로그인 요청 실패. 다시 시도해주세요.");
                         getCsrfToken();
                     }
                 } else {
@@ -223,6 +243,11 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
 
         return () => {
             setModal(false); // 모달이 닫힐 때 modal 상태 false로 설정
+            setSignUpToggle(false)
+            setEmail('')
+            setPassword('')
+
+            setLoginError(null)
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('mousedown', handleBackgroundClick);
         };
@@ -234,40 +259,51 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
     return (
         <div css={LoginWrap}>
             <div css={LoginBg}></div>
-            {!signUpToggle ?
-                <LoginButtonWrap ref={modalRef}>
-                    <LoginTitle>로그인</LoginTitle>
-                    <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
-                        <LoginInputWrap>
-                            <div>
-                                <p>이메일 또는 아이디</p>
-                                <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
+            <div ref={modalRef}>
+                {!signUpToggle ?
+                    <LoginButtonWrap >
+                        <LoginTitle>로그인</LoginTitle>
+                        <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
+                            <LoginInputWrap>
+                                <div>
+                                    <p>이메일 또는 아이디</p>
+                                    <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
+                                </div>
+                                <div>
+                                    <p>패스워드</p>
+                                    <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
+                                </div>
+                            </LoginInputWrap>
+                            <div className="login_error_wrap">
+                                {
+                                    loginError &&
+                                    <p className="login_error">{loginError}</p>
+                                }
+                                {
+                                    (loginError && verifyReSend) &&
+                                    <button
+                                        onClick={() => handleVerifyReSend(unverifedUser as User)}
+                                        disabled={!verifyReSend}
+                                    >인증 메일 재전송</button>
+                                }
                             </div>
-                            <div>
-                                <p>패스워드</p>
-                                <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
-                            </div>
-                        </LoginInputWrap>
-                        {
-                            loginError &&
-                            <p className="login_error">{loginError}</p>
-                        }
-                        <LoginButton type="submit">로그인</LoginButton>
-                    </form>
-                    <LoginSpan>처음 이신가요?</LoginSpan >
-                    <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
+                            <LoginButton type="submit">로그인</LoginButton>
+                        </form>
+                        <LoginSpan>처음 이신가요?</LoginSpan >
+                        <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
 
-                    <OtherLoginWrap>
-                        <LoginOr>또는</LoginOr>
-                        <div>
-                            <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>
-                            <GuestButton onClick={handleGuest}>게스트 로그인</GuestButton>
-                        </div>
-                    </OtherLoginWrap>
-                </LoginButtonWrap>
-                :
-                <SignUp />
-            }
+                        <OtherLoginWrap>
+                            <LoginOr>또는</LoginOr>
+                            <div>
+                                <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>
+                                <GuestButton onClick={handleGuest}>게스트 로그인</GuestButton>
+                            </div>
+                        </OtherLoginWrap>
+                    </LoginButtonWrap>
+                    :
+                    <SignUp />
+                }
+            </div>
         </div >
     )
 }
