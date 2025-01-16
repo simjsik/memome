@@ -3,13 +3,13 @@
 
 import { fetchPosts } from "@/app/api/loadToFirebasePostData/fetchPostData";
 import { PostStyleBtn } from "@/app/layout";
-import { noticeState, PostData, UsageLimitState, userState } from "@/app/state/PostState";
+import { DidYouLogin, loginToggleState, modalState, noticeState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import { NoMorePost, NoticeWrap, PostWrap } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
 interface MainHomeProps {
     post: PostData[],
@@ -17,13 +17,17 @@ interface MainHomeProps {
 }
 
 export default function ClientNotice({ post: initialPosts, initialNextPage }: MainHomeProps) {
+    const yourLogin = useRecoilValue(DidYouLogin)
+    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const setModal = useSetRecoilState<boolean>(modalState);
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
+    const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
 
     // 포스트 스테이트
     const [notices, setNotices] = useRecoilState<PostData[]>(noticeState)
 
     // 현재 로그인 한 유저
     const currentUser = useRecoilValue(userState)
-    const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
 
     const pathName = usePathname();
     const observerLoadRef = useRef(null);
@@ -90,6 +94,7 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
 
     // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
     useEffect(() => {
+        if (usageLimit) return;
         const uniqueNotices = Array.from(
             new Map(
                 [
@@ -104,7 +109,17 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
-        if (usageLimit) return console.log('함수 요청 안함.');
+        if (!yourLogin || usageLimit) {
+            if (usageLimit) {
+                setLimitToggle(true);
+                setModal(true);
+            }
+            if (!yourLogin) {
+                setLoginToggle(true);
+                setModal(true);
+            }
+            return;
+        }
 
         const obsever = new IntersectionObserver(
             (entries) => {
@@ -125,7 +140,6 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
     }, [hasNextPage, fetchNextPage])
 
     useEffect(() => {
-        console.log('페이지 이동')
         // 페이지 진입 시 스크롤 위치 복원
         const savedScroll = sessionStorage.getItem(`scroll-${pathName}`);
 

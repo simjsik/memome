@@ -1,11 +1,11 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 import "./globals.css";
 import { PretendardBold, PretendardMedium, PretendardLight } from './styled/FontsComponets';
 import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil';
-import { useParams, usePathname, useRouter } from 'next/navigation';
-import { bookMarkState, loginToggleState, modalState, postStyleState, UsageLimitState, userData, userState } from './state/PostState';
+import { usePathname, useRouter } from 'next/navigation';
+import { bookMarkState, DidYouLogin, loginToggleState, modalState, postStyleState, UsageLimitState, userData, userState } from './state/PostState';
 
 import LoginBox from './login/LoginBox';
 import StatusBox from './components/StatusBox';
@@ -38,6 +38,7 @@ function LayoutContent({ children }: LayoutProps) {
   const isLogin = pathName === '/login'
   // 위치
 
+  const yourLogin = useRecoilValue(DidYouLogin)
   const loginToggle = useRecoilValue<boolean>(loginToggleState)
   const [postStyle, setPostStyle] = useRecoilState<boolean>(postStyleState)
   const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
@@ -68,7 +69,6 @@ function LayoutContent({ children }: LayoutProps) {
           if (bookmarks.exists()) {
             // 북마크 데이터가 있을 경우
             const data = bookmarks.data() as { bookmarkId: string[] };
-            console.log(data.bookmarkId, '북마크 데이터')
             setCurrentBookmark(data.bookmarkId); // Recoil 상태 업데이트
           }
         } catch (error) {
@@ -100,14 +100,14 @@ function LayoutContent({ children }: LayoutProps) {
   return (
     <>
       {usageLimit && <UsageLimit isOpen={modal} onClose={closeModal} />}
+      {(!yourLogin && loginToggle) && <LoginBox isOpen={modal} onClose={closeModal} />}
+      {isMain && <PostStyleBtn onClick={handlePostStyle} />}
       {(!isPost && !isLogin) &&
         <>
           <NavWrap></NavWrap>
           <StatusBox></StatusBox>
         </>
       }
-      {loginToggle && <LoginBox isOpen={modal} onClose={closeModal} />}
-      {isMain && <PostStyleBtn onClick={handlePostStyle} />}
       {children}
     </>
   );

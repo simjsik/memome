@@ -110,31 +110,22 @@ export default function UsageLimit({ isOpen, onClose }: ModalProps) {
             alert("An error occurred during logout.");
         }
     }
-
-    // ESC 키 및 배경 클릭 핸들러
-    const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-            onClose();
-        }
-    };
-
+    
     // Mount/Unmount 상태 감지 및 이벤트 등록
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && usageLimit) {
             setModal(true); // 모달이 열릴 때 modal 상태 true로 설정
-            document.addEventListener('keydown', handleKeyDown);
         }
 
         return () => {
             setModal(false); // 모달이 닫힐 때 modal 상태 false로 설정
-            document.removeEventListener('keydown', handleKeyDown);
         };
     }, [isOpen]);
 
     const handleUsageBox = async () => {
         setLimitToggle(false);
     }
-    
+
     const [timeLeft, setTimeLeft] = useState('');
 
     useEffect(() => {

@@ -19,17 +19,6 @@ import socket from '@/app/api/websocket/route';
 import { Socket } from 'socket.io-client';
 import BookmarkBtn from '@/app/components/BookmarkBtn';
 
-const postDeleteBtn = css`
-position : absolute;
-right : 20px;
-top: 50%;
-transform: translateY(-50%);
-width : 14px;
-height : 14px;
-background : red;
-border : none;
-cursor : pointer;
-`
 const PostStyleBtn = styled.button`
 position : fixed;
 left: 18px;
@@ -218,17 +207,16 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
-        if (usageLimit) return console.log('함수 요청 안함.');
-
         if (!yourLogin || usageLimit) {
             if (usageLimit) {
-                return setLimitToggle(true);
+                setLimitToggle(true);
+                setModal(true);
             }
             if (!yourLogin) {
                 setLoginToggle(true);
                 setModal(true);
-                return;
             }
+            return;
         }
 
         const obsever = new IntersectionObserver(

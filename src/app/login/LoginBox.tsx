@@ -235,7 +235,7 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
 
     // Mount/Unmount 상태 감지 및 이벤트 등록
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && !hasLogin) {
             setModal(true); // 모달이 열릴 때 modal 상태 true로 설정
             document.addEventListener('keydown', handleKeyDown);
             document.addEventListener('mousedown', handleBackgroundClick);

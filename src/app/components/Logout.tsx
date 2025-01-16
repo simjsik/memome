@@ -4,7 +4,6 @@
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState, modalState, userData, userState } from "../state/PostState";
 import { css } from "@emotion/react";
-import loginListener from "../hook/LoginHook";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
@@ -42,7 +41,7 @@ export default function Logout() {
     const [modal, setModal] = useRecoilState<boolean>(modalState);
     // State
     const router = useRouter();
-    loginListener();
+
     // hook
 
     const handleLogout = async () => {

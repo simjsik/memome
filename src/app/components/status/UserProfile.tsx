@@ -234,7 +234,8 @@ export default function UserProfile() {
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setModal = useSetRecoilState<boolean>(modalState);
     const [noticeLists, setNoticeLists] = useRecoilState<noticeType[]>(noticeList);
-    const [usageLimit, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
+    const usageLimit = useRecoilValue<boolean>(UsageLimitState)
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     const [updateToggle, setUpdateToggle] = useState<boolean>(false)
     const [updateUserName, setUpdateUserName] = useState<string | null>(null)
     const [updateUserNameError, setUpdateUserNameError] = useState<string | null>(null)

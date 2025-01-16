@@ -341,20 +341,33 @@ const SwiperHits = () => {
     const [searchLoading, setSearchLoading] = useState(false); // 로딩 상태 추가
 
     useEffect(() => {
-        if (query.trim()) {
-            setSearchLoading(true);
+        if (!yourLogin || usageLimit) {
+            if (usageLimit) {
+                return setLimitToggle(true);
+            }
+
+            if (!yourLogin) {
+                setLoginToggle(true);
+                setModal(true);
+                return;
+            }
+            return;
         } else {
-            setDebouncedQuery('');
-            setSearchLoading(false);
+            if (query.trim()) {
+                setSearchLoading(true);
+            } else {
+                setDebouncedQuery('');
+                setSearchLoading(false);
+            }
+
+            const timer = setTimeout(() => {
+                setDebouncedQuery(query);
+                refine(query);
+                setSearchLoading(false);
+            }, 500);
+
+            return () => clearTimeout(timer);
         }
-
-        const timer = setTimeout(() => {
-            setDebouncedQuery(query);
-            refine(query);
-            setSearchLoading(false);
-        }, 500);
-
-        return () => clearTimeout(timer);
     }, [query, refine])
 
     if (!query) return <p>작성자 및 키워드를 입력해 검색해 보세요.</p>
@@ -421,22 +434,24 @@ export default function SearchComponent() {
     const yourLogin = useRecoilValue(DidYouLogin)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setModal = useSetRecoilState<boolean>(modalState);
-    const [usageLimit, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
+    const usageLimit = useRecoilValue<boolean>(UsageLimitState)
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
 
     const handleSearch = (event: React.KeyboardEvent<HTMLDivElement>) => {
         // 엔터키를 감지
-        if (!yourLogin || usageLimit) {
-            if (usageLimit) {
-                return setLimitToggle(true);
-            }
-            if (!yourLogin) {
-                setLoginToggle(true);
-                setModal(true);
+        if (event.key === 'Enter') {
+            if (!yourLogin || usageLimit) {
+                if (usageLimit) {
+                    return setLimitToggle(true);
+                }
+                if (!yourLogin) {
+                    setLoginToggle(true);
+                    setModal(true);
+                    return;
+                }
                 return;
             }
-        }
 
-        if (event.key === 'Enter') {
             const inputElement = event.target as HTMLInputElement;
 
             // input 요소에서 검색어를 가져옴

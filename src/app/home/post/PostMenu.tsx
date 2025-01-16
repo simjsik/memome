@@ -2,8 +2,8 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
-import { PostingState, storageLoadState } from '../../state/PostState';
-import { useRecoilState, } from 'recoil';
+import { DidYouLogin, loginToggleState, modalState, PostingState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
+import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import Delta from 'quill-delta';
@@ -11,7 +11,7 @@ import QuillResizeImage from 'quill-resize-image';
 // import 'quill/dist/quill.snow.css';
 import ReactQuill, { Quill } from 'react-quill-new';
 import styled from '@emotion/styled';
-import { auth, db } from '@/app/DB/firebaseConfig';
+import { db } from '@/app/DB/firebaseConfig';
 
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
@@ -575,6 +575,12 @@ export default function PostMenu() {
     const quillRef = useRef<any>(null); // Quill 인스턴스 접근을 위한 ref 설정
     const tagRef = useRef<HTMLSelectElement>(null); // Quill 인스턴스 접근을 위한 ref 설정
     const styleToolRef = useRef<HTMLDivElement>(null); // Quill 인스턴스 접근을 위한 ref 설정
+    const yourLogin = useRecoilValue(DidYouLogin)
+    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const setModal = useSetRecoilState<boolean>(modalState);
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
+    const usageLimit = useRecoilValue<boolean>(UsageLimitState)
+    const currentUser = useRecoilValue(userState)
 
     const [postingComplete, setPostingComplete] = useState<boolean>(false);
     const [postTitle, setPostTitle] = useState<string>('');
@@ -594,7 +600,6 @@ export default function PostMenu() {
     const [selectBgColor, setSelectedBgColor] = useState<string>('#ffffff');
     const [selectLineheight, setSelectedLineHeight] = useState<string>('1.5');
     const [selectAlign, setSelectedAlign] = useState<string>('left');
-
     //  State
 
     const colorPallete = {
@@ -614,7 +619,6 @@ export default function PostMenu() {
 
     const fontsize = ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px', '36px', '40px']
     const lineheight = ['1', '1.5', '2', '2.5', '3', '4', '5']
-    const align = ['left', 'center', 'right', 'justify']
     const [quillLoaded, setQuillLoaded] = useState(false);
 
     // quill 모듈 로드
@@ -734,7 +738,6 @@ export default function PostMenu() {
     // 포스트 내용 입력 시 해당 스테이트에 저장
     const content_limit_count = 2500; // 글자수 제한
     const content_limit_max = 2510; // 글자 입력 맥스
-
     const handlePostingEditor = (content: string) => {
         // 입력이 최대 길이 초과 시 차단
         if (content.length > content_limit_max) {
@@ -751,7 +754,6 @@ export default function PostMenu() {
     // 포스팅 제목.
     const title_limit_count = 20; // 글자수 제한
     const title_limit_max = 30; // 글자 입력 맥스
-
     const handlePostingTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
 
@@ -834,8 +836,15 @@ export default function PostMenu() {
     // 포스팅 업로드
     const uploadThisPost = async () => {
         // 사용자 인증 확인
-        if (!auth.currentUser) {
-            alert('로그인이 필요합니다.');
+        if (!yourLogin || usageLimit) {
+            if (usageLimit) {
+                setLimitToggle(true);
+                setModal(true);
+            }
+            if (!yourLogin) {
+                setLoginToggle(true);
+                setModal(true);
+            }
             return;
         }
 
@@ -852,7 +861,7 @@ export default function PostMenu() {
             return;
         }
 
-        if (postTitle && posting) {
+        if (postTitle && posting && currentUser) {
             try {
                 // 업로드된 이미지 URL을 추적하기 위한 Map 생성
                 const uploadedImageUrls = new Map<string, string>();
@@ -873,15 +882,13 @@ export default function PostMenu() {
                 await addDoc(collection(db, 'posts'), {
                     tag: selectTag,
                     title: postTitle,
-                    userId: auth.currentUser.uid, // uid로 사용자 ID 사용
+                    userId: currentUser.uid, // uid로 사용자 ID 사용
                     content: optContentUrls,
                     images: optImageUrls ? false : optImageUrls,
                     createAt: Timestamp.now(),
                     commentCount: 0,
                     notice: checkedNotice,
                 });
-                console.log(imageUrls, optImageUrls)
-
                 alert('포스팅 완료');
                 setPostingComplete(true);
                 localStorage.removeItem('unsavedPost');
@@ -1093,17 +1100,15 @@ export default function PostMenu() {
         }
     }, [postTitle, posting])
 
-    // 페이지 로드 시 내용 불러오기 팝업
     useEffect(() => {
+        // 페이지 로드 시 내용 불러오기 팝업
         const savedData = JSON.parse(localStorage.getItem('unsavedPost')!);
         setImageUrls([])
         if (savedData) {
             setPostDate(savedData.date)
         }
         if (savedData) setConfirmed(true);
-    }, [])
 
-    useEffect(() => {
         // 도구 외 클릭 시 닫기
         const clickOutside = (event: MouseEvent) => {
             if (styleToolRef.current && !styleToolRef.current.contains(event.target as Node)) {
@@ -1117,7 +1122,6 @@ export default function PostMenu() {
             document.removeEventListener('mousedown', clickOutside);
         }
     }, [])
-
 
     // Function
     const SetModules = useMemo(

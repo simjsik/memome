@@ -72,7 +72,9 @@ export default function NavBar() {
     const setModal = useSetRecoilState<boolean>(modalState);
     const [selectedMenu, setSelectedMenu] = useRecoilState<number>(selectedMenuState);
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
-    const [usageLimit, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
+    const usageLimit = useRecoilValue<boolean>(UsageLimitState)
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
+    
     // State
     const router = useRouter();
     const path = usePathname();
