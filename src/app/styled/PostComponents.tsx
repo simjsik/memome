@@ -393,7 +393,7 @@ export const NoticeWrap = styled.div`
     }
 
     .post_content_wrap{
-        padding: 0px 0px 10px 52px;
+        padding: 0px 0px 10px 44px;
 
         .post_content{
             height: 80px;

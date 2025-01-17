@@ -6,6 +6,7 @@
     border: 1px solid #ededed;
     border-radius: 10px;
     background: #fff;
+
 }
 
 .user_photo_wrap,
@@ -36,5 +37,4 @@
     display: block;
     font-family: var(--font-pretendard-light);
     color: #272D2D;
-    margin-top: 4px;
 }

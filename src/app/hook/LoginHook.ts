@@ -1,46 +1,38 @@
-/** @jsxImportSource @emotion/react */ // 최상단에 배치
-"use client";
-import { useSetRecoilState } from "recoil";
-import { DidYouLogin, userData, userState } from "../state/PostState";
-import { useEffect } from "react";
+import { cookies } from "next/headers";
+import { userData } from "../state/PostState";
 
-export const loginListener = () => {
-    const setUser = useSetRecoilState<userData | null>(userState)
-    const setLogin = useSetRecoilState<boolean>(DidYouLogin)
+export const loginListener = async () => {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/utils/autoLoginToken`, {
+            method: "GET",
+            headers: {
+                Cookie: cookies().toString(),
+            },
+        });
 
-    useEffect(() => {
-        const checkLoginStatus = async () => {
-            try {
-                const response = await fetch("/api/utils/autoLoginToken", {
-                    method: "GET",
-                    credentials: "include", // 쿠키를 요청에 포함
-                });
+        console.log(response, '로그인 시도')
+        if (response.ok) {
+            // 비동기 데이터 처리 시 Promise로 남겨질 걸 생각해 await 사용.
+            const data = await response.json();
+            const { user } = data;
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    const { user } = data;
-
-                    setUser({
-                        name: user.displayName,
-                        email: user.email,
-                        photo: user.photoURL,
-                        uid: user.uid,
-                    });
-
-                    setLogin(true);
-                } else {
-                    setUser(null);
-                    setLogin(false);
-                }
-            } catch (error) {
-                console.error("Failed to fetch session:", error);
-                setUser(null);
-            }
-        };
-
-        checkLoginStatus();
-    }, []);
-}
+            return {
+                user: {
+                    name: user.displayName,
+                    email: user.email,
+                    photo: user.photoURL,
+                    uid: user.uid,
+                } as userData,
+                hasLogin: true,
+            };
+        } else {
+            console.log("No auth token or invalid token");
+            return { user: null, hasLogin: false };
+        }
+    } catch (error) {
+        console.error("Failed to fetch session:", error);
+        return { user: null, hasLogin: false };
+    }
+};
 
 export default loginListener

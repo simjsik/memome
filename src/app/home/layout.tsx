@@ -16,8 +16,6 @@ type LayoutProps = {
 };
 
 function HomeContent({ children }: LayoutProps) {
-    const yourLogin = useRecoilValue(DidYouLogin)
-    const [postStyle, setPostStyle] = useRecoilState<boolean>(postStyleState)
     const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
     const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)

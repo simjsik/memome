@@ -42,17 +42,21 @@ export default function StatusBox() {
 
     // Function
     return (
-        <PostListWrap >
-            <SearchComponent></SearchComponent>
-            {
-                path !== `/home/memo/${params?.postId}` && <UserProfile></UserProfile >
+        <>
+            { path !== '/home/post' && 
+                <PostListWrap >
+                    <SearchComponent></SearchComponent>
+                    {
+                        path !== `/home/memo/${params?.postId}` && <UserProfile></UserProfile >
+                    }
+                    <div className='list_top'>
+                        {
+                            path === `/home/memo/${params?.postId}` && <MemoStatus post={postId} />
+                        }
+                    </div>
+                    <Logout></Logout>
+                </PostListWrap >
             }
-            <div className='list_top'>
-                {
-                    path === `/home/memo/${params?.postId}` && <MemoStatus post={postId} />
-                }
-            </div>
-            <Logout></Logout>
-        </PostListWrap >
+        </>
     )
 }

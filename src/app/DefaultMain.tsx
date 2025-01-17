@@ -1,37 +1,23 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { bookMarkState, DidYouLogin, loginToggleState, modalState, postStyleState, UsageLimitState, userData, userState } from "./state/PostState";
-import { checkUsageLimit } from "./api/utils/checkUsageLimit";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "./DB/firebaseConfig";
+import { useRecoilState, } from "recoil";
+import { modalState } from "./state/PostState";
 
-interface DefaultMainProps {
-    user: userData | null,
-    hasLogin: boolean
-}
 
-export default function DefaultMain({ user, hasLogin }: DefaultMainProps) {
-    const pathName = usePathname();
-    const isMain = pathName === '/';
-    const isPost = pathName === '/home/post'
-    const isLogin = pathName === '/login'
-    // 위치
 
-    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+export default function DefaultMain() {
+
     const [modal, setModal] = useRecoilState<boolean>(modalState);
     const router = useRouter();
     // State
-    useEffect(() => {
-        if (!hasLogin) {
-            router.push('/login');
-            setLoginToggle(true);
-        }
-    }, [user, hasLogin])
 
+    useEffect(() => {
+
+        router.push('/home/main');
+    }, [])
 
     useEffect(() => {
         const htmlElement = document.documentElement; // <html> 태그 선택
@@ -42,8 +28,6 @@ export default function DefaultMain({ user, hasLogin }: DefaultMainProps) {
         }
     }, [modal]);
 
-    // 모달 닫기 함수
-    const closeModal = () => setModal(false);
     return (
         <></>
     )

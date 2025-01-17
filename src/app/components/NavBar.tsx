@@ -128,6 +128,16 @@ export default function NavBar() {
                 setModal(true);
                 return;
             }
+        } else if (NavTitle === 5) {
+            if (yourLogin && !usageLimit) {
+                router.push('/home/post');
+            } else if (usageLimit) {
+                return setLimitToggle(true);
+            } else {
+                setLoginToggle(true);
+                setModal(true);
+                return;
+            }
         }
         setSelectedMenu(NavTitle);
     }
@@ -244,17 +254,29 @@ export default function NavBar() {
                     </NavMenu>
 
                     {/* 포스팅 */}
-                    <NavMenu isActive={false} onClick={handlePosting}>
+                    <NavMenu isActive={5 === selectedMenu} onClick={() => handleNavClick(5)}>
                         <div className='menu_icon'>
-                            <svg width="40" height="40" viewBox="0 0 40 40">
-                                <g>
-                                    <path d="M18,8H11.25A3.25,3.25,0,0,0,8,11.25v13.5A3.25,3.25,0,0,0,11.25,28h13.5A3.25,3.25,0,0,0,28,24.75V18" transform="translate(1 1)" fill="none" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="2.5" stroke='#ccc' />
-                                    <path d="M24,21.718a.524.524,0,0,0,.524.532l1.253-.16a.569.569,0,0,0,.3-.142L37.858,10.158a.753.753,0,0,0-.142-1.029l-.6-.594a.757.757,0,0,0-1.031-.142L24.276,20.174a.567.567,0,0,0-.142.3Z" transform="translate(-8 -0.25)" fill='#ccc' />
-                                </g>
-                                <g>
-                                    <rect width="40" height="40" fill="none" />
-                                </g>
-                            </svg>
+                            {selectedMenu === 5 ?
+                                <svg width="40" height="40" viewBox="0 0 40 40">
+                                    <g>
+                                        <path d="M18,8H11.25A3.25,3.25,0,0,0,8,11.25v13.5A3.25,3.25,0,0,0,11.25,28h13.5A3.25,3.25,0,0,0,28,24.75V18" transform="translate(1 1)" fill="none" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="2.5" stroke='#191919'/>
+                                        <path d="M24,21.718a.524.524,0,0,0,.524.532l1.253-.16a.569.569,0,0,0,.3-.142L37.858,10.158a.753.753,0,0,0-.142-1.029l-.6-.594a.757.757,0,0,0-1.031-.142L24.276,20.174a.567.567,0,0,0-.142.3Z" transform="translate(-8 -0.25)" fill='#191919' />
+                                    </g>
+                                    <g>
+                                        <rect width="40" height="40" fill="none" />
+                                    </g>
+                                </svg>
+                                :
+                                <svg width="40" height="40" viewBox="0 0 40 40">
+                                    <g>
+                                        <path d="M18,8H11.25A3.25,3.25,0,0,0,8,11.25v13.5A3.25,3.25,0,0,0,11.25,28h13.5A3.25,3.25,0,0,0,28,24.75V18" transform="translate(1 1)" fill="none" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="2.5" stroke='#ccc' />
+                                        <path d="M24,21.718a.524.524,0,0,0,.524.532l1.253-.16a.569.569,0,0,0,.3-.142L37.858,10.158a.753.753,0,0,0-.142-1.029l-.6-.594a.757.757,0,0,0-1.031-.142L24.276,20.174a.567.567,0,0,0-.142.3Z" transform="translate(-8 -0.25)" fill='#ccc' />
+                                    </g>
+                                    <g>
+                                        <rect width="40" height="40" fill="none" />
+                                    </g>
+                                </svg>
+                            }
                         </div>
                     </NavMenu>
                 </div>

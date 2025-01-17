@@ -14,16 +14,22 @@ export async function POST(req: NextRequest) {
         if (!validateCsrfToken(csrfToken)) {
             return NextResponse.json({ message: "CSRF 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
         }
-        
+
         // HTTP-only 쿠키에 ID 토큰 저장
         const response = NextResponse.json({ message: "Token validated" });
 
         response.cookies.set("authToken", idToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production" ? true : false,
+            secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             path: "/",
         });
+
+        // 추가적인 헤더 설정
+        response.headers.set("Access-Control-Allow-Credentials", "true");
+        response.headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+        response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        response.headers.set("Access-Control-Allow-Headers", "Content-Type");
 
         return response;
     } catch (error) {

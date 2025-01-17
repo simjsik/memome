@@ -12,7 +12,6 @@ export async function GET(req: NextRequest) {
 
         // ID 토큰 검증
         const decodedToken = await adminAuth.verifyIdToken(authToken);
-
         // 사용자 정보 반환
         return NextResponse.json({
             message: "Auto login successful",

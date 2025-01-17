@@ -81,6 +81,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
         // 설정 해주지 않으면 popstate 이벤트가 실행 안됨.
         window.history.pushState(null, "", window.location.pathname);
 
+        console.log(currentUser)
         if (!yourLogin) {
             router.push('/login');
             setLoginToggle(true);
@@ -542,7 +543,6 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                             </NoMorePost>
                         }
                     </>
-                    <PostStyleBtn className='post_style_btn' onClick={() => setPostStyle((prev) => !prev)} ></PostStyleBtn>
                 </PostWrap >
             }
         </>
