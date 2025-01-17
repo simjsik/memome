@@ -235,7 +235,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
         return () => {
             if (observerLoadRef.current) obsever.unobserve(observerLoadRef.current);
         };
-    }, [hasNextPage, fetchNextPage])
+    }, [hasNextPage, fetchNextPage, yourLogin])
 
     // 포스트 삭제
     const deletePost = async (postId: string) => {

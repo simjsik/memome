@@ -16,6 +16,7 @@ import { checkUsageLimit } from './api/utils/checkUsageLimit';
 import UsageLimit from './components/UsageLimit';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from './DB/firebaseConfig';
+import loginListener from './hook/LoginHook';
 
 type LayoutProps = {
   children: ReactNode;
@@ -47,6 +48,8 @@ function LayoutContent({ children }: LayoutProps) {
   const [modal, setModal] = useRecoilState<boolean>(modalState);
   const router = useRouter();
   // State
+
+  loginListener();
 
   // 사용량 확인
   useEffect(() => {

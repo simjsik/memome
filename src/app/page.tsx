@@ -3,7 +3,6 @@ import loginListener from './hook/LoginHook';
 
 
 export default function Login() {
-  loginListener();
   
   return (
     <>
