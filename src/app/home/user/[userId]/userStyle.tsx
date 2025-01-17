@@ -97,6 +97,7 @@ export const UserPostWrap = styled.div`
             -ms-flex: 0 0 86.5%;
             flex: 0 0 86.5%;
             line-height: 36px;
+            font-size : 14px;
             font-family: var(--font-pretendard-bold);
         }
 

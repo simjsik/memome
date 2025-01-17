@@ -34,28 +34,26 @@ width : 100%;
 height : 100%;
 background : rgba(0,0,0,0.8);
 `
+export default function LoginBox() {
+    const setUser = useSetRecoilState<userData | null>(userState)
 
-interface ModalProps {
-    isOpen: boolean;
-    onClose?: () => void | null;
-}
-export default function LoginBox({ isOpen, onClose }: ModalProps) {
-    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const [loginToggle, setLoginToggle] = useRecoilState<boolean>(loginToggleState)
+    const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
+    const [signUpToggle, setSignUpToggle] = useRecoilState<boolean>(signUpState);
+    const [modal, setModal] = useRecoilState<boolean>(modalState);
+
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [user, setUser] = useRecoilState<userData | null>(userState)
-    const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
     const [csrfToken, setCsrfToken] = useState<string | null>(null)
-    const [signUpToggle, setSignUpToggle] = useRecoilState<boolean>(signUpState);
-    const modalRef = useRef<HTMLDivElement>(null);
-    const [modal, setModal] = useRecoilState<boolean>(modalState);
     const [loginError, setLoginError] = useState<string | null>(null);
     const [verifyReSend, setVerifyReSend] = useState<boolean>(false);
     const [unverifedUser, setUnverifiedUser] = useState<User | null>(null);
+
+    const modalRef = useRef<HTMLDivElement>(null);
     // State
     const auths = getAuth();
     const router = useRouter();
-    loginListener();
+
     // hook
     const getCsrfToken = async () => {
         try {
@@ -188,54 +186,66 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
                 // ID 토큰 가져오기
                 const idToken = await user.getIdToken();
 
-                // 서버에 ID 토큰 전달하여 쿠키 저장 요청
-                const csrfResponse = await fetch("/api/utils/validateAuthToken", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include", // 쿠키를 요청 및 응답에 포함
-                    body: JSON.stringify({ idToken, csrfToken }),
-                });
+                if (idToken) {
+                    // 서버로 ID 토큰 전송
+                    const csrfResponse = await fetch("/api/utils/validateAuthToken", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "include", // 쿠키를 요청 및 응답에 포함
+                        body: JSON.stringify({ idToken, csrfToken }),
+                    });
 
-                if (!csrfResponse.ok) {
-                    alert("CSRF Token validation failed. Please try again.");
+                    if (csrfResponse.ok) {
+                        setUser({
+                            name: user.displayName,
+                            email: user.email,
+                            photo: user.photoURL,
+                            uid: user.uid,
+                        });
+
+                        setHasLogin(true);
+                        setLoginToggle(false);
+                        saveNewGoogleUser(user.uid, user.displayName, user.photoURL);
+                        router.push('/home/main'); // 메인 페이지로 이동
+                    } else {
+                        setLoginError("로그인 요청 실패. 다시 시도해주세요.");
+                        getCsrfToken();
+                    }
+                } else {
+                    setLoginError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
                 }
-
-                // 사용자 데이터 설정
-                setUser({
-                    name: user.displayName,
-                    email: user.email,
-                    photo: user.photoURL,
-                    uid: user.uid,
-                });
-
-                setHasLogin(true);
-                setLoginToggle(false);
-                saveNewGoogleUser(user.uid, user.displayName, user.photoURL);
-                alert("Google Login successful!");
-                router.push('/home/main'); // 메인 페이지로 이동
             }
-        } catch (error) {
-            console.error("Error during Google login:", error);
-            alert("Google login failed. Please try again.");
+        } catch (error: any) {
+            console.error("로그인 중 오류 발생:", error);
+
+            // Firebase 에러 코드별 메시지 처리
+            if (error.code && firebaseErrorMessages[error.code]) {
+                setLoginError(firebaseErrorMessages[error.code]);
+            } else {
+                setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+            }
+            return;
         }
     };
 
     // ESC 키 및 배경 클릭 핸들러
     const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape' && onClose) {
-            onClose();
+        if (e.key === 'Escape' && modal && loginToggle) {
+            setModal(false);
+            setLoginToggle(false);
         }
     };
 
     const handleBackgroundClick = (e: MouseEvent) => {
-        if (modalRef.current && !modalRef.current.contains(e.target as Node) && onClose) {
-            onClose();
+        if (modalRef.current && !modalRef.current.contains(e.target as Node) && modal && loginToggle) {
+            setModal(false);
+            setLoginToggle(false);
         }
     };
 
     // Mount/Unmount 상태 감지 및 이벤트 등록
     useEffect(() => {
-        if (isOpen && !hasLogin) {
+        if (!hasLogin) {
             setModal(true); // 모달이 열릴 때 modal 상태 true로 설정
             document.addEventListener('keydown', handleKeyDown);
             document.addEventListener('mousedown', handleBackgroundClick);
@@ -251,59 +261,61 @@ export default function LoginBox({ isOpen, onClose }: ModalProps) {
             document.removeEventListener('keydown', handleKeyDown);
             document.removeEventListener('mousedown', handleBackgroundClick);
         };
-    }, [isOpen]);
+    }, [hasLogin]);
 
-    // 모달이 열리지 않았을 경우 null 반환
-    if (!isOpen) return null;
     // Function
-    return (
-        <div css={LoginWrap}>
-            <div css={LoginBg}></div>
-            <div ref={modalRef}>
-                {!signUpToggle ?
-                    <LoginButtonWrap >
-                        <LoginTitle>로그인</LoginTitle>
-                        <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
-                            <LoginInputWrap>
-                                <div>
-                                    <p>이메일 또는 아이디</p>
-                                    <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
+    return (<>
+        {(!hasLogin && loginToggle) &&
+            <div css={LoginWrap}>
+                <div css={LoginBg}></div>
+                <div ref={modalRef}>
+                    {!signUpToggle ?
+                        <LoginButtonWrap >
+                            <LoginTitle>로그인</LoginTitle>
+                            <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
+                                <LoginInputWrap>
+                                    <div>
+                                        <p>이메일 또는 아이디</p>
+                                        <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
+                                    </div>
+                                    <div>
+                                        <p>패스워드</p>
+                                        <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
+                                    </div>
+                                </LoginInputWrap>
+                                <div className="login_error_wrap">
+                                    {
+                                        loginError &&
+                                        <p className="login_error">{loginError}</p>
+                                    }
+                                    {
+                                        (loginError && verifyReSend) &&
+                                        <button
+                                            onClick={() => handleVerifyReSend(unverifedUser as User)}
+                                            disabled={!verifyReSend}
+                                        >인증 메일 재전송</button>
+                                    }
                                 </div>
-                                <div>
-                                    <p>패스워드</p>
-                                    <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
-                                </div>
-                            </LoginInputWrap>
-                            <div className="login_error_wrap">
-                                {
-                                    loginError &&
-                                    <p className="login_error">{loginError}</p>
-                                }
-                                {
-                                    (loginError && verifyReSend) &&
-                                    <button
-                                        onClick={() => handleVerifyReSend(unverifedUser as User)}
-                                        disabled={!verifyReSend}
-                                    >인증 메일 재전송</button>
-                                }
-                            </div>
-                            <LoginButton type="submit">로그인</LoginButton>
-                        </form>
-                        <LoginSpan>처음 이신가요?</LoginSpan >
-                        <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
+                                <LoginButton type="submit">로그인</LoginButton>
+                            </form>
+                            <LoginSpan>처음 이신가요?</LoginSpan >
+                            <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
 
-                        <OtherLoginWrap>
-                            <LoginOr>또는</LoginOr>
-                            <div>
-                                <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>
-                                <GuestButton onClick={handleGuest}>게스트 로그인</GuestButton>
-                            </div>
-                        </OtherLoginWrap>
-                    </LoginButtonWrap>
-                    :
-                    <SignUp />
-                }
-            </div>
-        </div >
+                            <OtherLoginWrap>
+                                <LoginOr>또는</LoginOr>
+                                <div>
+                                    <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>
+                                    <GuestButton onClick={handleGuest}>게스트 로그인</GuestButton>
+                                </div>
+                            </OtherLoginWrap>
+                        </LoginButtonWrap>
+                        :
+                        <SignUp />
+                    }
+                </div>
+            </div >
+        }
+    </>
+
     )
 }

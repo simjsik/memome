@@ -3,7 +3,7 @@
 
 import styled from "@emotion/styled";
 import { DidYouLogin, loginToggleState, modalState, UsageLimitState, UsageLimitToggle, userData, userState } from "../state/PostState";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
 import { useEffect, useRef, useState } from "react";
@@ -73,19 +73,21 @@ interface ModalProps {
     onClose: () => void;
 }
 
-export default function UsageLimit({ isOpen, onClose }: ModalProps) {
+export default function UsageLimit() {
     const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
     const [user, setUser] = useRecoilState<userData | null>(userState)
-    const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+    const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const [limitToggle, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
     const [modal, setModal] = useRecoilState<boolean>(modalState);
-    const modalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (usageLimit) {
             setLimitToggle(true);
+            setModal(true); // 모달이 열릴 때 modal 상태 true로 설정
+
         } else {
             setLimitToggle(false);
+            setModal(false); // 모달이 닫힐 때 modal 상태 false로 설정
         }
     }, [usageLimit])
 
@@ -110,17 +112,6 @@ export default function UsageLimit({ isOpen, onClose }: ModalProps) {
             alert("An error occurred during logout.");
         }
     }
-    
-    // Mount/Unmount 상태 감지 및 이벤트 등록
-    useEffect(() => {
-        if (isOpen && usageLimit) {
-            setModal(true); // 모달이 열릴 때 modal 상태 true로 설정
-        }
-
-        return () => {
-            setModal(false); // 모달이 닫힐 때 modal 상태 false로 설정
-        };
-    }, [isOpen]);
 
     const handleUsageBox = async () => {
         setLimitToggle(false);
@@ -156,15 +147,19 @@ export default function UsageLimit({ isOpen, onClose }: ModalProps) {
 
     // Function
     return (
-        <UsageWrap Limit={limitToggle}>
-            <div className="usage_box">
-                <p>일일 제공 사용량이 초과되었습니다.</p>
-                <span>초기화 까지 남은 시간 : {timeLeft}</span>
-                <div className="usage_btn_wrap">
-                    <button onClick={handleLogout}>로그아웃</button>
-                    <button onClick={handleUsageBox}>현 상태로 둘러보기</button>
-                </div>
-            </div>
-        </UsageWrap>
+        <>
+            {usageLimit &&
+                < UsageWrap Limit={limitToggle} >
+                    <div className="usage_box">
+                        <p>일일 제공 사용량이 초과되었습니다.</p>
+                        <span>초기화 까지 남은 시간 : {timeLeft}</span>
+                        <div className="usage_btn_wrap">
+                            <button onClick={handleLogout}>로그아웃</button>
+                            <button onClick={handleUsageBox}>현 상태로 둘러보기</button>
+                        </div>
+                    </div>
+                </UsageWrap >
+            }
+        </>
     )
 }

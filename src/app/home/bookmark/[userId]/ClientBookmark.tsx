@@ -177,9 +177,12 @@ export default function Bookmark() {
                                         css={css`background-image : url(${post.PhotoURL})`}
                                     >
                                     </div>
-                                    <p className='user_id'>
+                                    <p className='user_name'>
                                         {post.displayName}
                                     </p>
+                                    <span className='user_uid'>
+                                        @{post.userId.slice(0, 6)}...
+                                    </span>
                                     <p className='post_date'>
                                         · {formatDate(post.createAt)}
                                     </p>

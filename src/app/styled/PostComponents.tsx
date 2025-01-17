@@ -122,20 +122,23 @@ border-right : 1px solid #ededed;
       }
 
       // 유저 이름, 포스트 날짜, 포스트 댓글
-      .user_id,
+      .user_name,
+      .user_uid,
       .post_date,
-      .post_coment {
+      .post_comment {
       font-size : 14px;
       line-height : 36px;
       }
 
-      .user_id,
+      .user_uid,
       .post_date{
-      flex : ${(props) => (props.postStyle ? '0 0 auto' : '0 0 50%')};
+        flex : 0 0 auto;
+        font-family : var(--font-pretendard-light);
       }
 
-      .user_id{
-      margin-right : ${(props) => (props.postStyle ? '4px' : '0')};
+      .user_name,
+      .user_uid{
+        margin-right : 4px;
       }
 
       .post_bottom_wrap{
@@ -335,8 +338,8 @@ export const NoticeWrap = styled.div`
     }
 
     .user_profile{
-        width: 42px;
-        height: 42px;
+        width: 36px;
+        height: 36px;
         margin-right: 8px;
         border-radius: 50%;
         border: 2px solid #ededed;
@@ -344,12 +347,20 @@ export const NoticeWrap = styled.div`
         background-repeat: no-repeat;
     }
 
-    .user_id{
-        line-height: 36px;
-        margin-right: 10px;
-    }
-
+    .user_name,
+    .user_uid,
     .post_date{
+        font-size : 14px;
+    }
+    
+    .user_name,
+    .user_uid{
+        line-height: 36px;
+        margin-right: 4px;
+    }
+    .user_uid,
+    .post_date{
+        font-family : var(--font-pretendard-light);
         line-height: 36px;
     }
 

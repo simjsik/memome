@@ -274,7 +274,7 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
                                     ></div>
                                     <div className="user_post_name">
                                         <p>{user.name}</p>
-                                        <span>@{user.uid.slice(0, 8)}... · {formatDate(post.createAt)}</span>
+                                        <span>@{user.uid.slice(0, 6)}... · {formatDate(post.createAt)}</span>
                                     </div>
                                     <div className="post_more">
                                         <button

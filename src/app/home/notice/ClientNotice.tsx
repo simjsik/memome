@@ -2,7 +2,6 @@
 "use client";
 
 import { fetchPosts } from "@/app/api/loadToFirebasePostData/fetchPostData";
-import { PostStyleBtn } from "@/app/layout";
 import { DidYouLogin, loginToggleState, modalState, noticeState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import { NoMorePost, NoticeWrap, PostWrap } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
@@ -67,7 +66,7 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
         queryKey: ['notices'],
         queryFn: async ({ pageParam }) => {
             try {
-                return fetchPosts(currentUser?.uid, pageParam, 4);
+                return fetchPosts(currentUser?.uid, pageParam, 5);
             } catch (error: any) {
                 if (error.message) {
                     setUsageLimit(true); // 에러 상태 업데이트
@@ -181,9 +180,12 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
                                 <div className='user_profile'
                                     css={css`background-image : url(${post.PhotoURL})`}
                                 ></div>
-                                <p className='user_id'>
+                                <p className='user_name'>
                                     {post.displayName}
                                 </p>
+                                <span className='user_uid'>
+                                    @{post.userId.slice(0, 6)}...
+                                </span>
                                 <p className='post_date'>
                                     · {formatDate(post.createAt)}
                                 </p>

@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
-import { DidYouLogin, loginToggleState, modalState, newNoticeState, noticeState, searchState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
+import { DidYouLogin, loginToggleState, modalState, newNoticeState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css } from '@emotion/react';
 import { auth } from '../DB/firebaseConfig';
@@ -74,11 +74,10 @@ export default function NavBar() {
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
-    
+
     // State
     const router = useRouter();
     const path = usePathname();
-
     useEffect(() => {
         if (path) {
             const pathSegment = path?.split('/').filter(Boolean);

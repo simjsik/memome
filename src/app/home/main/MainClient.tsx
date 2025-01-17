@@ -81,6 +81,11 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
         // 설정 해주지 않으면 popstate 이벤트가 실행 안됨.
         window.history.pushState(null, "", window.location.pathname);
 
+        if (!yourLogin) {
+            router.push('/login');
+            setLoginToggle(true);
+        }
+
         // socket 객체를 초기화
         socketRef.current = socket; // socket은 외부에서 가져온 웹소켓 인스턴스
 
@@ -110,7 +115,6 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
         } else {
             setStorageLoad(false);
         }
-
 
         // 컴포넌트 언마운트 시 이벤트 제거
         return () => {
@@ -468,9 +472,12 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                                             css={css`background-image : url(${post.PhotoURL})`}
                                         >
                                         </div>
-                                        <p className='user_id'>
+                                        <p className='user_name'>
                                             {post.displayName}
                                         </p>
+                                        <span className='user_uid'>
+                                            @{post.userId.slice(0, 6)}...
+                                        </span>
                                         <p className='post_date'>
                                             · {formatDate(post.createAt)}
                                         </p>
