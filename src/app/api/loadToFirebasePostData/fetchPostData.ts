@@ -85,7 +85,6 @@ export const fetchPostList = async (
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
 
-
         // 현재 포스트 작성자의 모든 글 가져오기
         const postlistRef = collection(db, 'posts');
 
@@ -129,7 +128,7 @@ export const fetchPostList = async (
         };
     } catch (error) {
         console.error("Error fetching data:", error);
-        return error;
+        throw error;
     };
 };
 
@@ -170,7 +169,6 @@ export const fetchPosts = async (
                 orderBy('createAt', 'desc'),
                 limit(pageSize) // 필요한 수 만큼 데이터 가져오기
             )
-
 
         // console.log(pageParam?.at(0), '= 공지사항 여부', pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
 
@@ -234,7 +232,7 @@ export const fetchPosts = async (
         };
     } catch (error: any) {
         console.error('Error in fetchPosts:', error.message);
-        return error;
+        throw error;
     }
 };
 
@@ -292,7 +290,6 @@ export const fetchBookmarks = async (
     pageSize: number = 4 // 페이지당 데이터 수
 ) => {
     if (bookmarkIds.length <= 0) return;
-    console.log(bookmarkIds, '받아온 북마크 배열')
     try {
         const response = await fetch('http://localhost:3000/api/firebaseLimit', {
             method: 'POST',
@@ -365,6 +362,6 @@ export const fetchBookmarks = async (
         return { data: validPosts, nextIndexData: nextIndex };
     } catch (error: any) {
         console.error('Error in fetchPosts:', error.message);
-        return error;
+        throw error;
     }
 };

@@ -39,6 +39,7 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         data,
         fetchNextPage,
         hasNextPage,
+        isError,  // 에러 상태
     } = useInfiniteQuery({
         queryKey: ['postList'],
         queryFn: async ({ pageParam }) => {
@@ -56,7 +57,6 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
             if (usageLimit || !lastPage.nextPage) {
                 return;
             }
-            console.log(lastPage.nextPage, '마지막 페이지 데이터')
             return lastPage.nextPage;
         },
         staleTime: 5 * 60 * 1000, // 5분 동안 캐시 유지
@@ -73,17 +73,11 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         data: imageData,
         fetchNextPage: fetchNextImagePage,
         hasNextPage: hasNextImagePage,
+        isError: imageIsError,  // 에러 상태
     } = useInfiniteQuery({
         queryKey: ['imagePostlist'],
         queryFn: async ({ pageParam }) => {
-            try {
-                return fetchPostsWithImages(user.uid, pageParam, 4);
-            } catch (error: any) {
-                if (error.message) {
-                    setUsageLimit(true); // 에러 상태 업데이트
-                    throw error;
-                }
-            }
+            return fetchPostsWithImages(user.uid, pageParam, 4);
         },
         getNextPageParam: (lastPage) => {
             if (usageLimit || !lastPage.nextPage) {
@@ -101,15 +95,24 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         },
     });
 
+    useEffect(() => {
+        if (isError || imageIsError) {
+            setUsageLimit(true);
+        }
+    }, [isError])
+
     // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
     useEffect(() => {
         const uniquePosts = Array.from(
             new Map(
                 [
-                    ...data.pages.flatMap((page: any) => page.data as PostData[]) // 무한 스크롤 데이터
+                    ...(data.pages
+                        ?.flatMap((page) => page?.data || [])
+                        .filter((post): post is PostData => !!post) || []),
                 ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
             ).values()
         );
+
         setPosts(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
     }, [data.pages]);
 
@@ -117,7 +120,9 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         const uniqueImagePosts = Array.from(
             new Map(
                 [
-                    ...imageData.pages.flatMap((page) => page.data as PostData[])
+                    ...(imageData.pages
+                        ?.flatMap((page) => page?.data || [])
+                        .filter((post): post is PostData => !!post) || []),
                 ].map((post) => [post.id, post])
             ).values()
         );
@@ -324,7 +329,7 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
                         ))}
                         {postTab && < div className="postObserver" ref={observerLoadRef} style={{ height: '1px' }} />}
                         {
-                            !hasNextPage &&
+                            (!hasNextPage && posts.length > 0) &&
                             <NoMorePost>
                                 <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
                                 <p>모두 확인했습니다.</p>
@@ -361,7 +366,22 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
                             ))}
                         </div>
                         {!postTab && < div className="imageObserver" ref={observerImageLoadRef} style={{ height: '1px' }} />}
-                        {!hasNextPage && <p>제일 최근 메모입니다.</p>}
+                        {
+                            (!hasNextPage && imagePost.length > 0) &&
+                            <NoMorePost>
+                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+                                <p>모두 확인했습니다.</p>
+                                <span>이미지가 포함된 메모를 전부 확인했습니다.</span>
+                            </NoMorePost>
+                        }
+                        {
+                            imagePost.length === 0 &&
+                            <NoMorePost>
+                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+                                <p>메모가 없습니다.</p>
+                                <span>메모 작성 시 이미지를 추가 해보세요.</span>
+                            </NoMorePost>
+                        }
                     </>
                 }
 

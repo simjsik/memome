@@ -89,7 +89,7 @@ export default function UsageLimit() {
             setLimitToggle(false);
             setModal(false); // 모달이 닫힐 때 modal 상태 false로 설정
         }
-    }, [usageLimit])
+    }, [usageLimit, setLimitToggle])
 
     const handleLogout = async () => {
         try {

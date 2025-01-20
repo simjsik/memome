@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/app/DB/firebaseAdminConfig";
+import { validateIdToken } from "../../auth/validateCsrfToken/route";
 
 export async function GET(req: NextRequest) {
     try {
@@ -11,8 +12,11 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ message: "No auth token found" }, { status: 401 });
         }
 
-
         // ID 토큰 검증
+        if (!validateIdToken(authToken)) {
+            return NextResponse.json({ message: "ID 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
+        }
+
         const decodedToken = await adminAuth.verifyIdToken(authToken);
         // 사용자 정보 반환
         return NextResponse.json({

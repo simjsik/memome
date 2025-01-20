@@ -62,17 +62,12 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
         data,
         fetchNextPage,
         hasNextPage,
+        isError,  // 에러 상태
+        error,    // 에러 메시지
     } = useInfiniteQuery({
         queryKey: ['notices'],
         queryFn: async ({ pageParam }) => {
-            try {
-                return fetchPosts(currentUser?.uid, pageParam, 5);
-            } catch (error: any) {
-                if (error.message) {
-                    setUsageLimit(true); // 에러 상태 업데이트
-                    throw error; // 에러를 다시 던져서 useInfiniteQuery가 에러 상태를 인식하게 함
-                }
-            }
+            return fetchPosts(currentUser?.uid, pageParam, 5);
         },
         getNextPageParam: (lastPage) => {
             // 사용량 초과 시 페이지 요청 중단
@@ -91,6 +86,12 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
         },
     });
 
+    useEffect(() => {
+        if (isError) {
+            setUsageLimit(true);
+        }
+    }, [isError])
+    
     // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
     useEffect(() => {
         if (usageLimit) return;
@@ -98,7 +99,9 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
             new Map(
                 [
                     ...notices, // fetchNewPosts로 가져온 최신 데이터
-                    ...data.pages.flatMap((page) => page.data as PostData[]) // 무한 스크롤 데이터
+                    ...(data.pages
+                        ?.flatMap((page) => page?.data || [])
+                        .filter((post): post is PostData => !!post) || []),
                 ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
             ).values()
         );

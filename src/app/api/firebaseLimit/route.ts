@@ -10,7 +10,7 @@ export async function POST(req: NextRequest,) {
     if (!userId) {
         return NextResponse.json({ error: '유저가 없습니다.' }, { status: 401 });
     }
-    const limitCount = hasGuest ? 50 : 100
+    const limitCount = hasGuest ? 40 : 80
     const currentTime = new Date();
     const today = currentTime.toISOString().split('T')[0] // 오늘 날짜
 

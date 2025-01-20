@@ -5,8 +5,8 @@ import NavBar from '../components/NavBar';
 import UsageLimit from '../components/UsageLimit';
 import LoginBox from '../login/LoginBox';
 import StatusBox from '../components/StatusBox';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { bookMarkState, DidYouLogin, postStyleState, UsageLimitState, userData, userState } from '../state/PostState';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { bookMarkState, DidYouLogin, postStyleState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { checkUsageLimit } from '../api/utils/checkUsageLimit';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../DB/firebaseConfig';
@@ -19,7 +19,7 @@ function HomeContent({ children }: LayoutProps) {
     const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
     const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
-
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     // 사용량 확인
     useEffect(() => {
         if (currentUser) {
@@ -52,6 +52,12 @@ function HomeContent({ children }: LayoutProps) {
             checkLimit();
         }
     }, [currentUser])
+
+    useEffect(() => {
+        if (usageLimit) {
+            setLimitToggle(true);
+        }
+    }, [usageLimit])
     return (
         <>
             <LoginBox />

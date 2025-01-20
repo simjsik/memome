@@ -26,6 +26,8 @@ export default function Bookmark() {
         fetchNextPage,
         hasNextPage,
         refetch,
+        isError,  // 에러 상태
+        error,    // 에러 메시지
     } = useInfiniteQuery({
         queryKey: ['bookmarks', currentUser?.uid],
         queryFn: async ({ pageParam = 0 }) => {
@@ -52,6 +54,26 @@ export default function Bookmark() {
         },
     });
 
+    useEffect(() => {
+        if (isError) {
+            setUsageLimit(true);
+        }
+    }, [isError])
+
+    useEffect(() => {
+        const uniquePosts = Array.from(
+            new Map(
+                [
+                    ...userBookmarks, // fetchNewPosts로 가져온 최신 데이터
+                    ...(bookmarkPages.pages
+                        ?.flatMap((page) => page?.data || [])
+                        .filter((post): post is PostData => !!post) || []),
+                ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
+            ).values()
+        );
+
+        setUserBookmarks(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
+    }, [bookmarkPages.pages])
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
         if (usageLimit) return console.log('함수 요청 안함.');
@@ -91,18 +113,7 @@ export default function Bookmark() {
         }
     }, [currentBookmark])
 
-    useEffect(() => {
-        const uniquePosts = Array.from(
-            new Map(
-                [
-                    ...userBookmarks, // fetchNewPosts로 가져온 최신 데이터
-                    ...bookmarkPages.pages.flatMap((page) => page.data as PostData[]) // 무한 스크롤 데이터
-                ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
-            ).values()
-        );
 
-        setUserBookmarks(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
-    }, [bookmarkPages.pages])
 
     const formatDate = (createAt: any) => {
         if (createAt?.toDate) {
@@ -230,11 +241,19 @@ export default function Bookmark() {
                     }
                     < div ref={observerLoadRef} style={{ height: '1px' }} />
                     {
-                        !hasNextPage &&
+                        (!hasNextPage && userBookmarks.length > 0) &&
                         <NoMorePost>
                             <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
                             <p>모두 확인했습니다.</p>
                             <span>북마크된 메모를 전부 확인했습니다.</span>
+                        </NoMorePost>
+                    }
+                    {
+                        userBookmarks.length === 0 &&
+                        <NoMorePost>
+                            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+                            <p>북마크된 메모가 없습니다.</p>
+                            <span>페이지를 탐색 후 원하는 메모를 북마크 해보세요.</span>
                         </NoMorePost>
                     }
                 </PostWrap >

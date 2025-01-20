@@ -164,24 +164,17 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
         data,
         fetchNextPage,
         hasNextPage,
+        isError,  // 에러 상태
+        error,    // 에러 메시지
     } = useInfiniteQuery({
         queryKey: ['posts'],
         queryFn: async ({ pageParam }) => {
-            try {
-                return fetchPosts(currentUser?.uid, pageParam, 5);
-            } catch (error: any) {
-                if (error.message) {
-                    setUsageLimit(true); // 에러 상태 업데이트
-                    console.log(error.message)
-                    throw error; // 에러를 다시 던져서 useInfiniteQuery가 에러 상태를 인식하게 함
-                }
-            }
+            return fetchPosts(currentUser?.uid, pageParam, 5);
         },
         getNextPageParam: (lastPage) => {
             // 사용량 초과 시 페이지 요청 중단
-            if (usageLimit || !lastPage.nextPage) {
-                return;
-            }
+            if (!lastPage.nextPage) return;
+
             return lastPage.nextPage;
         },
         staleTime: 5 * 60 * 1000, // 5분 동안 캐시 유지
@@ -211,6 +204,12 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
         setPosts(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
     }, [newPosts, data.pages, usageLimit]);
+
+    useEffect(() => {
+        if(isError){
+            setUsageLimit(true);
+        }
+    }, [isError])
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {

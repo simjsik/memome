@@ -28,14 +28,12 @@ export async function POST(req: NextRequest) {
             path: "/",
         });
 
-        if (hasGuest) {
-            response.cookies.set("hasGuest", hasGuest, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                path: "/",
-            });
-        }
+        response.cookies.set("hasGuest", hasGuest, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+        });
 
         // 추가적인 헤더 설정
         response.headers.set("Access-Control-Allow-Credentials", "true");

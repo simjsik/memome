@@ -159,6 +159,7 @@ export default function LoginBox() {
 
             if (user) {
                 const idToken = await userCredential.user.getIdToken();
+                const hasGuest = false;
 
                 if (idToken) {
                     // 서버로 ID 토큰 전송
@@ -166,7 +167,7 @@ export default function LoginBox() {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         credentials: "include", // 쿠키를 요청 및 응답에 포함
-                        body: JSON.stringify({ idToken, csrfToken }),
+                        body: JSON.stringify({ idToken, csrfToken, hasGuest }),
                     });
 
                     if (csrfResponse.ok) {
@@ -213,6 +214,7 @@ export default function LoginBox() {
             if (user) {
                 // ID 토큰 가져오기
                 const idToken = await user.getIdToken();
+                const hasGuest = false;
 
                 if (idToken) {
                     // 서버로 ID 토큰 전송
@@ -220,7 +222,7 @@ export default function LoginBox() {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         credentials: "include", // 쿠키를 요청 및 응답에 포함
-                        body: JSON.stringify({ idToken, csrfToken }),
+                        body: JSON.stringify({ idToken, csrfToken, hasGuest }),
                     });
 
                     if (csrfResponse.ok) {
