@@ -142,19 +142,6 @@ export default function NavBar() {
         setSelectedMenu(NavTitle);
     }
 
-    // 포스팅 메뉴 클릭 시 이동 및 제어
-    const handlePosting = () => {
-        if (yourLogin && !usageLimit) {
-            router.push('/home/post');
-        } else if (usageLimit) {
-            return setLimitToggle(true);
-        } else {
-            setLoginToggle(true);
-            setModal(true);
-            return;
-        }
-    };
-
     // Function
     return (
         <>

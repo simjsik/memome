@@ -5,10 +5,12 @@ export async function GET(req: NextRequest) {
     try {
         // 쿠키에서 authToken 가져오기
         const authToken = req.cookies.get("authToken")?.value;
+        const hasGuest = req.cookies.get("hasGuest")?.value;
 
         if (!authToken) {
             return NextResponse.json({ message: "No auth token found" }, { status: 401 });
         }
+
 
         // ID 토큰 검증
         const decodedToken = await adminAuth.verifyIdToken(authToken);
@@ -21,6 +23,7 @@ export async function GET(req: NextRequest) {
                 displayName: decodedToken.name || "Anonymous",
                 photoURL: decodedToken.picture || null,
             },
+            hasGuest: hasGuest ? true : false
         });
     } catch (error) {
         console.error("Auto-login token validation failed:", error);

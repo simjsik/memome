@@ -2,14 +2,52 @@
 "use client";
 import styled from "@emotion/styled";
 
-export const LoginPageWrap = styled.div`
-width : 100vw;
-height : 100vh;
-background-image : url('/img/AdobeStock_295537932.jpeg');
-background-size : cover;
-`
-
 export const LoginButtonWrap = styled.div`
+    margin: 0 auto;
+    margin-top: 120px;
+    width: 520px;
+    height: 720px;
+    background: #fff;
+    padding: 40px;
+    border-radius: 8px;
+    
+  .login_error_wrap{
+    display: flex;
+    margin-top: 4px;
+
+    button{
+        text-decoration: underline;
+        border: none;
+        background: none;
+        line-height: 15px;
+        font-family: 'var(--font-pretendard-light)';
+        cursor: pointer;
+    }
+  }
+
+  .login_error,
+  .sign_error{
+    font-size: 14px;
+    color: #fa5741;
+    margin-right: 4px;
+  }
+
+    .login_back{
+        width: 100%;
+        height: 52px;
+        margin: 20px 0px 4px 0px;
+        border: 1px solid #0087ff;
+        border-radius: 4px;
+        background: #fff;
+        color: #0087ff;
+        font-size: 16px;
+        font-family: var(--font-pretendard-medium);
+        cursor: pointer;
+    }
+
+    
+`
+export const LoginModalWrap = styled.div`
   position: absolute;
   top: 50%;
   left : 50%;

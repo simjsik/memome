@@ -1,3 +1,4 @@
+import { adminAuth } from "@/app/DB/firebaseAdminConfig";
 import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
 
@@ -21,15 +22,34 @@ export async function GET() {
     return response;
 }
 
-export function validateCsrfToken(token: string) {
+export async function validateCsrfToken(token: string) {
     const expiresAt = csrfTokens.get(token);
     console.log('CSRF 토큰 검증 중')
     if (!expiresAt || Date.now() > expiresAt) {
         csrfTokens.delete(token); // 만료된 토큰 삭제
         console.log('CSRF 토큰 만료 삭제', Date.now() > expiresAt, token)
+
         return false;
+    } else {
+        console.log('CSRF 토큰 유효.')
+
+        return true;
     }
-    csrfTokens.delete(token); // 사용한 토큰 삭제
-    console.log('CSRF 토큰 확인.')
-    return true;
+}
+
+export async function validateIdToken(idToken: string) {
+    try {
+        const decodedToken = await adminAuth.verifyIdToken(idToken);
+        if (decodedToken) {
+            console.log('ID 토큰 유효')
+            return true;
+        } else {
+            console.log('ID 토큰 검증 실패')
+
+            return false;
+        }
+    } catch (error) {
+        console.error("ID 토큰 검증 실패:", error);
+        return false; // 유효하지 않은 경우
+    }
 }

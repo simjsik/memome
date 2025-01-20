@@ -106,6 +106,12 @@ export const DidYouLogin = atom<boolean>({
     default: false
 })
 
+// 로그인 유무 확인
+export const hasGuestState = atom<boolean>({
+    key: 'hasGuestState',
+    default: false
+})
+
 // 알림 리스트
 export const noticeList = atom<noticeType[]>({
     key: 'noticeList',

@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { css } from "@emotion/react";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState, modalState, signUpState, userData, userState } from "../state/PostState";
-import loginListener from "../hook/LoginHook";
+import { DidYouLogin, hasGuestState, loginToggleState, modalState, signUpState, userData, userState } from "../state/PostState";
 import {
     CreateButton,
     GoogleButton,
@@ -13,32 +12,64 @@ import {
     LoginButtonWrap,
     LoginInput,
     LoginInputWrap,
+    LoginModalWrap,
     OtherLoginWrap
 } from "../styled/LoginComponents";
-import { getAuth, GoogleAuthProvider, sendEmailVerification, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, sendEmailVerification, signInAnonymously, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth";
 import { LoginOr, LoginSpan, LoginTitle } from "../styled/LoginStyle";
-import { useRouter } from "next/navigation";
-import { saveNewGoogleUser, saveNewUser } from "../api/utils/saveUserProfile";
+import { usePathname, useRouter } from "next/navigation";
+import { saveNewGoogleUser, saveNewGuest, saveNewUser } from "../api/utils/saveUserProfile";
 import SignUp from "./SignUp";
+import { auth } from "../DB/firebaseConfig";
 
 const LoginWrap = css`
-position : fixed;
-left : 0;
-width : 100%;
-height : 100vh;
-z-index : 5;
-`
+    position : fixed;
+    left : 0;
+    width : 100%;
+    height : 100vh;
+    z-index : 5;
 
+    .copyright_box{
+        text-align: center;
+        margin: 0 auto;
+
+        p:nth-of-type(0){
+            font-size: 12px;
+            font-family: var(--font-pretendard-light);
+        }
+        p:nth-of-type(0){
+            font-size: 12px;
+            font-family: var(--font-pretendard-bold);
+            margin-top: 4px;
+        }
+        span{
+            font-size: 14px;
+            font-family: var(--font-pretendard-medium);
+        }
+    }
+`
 const LoginBg = css`
 width : 100%;
 height : 100%;
 background : rgba(0,0,0,0.8);
+`
+const LogoBox = css`
+    position: absolute;
+    left: 50%;
+    top: 80px;
+    transform: translateX(-50%);
+    width: 160px;
+    height: 40px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737169919/%EC%BB%AC%EB%9F%AC%EB%A1%9C%EA%B3%A0_snbplg.svg);
 `
 export default function LoginBox() {
     const setUser = useSetRecoilState<userData | null>(userState)
 
     const [loginToggle, setLoginToggle] = useRecoilState<boolean>(loginToggleState)
     const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
+    const [isGuest, setIsGuest] = useRecoilState<boolean>(hasGuestState)
     const [signUpToggle, setSignUpToggle] = useRecoilState<boolean>(signUpState);
     const [modal, setModal] = useRecoilState<boolean>(modalState);
 
@@ -53,7 +84,7 @@ export default function LoginBox() {
     // State
     const auths = getAuth();
     const router = useRouter();
-
+    const path = usePathname();
     // hook
     const getCsrfToken = async () => {
         try {
@@ -71,7 +102,7 @@ export default function LoginBox() {
 
             // 쿠키 설정 후 약간의 지연을 추가
             await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms
-            console.log("CSRF 토큰 발급 성공:", csrfToken);
+            console.log("CSRF 토큰 발급 성공: ", csrfToken);
         } catch (error) {
             console.error("CSRF 토큰 요청 중 오류:", error);
         }
@@ -81,9 +112,6 @@ export default function LoginBox() {
         getCsrfToken();
     }, []);
 
-    const handleGuest = () => {
-        setLoginToggle(false);
-    }
 
     const firebaseErrorMessages: Record<string, string> = {
         "auth/user-not-found": "해당 계정을 찾을 수 없습니다. 이메일을 확인해주세요.",
@@ -151,7 +179,7 @@ export default function LoginBox() {
 
                         setHasLogin(true);
                         setLoginToggle(false);
-                        saveNewUser(user.uid);
+                        saveNewUser(user.uid, user.displayName);
                         router.push('/home/main')
                     } else {
                         setLoginError("로그인 요청 실패. 다시 시도해주세요.");
@@ -228,6 +256,56 @@ export default function LoginBox() {
         }
     };
 
+    const handleGuestLogin = async () => {
+        try {
+            const userCredential = await signInAnonymously(auth);
+            const user = userCredential.user;
+
+            if (user) {
+                const idToken = await userCredential.user.getIdToken();
+                const hasGuest = true;
+                if (idToken) {
+                    // 서버로 ID 토큰 전송
+                    const csrfResponse = await fetch("/api/utils/validateAuthToken", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "include", // 쿠키를 요청 및 응답에 포함
+                        body: JSON.stringify({ idToken, csrfToken, hasGuest }),
+                    });
+
+                    if (csrfResponse.ok) {
+                        setUser({
+                            name: user.displayName,
+                            email: user.email,
+                            photo: user.photoURL,
+                            uid: user.uid,
+                        });
+
+                        setHasLogin(true);
+                        setIsGuest(true);
+                        setLoginToggle(false);
+                        saveNewGuest(user.uid);
+                        router.push('/home/main')
+                    } else {
+                        setLoginError("로그인 요청 실패. 다시 시도해주세요.");
+                        getCsrfToken();
+                    }
+                } else {
+                    setLoginError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
+                }
+            }
+        } catch (error: any) {
+            console.error("로그인 중 오류 발생:", error);
+
+            // Firebase 에러 코드별 메시지 처리
+            if (error.code && firebaseErrorMessages[error.code]) {
+                setLoginError(firebaseErrorMessages[error.code]);
+            } else {
+                setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+            }
+            return;
+        }
+    }
     // ESC 키 및 배경 클릭 핸들러
     const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'Escape' && modal && loginToggle) {
@@ -264,14 +342,64 @@ export default function LoginBox() {
     }, [hasLogin]);
 
     // Function
-    return (<>
-        {(!hasLogin && loginToggle) &&
-            <div css={LoginWrap}>
-                <div css={LoginBg}></div>
-                <div ref={modalRef}>
+    return (
+        <>
+            {path !== '/login' ?
+                !hasLogin &&
+                <div css={LoginWrap}>
+                    {!hasLogin &&
+                        <>
+                            <div css={LoginBg}></div>
+                            {!signUpToggle ?
+                                <LoginModalWrap>
+                                    <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
+                                        <LoginInputWrap>
+                                            <div>
+                                                <p>이메일 또는 아이디</p>
+                                                <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
+                                            </div>
+                                            <div>
+                                                <p>패스워드</p>
+                                                <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
+                                            </div>
+                                        </LoginInputWrap>
+                                        <div className="login_error_wrap">
+                                            {
+                                                loginError &&
+                                                <p className="login_error">{loginError}</p>
+                                            }
+                                            {
+                                                (loginError && verifyReSend) &&
+                                                <button
+                                                    onClick={() => handleVerifyReSend(unverifedUser as User)}
+                                                    disabled={!verifyReSend}
+                                                >인증 메일 재전송</button>
+                                            }
+                                        </div>
+                                        <LoginButton type="submit">로그인</LoginButton>
+                                    </form>
+                                    <LoginSpan>처음 이신가요?</LoginSpan >
+                                    <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
+
+                                    <OtherLoginWrap>
+                                        <LoginOr>또는</LoginOr>
+                                        <div>
+                                            <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>
+                                            <GuestButton onClick={handleGuestLogin}>게스트 로그인</GuestButton>
+                                        </div>
+                                    </OtherLoginWrap>
+                                </LoginModalWrap>
+                                :
+                                <SignUp />
+                            }
+                        </>
+                    }
+                </div >
+                :
+                <div css={LoginWrap}>
+                    <div className="logo_box" css={LogoBox}></div>
                     {!signUpToggle ?
-                        <LoginButtonWrap >
-                            <LoginTitle>로그인</LoginTitle>
+                        <LoginButtonWrap>
                             <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
                                 <LoginInputWrap>
                                     <div>
@@ -305,17 +433,20 @@ export default function LoginBox() {
                                 <LoginOr>또는</LoginOr>
                                 <div>
                                     <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>
-                                    <GuestButton onClick={handleGuest}>게스트 로그인</GuestButton>
+                                    <GuestButton onClick={handleGuestLogin}>게스트 로그인</GuestButton>
                                 </div>
                             </OtherLoginWrap>
                         </LoginButtonWrap>
                         :
                         <SignUp />
                     }
-                </div>
-            </div >
-        }
-    </>
-
+                    <div className="copyright_box">
+                        <p>본 사이트는 포트폴리오 사이트입니다.</p>
+                        <p>로그인 및 회원가입 시 사이트 이용에 필요한 정보 외 사용되지 않습니다.</p>
+                        <span>ⓒ 2025. SIM HYEOK BO All rights reserved.</span>
+                    </div>
+                </div >
+            }
+        </>
     )
 }

@@ -81,7 +81,6 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
         // 설정 해주지 않으면 popstate 이벤트가 실행 안됨.
         window.history.pushState(null, "", window.location.pathname);
 
-        console.log(currentUser)
         if (!yourLogin) {
             router.push('/login');
             setLoginToggle(true);
@@ -154,12 +153,10 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
         const sockets = socketRef.current;
         if (currentUser) {
-
             sockets.emit("register", { uid: currentUser?.uid }); // UID를 서버에 전송
 
             if (!currentUser.uid) return console.log('유저 없음');
         }
-
     }, [currentUser])
 
     // 무한 스크롤 로직
@@ -175,6 +172,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
             } catch (error: any) {
                 if (error.message) {
                     setUsageLimit(true); // 에러 상태 업데이트
+                    console.log(error.message)
                     throw error; // 에러를 다시 던져서 useInfiniteQuery가 에러 상태를 인식하게 함
                 }
             }
@@ -198,17 +196,21 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
     // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
     useEffect(() => {
+        if (usageLimit) return;
+
         const uniquePosts = Array.from(
             new Map(
                 [
                     ...posts, // fetchNewPosts로 가져온 최신 데이터
-                    ...data.pages.flatMap((page) => page.data as PostData[]) // 무한 스크롤 데이터
+                    ...(data.pages
+                        ?.flatMap((page) => page?.data || [])
+                        .filter((post): post is PostData => !!post) || []),
                 ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
             ).values()
         );
 
         setPosts(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
-    }, [newPosts, data.pages]);
+    }, [newPosts, data.pages, usageLimit]);
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {

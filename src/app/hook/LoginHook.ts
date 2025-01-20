@@ -10,12 +10,10 @@ export const loginListener = async () => {
             },
         });
 
-        console.log(response, '로그인 시도')
         if (response.ok) {
             // 비동기 데이터 처리 시 Promise로 남겨질 걸 생각해 await 사용.
             const data = await response.json();
-            const { user } = data;
-
+            const { user, hasGuest } = data;
             return {
                 user: {
                     name: user.displayName,
@@ -24,6 +22,7 @@ export const loginListener = async () => {
                     uid: user.uid,
                 } as userData,
                 hasLogin: true,
+                hasGuest: hasGuest
             };
         } else {
             console.log("No auth token or invalid token");

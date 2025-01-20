@@ -5,6 +5,7 @@ export const checkUsageLimit = async (userId: string) => {
             headers: {
                 'Content-Type': 'application/json',
                 'user-id': userId,
+                credentials: "include",
             }
         });
 

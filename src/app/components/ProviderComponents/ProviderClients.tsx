@@ -4,33 +4,29 @@ import { ReactNode, useEffect } from "react";
 import { PretendardBold, PretendardLight, PretendardMedium } from "@/app/styled/FontsComponets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState, userData, userState } from "@/app/state/PostState";
+import { DidYouLogin, hasGuestState, loginToggleState, userData, userState } from "@/app/state/PostState";
 import { useRouter } from "next/navigation";
+import '../../globals.css'
 
 const queryClient = new QueryClient();
 
-interface DefaultMainProps {
-    user: userData | null,
-    hasLogin: boolean
-}
-
-
-function InitializeLoginComponent({ children, user, hasLogin }: { children: ReactNode, user: DefaultMainProps, hasLogin: DefaultMainProps }) {
+function InitializeLoginComponent({ children, user, hasLogin, hasGuest }: { children: ReactNode, user: userData | null, hasLogin: boolean, hasGuest: boolean }) {
     const setUserState = useSetRecoilState<userData | null>(userState);
     const setLoginState = useSetRecoilState<boolean>(DidYouLogin);
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const setHasGuest = useSetRecoilState<boolean>(hasGuestState)
 
     const router = useRouter();
     useEffect(() => {
-        console.log(user, hasLogin)
         if (!hasLogin) {
             setLoginToggle(true);
             router.push('/login');
             return;
         }
 
-        setUserState(user.user);
+        setUserState(user);
         setLoginState(true);
+        setHasGuest(hasGuest);
         router.push('/home/main');
     }, [user, hasLogin])
     return <>{children}</>; // 반드시 children을 렌더링
@@ -41,7 +37,7 @@ export default function ProviderClient({ children, loginData }: { children: Reac
         <div className={`${PretendardLight.variable} ${PretendardMedium.variable} ${PretendardBold.variable}`}>
             <QueryClientProvider client={queryClient}>
                 <RecoilRoot> {/* RecoilRoot로 감싸기 */}
-                    <InitializeLoginComponent user={loginData.user} hasLogin={loginData.hasLogin}>
+                    <InitializeLoginComponent user={loginData.user} hasLogin={loginData.hasLogin} hasGuest={loginData.hasGuest}>
                         {children}
                     </InitializeLoginComponent>
                 </RecoilRoot>

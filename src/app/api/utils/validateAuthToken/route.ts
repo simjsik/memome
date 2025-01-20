@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateCsrfToken } from "../../auth/validateCsrfToken/route";
+import { validateCsrfToken, validateIdToken } from "../../auth/validateCsrfToken/route";
 
 export async function POST(req: NextRequest) {
     try {
-        const { idToken } = await req.json();
-
+        const { idToken, hasGuest } = await req.json();
         const csrfToken = req.cookies.get("csrfToken")?.value;
 
         if (!csrfToken) {
             return NextResponse.json({ message: "CSRF 토큰이 누락되었습니다." }, { status: 403 });
+        }
+
+        if (!validateIdToken(idToken)) {
+            return NextResponse.json({ message: "ID 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
         }
 
         if (!validateCsrfToken(csrfToken)) {
@@ -24,6 +27,15 @@ export async function POST(req: NextRequest) {
             sameSite: "strict",
             path: "/",
         });
+
+        if (hasGuest) {
+            response.cookies.set("hasGuest", hasGuest, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                path: "/",
+            });
+        }
 
         // 추가적인 헤더 설정
         response.headers.set("Access-Control-Allow-Credentials", "true");

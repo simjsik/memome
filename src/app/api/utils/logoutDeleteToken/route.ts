@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
     try {
         // 클라이언트 측 쿠키 삭제
         const response = NextResponse.json({ success: true });
@@ -8,6 +8,7 @@ export async function POST(request: Request) {
         // httpOnly 쿠키 삭제
         response.cookies.delete("authToken")
         response.cookies.delete("csrfToken")
+        response.cookies.delete("hasGuest")
 
         return response;
     } catch (error) {

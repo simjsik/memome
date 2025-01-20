@@ -14,8 +14,8 @@ export async function saveNewUser(uid: string, displayName: string | null = null
             photoURL: "",
             userId: uid,
         });
-        
-        console.log(`New user created: ${randomName}`);
+
+        console.log(`New user created: ${setDisplay}`);
     }
 }
 
@@ -31,5 +31,23 @@ export async function saveNewGoogleUser(uid: string, displayName: string | null,
             userId: uid,
         });
         console.log(`New user created: ${randomName}`);
+    }
+}
+
+export async function saveNewGuest(uid: string) {
+    const guestRef = doc(db, "guests", uid);
+    const guestSnapshot = await getDoc(guestRef);
+    console.log(guestSnapshot.exists(), '게스트 데이터 확인')
+    if (!guestSnapshot.exists()) {
+        const randomName = `Guest-${Math.random().toString(36).substring(2, 10)}`;
+        const setDisplay = randomName
+
+        await setDoc(guestRef, {
+            setDisplay,
+            photoURL: "",
+            userId: uid,
+        });
+
+        console.log(`New user created: ${setDisplay}`);
     }
 }
