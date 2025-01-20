@@ -167,6 +167,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
         isError,  // 에러 상태
         error,    // 에러 메시지
     } = useInfiniteQuery({
+        retry: false, // 재시도 방지
         queryKey: ['posts'],
         queryFn: async ({ pageParam }) => {
             return fetchPosts(currentUser?.uid, pageParam, 5);
@@ -191,6 +192,11 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
     useEffect(() => {
         if (usageLimit) return;
 
+        // 빈 배열이거나 데이터가 없으면 기존 데이터를 유지
+        const fetchedPosts = data?.pages?.flatMap((page) => page?.data || []) || [];
+        console.log(fetchedPosts, '데이터 확인')
+        if (fetchedPosts.length === 0 && newPosts.length === 0) return;
+
         const uniquePosts = Array.from(
             new Map(
                 [
@@ -201,12 +207,19 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                 ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
             ).values()
         );
+        console.log(uniquePosts, '합병된 데이터 배열')
 
-        setPosts(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
+        // posts 배열이 업데이트될 때만 상태 변경
+        if (JSON.stringify(uniquePosts) !== JSON.stringify(posts)) {
+            console.log(uniquePosts, '적용 배열')
+
+            setPosts(uniquePosts);
+        }
     }, [newPosts, data.pages, usageLimit]);
 
     useEffect(() => {
-        if(isError){
+        if (isError) {
+            console.log('사용 제한!', posts)
             setUsageLimit(true);
         }
     }, [isError])
@@ -458,94 +471,92 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                 <NewPostBtn className='new_post_btn' onClick={handleUpdateClick}>새로운 업데이트 확인</NewPostBtn>
             }
             {/* 공지사항 제외 전체 포스트 */}
-            {!usageLimit &&
-                <PostWrap postStyle={postStyle}>
-                    <>
-                        {/* 무한 스크롤 구조 */}
-                        {posts.map((post) => (
-                            <div
-                                key={post.id}
-                                className='post_box'
-                                onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}>
-                                {/* 작성자 프로필 */}
-                                <div className='post_profile_wrap'>
-                                    <div className='user_profile'>
-                                        <div className='user_photo'
-                                            css={css`background-image : url(${post.PhotoURL})`}
-                                        >
-                                        </div>
-                                        <p className='user_name'>
-                                            {post.displayName}
-                                        </p>
-                                        <span className='user_uid'>
-                                            @{post.userId.slice(0, 6)}...
-                                        </span>
-                                        <p className='post_date'>
-                                            · {formatDate(post.createAt)}
-                                        </p>
-                                    </div>
-                                    <button
-                                        className='post_drop_menu_btn'
-                                        css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
-                                        onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
+            <PostWrap postStyle={postStyle}>
+                <>
+                    {/* 무한 스크롤 구조 */}
+                    {posts.map((post) => (
+                        <div
+                            key={post.id}
+                            className='post_box'
+                            onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}>
+                            {/* 작성자 프로필 */}
+                            <div className='post_profile_wrap'>
+                                <div className='user_profile'>
+                                    <div className='user_photo'
+                                        css={css`background-image : url(${post.PhotoURL})`}
                                     >
-                                        {dropToggle === post.id &&
-                                            <div ref={dropdownRef}>
-                                                <ul>
-                                                    <li className='post_drop_menu'>
-                                                        <button onClick={(event) => { event.preventDefault(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</button>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        }
-                                    </button>
-                                </div>
-                                {/* 포스트 내용 */}
-                                < div className='post_content_wrap' >
-                                    {/* 포스트 제목 */}
-                                    < div className='post_title_wrap' >
-                                        <span className='post_tag'>[{post.tag}]</span>
-                                        <h2 className='post_title'>{post.title}</h2>
                                     </div>
-                                    <div className='post_text' dangerouslySetInnerHTML={{ __html: post.content }}></div>
-                                    {/* 이미지 */}
-                                    {(post.images && post.images.length > 0) && (
-                                        <div className='post_pr_img_wrap'>
-                                            {post.images.map((imageUrl, index) => (
-                                                <div className='post_pr_img' key={index}
-                                                    css={css`background-image : url(${imageUrl})`}
-                                                ></div>
-                                            ))}
+                                    <p className='user_name'>
+                                        {post.displayName}
+                                    </p>
+                                    <span className='user_uid'>
+                                        @{post.userId.slice(0, 6)}...
+                                    </span>
+                                    <p className='post_date'>
+                                        · {formatDate(post.createAt)}
+                                    </p>
+                                </div>
+                                <button
+                                    className='post_drop_menu_btn'
+                                    css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
+                                    onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
+                                >
+                                    {dropToggle === post.id &&
+                                        <div ref={dropdownRef}>
+                                            <ul>
+                                                <li className='post_drop_menu'>
+                                                    <button onClick={(event) => { event.preventDefault(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</button>
+                                                </li>
+                                            </ul>
                                         </div>
-                                    )}
+                                    }
+                                </button>
+                            </div>
+                            {/* 포스트 내용 */}
+                            < div className='post_content_wrap' >
+                                {/* 포스트 제목 */}
+                                < div className='post_title_wrap' >
+                                    <span className='post_tag'>[{post.tag}]</span>
+                                    <h2 className='post_title'>{post.title}</h2>
+                                </div>
+                                <div className='post_text' dangerouslySetInnerHTML={{ __html: post.content }}></div>
+                                {/* 이미지 */}
+                                {(post.images && post.images.length > 0) && (
+                                    <div className='post_pr_img_wrap'>
+                                        {post.images.map((imageUrl, index) => (
+                                            <div className='post_pr_img' key={index}
+                                                css={css`background-image : url(${imageUrl})`}
+                                            ></div>
+                                        ))}
+                                    </div>
+                                )}
 
-                                    {/* 포스트 댓글, 북마크 등 */}
-                                    <div className='post_bottom_wrap'>
-                                        <div className='post_comment'>
-                                            <button className='post_comment_btn'>
-                                                <div className='post_comment_icon'>
-                                                </div>
-                                            </button>
-                                            <p>{post.commentCount}</p>
-                                        </div>
-                                        <BookmarkBtn postId={post.id}></BookmarkBtn>
+                                {/* 포스트 댓글, 북마크 등 */}
+                                <div className='post_bottom_wrap'>
+                                    <div className='post_comment'>
+                                        <button className='post_comment_btn'>
+                                            <div className='post_comment_icon'>
+                                            </div>
+                                        </button>
+                                        <p>{post.commentCount}</p>
                                     </div>
+                                    <BookmarkBtn postId={post.id}></BookmarkBtn>
                                 </div>
-                            </div >
-                        ))
-                        }
-                        {postStyle && < div ref={observerLoadRef} style={{ height: '1px' }} />}
-                        {
-                            !hasNextPage &&
-                            <NoMorePost>
-                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
-                                <p>모두 확인했습니다.</p>
-                                <span>전체 메모를 전부 확인했습니다.</span>
-                            </NoMorePost>
-                        }
-                    </>
-                </PostWrap >
-            }
+                            </div>
+                        </div >
+                    ))
+                    }
+                    {postStyle && < div ref={observerLoadRef} style={{ height: '1px' }} />}
+                    {
+                        !hasNextPage &&
+                        <NoMorePost>
+                            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+                            <p>모두 확인했습니다.</p>
+                            <span>전체 메모를 전부 확인했습니다.</span>
+                        </NoMorePost>
+                    }
+                </>
+            </PostWrap >
         </>
     )
 }

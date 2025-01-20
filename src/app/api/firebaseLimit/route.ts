@@ -6,11 +6,13 @@ const db = getFirestore();
 export async function POST(req: NextRequest,) {
     const userId = req.headers.get('user-id');
     const hasGuest = req.cookies.get("hasGuest")?.value;
+    console.log(hasGuest, '게스트 유저 확인')
 
     if (!userId) {
         return NextResponse.json({ error: '유저가 없습니다.' }, { status: 401 });
     }
-    const limitCount = hasGuest ? 40 : 80
+
+    const limitCount = !hasGuest ? 40 : 80
     const currentTime = new Date();
     const today = currentTime.toISOString().split('T')[0] // 오늘 날짜
 
@@ -31,8 +33,11 @@ export async function POST(req: NextRequest,) {
                     readCount: 0,
                     lastUpdate: today,
                 })
+                console.log(readCount, limitCount, '초과 제한!')
 
             } else if (readCount >= limitCount) {
+                console.log('초과 제한!')
+
                 // 사용량 초과
                 return NextResponse.json({ error: 'Usage limit exceeded' }, { status: 403 });
             } else {
