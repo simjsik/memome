@@ -29,6 +29,7 @@ export default function Bookmark() {
         isError,  // 에러 상태
         error,    // 에러 메시지
     } = useInfiniteQuery({
+        retry: false,
         queryKey: ['bookmarks', currentUser?.uid],
         queryFn: async ({ pageParam = 0 }) => {
             const result = await fetchBookmarks(

@@ -65,6 +65,7 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
         isError,  // 에러 상태
         error,    // 에러 메시지
     } = useInfiniteQuery({
+        retry: false,
         queryKey: ['notices'],
         queryFn: async ({ pageParam }) => {
             return fetchPosts(currentUser?.uid, pageParam, 5);
@@ -91,7 +92,7 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
             setUsageLimit(true);
         }
     }, [isError])
-    
+
     // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
     useEffect(() => {
         if (usageLimit) return;

@@ -41,6 +41,7 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         hasNextPage,
         isError,  // 에러 상태
     } = useInfiniteQuery({
+        retry: false,
         queryKey: ['postList'],
         queryFn: async ({ pageParam }) => {
             try {
@@ -75,6 +76,7 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         hasNextPage: hasNextImagePage,
         isError: imageIsError,  // 에러 상태
     } = useInfiniteQuery({
+        retry: false,
         queryKey: ['imagePostlist'],
         queryFn: async ({ pageParam }) => {
             return fetchPostsWithImages(user.uid, pageParam, 4);
