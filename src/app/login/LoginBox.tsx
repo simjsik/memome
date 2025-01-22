@@ -85,6 +85,7 @@ export default function LoginBox() {
     const auths = getAuth();
     const router = useRouter();
     const path = usePathname();
+
     // hook
     const getCsrfToken = async () => {
         try {
@@ -114,15 +115,15 @@ export default function LoginBox() {
 
 
     const firebaseErrorMessages: Record<string, string> = {
-        "auth/user-not-found": "해당 계정을 찾을 수 없습니다. 이메일을 확인해주세요.",
-        "auth/wrong-password": "비밀번호가 올바르지 않습니다. 다시 시도해주세요.",
+        "auth/user-not-found": "이메일 또는 비밀번호가 올바르지 않습니다.",
+        "auth/wrong-password": "이메일 또는 비밀번호가 올바르지 않습니다.",
         "auth/email-already-in-use": "이미 사용 중인 이메일입니다.",
-        "auth/invalid-email": "유효하지 않은 이메일 형식입니다.",
-        "auth/weak-password": "비밀번호는 최소 6자 이상이어야 합니다.",
+        "auth/invalid-email": "이메일 또는 비밀번호가 올바르지 않습니다.",
+        "auth/weak-password": "이메일 또는 비밀번호가 올바르지 않습니다.",
         "auth/network-request-failed": "네트워크 오류가 발생했습니다. 연결을 확인해주세요.",
-        "auth/too-many-requests": "잠시 후 다시 시도해주세요. 요청이 너무 많습니다.",
-        "auth/operation-not-allowed": "이 작업은 현재 허용되지 않습니다. 관리자에게 문의하세요.",
-        "auth/invalid-credential": "입력하신 이메일 주소와 비밀번호를 다시 한 번 확인해 주세요.",
+        "auth/too-many-requests": "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
+        "auth/operation-not-allowed": "허용되지 않은 요청입니다.",
+        "auth/invalid-credential": "이메일 또는 비밀번호가 올바르지 않습니다.",
         "auth/missing-password": "비밀번호를 입력해주세요.",
         // 추가적인 에러 코드 필요 시 확장 가능
     };
@@ -146,49 +147,18 @@ export default function LoginBox() {
     const handleLogin = async (email: string, password: string) => {
         try {
             setVerifyReSend(false);
-            const userCredential = await signInWithEmailAndPassword(auths, email, password);
-            const user = userCredential.user;
 
+            // 서버로 ID 토큰 전송
+            const loginResponse = await fetch("/api/auth/loginApi", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
 
-            if (!user.emailVerified) {
-                setLoginError('이메일 인증이 필요한 계정입니다.')
-                setVerifyReSend(true);
-                setUnverifiedUser(user); // 상태에 user 저장
-                return;
-            }
+            if (loginResponse) {
+                const userData = await loginResponse.json();
 
-            if (user) {
-                const idToken = await userCredential.user.getIdToken();
-                const hasGuest = false;
-
-                if (idToken) {
-                    // 서버로 ID 토큰 전송
-                    const csrfResponse = await fetch("/api/utils/validateAuthToken", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        credentials: "include", // 쿠키를 요청 및 응답에 포함
-                        body: JSON.stringify({ idToken, csrfToken, hasGuest }),
-                    });
-
-                    if (csrfResponse.ok) {
-                        setUser({
-                            name: user.displayName,
-                            email: user.email,
-                            photo: user.photoURL,
-                            uid: user.uid,
-                        });
-
-                        setHasLogin(true);
-                        setLoginToggle(false);
-                        saveNewUser(user.uid, user.displayName);
-                        router.push('/home/main')
-                    } else {
-                        setLoginError("로그인 요청 실패. 다시 시도해주세요.");
-                        getCsrfToken();
-                    }
-                } else {
-                    setLoginError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
-                }
+                setUser(userData)
             }
         } catch (error: any) {
             console.error("로그인 중 오류 발생:", error);

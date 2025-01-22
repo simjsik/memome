@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateCsrfToken, validateIdToken } from "../../auth/validateCsrfToken/route";
+import { validateCsrfToken, validateIdToken } from "../validateCsrfToken/route";
 
 export async function POST(req: NextRequest) {
     try {
