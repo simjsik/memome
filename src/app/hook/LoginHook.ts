@@ -10,6 +10,11 @@ export const loginListener = async () => {
             },
         });
 
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`자동 로그인 요청 에러 ${response.status}: ${errorData.message}`);
+        }
+
         if (response.ok) {
             // 비동기 데이터 처리 시 Promise로 남겨질 걸 생각해 await 사용.
             const data = await response.json();
@@ -25,11 +30,11 @@ export const loginListener = async () => {
                 hasGuest: hasGuest
             };
         } else {
-            console.log("No auth token or invalid token");
+            console.log("ID 토큰 및 유저 토큰이 유효하지 않습니다.");
             return { user: null, hasLogin: false };
         }
     } catch (error) {
-        console.error("Failed to fetch session:", error);
+        console.error("자동 로그인 실패", error);
         return { user: null, hasLogin: false };
     }
 };

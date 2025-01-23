@@ -1,39 +1,33 @@
 import { adminAuth } from "@/app/DB/firebaseAdminConfig";
 import { randomBytes } from "crypto";
+import redisClient from "../../utils/redisClient";
 import { NextResponse } from "next/server";
 
-const csrfTokens = new Map(); // In-memory storage for CSRF tokens
-
-export async function GET() {
-    const csrfToken = randomBytes(32).toString("hex");
-    const expiresAt = Date.now() + 60 * 60 * 1000; // 1시간 후 만료
-
-    csrfTokens.set(csrfToken, expiresAt);
-
-    const response = NextResponse.json({ csrfToken });
-    response.cookies.set("csrfToken", csrfToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        path: "/",
-        maxAge: 60 * 60, // 1시간
-    });
-
-    return response;
-}
-
 export async function validateCsrfToken(token: string) {
-    const expiresAt = csrfTokens.get(token);
-    console.log('CSRF 토큰 검증 중')
-    if (!expiresAt || Date.now() > expiresAt) {
-        csrfTokens.delete(token); // 만료된 토큰 삭제
-        console.log('CSRF 토큰 만료 삭제', Date.now() > expiresAt, token)
-
+    if (!token) {
+        console.log("CSRF 토큰 없음.");
         return false;
-    } else {
-        console.log('CSRF 토큰 유효.')
+    }
 
+    try {
+        // Redis에서 토큰의 만료 시간 가져오기
+        const expiresAt = await redisClient.get(token);
+
+        // 토큰이 존재하지 않거나 만료된 경우
+        if (!expiresAt || Date.now() > Number(expiresAt)) {
+            console.log("CSRF 토큰 만료됨.");
+
+            // 만료된 토큰 삭제
+            await redisClient.del(token);
+
+            return false;
+        }
+
+        console.log("CSRF 토큰 유효.");
         return true;
+    } catch (error) {
+        console.error("CSRF 검증 중 오류 발생:", error);
+        return false;
     }
 }
 
@@ -53,3 +47,30 @@ export async function validateIdToken(idToken: string) {
         return false; // 유효하지 않은 경우
     }
 }
+
+// CSRF 토큰 저장을 위한 API
+export async function GET() {
+    const csrfToken = randomBytes(32).toString("hex");
+    const expiresAt = Date.now() + 3600 * 1000; // 1시간 후 만료
+
+    // Redis에 CSRF 토큰 저장
+    await redisClient.setEx(csrfToken, 3600, expiresAt.toString()); // "EX"는 만료 시간을 설정합니다.
+
+    const response = NextResponse.json({ csrfToken });
+    response.cookies.set("csrfToken", csrfToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+        maxAge: 3600 * 1000, // 1시간
+    });
+
+    return response;
+}
+
+export function generateJwt(uid: string, role: number): string {
+    const jwt = require('jsonwebtoken');
+
+    return jwt.sign({ uid: uid, role: role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+}
+

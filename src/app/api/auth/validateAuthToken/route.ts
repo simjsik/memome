@@ -3,8 +3,7 @@ import { validateCsrfToken, validateIdToken } from "../validateCsrfToken/route";
 
 export async function POST(req: NextRequest) {
     try {
-        const { idToken, hasGuest } = await req.json();
-        const csrfToken = req.cookies.get("csrfToken")?.value;
+        const { idToken, csrfToken } = await req.json();
 
         if (!csrfToken) {
             return NextResponse.json({ message: "CSRF 토큰이 누락되었습니다." }, { status: 403 });
@@ -20,20 +19,6 @@ export async function POST(req: NextRequest) {
 
         // HTTP-only 쿠키에 ID 토큰 저장
         const response = NextResponse.json({ message: "Token validated" });
-
-        response.cookies.set("authToken", idToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            path: "/",
-        });
-
-        response.cookies.set("hasGuest", hasGuest, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            path: "/",
-        });
 
         // 추가적인 헤더 설정
         response.headers.set("Access-Control-Allow-Credentials", "true");

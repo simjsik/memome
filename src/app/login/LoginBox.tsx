@@ -98,12 +98,6 @@ export default function LoginBox() {
                 console.error("CSRF 토큰 발급 실패:", await csrfResponse.text());
                 throw new Error("CSRF 토큰 발급 실패");
             }
-            const { csrfToken } = await csrfResponse.json();
-            setCsrfToken(csrfToken);
-
-            // 쿠키 설정 후 약간의 지연을 추가
-            await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms
-            console.log("CSRF 토큰 발급 성공: ", csrfToken);
         } catch (error) {
             console.error("CSRF 토큰 요청 중 오류:", error);
         }
@@ -146,22 +140,45 @@ export default function LoginBox() {
 
     const handleLogin = async (email: string, password: string) => {
         try {
+            setLoginError(null);
             setVerifyReSend(false);
+            const hasGuest = false;
 
             // 서버로 ID 토큰 전송
             const loginResponse = await fetch("/api/auth/loginApi", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
+                credentials: "include",
+                body: JSON.stringify({ email, password, hasGuest }),
             });
 
-            if (loginResponse) {
-                const userData = await loginResponse.json();
-
-                setUser(userData)
+            if (!loginResponse.ok) {
+                const errorData = await loginResponse.json();
+                setLoginError(`${errorData.message}`)
+                throw new Error(`서버 요청 에러 ${loginResponse.status}: ${errorData.message}`);
             }
+
+            const data = await loginResponse.json();
+            const { uid } = data;
+
+            const userResponse = await fetch("/api/utils/sessionFetchData", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ uid }),
+            });
+
+            if (!userResponse.ok) {
+                console.log('유저 정보 확인 불가')
+                setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+            }
+
+            const userData = await userResponse.json();
+            const { user } = userData;
+
+            setUser(user)
         } catch (error: any) {
-            console.error("로그인 중 오류 발생:", error);
+            console.error("로그인 중 오류 발생:", error, error.code);
 
             // Firebase 에러 코드별 메시지 처리
             if (error.code && firebaseErrorMessages[error.code]) {
