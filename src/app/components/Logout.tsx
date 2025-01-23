@@ -47,19 +47,22 @@ export default function Logout() {
     const handleLogout = async () => {
         try {
             const confirmed = confirm('로그아웃 하시겠습니까?')
-            if (confirmed) {
-                await signOut(auth);
+            if (confirmed && user) {
+                const uid = user.uid
                 const response = await fetch("/api/utils/logoutDeleteToken", {
                     method: "POST",
+                    body: JSON.stringify({ uid }),
                 });
 
-                if (response.ok) {
-                    setUser(null); // 로그아웃 상태로 초기화
-                    setHasLogin(false)
-                    router.refresh();
-                } else {
-                    alert("Failed to logout.");
+                if (!response.ok) {
+                    const errorData = await response.json()
+                    console.log('로그아웃 실패 :', errorData.message)
                 }
+                await signOut(auth);
+
+                setUser(null); // 로그아웃 상태로 초기화
+                setHasLogin(false)
+                router.refresh();
             }
         } catch (error) {
             console.error("Error during logout:", error);
@@ -72,7 +75,7 @@ export default function Logout() {
         setModal(true);
     }
 
-    
+
     // Function
     return (
         <>
