@@ -35,15 +35,33 @@ export async function validateIdToken(idToken: string) {
     try {
         const decodedToken = await adminAuth.verifyIdToken(idToken);
         if (decodedToken) {
-            console.log('ID 토큰 유효')
             return true;
         } else {
-            console.log('ID 토큰 검증 실패')
-
+            console.error('ID 토큰 검증 실패')
             return false;
         }
     } catch (error) {
         console.error("ID 토큰 검증 실패:", error);
+        return false; // 유효하지 않은 경우
+    }
+}
+
+export async function validateGoogleToken(googleToken: string) {
+    try {
+        const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${googleToken}`);
+        if (!response) {
+            console.error('구글 토큰 검증 실패')
+            return false;
+        }
+        const googleUser = await response.json();
+        if (googleUser) {
+            return true;
+        } else {
+            console.error('구글 토큰 검증 실패')
+            return false;
+        }
+    } catch (error) {
+        console.error("구글 토큰 검증 실패:", error);
         return false; // 유효하지 않은 경우
     }
 }

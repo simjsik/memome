@@ -1,16 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateCsrfToken, validateIdToken } from "../validateCsrfToken/route";
+import { validateCsrfToken, validateGoogleToken, validateIdToken } from "../validateCsrfToken/route";
 
 export async function POST(req: NextRequest) {
     try {
-        const { idToken, csrfToken } = await req.json();
+        const { idToken, csrfToken, googleToken } = await req.json();
 
         if (!csrfToken) {
             return NextResponse.json({ message: "CSRF 토큰이 누락되었습니다." }, { status: 403 });
         }
 
-        if (!validateIdToken(idToken)) {
-            return NextResponse.json({ message: "ID 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
+        if (!idToken && !googleToken) {
+            return NextResponse.json({ message: "계정 토큰이 누락되었습니다." }, { status: 403 });
+        }
+
+        if (idToken) {
+            if (!validateIdToken(idToken)) {
+                return NextResponse.json({ message: "ID 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
+            }
+        }
+
+        if (googleToken) {
+            if (!validateGoogleToken(googleToken)) {
+                return NextResponse.json({ message: "구글 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
+            }
         }
 
         if (!validateCsrfToken(csrfToken)) {

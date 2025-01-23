@@ -177,6 +177,7 @@ export default function LoginBox() {
             const { user } = userData;
 
             setUser(user)
+            router.push('/home/main');
         } catch (error: any) {
             console.error("로그인 중 오류 발생:", error, error.code);
 
@@ -196,41 +197,45 @@ export default function LoginBox() {
 
             // Google 로그인 팝업
             const result = await signInWithPopup(auths, provider);
-            const user = result.user;
+            const googleToken = await result.user.getIdToken();
+            if (result) {
 
-            if (user) {
-                // ID 토큰 가져오기
-                const idToken = await user.getIdToken();
-                const hasGuest = false;
+                // 서버로 ID 토큰 전송
+                const googleResponse = await fetch("/api/auth/googleLoginApi", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include", // 쿠키를 요청 및 응답에 포함
+                    body: JSON.stringify({ googleToken }),
+                });
 
-                if (idToken) {
-                    // 서버로 ID 토큰 전송
-                    const csrfResponse = await fetch("/api/utils/validateAuthToken", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        credentials: "include", // 쿠키를 요청 및 응답에 포함
-                        body: JSON.stringify({ idToken, csrfToken, hasGuest }),
-                    });
-
-                    if (csrfResponse.ok) {
-                        setUser({
-                            name: user.displayName,
-                            email: user.email,
-                            photo: user.photoURL,
-                            uid: user.uid,
-                        });
-
-                        setHasLogin(true);
-                        setLoginToggle(false);
-                        saveNewGoogleUser(user.uid, user.displayName, user.photoURL);
-                        router.push('/home/main'); // 메인 페이지로 이동
-                    } else {
-                        setLoginError("로그인 요청 실패. 다시 시도해주세요.");
-                        getCsrfToken();
-                    }
-                } else {
-                    setLoginError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
+                if (!googleResponse.ok) {
+                    const errorData = await googleResponse.json();
+                    setLoginError(`${errorData.message}`)
+                    throw new Error(`서버 요청 에러 ${googleResponse.status}: ${errorData.message}`);
                 }
+
+                const data = await googleResponse.json();
+                const { uid } = data;
+
+                const userResponse = await fetch("/api/utils/sessionFetchData", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ uid }),
+                });
+
+                if (!userResponse.ok) {
+                    console.log('유저 정보 확인 불가')
+                    setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+                }
+
+                const userData = await userResponse.json();
+                const { user } = userData;
+
+                setUser(user)
+                router.push('/home/main');
+            } else {
+                setLoginError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
             }
         } catch (error: any) {
             console.error("로그인 중 오류 발생:", error);
