@@ -25,7 +25,9 @@ export async function GET(req: NextRequest) {
         let decodedToken: any; // Firebase 또는 Google에서 디코드된 토큰
         let userData: any;     // Redis에서 가져온 유저 데이터
 
-        if (!validateIdToken(authToken)) return NextResponse.json({ message: "ID 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
+        if (!validateIdToken(authToken)) {
+            return NextResponse.json({ message: "ID 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
+        }
 
         try {
             decodedToken = await adminAuth.verifyIdToken(authToken); // Firebase 토큰 검증

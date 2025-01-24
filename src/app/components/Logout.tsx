@@ -48,21 +48,20 @@ export default function Logout() {
         try {
             const confirmed = confirm('로그아웃 하시겠습니까?')
             if (confirmed && user) {
-                const uid = user.uid
                 const response = await fetch("/api/utils/logoutDeleteToken", {
                     method: "POST",
-                    body: JSON.stringify({ uid }),
+                    credentials: 'include',
                 });
 
                 if (!response.ok) {
                     const errorData = await response.json()
                     console.log('로그아웃 실패 :', errorData.message)
                 }
+
                 await signOut(auth);
 
                 setUser(null); // 로그아웃 상태로 초기화
                 setHasLogin(false)
-                router.refresh();
             }
         } catch (error) {
             console.error("Error during logout:", error);

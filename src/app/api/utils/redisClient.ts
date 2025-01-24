@@ -29,6 +29,13 @@ export async function saveSession(uid: string, data: SessionData) {
     await redisClient.set(key, JSON.stringify(data), { EX: 3600 }); // 1시간 만료
 }
 
+// 게스트 세션 저장 함수
+export async function saveGuestSession(uid: string, data: SessionData) {
+    const key = `session:${uid}`;
+    console.log(data, '게스트 세션 저장 유저 정보')
+    await redisClient.set(key, JSON.stringify(data), { EX: 3600 * 24 }); // 1시간 만료
+}
+
 // 세션 가져오기 함수
 export async function getSession(uid: string): Promise<SessionData | null> {
     const key = `session:${uid}`;

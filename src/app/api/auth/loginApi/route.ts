@@ -9,12 +9,10 @@ export async function POST(req: NextRequest) {
         const { email, password, hasGuest } = await req.json();
 
         const csrfToken = req.cookies.get("csrfToken")?.value;
-        let role = 1
+        let role = 2
 
-        role = email === 'simjsik75@naver.com' ? 3 : 2;
-
-        if (hasGuest) {
-            role = 1;
+        if (email === 'simjsik75@naver.com') {
+            role = 3
         }
 
         const userCredential = await signInWithEmailAndPassword(auth, email, password);

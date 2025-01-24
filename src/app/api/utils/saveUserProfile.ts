@@ -1,10 +1,10 @@
+import { adminAuth } from "@/app/DB/firebaseAdminConfig";
 import { db } from "@/app/DB/firebaseConfig";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
 export async function saveNewUser(uid: string, displayName: string | null = null) {
     const userRef = doc(db, "users", uid);
     const userSnapshot = await getDoc(userRef);
-    console.log(userSnapshot.exists(), '유저 데이터 확인')
     if (!userSnapshot.exists()) {
         const randomName = `user${Math.random().toString(36).substring(2, 10)}`;
         const setDisplay = displayName ? displayName : randomName
@@ -22,7 +22,6 @@ export async function saveNewUser(uid: string, displayName: string | null = null
 export async function saveNewGoogleUser(uid: string, displayName: string | null, photoURL: string | null) {
     const userRef = doc(db, "users", uid);
     const userSnapshot = await getDoc(userRef);
-    console.log(userSnapshot.exists(), '유저 데이터 확인')
     if (!userSnapshot.exists()) {
         const randomName = `user${Math.random().toString(36).substring(2, 10)}`;
         await setDoc(userRef, {
@@ -34,20 +33,17 @@ export async function saveNewGoogleUser(uid: string, displayName: string | null,
     }
 }
 
-export async function saveNewGuest(uid: string) {
+export async function saveNewGuest(uid: string, displayName: string | null, token: string) {
     const guestRef = doc(db, "guests", uid);
     const guestSnapshot = await getDoc(guestRef);
-    console.log(guestSnapshot.exists(), '게스트 데이터 확인')
     if (!guestSnapshot.exists()) {
         const randomName = `Guest-${Math.random().toString(36).substring(2, 10)}`;
-        const setDisplay = randomName
 
         await setDoc(guestRef, {
-            setDisplay,
+            displayName: displayName || randomName,
             photoURL: "",
             userId: uid,
+            token: token
         });
-
-        console.log(`New user created: ${setDisplay}`);
     }
 }

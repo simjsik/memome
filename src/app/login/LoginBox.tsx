@@ -21,6 +21,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { saveNewGoogleUser, saveNewGuest, saveNewUser } from "../api/utils/saveUserProfile";
 import SignUp from "./SignUp";
 import { auth } from "../DB/firebaseConfig";
+import { deleteSession } from "../api/utils/redisClient";
 
 const LoginWrap = css`
     position : fixed;
@@ -154,7 +155,7 @@ export default function LoginBox() {
 
             if (!loginResponse.ok) {
                 const errorData = await loginResponse.json();
-                setLoginError(`${errorData.message}`)
+                setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
                 throw new Error(`서버 요청 에러 ${loginResponse.status}: ${errorData.message}`);
             }
 
@@ -169,14 +170,16 @@ export default function LoginBox() {
             });
 
             if (!userResponse.ok) {
-                console.log('유저 정보 확인 불가')
-                setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+                const errorData = await userResponse.json();
+                setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
+                throw new Error(`서버 요청 에러 ${userResponse.status}: ${errorData.message}`);
             }
 
             const userData = await userResponse.json();
             const { user } = userData;
 
             setUser(user)
+            setHasLogin(true);
             router.push('/home/main');
         } catch (error: any) {
             console.error("로그인 중 오류 발생:", error, error.code);
@@ -192,12 +195,16 @@ export default function LoginBox() {
     }
 
     const handleGoogleLogin = async () => {
+        setLoginError(null);
+
         try {
             const provider = new GoogleAuthProvider();
 
             // Google 로그인 팝업
             const result = await signInWithPopup(auths, provider);
             const googleToken = await result.user.getIdToken();
+            // 서버 측에서 구글 로그인을 진행시킬 순 없으니 여기서 ID 토큰만 추출 후 전송.
+            // result를 전부 보내주면 보안 상 문제가 생김. ( 최소 권한 원칙 )
             if (result) {
 
                 // 서버로 ID 토큰 전송
@@ -210,7 +217,7 @@ export default function LoginBox() {
 
                 if (!googleResponse.ok) {
                     const errorData = await googleResponse.json();
-                    setLoginError(`${errorData.message}`)
+                    setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
                     throw new Error(`서버 요청 에러 ${googleResponse.status}: ${errorData.message}`);
                 }
 
@@ -225,14 +232,16 @@ export default function LoginBox() {
                 });
 
                 if (!userResponse.ok) {
-                    console.log('유저 정보 확인 불가')
-                    setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+                    const errorData = await userResponse.json();
+                    setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
+                    throw new Error(`서버 요청 에러 ${userResponse.status}: ${errorData.message}`);
                 }
 
                 const userData = await userResponse.json();
                 const { user } = userData;
 
-                setUser(user)
+                setUser(user);
+                setHasLogin(true);
                 router.push('/home/main');
             } else {
                 setLoginError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
@@ -251,43 +260,57 @@ export default function LoginBox() {
     };
 
     const handleGuestLogin = async () => {
+        setLoginError(null);
+
         try {
-            const userCredential = await signInAnonymously(auth);
-            const user = userCredential.user;
+            const hasGuest = true;
+            const guestUid = localStorage.getItem("guestUid");
 
-            if (user) {
-                const idToken = await userCredential.user.getIdToken();
-                const hasGuest = true;
-                if (idToken) {
-                    // 서버로 ID 토큰 전송
-                    const csrfResponse = await fetch("/api/utils/validateAuthToken", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        credentials: "include", // 쿠키를 요청 및 응답에 포함
-                        body: JSON.stringify({ idToken, csrfToken, hasGuest }),
-                    });
+            const guestResponse = await fetch("/api/auth/guestLoginApi", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include", // 쿠키를 요청 및 응답에 포함
+                body: JSON.stringify({ hasGuest, guestUid }),
+            });
 
-                    if (csrfResponse.ok) {
-                        setUser({
-                            name: user.displayName,
-                            email: user.email,
-                            photo: user.photoURL,
-                            uid: user.uid,
-                        });
-
-                        setHasLogin(true);
-                        setIsGuest(true);
-                        setLoginToggle(false);
-                        saveNewGuest(user.uid);
-                        router.push('/home/main')
-                    } else {
-                        setLoginError("로그인 요청 실패. 다시 시도해주세요.");
-                        getCsrfToken();
-                    }
-                } else {
-                    setLoginError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
+            if (!guestResponse.ok) {
+                const errorData = await guestResponse.json();
+                console.log(guestResponse.status, '에러 상태')
+                if (guestResponse.status === 411) {
+                    getCsrfToken();
+                    setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
+                    throw new Error(`CSRF 토큰 확인 불가 ${guestResponse.status}: ${errorData.message}`);
                 }
+                setLoginError('게스트 로그인에 실패했습니다. 다시 시도 해주세요.')
+                throw new Error(`서버 요청 에러 ${guestResponse.status}: ${errorData.message}`);
             }
+
+            const data = await guestResponse.json();
+            const { uid } = data;
+
+            if (!guestUid) {
+                localStorage.setItem("guestUid", uid);
+            }
+
+            const guestUserResponse = await fetch("/api/utils/sessionFetchData", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ uid }),
+            });
+
+            if (!guestUserResponse.ok) {
+                const errorData = await guestUserResponse.json();
+                setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
+                throw new Error(`서버 요청 에러 ${guestUserResponse.status}: ${errorData.message}`);
+            }
+
+            const userData = await guestUserResponse.json();
+            const { user } = userData;
+
+            setUser(user)
+            setHasLogin(true);
+            router.push('/home/main');
         } catch (error: any) {
             console.error("로그인 중 오류 발생:", error);
 
