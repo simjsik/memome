@@ -156,6 +156,11 @@ export default function LoginBox() {
             if (!loginResponse.ok) {
                 const errorData = await loginResponse.json();
                 setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
+                if (loginResponse.status === 411) {
+                    getCsrfToken();
+                    setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
+                    throw new Error(`CSRF 토큰 확인 불가 ${loginResponse.status}: ${errorData.message}`);
+                }
                 throw new Error(`서버 요청 에러 ${loginResponse.status}: ${errorData.message}`);
             }
 
@@ -218,6 +223,11 @@ export default function LoginBox() {
                 if (!googleResponse.ok) {
                     const errorData = await googleResponse.json();
                     setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
+                    if (googleResponse.status === 411) {
+                        getCsrfToken();
+                        setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
+                        throw new Error(`CSRF 토큰 확인 불가 ${googleResponse.status}: ${errorData.message}`);
+                    }
                     throw new Error(`서버 요청 에러 ${googleResponse.status}: ${errorData.message}`);
                 }
 
