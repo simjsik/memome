@@ -1,10 +1,31 @@
 import MainHome from './MainClient';
 import { fetchPosts } from '../../api/loadToFirebasePostData/fetchPostData';
+import { cookies } from 'next/headers';
+import { authenticateUser } from '@/app/api/utils/redisClient';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET; // JWT 비밀키
 
 export default async function Home() {
   // 포스트 불러오기
+  const cookieStore = cookies();
+  const userToken = cookieStore.get('userToken')?.value;
 
-  const { nextPage: initialNextPage } = await fetchPosts(null, null, 4);
+  if (!userToken || userToken === 'undefined') {
+    return console.error("유저 토큰이 누락되었습니다.");
+  }
+  if (!JWT_SECRET) {
+    return console.error("유저 토큰 접근 권한이 없습니다.");
+  }
+  if (!authenticateUser(userToken)) {
+    return console.error("유저 토큰이 유효하지 않습니다.");
+  }
+
+  const decoded = jwt.verify(userToken, JWT_SECRET) as JwtPayload;
+
+  const uid = decoded.uid as string;
+
+  const { nextPage: initialNextPage } = await fetchPosts(uid, null, 4);
 
   return (
     <>

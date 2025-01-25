@@ -194,7 +194,6 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
         // 빈 배열이거나 데이터가 없으면 기존 데이터를 유지
         const fetchedPosts = data?.pages?.flatMap((page) => page?.data || []) || [];
-        console.log(fetchedPosts, '데이터 확인')
         if (fetchedPosts.length === 0 && newPosts.length === 0) return;
 
         const uniquePosts = Array.from(
@@ -207,12 +206,9 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                 ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
             ).values()
         );
-        console.log(uniquePosts, '합병된 데이터 배열')
 
         // posts 배열이 업데이트될 때만 상태 변경
         if (JSON.stringify(uniquePosts) !== JSON.stringify(posts)) {
-            console.log(uniquePosts, '적용 배열')
-
             setPosts(uniquePosts);
         }
     }, [newPosts, data.pages, usageLimit]);

@@ -66,7 +66,7 @@ export async function validateGoogleToken(googleToken: string) {
     }
 }
 
-// CSRF 토큰 저장을 위한 API
+// CSRF 토큰 생성 API
 export async function GET() {
     const csrfToken = randomBytes(32).toString("hex");
     const expiresAt = Date.now() + 3600 * 1000; // 1시간 후 만료

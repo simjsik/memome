@@ -133,7 +133,7 @@ export const fetchPostList = async (
 };
 
 // 일반 포스트 무한 스크롤 로직
-export const fetchPosts = async (
+export const fetchPostss = async (
     userId: string | null = null,
     pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
     pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
@@ -235,7 +235,53 @@ export const fetchPosts = async (
         throw error;
     }
 };
+// 일반 포스트 무한 스크롤 로직
+export const fetchPosts = async (
+    userId: string | null = null,
+    pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
+    pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
+) => {
+    try {
+        const LimitResponse = await fetch('http://localhost:3000/api/firebaseLimit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'user-id': userId || '',
+            }
+        });
+        if (LimitResponse.status === 403) {
+            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+        }
 
+
+        const pageParamForServer = pageParam ? [pageParam[0], { seconds: pageParam[1]?.seconds, nanoseconds: pageParam[1]?.nanoseconds }] : null
+
+        const PostResponse = await fetch('http://localhost:3000/api/loadToFirebasePostData/fetchPost', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId, pageParam: pageParamForServer, pageSize }),
+        })
+        if (!PostResponse.ok) {
+            const errorDetails = await PostResponse.json();
+            throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+        }
+
+        const postData = await PostResponse.json()
+        const postWithComment = postData.data
+        const nextPage = postData.nextPage
+        // console.log(postWithComment, 'postWithComment', nextPage, 'nextPage', '받은 데이터')
+
+        return {
+            data: postWithComment,
+            nextPage: nextPage
+        };
+    } catch (error: any) {
+        console.error('Error in fetchPosts:', error.message);
+        throw error;
+    }
+};
 // 이미지 포스트 무한 스크롤 로직
 export const fetchPostsWithImages = async (
     userId: string,
