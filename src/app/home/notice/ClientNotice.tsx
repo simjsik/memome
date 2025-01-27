@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { fetchPosts } from "@/app/api/loadToFirebasePostData/fetchPostData";
+import { fetchNoticePosts, fetchPosts } from "@/app/api/loadToFirebasePostData/fetchPostData";
 import { DidYouLogin, loginToggleState, modalState, noticeState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import { NoMorePost, NoticeWrap, PostWrap } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
@@ -68,13 +68,12 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
         retry: false,
         queryKey: ['notices'],
         queryFn: async ({ pageParam }) => {
-            return fetchPosts(currentUser?.uid, pageParam, 5);
+            return fetchNoticePosts(currentUser?.uid, pageParam, 4);
         },
         getNextPageParam: (lastPage) => {
             // 사용량 초과 시 페이지 요청 중단
-            if (usageLimit || !lastPage.nextPage) {
-                return;
-            }
+            if (!lastPage.nextPage) return;
+
             return lastPage.nextPage;
         },
         staleTime: 5 * 60 * 1000, // 5분 동안 캐시 유지
@@ -86,12 +85,6 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
             pageParams: [initialNextPage],
         },
     });
-
-    useEffect(() => {
-        if (isError) {
-            setUsageLimit(true);
-        }
-    }, [isError])
 
     // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
     useEffect(() => {
@@ -109,6 +102,12 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
 
         setNotices(uniqueNotices); // 중복 제거된 포스트 배열을 posts에 저장
     }, [data.pages])
+
+    useEffect(() => {
+        if (isError) {
+            setUsageLimit(true);
+        }
+    }, [isError])
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {

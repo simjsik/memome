@@ -50,7 +50,7 @@ export async function deleteSession(uid: string) {
 }
 
 // 유저 인증 함수
-export async function authenticateUser(token: string): Promise<boolean> {
+export async function authenticateUser(token: string): Promise<boolean | string> {
     try {
         if (JWT_SECRET) {
             // Step 1: JWT 검증 및 uid 추출
@@ -69,10 +69,22 @@ export async function authenticateUser(token: string): Promise<boolean> {
 
             if (!userSession) {
                 console.error('Redis 세션 없음 또는 만료됨.');
+
+                const response = await fetch('http://localhost:3000/api/utils/logoutDeleteToken', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                if (!response.ok) {
+                    const errorDetails = await response.json();
+                    throw new Error(`로그아웃 실패: ${errorDetails.message}`);
+                }
+
                 return false;
             }
 
-            return true;
+            return uid;
         }
         return false;
     } catch (error) {

@@ -133,109 +133,6 @@ export const fetchPostList = async (
 };
 
 // 일반 포스트 무한 스크롤 로직
-export const fetchPostss = async (
-    userId: string | null = null,
-    pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
-    pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
-) => {
-    try {
-        const response = await fetch('http://localhost:3000/api/firebaseLimit', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'user-id': userId || '',
-            }
-        });
-
-        if (response.status === 403) {
-            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
-        }
-
-        // 닉네임 매핑을 위한 캐시 초기화
-        const userCache = new Map<string, { nickname: string; photo: string | null }>();
-        const queryBase = pageParam?.at(0) ?
-            query(
-                collection(db, 'posts'),
-                where('notice', '==', true),
-                orderBy('notice', 'desc'),
-                orderBy('createAt', 'desc'),
-                limit(pageSize) // 필요한 수 만큼 데이터 가져오기
-            )
-            :
-            query(
-                collection(db, 'posts'),
-                where('notice', '==', false),
-                orderBy('notice', 'desc'),
-                orderBy('createAt', 'desc'),
-                limit(pageSize) // 필요한 수 만큼 데이터 가져오기
-            )
-
-        // console.log(pageParam?.at(0), '= 공지사항 여부', pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
-
-        const postQuery = (pageParam && pageParam.at(1))
-            ?
-            query(
-                queryBase,
-                startAfter(...pageParam),
-            )
-            :
-            queryBase
-
-        const postSnapshot = await getDocs(postQuery);
-
-        const postWithComment: PostData[] = await Promise.all(
-            postSnapshot.docs.map(async (document) => {
-                // 포스트 가져오기
-                const postData = { id: document.id, ...document.data() } as PostData;
-
-                // 댓글 개수 가져오기
-                const commentRef = collection(db, 'posts', document.id, 'comments');
-                const commentSnapshot = await getDocs(commentRef);
-                postData.commentCount = commentSnapshot.size;
-
-                // 포스트 데이터에 유저 이름 매핑하기
-                if (!userCache.has(postData.userId)) {
-                    const userDocRef = doc(db, "users", postData.userId); // DocumentReference 생성
-                    const userDoc = await getDoc(userDocRef); // 문서 데이터 가져오기
-
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data() as { displayName: string; photoURL: string | null }; // .data() 호출 필요
-                        userCache.set(postData.userId, {
-                            nickname: userData.displayName,
-                            photo: userData.photoURL || null,
-                        });
-
-                    } else {
-                        userCache.set(postData.userId, {
-                            nickname: "Unknown",
-                            photo: null,
-                        });
-                    }
-                }
-
-                const userData = userCache.get(postData.userId) || { nickname: 'Unknown', photo: null }
-                postData.displayName = userData.nickname;
-                postData.PhotoURL = userData.photo;
-
-                return postData;
-            })
-        );
-
-        const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
-        // console.log(postWithComment, lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
-
-        return {
-            data: postWithComment,
-            nextPage: lastVisible
-                ? [lastVisible.data().notice, lastVisible.data().createAt as Timestamp] // 정렬 필드 값 배열로 반환
-                : null,
-        };
-    } catch (error: any) {
-        console.error('Error in fetchPosts:', error.message);
-        throw error;
-    }
-};
-// 일반 포스트 무한 스크롤 로직
 export const fetchPosts = async (
     userId: string | null = null,
     pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
@@ -262,6 +159,51 @@ export const fetchPosts = async (
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ userId, pageParam: pageParamForServer, pageSize }),
+        })
+        if (!PostResponse.ok) {
+            const errorDetails = await PostResponse.json();
+            throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+        }
+
+        const postData = await PostResponse.json()
+        const postWithComment = postData.data
+        const nextPage = postData.nextPage
+        // console.log(postWithComment, 'postWithComment', nextPage, 'nextPage', '받은 데이터')
+
+        return {
+            data: postWithComment,
+            nextPage: nextPage
+        };
+    } catch (error: any) {
+        console.error('Error in fetchPosts:', error.message);
+        throw error;
+    }
+};
+
+// 일반 포스트 무한 스크롤 로직
+export const fetchNoticePosts = async (
+    userId: string | null = null,
+    pageParam: [boolean, Timestamp] | [boolean, null],
+    pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
+) => {
+    try {
+        const LimitResponse = await fetch('http://localhost:3000/api/firebaseLimit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'user-id': userId || '',
+            }
+        });
+        if (LimitResponse.status === 403) {
+            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+        }
+
+        const PostResponse = await fetch('http://localhost:3000/api/loadToFirebasePostData/fetchNoticePost', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId, pageParam, pageSize }),
         })
         if (!PostResponse.ok) {
             const errorDetails = await PostResponse.json();
