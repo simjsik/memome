@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { fetchComments } from "@/app/api/loadToFirebasePostData/fetchPostData";
 import { checkUsageLimit } from "@/app/api/utils/checkUsageLimit";
 import { ADMIN_ID, Comment, memoCommentCount, memoCommentState, memoList, memoState, UsageLimitState, userData, userState } from "@/app/state/PostState";
 import { HomeBtn } from "@/app/styled/RouterComponents";
@@ -17,7 +16,6 @@ interface ClientPostProps {
     post: DocumentData;
     comment: Comment[];
 }
-
 
 const PostDetailWrap = styled.div`
 position : absolute;
