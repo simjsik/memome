@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
             new Timestamp(pageParam[1].seconds, pageParam[1].nanoseconds) // 변환
         ]
         : null;
+
+    console.log(startAfterParam?.at(1) instanceof Timestamp, 'PageParam 타입 확인');
     try {
         // 닉네임 매핑을 위한 캐시 초기화
         const user = await getSession(userId);

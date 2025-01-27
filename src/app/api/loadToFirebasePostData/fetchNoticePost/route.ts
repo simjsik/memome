@@ -9,13 +9,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { userId, pageParam, pageSize } = body;
 
-    const startAfterParam = pageParam
-        ? [
-            pageParam[1] ? new Timestamp(pageParam[1].seconds, pageParam[1].nanoseconds) : null// 변환
-        ]
+    const startAfterParam = (pageParam && pageParam[1])
+        ?
+        new Timestamp(pageParam[1].seconds, pageParam[1].nanoseconds)// 변환
         : null;
 
-        console.log(startAfterParam, '다음 페이지')
     try {
         // 닉네임 매핑을 위한 캐시 초기화
         const user = await getSession(userId);
@@ -36,8 +34,6 @@ export async function POST(req: NextRequest) {
                 limit(pageSize) // 필요한 수 만큼 데이터 가져오기
             )
 
-        console.log(pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
-
         const postQuery = startAfterParam
             ?
             query(
@@ -46,8 +42,6 @@ export async function POST(req: NextRequest) {
             )
             :
             queryBase
-
-        console.log(pageParam, 'pageParam', startAfterParam, 'startAfterParam', '시작쿼리')
 
         const postSnapshot = await getDocs(postQuery);
 
@@ -74,7 +68,6 @@ export async function POST(req: NextRequest) {
         );
 
         const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
-        console.log(postWithComment, '보내는 인자')
 
         return NextResponse.json(
             {

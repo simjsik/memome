@@ -224,6 +224,7 @@ export const fetchNoticePosts = async (
         throw error;
     }
 };
+
 // 이미지 포스트 무한 스크롤 로직
 export const fetchPostsWithImages = async (
     userId: string,
