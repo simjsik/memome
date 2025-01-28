@@ -122,7 +122,7 @@ export default function NavBar() {
         } else if (NavTitle === 3) {
             router.push(`/home/bookmark/${currentUser?.uid}`);
         } else if (NavTitle === 4) {
-            router.push(`/home/user/${auth.currentUser?.uid}`)
+            router.push(`/home/user/${currentUser?.uid}`)
         } else if (NavTitle === 5) {
             router.push('/home/post');
         }

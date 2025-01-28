@@ -3,12 +3,14 @@ import UserClient from "./userClient";
 import { db } from "@/app/DB/firebaseConfig";
 import { userData } from "@/app/state/PostState";
 import './userStyle.css'
-import { fetchPostList, fetchPosts, fetchPostsWithImages } from "@/app/api/loadToFirebasePostData/fetchPostData";
+import { fetchPostList, fetchPostsWithImages } from "@/app/api/loadToFirebasePostData/fetchPostData";
+
 interface UserPageProps {
     params: {
         userId: string;
     };
 }
+
 export default async function UserHome({ params }: UserPageProps) {
     const { userId } = params;
 
@@ -26,7 +28,7 @@ export default async function UserHome({ params }: UserPageProps) {
         } as userData
     }
 
-    const { nextPage: initialNextPage } = await fetchPosts(userId, null, 4);
+    const { nextPage: initialNextPage } = await fetchPostList(userId, null, 4);
     const { nextPage: initialImageNextPage } = await fetchPostsWithImages(userId, null, 4);
 
     return (
