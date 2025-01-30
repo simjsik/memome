@@ -28,8 +28,8 @@ export default async function UserHome({ params }: UserPageProps) {
         } as userData
     }
 
-    const { nextPage: initialNextPage } = await fetchPostList(userId, null, 4);
-    const { nextPage: initialImageNextPage } = await fetchPostsWithImages(userId, null, 4);
+    const { data, nextPage: initialNextPage } = await fetchPostList(userId, null, 4);
+    const { imagedata, nextPage: initialImageNextPage } = await fetchPostsWithImages(userId, null, 4);
 
     return (
         <>
@@ -45,7 +45,7 @@ export default async function UserHome({ params }: UserPageProps) {
                         <span className="user_uid">@{userData?.uid.slice(0, 8)}...</span>
                     </div>
                 </div>
-                {userData && <UserClient user={userData} post={[]} initialNextPage={initialNextPage} imagePost={[]} initialImageNextPage={initialImageNextPage} />}
+                {userData && <UserClient user={userData} post={data} initialNextPage={initialNextPage} imagePost={imagedata} initialImageNextPage={initialImageNextPage} />}
             </div>
         </>
     )

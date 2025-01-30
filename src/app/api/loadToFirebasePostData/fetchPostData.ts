@@ -209,7 +209,7 @@ export const fetchPostsWithImages = async (
         // console.log(data, '보내는 인자')
 
         return {
-            data,
+            imageData: data,
             nextPage: lastVisible
                 ? [lastVisible.data().images, lastVisible.data().createAt as Timestamp] // 정렬 필드 값 배열로 반환
                 : null,

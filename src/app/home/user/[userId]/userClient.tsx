@@ -128,17 +128,23 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
                 ].map((post) => [post.id, post])
             ).values()
         );
-        console.log(uniqueImagePosts)
+        console.log(uniqueImagePosts, '이미지 포스트')
         setImagePost(uniqueImagePosts);
     }, [imageData.pages]);
 
     // 스크롤 끝나면 포스트 요청
+    const isFirstLoad = useRef(true); // 최초 실행 여부 확인
+
     useEffect(() => {
         if (usageLimit || !postTab) return; // postTab === false면 실행 안 함.
 
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && hasNextPage) {
+                    if (isFirstLoad.current) {
+                        isFirstLoad.current = false; // 최초 실행을 방지하고 이후부터 동작
+                        return;
+                    }
                     fetchNextPage();
                 }
             },
@@ -148,8 +154,6 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         if (observerLoadRef.current) {
             observer.observe(observerLoadRef.current);
         }
-
-
 
         return () => {
             if (observerLoadRef.current) {
@@ -165,7 +169,13 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && hasNextImagePage) {
-                    fetchNextImagePage();
+                    if (entries[0].isIntersecting && hasNextPage) {
+                        if (isFirstLoad.current) {
+                            isFirstLoad.current = false; // 최초 실행을 방지하고 이후부터 동작
+                            return;
+                        }
+                        fetchNextPage();
+                    }
                 }
             },
             { threshold: 1.0 }
@@ -174,7 +184,6 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         if (observerImageLoadRef.current) {
             observer.observe(observerImageLoadRef.current);
         }
-
 
         return () => {
             if (observerImageLoadRef.current) {
@@ -259,7 +268,6 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
                 setDropToggle(''); // 드롭다운 닫기
             }
         };
-
         document.addEventListener('mousedown', handleOutsideClick); // 이벤트 리스너 추가
         return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
     }, []);
