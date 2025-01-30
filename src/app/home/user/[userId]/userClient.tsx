@@ -124,11 +124,10 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
                 [
                     ...(imageData.pages
                         ?.flatMap((page) => page?.data || [])
-                        .filter((post): post is PostData => !!post) || []),
+                        .filter((post) => !!post) || []),
                 ].map((post) => [post.id, post])
             ).values()
         );
-        console.log(uniqueImagePosts, '이미지 포스트')
         setImagePost(uniqueImagePosts);
     }, [imageData.pages]);
 
@@ -174,7 +173,7 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
                             isFirstLoad.current = false; // 최초 실행을 방지하고 이후부터 동작
                             return;
                         }
-                        fetchNextPage();
+                        fetchNextImagePage();
                     }
                 }
             },

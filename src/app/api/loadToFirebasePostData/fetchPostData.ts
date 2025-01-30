@@ -85,6 +85,52 @@ export const fetchPostList = async (
     };
 };
 
+// 이미지 포스트 무한 스크롤 로직
+export const fetchPostsWithImages = async (
+    userId: string,
+    pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
+    pageSize: number = 6, // 무한 스크롤 시 가져올 데이터 수
+) => {
+    try {
+        const LimitResponse = await fetch('http://localhost:3000/api/firebaseLimit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'user-id': userId || '',
+            }
+        });
+        if (LimitResponse.status === 403) {
+            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+        }
+
+        const PostResponse = await fetch('http://localhost:3000/api/loadToFirebasePostData/fetchPostsWithImages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId, pageParam, pageSize }),
+        })
+        if (!PostResponse.ok) {
+            const errorDetails = await PostResponse.json();
+            throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+        }
+
+        const postData = await PostResponse.json()
+        const postWithImage = postData.imageData
+        const nextPage = postData.nextPage
+
+        console.log(postWithImage, '받아온 데이터')
+        
+        return {
+            imageData: postWithImage,
+            nextPage: nextPage
+        };
+    } catch (error: any) {
+        console.error('Error in fetchPostsWithImages:', error.message);
+        return error;
+    }
+};
+
 // 일반 포스트 무한 스크롤 로직
 export const fetchPosts = async (
     userId: string | null = null,
@@ -174,51 +220,7 @@ export const fetchNoticePosts = async (
     }
 };
 
-// 이미지 포스트 무한 스크롤 로직
-export const fetchPostsWithImages = async (
-    userId: string,
-    pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
-    pageSize: number = 6, // 무한 스크롤 시 가져올 데이터 수
-) => {
-    try {
-        const queryBase = query(
-            collection(db, 'posts'),
-            where('notice', '==', false),
-            where('userId', '==', userId),
-            where('images', '!=', false), // images 필드가 false가 아닌 문서만 필터링
-            orderBy('createAt', 'desc'),
-            limit(pageSize) // 필요한 수 만큼 데이터 가져오기
-        );
 
-        const postQuery = (pageParam && pageParam.at(1))
-            ? query(queryBase, startAfter(pageParam.at(1)))
-            : queryBase;
-
-        const postSnapshot = await getDocs(postQuery);
-
-        const data = postSnapshot.docs.map((document) => {
-            const { images } = document.data();
-            return {
-                id: document.id,
-                images: Array.isArray(images) ? images : [], // images가 배열인지 확인 후 반환
-            };
-        });
-
-        const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
-
-        // console.log(data, '보내는 인자')
-
-        return {
-            imageData: data,
-            nextPage: lastVisible
-                ? [lastVisible.data().images, lastVisible.data().createAt as Timestamp] // 정렬 필드 값 배열로 반환
-                : null,
-        };
-    } catch (error: any) {
-        console.error('Error in fetchPostsWithImages:', error.message);
-        return error;
-    }
-};
 
 // 북마크 무한 스크롤 로직
 export const fetchBookmarks = async (

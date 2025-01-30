@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
         ]
         : null;
 
-    console.log(startAfterParam?.at(1) instanceof Timestamp, 'PageParam 타입 확인');
+    // console.log(startAfterParam?.at(1) instanceof Timestamp, 'PageParam 타입 확인');
     try {
         // 닉네임 매핑을 위한 캐시 초기화
         const user = await getSession(userId);

@@ -24,9 +24,7 @@ export async function POST(req: NextRequest) {
             orderBy('createAt', 'desc'),
             limit(pageSize)
         );
-
         // console.log(pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
-
         const postQuery = startAfterParam
             ?
             query(
