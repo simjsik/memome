@@ -25,10 +25,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: '유효하지 않은 유저 또는 유저 세션 정보 만료' }, { status: 401 });
         }
 
-        if (user.role < 2) {
-            return NextResponse.json({ message: '권한이 없습니다.' }, { status: 403 });
-        }
-
         const queryBase =
             query(
                 collection(db, 'posts'),

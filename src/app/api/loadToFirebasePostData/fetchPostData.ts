@@ -1,10 +1,7 @@
-import { db } from "@/app/DB/firebaseConfig";
-import { Comment, PostData } from "@/app/state/PostState";
-import { collection, getDoc, doc, getDocs, limit, orderBy, query, startAfter, Timestamp, where } from "firebase/firestore";
-
+import { Timestamp } from "firebase/firestore";
 
 // 포스트의 댓글
-export const fetchCommentss = async (userId: string, postId: string) => {
+export const fetchComments = async (userId: string, postId: string) => {
     try {
         const LimitResponse = await fetch('http://localhost:3000/api/firebaseLimit', {
             method: 'POST',
@@ -119,8 +116,6 @@ export const fetchPostsWithImages = async (
         const postWithImage = postData.imageData
         const nextPage = postData.nextPage
 
-        console.log(postWithImage, '받아온 데이터')
-        
         return {
             imageData: postWithImage,
             nextPage: nextPage
@@ -154,8 +149,10 @@ export const fetchPosts = async (
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: "include",
             body: JSON.stringify({ userId, pageParam, pageSize }),
         })
+
         if (!PostResponse.ok) {
             const errorDetails = await PostResponse.json();
             throw new Error(`포스트 요청 실패: ${errorDetails.message}`);

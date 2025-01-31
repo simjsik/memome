@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/app/DB/firebaseAdminConfig";
-import { validateGoogleToken, validateIdToken } from "../../auth/validateCsrfToken/route";
+import { validateIdToken } from "../../auth/validateCsrfToken/route";
 import { authenticateUser, getSession } from "../redisClient";
 
 export async function GET(req: NextRequest) {
@@ -17,9 +17,12 @@ export async function GET(req: NextRequest) {
         if (!userToken) {
             return NextResponse.json({ message: "유저 토큰이 존재하지 않습니다." }, { status: 401 });
         }
-
         if (!authenticateUser(userToken)) {
             return NextResponse.json({ message: "유저 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
+        }
+
+        if (!hasGuest) {
+            return NextResponse.json({ message: "게스트 유저 정보가 유효하지 않습니다." }, { status: 403 });
         }
 
         let decodedToken: any; // Firebase 또는 Google에서 디코드된 토큰

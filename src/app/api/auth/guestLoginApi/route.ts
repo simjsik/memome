@@ -6,6 +6,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/app/DB/firebaseConfig";
 import { signInAnonymously, signInWithCustomToken } from "firebase/auth";
 import { saveNewGuest } from "../../utils/saveUserProfile";
+import jwt from 'jsonwebtoken';
 
 export async function POST(req: NextRequest) {
     try {
@@ -63,6 +64,7 @@ export async function POST(req: NextRequest) {
             saveNewGuest(uid, randomName, customToken)
         } else {
             const customToken = guestDoc.data().token;
+            console.log(customToken, '게스트 커스텀 토큰')
 
             const userCredential = await signInWithCustomToken(auth, customToken);
             if (!userCredential) {
@@ -129,7 +131,7 @@ export async function POST(req: NextRequest) {
         response.cookies.set("hasGuest", hasGuest, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+            sameSite: 'strict',
             path: "/",
         });
 
