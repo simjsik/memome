@@ -6,7 +6,6 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/app/DB/firebaseConfig";
 import { signInAnonymously, signInWithCustomToken } from "firebase/auth";
 import { saveNewGuest } from "../../utils/saveUserProfile";
-import jwt from 'jsonwebtoken';
 
 export async function POST(req: NextRequest) {
     try {
@@ -100,14 +99,12 @@ export async function POST(req: NextRequest) {
             // 이미 토큰을 가져왔으니 여기선 필요 없음!
             body: JSON.stringify({ idToken, csrfToken }),
         });
-
         if (!csrfResponse.ok) {
             const errorData = await csrfResponse.json();
             console.error("CSRF 토큰 인증 실패:", errorData.message);
             return NextResponse.json({ message: "CSRF 토큰 인증 실패." }, { status: 411 });
         }
-
-
+        
         const UID = generateJwt(uid, role);
 
         const response = NextResponse.json({ message: "Token validated", uid });

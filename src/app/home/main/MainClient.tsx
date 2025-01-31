@@ -39,7 +39,7 @@ interface MainHomeProps {
 }
 
 export default function MainHome({ post: initialPosts, initialNextPage }: MainHomeProps) {
-    window.history.scrollRestoration = 'manual'
+    // window.history.scrollRestoration = 'manual'
 
     const yourLogin = useRecoilValue(DidYouLogin)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
@@ -215,7 +215,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
     useEffect(() => {
         if (isError) {
-            console.log('사용 제한!', posts)
+            console.log('사용 제한!', error.message)
             setUsageLimit(true);
         }
     }, [isError])

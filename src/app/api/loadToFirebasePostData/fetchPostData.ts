@@ -149,18 +149,21 @@ export const fetchPosts = async (
             headers: {
                 'Content-Type': 'application/json',
             },
-            credentials: "include",
             body: JSON.stringify({ userId, pageParam, pageSize }),
-        })
-
+        });
+        if (PostResponse.status === 403) {
+            const errorDetails = await PostResponse.json();
+            throw new Error(`게스트 유저 제한 : ${errorDetails.message}`);
+        }
         if (!PostResponse.ok) {
             const errorDetails = await PostResponse.json();
+
             throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
         }
 
-        const postData = await PostResponse.json()
-        const postWithComment = postData.data
-        const nextPage = postData.nextPage
+        const postData = await PostResponse.json();
+        const postWithComment = postData.data;
+        const nextPage = postData.nextPage;
 
         return {
             data: postWithComment,
@@ -197,6 +200,10 @@ export const fetchNoticePosts = async (
             },
             body: JSON.stringify({ userId, pageParam, pageSize }),
         })
+        if (PostResponse.status === 403) {
+            const errorDetails = await PostResponse.json();
+            throw new Error(`게스트 유저 제한 : ${errorDetails.message}`);
+        }
         if (!PostResponse.ok) {
             const errorDetails = await PostResponse.json();
             throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
@@ -205,7 +212,6 @@ export const fetchNoticePosts = async (
         const postData = await PostResponse.json()
         const postWithComment = postData.data
         const nextPage = postData.nextPage
-        // console.log(postWithComment, 'postWithComment', nextPage, 'nextPage', '받은 데이터')
 
         return {
             data: postWithComment,
@@ -216,8 +222,6 @@ export const fetchNoticePosts = async (
         throw error;
     }
 };
-
-
 
 // 북마크 무한 스크롤 로직
 export const fetchBookmarks = async (
@@ -235,6 +239,7 @@ export const fetchBookmarks = async (
                 'user-id': userId || '',
             }
         });
+
         if (LimitResponse.status === 403) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
@@ -247,6 +252,10 @@ export const fetchBookmarks = async (
             },
             body: JSON.stringify({ bookmarkIds, startIdx, pageSize }),
         });
+        if (BookmarkResponse.status === 403) {
+            const errorDetails = await BookmarkResponse.json();
+            throw new Error(`게스트 유저 제한 : ${errorDetails.message}`);
+        }
         if (!BookmarkResponse.ok) {
             const errorDetails = await BookmarkResponse.json();
             throw new Error(`포스트 요청 실패: ${errorDetails.message}`);

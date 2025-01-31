@@ -120,6 +120,7 @@ export default function LoginBox() {
         "auth/operation-not-allowed": "허용되지 않은 요청입니다.",
         "auth/invalid-credential": "이메일 또는 비밀번호가 올바르지 않습니다.",
         "auth/missing-password": "비밀번호를 입력해주세요.",
+        "auth/invalid-custom-token": "로그인 요청에 실패 했습니다. 다시 시도해주세요",
         // 추가적인 에러 코드 필요 시 확장 가능
     };
 
