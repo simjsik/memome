@@ -216,7 +216,9 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
     useEffect(() => {
         if (isError) {
             console.log('사용 제한!', error.message)
-            setUsageLimit(true);
+            if (error.message === '사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.') {
+                setUsageLimit(true);
+            }
         }
     }, [isError])
 
@@ -354,6 +356,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                 orderBy('createAt', 'asc'),
                 startAfter(lastFetchedAt) // 마지막 시간 이후
             );
+            
             console.log(lastFetchedAt, '마지막 포스트 시간')
             const querySnapshot = await getDocs(postsQuery);
 

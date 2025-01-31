@@ -23,7 +23,7 @@ function InitializeLoginComponent({ children, user, hasLogin, hasGuest }: { chil
             router.push('/login');
             return;
         }
-
+        
         setUserState(user);
         setLoginState(true);
         setHasGuest(hasGuest);

@@ -30,7 +30,6 @@ export default async function UserHome({ params }: UserPageProps) {
 
     const { data, nextPage: initialNextPage } = await fetchPostList(userId, null, 4);
     const { imageData, nextPage: initialImageNextPage } = await fetchPostsWithImages(userId, null, 4);
-    console.log(imageData, '이미지 포스트좀 보내')
     return (
         <>
             <div className="user_wrap">

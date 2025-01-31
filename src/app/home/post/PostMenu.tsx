@@ -2,7 +2,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
-import { DidYouLogin, loginToggleState, modalState, PostingState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
+import { DidYouLogin, hasGuestState, loginToggleState, modalState, PostingState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
@@ -569,7 +569,7 @@ color: #bdbdbd;
 }
 `
 
-export default function PostMenu() {
+export default function PostMenu({ guestCookie }: { guestCookie: string }) {
     const router = useRouter();
 
     const quillRef = useRef<any>(null); // Quill 인스턴스 접근을 위한 ref 설정
@@ -581,6 +581,7 @@ export default function PostMenu() {
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const currentUser = useRecoilValue(userState)
+    const hasGuest = useRecoilValue<boolean>(hasGuestState);
 
     const [postingComplete, setPostingComplete] = useState<boolean>(false);
     const [postTitle, setPostTitle] = useState<string>('');
@@ -666,6 +667,15 @@ export default function PostMenu() {
 
         loadQuill();
     }, []);
+
+    useEffect(() => {
+        if (hasGuest === true || guestCookie === 'true') {
+            router.push('/home/main');
+        }
+        if (!yourLogin) {
+            router.push('/login');
+        }
+    }, [hasGuest, yourLogin])
 
     const handleFontSizeChange = (size: string | null) => {
         const editor = quillRef.current.getEditor();
@@ -769,70 +779,6 @@ export default function PostMenu() {
         setPostTitle(value);
     }
 
-    // Cloudinary에 이미지 업로드 요청
-    const uploadImgCdn = async (image: string) => {
-        const response = await fetch('/api/uploadToCloudinary', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ image }),
-        });
-
-        if (!response.ok) {
-            throw new Error('image upload failed')
-        }
-
-        const data = await response.json();
-        if (data.url) {
-            return data.url;
-        } else {
-            throw new Error('Image upload failed');
-        }
-    };
-
-    const uploadContentImgCdn = async (content: string, uploadedImageUrls: Map<string, string>) => {
-        const imgTagRegex = /<img[^>]+src="([^">]+)"/g;
-        let updatedContent = content;
-        let match;
-
-        // img 태그 추출
-        while ((match = imgTagRegex.exec(content)) !== null) {
-            const originalUrl = match[1];
-
-            // 이미 업로드된 이미지인지 확인
-            if (uploadedImageUrls.has(originalUrl)) {
-                // 이미 업로드된 이미지 URL로 교체
-                updatedContent = updatedContent.replace(originalUrl, uploadedImageUrls.get(originalUrl)!);
-                continue;
-            }
-
-            // Cloudinary에 이미지 업로드
-            const response = await fetch('/api/uploadToCloudinary', {
-                method: 'PHOTO',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ image: originalUrl }),
-            });
-
-            if (!response.ok) {
-                console.error('콘텐츠 이미지 업로드 실패', originalUrl);
-                continue;
-            }
-
-            const data = await response.json();
-
-            // Cloudinary URL이 있다면 content의 이미지 URL 교체 및 URL 캐싱
-            if (data.url) {
-                uploadedImageUrls.set(originalUrl, data.url);
-                updatedContent = updatedContent.replace(originalUrl, data.url);
-            }
-        }
-
-        return updatedContent;
-    };
-
     // 포스팅 업로드
     const uploadThisPost = async () => {
         // 사용자 인증 확인
@@ -847,48 +793,22 @@ export default function PostMenu() {
             }
             return;
         }
-
-        if (imageUrls.length > MAX_IMG_COUNT) {
-            alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 업로드 가능합니다.`)
-            return;
-        }
-        if (postTitle.length > title_limit_count) {
-            alert(`제목을 20자 이내로 작성해 주세요.`)
-            return;
-        }
-        if (posting.length > content_limit_count) {
-            alert(`최대 2500자의 내용만 작성 가능합니다.`)
-            return;
-        }
-
+        
         if (postTitle && posting && currentUser) {
             try {
-                // 업로드된 이미지 URL을 추적하기 위한 Map 생성
-                const uploadedImageUrls = new Map<string, string>();
-
-                // imageUrls 최적화 및 업로드
-                const optImageUrls = await Promise.all(
-                    imageUrls.map(async (image) => {
-                        const cloudinaryUrl = await uploadImgCdn(image);
-                        uploadedImageUrls.set(image, cloudinaryUrl); // 업로드된 URL을 Map에 저장
-                        return cloudinaryUrl;
-                    })
-                );
-
-                // content 내 이미지 URL을 최적화된 URL로 교체
-                const optContentUrls = await uploadContentImgCdn(posting, uploadedImageUrls);
-
-                // firebase 업로드
-                await addDoc(collection(db, 'posts'), {
-                    tag: selectTag,
-                    title: postTitle,
-                    userId: currentUser.uid, // uid로 사용자 ID 사용
-                    content: optContentUrls,
-                    images: optImageUrls ? false : optImageUrls,
-                    createAt: Timestamp.now(),
-                    commentCount: 0,
-                    notice: checkedNotice,
+                const PostringResponse = await fetch('/home/post/api/uploadPost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({ imageUrls, postTitle, posting, selectTag, checkedNotice }),
                 });
+                if (!PostringResponse.ok) {
+                    const errorDetails = await PostringResponse.json();
+                    throw new Error(`포스트 업로드 실패: ${errorDetails.message}`);
+                }
+
                 alert('포스팅 완료');
                 setPostingComplete(true);
                 localStorage.removeItem('unsavedPost');

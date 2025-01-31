@@ -287,10 +287,12 @@ export default function LoginBox() {
             if (!guestResponse.ok) {
                 const errorData = await guestResponse.json();
                 console.log(guestResponse.status, '에러 상태')
-                if (guestResponse.status === 411) {
-                    getCsrfToken();
+                if (guestResponse.status === 403) {
+                    if (errorData.message === 'CSRF 토큰 인증 실패.') {
+                        getCsrfToken();
+                        throw new Error(`CSRF 토큰 확인 불가 ${guestResponse.status}: ${errorData.message}`);
+                    }
                     setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
-                    throw new Error(`CSRF 토큰 확인 불가 ${guestResponse.status}: ${errorData.message}`);
                 }
                 setLoginError('게스트 로그인에 실패했습니다. 다시 시도 해주세요.')
                 throw new Error(`서버 요청 에러 ${guestResponse.status}: ${errorData.message}`);

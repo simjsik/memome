@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
         if (!csrfResponse.ok) {
             const errorData = await csrfResponse.json();
             console.error("CSRF 토큰 인증 실패:", errorData.message);
-            return NextResponse.json({ message: "CSRF 토큰 인증 실패." }, { status: 411 });
+            return NextResponse.json({ message: "CSRF 토큰 인증 실패." }, { status: 403 });
         }
         
         const UID = generateJwt(uid, role);
