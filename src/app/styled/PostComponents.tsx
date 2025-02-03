@@ -745,5 +745,6 @@ export const MyAlarmWrap = styled.div`
       background: #0087ff;
       border-radius: 4px;
       color: #fff;
+      cursor : pointer;
     }
 `

@@ -3,11 +3,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { ADMIN_ID, DidYouLogin, loginToggleState, modalState, noticeList, noticeType, PostData, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
+import { DidYouLogin, loginToggleState, modalState, noticeList, noticeType, PostData, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
-import { auth, db } from "@/app/DB/firebaseConfig";
-import { updateProfile } from "firebase/auth";
-import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "@/app/DB/firebaseConfig";
+import { deleteDoc, doc, getDoc } from "firebase/firestore";
 import { css } from "@emotion/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { MyAlarmWrap } from "@/app/styled/PostComponents";
@@ -229,7 +228,7 @@ margin-top : 20px;
 `
 
 export default function UserProfile() {
-    const user = useRecoilValue<userData | null>(userState)
+    const currentUser = useRecoilValue<userData | null>(userState)
     const yourLogin = useRecoilValue(DidYouLogin)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setModal = useSetRecoilState<boolean>(modalState);
@@ -247,7 +246,6 @@ export default function UserProfile() {
     const updatePhotoRef = useRef<HTMLInputElement | null>(null)
     // ref
     const router = useRouter();
-    const my = auth.currentUser
 
     // File 타입을 base64로 변경하기 위한 함수
     const fileToBase64 = (file: File): Promise<string> => {
@@ -261,55 +259,44 @@ export default function UserProfile() {
 
     // 프로필 사진 업데이트 시 로직
     const updateToProfile = async (image: File | null, name: string | null) => {
-        if (my && user) {
+        if (currentUser) {
             try {
-                let profileImageUrl = null
-
-                // 변경된 이미지가 있을 시 업데이트
                 if (image) {
                     // 받아온 image인자가 File 타입이기 때문에 Cloudinary에 저장을 위해 base64로 변경
                     const base64Image = await fileToBase64(image);
 
-                    const response = await fetch('/api/uploadToCloudinary', {
+                    const UpdateResponse = await fetch('/api/utils/updateProfile', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ image: base64Image }),
+                        body: JSON.stringify({ image: base64Image, name }),
                     });
 
-                    if (!response.ok) {
-                        throw new Error('프로필 사진 업로드 실패!');
+                    if (!UpdateResponse.ok) {
+                        const errorData = await UpdateResponse.json()
+                        throw new Error('프로필 사진 업로드 실패!', errorData.message);
                     }
 
-                    const data = await response.json();
-                    if (data.url) {
-                        profileImageUrl = data.url;
-                    } else {
-                        throw new Error('Cloudinary의 이미지 반환 실패')
-                    }
-                } else {
-                    profileImageUrl = my.photoURL;
+                    alert('프로필 업데이트 성공!')
+                    return;
                 }
 
-                // Firebase Authentication의 프로필 업데이트
-                await updateProfile(my, {
-                    displayName: name || user.name,
-                    photoURL: profileImageUrl || user.photo,
-                })
+                const UpdateResponse = await fetch('/api/utils/updateProfile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name }),
+                });
 
-                // 업데이트한 프로필 Firestore에 저장
-                await setDoc(
-                    doc(db, 'users', my.uid), {
-                    displayName: name || user.name,
-                    photoURL: profileImageUrl || user.photo,
-                },
-                    { merge: true }
-                );
+                if (!UpdateResponse.ok) {
+                    const errorData = await UpdateResponse.json()
+                    throw new Error('프로필 사진 업로드 실패!', errorData.message);
+                }
 
-                // setUserName(name)
-                // setUserPhoto(profileImageUrl)
                 alert('프로필 업데이트 성공!')
+                return;
             } catch (error) {
                 alert('프로필 사진 업로드에 실패' + error)
             }
@@ -360,8 +347,8 @@ export default function UserProfile() {
     }
 
     const handleProfileReset = () => {
-        if (user && user.name) {
-            setUpdateUserName(user.name)
+        if (currentUser && currentUser.name) {
+            setUpdateUserName(currentUser.name)
             setUpdateUserPhoto(null)
             setUpdateUserNameError(null)
             setUpdateUserPhotoError(null)
@@ -400,16 +387,22 @@ export default function UserProfile() {
     }
 
     const noticeConfirm = async (noticeId: string) => {
-        if (my) {
+        if (currentUser) {
             try {
                 // 게시글 존재 확인
-                const noticeDoc = await getDoc(doc(db, 'users', my.uid, 'noticeList', noticeId));
-                if (!noticeDoc.exists()) {
-                    alert('해당 게시글을 찾을 수 없습니다.')
-                    return;
+                const NoticeResponse = await fetch('/api/utils/noticeConfirm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ noticeId }),
+                });
+
+                if (!NoticeResponse.ok) {
+                    const errorData = await NoticeResponse.json()
+                    throw new Error('게시글 삭제 중 오류가 발생했습니다.', errorData.message);
                 }
-                // 삭제 권한 확인
-                await deleteDoc(doc(db, 'users', my.uid, 'noticeList', noticeId));
+
                 console.log('알림 확인')
 
                 // noticeLists 상태에서 해당 알림 제거
@@ -450,22 +443,23 @@ export default function UserProfile() {
     }
 
     useEffect(() => {
-        if (updateToggle && user) {
-            setUpdateUserName(user.name)
+        if (updateToggle && currentUser) {
+            setUpdateUserName(currentUser.name)
         }
     }, [updateToggle])
+    
     return (
         <ProfileWrap>
             {/* 프로필 상단 */}
             <div className="profile_top">
                 <div className="profile_id">
-                    <p className="user_name">{user?.name}</p>
+                    <p className="user_name">{currentUser?.name}</p>
                     <span className="user_uid">
-                        {user?.email}
+                        {currentUser?.email}
                     </span>
                 </div>
                 <div className="user_photo" css={css`
-                        background-image : url(${user?.photo});
+                        background-image : url(${currentUser?.photo});
                         background-size : cover;
                         background-position : center;
                         width : 72px;
@@ -489,7 +483,7 @@ export default function UserProfile() {
                             <div className="update_box">
                                 <div className="user_name_change_wrap">
                                     <label>별명</label>
-                                    <input onChange={handleNameChange} type="text" value={updateUserName || ''} placeholder={user?.name || '새 유저 별명'} />
+                                    <input onChange={handleNameChange} type="text" value={updateUserName || ''} placeholder={currentUser?.name || '새 유저 별명'} />
                                     <p>{updateUserName?.length}/12</p>
                                 </div>
                                 <span className="update_error">{updateUserNameError}</span>
@@ -504,7 +498,7 @@ export default function UserProfile() {
                                 </div>
                                 <span className="update_error">{updateUserPhotoError}</span>
                                 {/* 업데이트 감지 시 버튼 */}
-                                {(updateUserName !== user?.name || Boolean(updateUserPhoto)) &&
+                                {(updateUserName !== currentUser?.name || Boolean(updateUserPhoto)) &&
                                     <div className="update_btn_wrap">
                                         <p>{loading ? '저장하지 않은 변경 사항이 있습니다!' : ''}</p>
                                         <button className="reset_update_btn" onClick={handleProfileReset}>
@@ -524,7 +518,7 @@ export default function UserProfile() {
                         < div className="profile_menu_wrap">
                             <div className="memo_box">
                                 <div className="menu_profile" css={css`
-                                    background-image : url(${user?.photo});
+                                    background-image : url(${currentUser?.photo});
                                     background-size : cover;
                                     background-position : center;
                                     width : 32px;

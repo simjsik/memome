@@ -29,6 +29,13 @@ export async function saveSession(uid: string, data: SessionData) {
     await redisClient.set(key, JSON.stringify(data), { EX: 3600 }); // 1시간 만료
 }
 
+// 세션 업데이트 함수
+export async function updateSession(uid: string, data: SessionData) {
+    const key = `session:${uid}`;
+    console.log(data, '세션 업데이트 유저 정보')
+    await redisClient.set(key, JSON.stringify(data), { XX: true, KEEPTTL: true });
+}
+
 // 게스트 세션 저장 함수
 export async function saveGuestSession(uid: string, data: SessionData) {
     const key = `session:${uid}`;

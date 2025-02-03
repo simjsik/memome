@@ -66,8 +66,6 @@ export async function POST(req: NextRequest) {
                 postData.displayName = userData.displayName;
                 postData.PhotoURL = userData.photoURL;
 
-                console.log(postData.displayName, postData.PhotoURL, '유저 매핑')
-
                 return postData;
             })
         );

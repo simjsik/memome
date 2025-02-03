@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateCsrfToken, validateGoogleToken, validateIdToken } from "../validateCsrfToken/route";
 
+
 export async function POST(req: NextRequest) {
     try {
         const { idToken, csrfToken, googleToken } = await req.json();
@@ -30,7 +31,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: "CSRF 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
         }
 
-        // HTTP-only 쿠키에 ID 토큰 저장
         const response = NextResponse.json({ message: "Token validated" });
 
         // 추가적인 헤더 설정
