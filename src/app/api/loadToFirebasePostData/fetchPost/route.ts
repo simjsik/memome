@@ -62,10 +62,11 @@ export async function POST(req: NextRequest) {
                 const [commentSnapshot, userDoc] = await Promise.all([commentRef, userDocRef]);
 
                 postData.commentCount = commentSnapshot.size;
-                const userData = userDoc.data() || { nickname: '', photo: '' }
+                const userData = userDoc.data() || { displayName: '', photoURL: '' }
+                postData.displayName = userData.displayName;
+                postData.PhotoURL = userData.photoURL;
 
-                postData.displayName = userData.nickname;
-                postData.PhotoURL = userData.photo;
+                console.log(postData.displayName, postData.PhotoURL, '유저 매핑')
 
                 return postData;
             })
