@@ -4,7 +4,7 @@ import { validateCsrfToken, validateGoogleToken, validateIdToken } from "../vali
 export async function POST(req: NextRequest) {
     try {
         const { idToken, csrfToken, googleToken } = await req.json();
-        console.error(!idToken, !csrfToken, !googleToken, '토큰 확인')
+        // console.error(!idToken, !csrfToken, !googleToken, '토큰 확인')
 
         if (!csrfToken) {
             return NextResponse.json({ message: "CSRF 토큰이 누락되었습니다." }, { status: 403 });

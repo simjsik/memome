@@ -796,7 +796,7 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
         
         if (postTitle && posting && currentUser) {
             try {
-                const PostringResponse = await fetch('/home/post/api/uploadPost', {
+                const PostringResponse = await fetch('api/uploadPost', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

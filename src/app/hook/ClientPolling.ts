@@ -1,3 +1,4 @@
+"use client"
 import { useState, useEffect } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../DB/firebaseConfig";
@@ -33,8 +34,23 @@ const useUpdateChecker = (statusPath: string) => {
     const clearUpdate = async () => {
         try {
             if (currentUser) {
-                const docRef = doc(db, `users/${currentUser.uid}/${statusPath}`);
-                await updateDoc(docRef, { hasUpdate: false });
+                const userId = currentUser.uid
+
+                const UpdateResponse = await fetch('http://localhost:3000/api/utils/newPostUpdate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId, statusPath }),
+                })
+
+                if (!UpdateResponse.ok) {
+                    const errorDetails = await UpdateResponse.json();
+                    if (UpdateResponse.status === 403) {
+                        throw new Error(`새 포스트 업데이트 실패 : ${errorDetails.message}`);
+                    }
+                    throw new Error(`새 포스트 업데이트 실패 : ${errorDetails.message}`);
+                }
                 setHasUpdate(false);
                 console.log('업데이트 완료')
             }
