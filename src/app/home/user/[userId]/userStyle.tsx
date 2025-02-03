@@ -26,8 +26,8 @@ export const UserPostWrap = styled.div`
 
         .user_image_wrap{
             position:relative;
-            min-width: 200px;
-            height: 200px;
+            flex : 1 0 30%;
+            aspect-ratio : 1 / 1;
             background-size: cover;
             background-repeat: no-repeat;
             margin-right: 4px;
@@ -36,7 +36,7 @@ export const UserPostWrap = styled.div`
                 background-size: cover;
                 background-repeat: no-repeat;
                 width: 100%;
-                height: 200px;
+                height : 100%;
 
                 .image_list_icon{
                     position: absolute;
@@ -61,7 +61,7 @@ export const UserPostWrap = styled.div`
         .user_image_wrap:nth-of-type(3n){
             margin-right :0px;
         }
-        .user_image_wrap:nth-of-type(n + 3){
+        .user_image_wrap:nth-of-type(n + 4){
             margin-top : 4px
         }
     }
