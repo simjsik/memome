@@ -8,7 +8,6 @@ import { doc, setDoc } from "firebase/firestore";
 import { LoginTitle } from "../styled/LoginStyle";
 import { CreateInput, LoginButton, LoginButtonWrap, LoginModalWrap } from "../styled/LoginComponents";
 import { css } from "@emotion/react";
-import { saveNewUser } from "../api/utils/saveUserProfile";
 import { signUpState } from "../state/PostState";
 import { useRecoilState } from "recoil";
 import { usePathname } from "next/navigation";
@@ -166,9 +165,20 @@ export default function SignUp() {
             // 이메일/비밀번호로 계정 생성
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
+            const uid = user.uid
+            const displayName = formData.displayName
 
             // 사용자 정보 저장 (users 컬렉션)
-            saveNewUser(user.uid, formData.displayName)
+            const saveUserResponse = await fetch('/api/utils/saveUserProfile/Firebase', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ uid, displayName }),
+            })
+
+            if (!saveUserResponse.ok) {
+                const errorData = await saveUserResponse.json();
+                throw new Error(`유저 정보 저장 실패 ${saveUserResponse.status}: ${errorData.message}`);
+            }
 
             // Firebase Authentication의 프로필 업데이트
             await updateProfile(user, {

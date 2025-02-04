@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser } from "../redisClient";
 import { validateIdToken } from "../../auth/validateCsrfToken/route";
 import { adminAuth, adminDb } from "@/app/DB/firebaseAdminConfig";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function POST(req: NextRequest) {
     try {
@@ -12,7 +13,6 @@ export async function POST(req: NextRequest) {
         const userToken = req.cookies.get("userToken")?.value;
 
         let decodedToken: any; // Firebase 또는 Google에서 디코드된 토큰
-        let userData: any;     // Redis에서 가져온 유저 데이터
 
         if (!authToken) {
             return NextResponse.json({ message: "계정 토큰이 존재하지 않습니다." }, { status: 401 });
@@ -46,7 +46,9 @@ export async function POST(req: NextRequest) {
             return;
         }
         // 삭제 권한 확인
-        await noticeDoc.delete();
+        await noticeDoc.update({
+            noticeId: FieldValue.delete()  // noticeId 필드만 삭제
+        });
 
         return NextResponse.json({ message: "공지 확인" }, { status: 200 });
     } catch (error) {

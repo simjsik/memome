@@ -15,13 +15,10 @@ import {
     LoginModalWrap,
     OtherLoginWrap
 } from "../styled/LoginComponents";
-import { getAuth, GoogleAuthProvider, sendEmailVerification, signInAnonymously, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth";
-import { LoginOr, LoginSpan, LoginTitle } from "../styled/LoginStyle";
+import { getAuth, GoogleAuthProvider, sendEmailVerification, signInWithPopup, User } from "firebase/auth";
+import { LoginOr, LoginSpan } from "../styled/LoginStyle";
 import { usePathname, useRouter } from "next/navigation";
-import { saveNewGoogleUser, saveNewGuest, saveNewUser } from "../api/utils/saveUserProfile";
 import SignUp from "./SignUp";
-import { auth } from "../DB/firebaseConfig";
-import { deleteSession } from "../api/utils/redisClient";
 
 const LoginWrap = css`
     position : fixed;
@@ -157,8 +154,10 @@ export default function LoginBox() {
             if (!loginResponse.ok) {
                 const errorData = await loginResponse.json();
                 setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
-                if (loginResponse.status === 411) {
-                    getCsrfToken();
+                if (loginResponse.status === 403) {
+                    if (errorData.message = 'CSRF 토큰 인증 실패.') {
+                        getCsrfToken();
+                    }
                     setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
                     throw new Error(`CSRF 토큰 확인 불가 ${loginResponse.status}: ${errorData.message}`);
                 }
@@ -212,7 +211,6 @@ export default function LoginBox() {
             // 서버 측에서 구글 로그인을 진행시킬 순 없으니 여기서 ID 토큰만 추출 후 전송.
             // result를 전부 보내주면 보안 상 문제가 생김. ( 최소 권한 원칙 )
             if (result) {
-
                 // 서버로 ID 토큰 전송
                 const googleResponse = await fetch("/api/auth/googleLoginApi", {
                     method: "POST",
@@ -224,8 +222,10 @@ export default function LoginBox() {
                 if (!googleResponse.ok) {
                     const errorData = await googleResponse.json();
                     setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
-                    if (googleResponse.status === 411) {
-                        getCsrfToken();
+                    if (googleResponse.status === 403) {
+                        if (errorData.message = 'CSRF 토큰 인증 실패.') {
+                            getCsrfToken();
+                        }
                         setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
                         throw new Error(`CSRF 토큰 확인 불가 ${googleResponse.status}: ${errorData.message}`);
                     }
@@ -272,7 +272,6 @@ export default function LoginBox() {
 
     const handleGuestLogin = async () => {
         setLoginError(null);
-
         try {
             const hasGuest = true;
             const guestUid = localStorage.getItem("guestUid");
@@ -301,7 +300,7 @@ export default function LoginBox() {
             const data = await guestResponse.json();
             const { uid } = data;
 
-            if (!guestUid) {
+            if (!guestUid || guestUid != uid) {
                 localStorage.setItem("guestUid", uid);
             }
 

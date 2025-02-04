@@ -25,7 +25,6 @@ export async function POST(req: NextRequest) {
         response.cookies.delete("userToken")
 
         // UID를 기반으로 Redis에서 세션 삭제
-        deleteSession(uid)
         return response;
     } catch (error) {
         console.error("Error logging out:", error);

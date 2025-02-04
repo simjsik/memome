@@ -50,6 +50,14 @@ export async function getSession(uid: string): Promise<SessionData | null> {
     return data ? JSON.parse(data) : null;
 }
 
+// 세션 조회
+export async function sessionExists(uid: string): Promise<boolean> {
+    const key = `session:${uid}`;
+    const exists = await redisClient.exists(key);
+    console.log(uid, exists, '게스트 세션 저장 유저 정보 조회')
+    return exists === 1;
+}
+
 // 세션 삭제 함수
 export async function deleteSession(uid: string) {
     const key = `session:${uid}`;

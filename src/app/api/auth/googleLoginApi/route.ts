@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
         }
 
         if (!validateIdToken(googleToken)) {
-            return NextResponse.json({ message: "구글 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
+            return NextResponse.json({ message: "구글 계정 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
         }
 
         const role = 2
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         if (!csrfResponse.ok) {
             const errorData = await csrfResponse.json();
             console.error("Server-to-server error:", errorData.message);
-            return NextResponse.json({ message: "CSRF 토큰 인증 실패." }, { status: 411 });
+            return NextResponse.json({ message: "CSRF 토큰 인증 실패." }, { status: 403 });
         }
 
         const UID = generateJwt(uid, role);
