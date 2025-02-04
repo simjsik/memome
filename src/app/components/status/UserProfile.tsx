@@ -447,7 +447,7 @@ export default function UserProfile() {
             setUpdateUserName(currentUser.name)
         }
     }, [updateToggle])
-    
+
     return (
         <ProfileWrap>
             {/* 프로필 상단 */}
@@ -455,7 +455,7 @@ export default function UserProfile() {
                 <div className="profile_id">
                     <p className="user_name">{currentUser?.name}</p>
                     <span className="user_uid">
-                        {currentUser?.email}
+                        @{currentUser?.uid.slice(0, 8)}...
                     </span>
                 </div>
                 <div className="user_photo" css={css`

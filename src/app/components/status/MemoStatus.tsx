@@ -1,10 +1,10 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { auth, db } from "@/app/DB/firebaseConfig";
+import { db } from "@/app/DB/firebaseConfig";
 import { ADMIN_ID, Comment, DidYouLogin, memoCommentCount, memoCommentState, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, increment, orderBy, query, serverTimestamp, startAfter, Timestamp, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, updateDoc, where } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -204,38 +204,33 @@ export default function MemoStatus({ post }: ClientPostProps) {
         }
 
         if (user) {
-            const userId = user.uid;
             const text = parentId ? replyText : commentText;
-            const commentRef = collection(db, 'posts', post, 'comments');
 
             if (!text.trim()) {
                 alert(parentId ? '답글을 입력해주세요.' : '댓글을 입력해주세요.');
                 return;
             }
-            const currentDate = new Date();
+
             try {
-                const commentData = {
-                    replyId: commentId,
-                    user: userId,
-                    commentText: text,
-                    createAt: serverTimestamp(),
-                    parentId,
-                    displayName: user.name,
-                    PhotoURL: user.photo,
+                const CommentResponse = await fetch('/api/utils/addComment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ postId: post, parentId, commentId, text }),
+                });
+
+                if (!CommentResponse.ok) {
+                    const errorData = await CommentResponse.json()
+                    throw new Error('댓글 작성 실패!', errorData.message);
                 }
 
-                // firebase에 추가
-                const comments = await addDoc(commentRef, commentData);
-
-                // 댓글 수 수정
-                const postRef = doc(db, 'posts', post)
-                await updateDoc(postRef, {
-                    commentCount: increment(1)
-                })
+                const commentResponse = await CommentResponse.json()
+                const commentData = commentResponse.commentData
 
                 setCommentList((prev) => [
                     ...prev,
-                    { ...commentData, id: comments.id, createAt: currentDate } as Comment
+                    { ...commentResponse.commentData, id: commentResponse.id, createAt: commentData.createAt, displayName: user.name, PhotoURL: user.photo } as Comment
                 ]);
 
                 setCommentText('');
@@ -249,11 +244,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
     }
 
     const deleteComment = async (commentId: string) => {
-        if (!auth.currentUser) {
-            alert('로그인이 필요합니다.');
-            return;
-        }
-
         if (user) {
             const userId = user.uid;
 

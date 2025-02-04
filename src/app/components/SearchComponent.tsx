@@ -383,7 +383,7 @@ const SwiperHits = () => {
 
     const handleUserPage = (userId: string) => {
         if (yourLogin && !usageLimit) {
-            router.push(`/user/${userId}`)
+            router.push(`/home/user/${userId}`)
         } else if (usageLimit) {
             return setLimitToggle(true);
         } else {
