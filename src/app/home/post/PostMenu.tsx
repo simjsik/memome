@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { addDoc, collection, Timestamp } from 'firebase/firestore';
 import { DidYouLogin, hasGuestState, loginToggleState, modalState, PostingState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { useRouter } from 'next/navigation';
@@ -11,7 +10,6 @@ import QuillResizeImage from 'quill-resize-image';
 // import 'quill/dist/quill.snow.css';
 import ReactQuill, { Quill } from 'react-quill-new';
 import styled from '@emotion/styled';
-import { db } from '@/app/DB/firebaseConfig';
 
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
@@ -793,7 +791,7 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
             }
             return;
         }
-        
+
         if (postTitle && posting && currentUser) {
             try {
                 const PostringResponse = await fetch('api/uploadPost', {
@@ -955,7 +953,7 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
             if (storageLoad) return;
 
             const imgTags = Array.from(editor.root.querySelectorAll('img'));
-            const currentImageUrls = imgTags.map((img: HTMLImageElement) => img.src);
+            const currentImageUrls = imgTags.map((img) => (img as HTMLImageElement).src);
 
             // 이미지 개수 초과 시 초과 이미지를 삭제
             if (currentImageUrls.length > MAX_IMG_COUNT) {
