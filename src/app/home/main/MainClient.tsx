@@ -14,9 +14,9 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchPosts } from '../../api/loadToFirebasePostData/fetchPostData';
 
 // Swiper
-import { usePostUpdateChecker } from '@/app/hook/ClientPolling';
-import socket from '@/app/api/websocket/route';
+import socket from '@/app/api/utils/websocket';
 import { Socket } from 'socket.io-client';
+import { usePostUpdateChecker } from '@/app/hook/ClientPolling';
 import BookmarkBtn from '@/app/components/BookmarkBtn';
 
 const PostStyleBtn = styled.button`
@@ -356,7 +356,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                 orderBy('createAt', 'asc'),
                 startAfter(lastFetchedAt) // 마지막 시간 이후
             );
-            
+
             console.log(lastFetchedAt, '마지막 포스트 시간')
             const querySnapshot = await getDocs(postsQuery);
 

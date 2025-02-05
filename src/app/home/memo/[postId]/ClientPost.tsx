@@ -2,15 +2,14 @@
 "use client";
 
 import { checkUsageLimit } from "@/app/api/utils/checkUsageLimit";
-import { ADMIN_ID, Comment, memoCommentCount, memoCommentState, memoList, memoState, UsageLimitState, userData, userState } from "@/app/state/PostState";
+import { Comment, memoCommentCount, memoCommentState, UsageLimitState, userData, userState } from "@/app/state/PostState";
 import { HomeBtn } from "@/app/styled/RouterComponents";
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { useQuery } from "@tanstack/react-query";
 import { DocumentData, } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 
 interface ClientPostProps {
     post: DocumentData;
