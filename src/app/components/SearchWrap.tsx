@@ -15,7 +15,7 @@ import { GetServerSideProps } from 'next';
 
 type SearchPageProps = {
     serverState?: InstantSearchServerState;
-    serverUrl: URL;
+    serverUrl: string;
 };
 
 export default function SearchPage({ serverState, serverUrl }: SearchPageProps) {
@@ -44,7 +44,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     const serverUrl = `${protocol}://${host}${req.url}`;
 
     const serverState = await getServerState(
-        <SearchPage serverUrl={new URL(serverUrl)} />,
+        <SearchPage serverUrl={serverUrl} />,
         { renderToString }
     );
 
