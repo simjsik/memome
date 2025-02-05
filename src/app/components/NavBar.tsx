@@ -4,10 +4,9 @@ import styled from '@emotion/styled';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
-import { DidYouLogin, loginToggleState, modalState, newNoticeState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
+import { DidYouLogin, hasGuestState, loginToggleState, modalState, newNoticeState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css } from '@emotion/react';
-import { auth } from '../DB/firebaseConfig';
 
 const NavBarWrap = styled.div`
 position: fixed;
@@ -42,12 +41,15 @@ height : 6px;
 border-radius : 50%;
 }
 
-.menu_icon {
+.menu_icon,
+.no_active_icon {
 width : 40px;
 height : 40px;
 margin-top: 4px;
 }
-
+.no_active_icon{
+cursor : default;
+}
 .menu_p{
 font-size : 12px;
 color : ${(props) => props.isActive ? '#191919' : '#acacac'};
@@ -74,6 +76,7 @@ export default function NavBar() {
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
+    const hasGuest = useRecoilValue(hasGuestState)
 
     // State
     const router = useRouter();
@@ -184,77 +187,128 @@ export default function NavBar() {
                     </NavMenu>
 
                     {/* 북마크 */}
-                    <NavMenu isActive={3 === selectedMenu} onClick={() => handleNavClick(3)}>
-                        <div className='menu_icon'>
-                            {3 === selectedMenu ?
+                    {hasGuest ?
+                        < NavMenu isActive={false}>
+                            <div className='no_active_icon'>
                                 <svg width="40" height="40" viewBox="0 0 39 40">
                                     <g>
-                                        <path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z" fill="#050505" />
+                                        <path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z"
+                                            fill="none" stroke='#050505' strokeWidth={'2.5'} opacity={0.1} />
                                         <rect width="40" height="40" fill="none" stroke='none' />
                                     </g>
                                 </svg>
-                                :
-                                <svg width="40" height="40" viewBox="0 0 39 40">
-                                    <g>
-                                        <path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z" fill="none" stroke='#ccc' strokeWidth={'2.5'} />
-                                        <rect width="40" height="40" fill="none" stroke='none' />
-                                    </g>
-                                </svg>}
-                        </div>
-                    </NavMenu>
-
+                            </div>
+                        </NavMenu>
+                        :
+                        <NavMenu isActive={3 === selectedMenu} onClick={() => handleNavClick(3)}>
+                            <div className='menu_icon'>
+                                {3 === selectedMenu ?
+                                    <svg width="40" height="40" viewBox="0 0 39 40">
+                                        <g>
+                                            <path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z"
+                                                fill="#050505" />
+                                            <rect width="40" height="40" fill="none" stroke='none' />
+                                        </g>
+                                    </svg>
+                                    :
+                                    <svg width="40" height="40" viewBox="0 0 39 40">
+                                        <g>
+                                            <path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z"
+                                                fill="none" stroke='#ccc' strokeWidth={'2.5'} />
+                                            <rect width="40" height="40" fill="none" stroke='none' />
+                                        </g>
+                                    </svg>
+                                }
+                            </div>
+                        </NavMenu>
+                    }
                     {/* 프로필 */}
-                    <NavMenu isActive={4 === selectedMenu} onClick={() => handleNavClick(4)}>
-                        <div className='menu_icon'>
-                            {4 === selectedMenu ?
+                    {hasGuest ?
+                        <NavMenu isActive={false}>
+                            <div className='no_active_icon'>
                                 <svg viewBox="0 0 36 36">
                                     <g id="Layer_2" data-name="Layer 2">
-                                        <circle cx="18" cy="11.5" r="4" fill="#050505" stroke="none" />
-                                        <path d="M27.3,28.5a2,2,0,0,0,1.6-2.62C27.6,21.63,23.22,18.5,18,18.5S8.4,21.63,7.1,25.88A2,2,0,0,0,8.7,28.5Z" fill="#050505" stroke='none' strokeWidth={'2.5'} />
+                                        <circle cx="18" cy="11.5" r="4" fill="none" stroke='#050505' strokeWidth={'2.5'} opacity={0.1} />
+                                        <path d="M27.3,28.5a2,2,0,0,0,1.6-2.62C27.6,21.63,23.22,18.5,18,18.5S8.4,21.63,7.1,25.88A2,2,0,0,0,8.7,28.5Z"
+                                            fill="none" stroke='#050505' strokeWidth={'2.5'} opacity={0.1} />
                                         <rect width="40" height="40" fill="none" stroke='none' />
                                     </g>
                                 </svg>
-                                :
-                                <svg viewBox="0 0 36 36">
-                                    <g id="Layer_2" data-name="Layer 2">
-                                        <circle cx="18" cy="11.5" r="4" fill="none" stroke='#ccc' strokeWidth={'2.5'} />
-                                        <path d="M27.3,28.5a2,2,0,0,0,1.6-2.62C27.6,21.63,23.22,18.5,18,18.5S8.4,21.63,7.1,25.88A2,2,0,0,0,8.7,28.5Z" fill="none" stroke='#ccc' strokeWidth={'2.5'} />
-                                        <rect width="40" height="40" fill="none" stroke='none' />
-                                    </g>
-                                </svg>
-                            }
+                            </div>
+                        </NavMenu>
+                        :
+                        <NavMenu isActive={4 === selectedMenu} onClick={() => handleNavClick(4)}>
+                            <div className='menu_icon'>
+                                {4 === selectedMenu ?
+                                    <svg viewBox="0 0 36 36">
+                                        <g id="Layer_2" data-name="Layer 2">
+                                            <circle cx="18" cy="11.5" r="4" fill="#050505" stroke="none" />
+                                            <path d="M27.3,28.5a2,2,0,0,0,1.6-2.62C27.6,21.63,23.22,18.5,18,18.5S8.4,21.63,7.1,25.88A2,2,0,0,0,8.7,28.5Z" fill="#050505" stroke='none' strokeWidth={'2.5'} />
+                                            <rect width="40" height="40" fill="none" stroke='none' />
+                                        </g>
+                                    </svg>
+                                    :
+                                    <svg viewBox="0 0 36 36">
+                                        <g id="Layer_2" data-name="Layer 2">
+                                            <circle cx="18" cy="11.5" r="4" fill="none" stroke='#ccc' strokeWidth={'2.5'} />
+                                            <path d="M27.3,28.5a2,2,0,0,0,1.6-2.62C27.6,21.63,23.22,18.5,18,18.5S8.4,21.63,7.1,25.88A2,2,0,0,0,8.7,28.5Z" fill="none" stroke='#ccc' strokeWidth={'2.5'} />
+                                            <rect width="40" height="40" fill="none" stroke='none' />
+                                        </g>
+                                    </svg>
+                                }
 
-                        </div>
-                    </NavMenu>
+                            </div>
+                        </NavMenu>
+                    }
+
 
                     {/* 포스팅 */}
-                    <NavMenu isActive={5 === selectedMenu} onClick={() => handleNavClick(5)}>
-                        <div className='menu_icon'>
-                            {selectedMenu === 5 ?
+                    {hasGuest ?
+                        <NavMenu isActive={false}>
+                            <div className='no_active_icon'>
                                 <svg width="40" height="40" viewBox="0 0 40 40">
                                     <g>
-                                        <path d="M18,8H11.25A3.25,3.25,0,0,0,8,11.25v13.5A3.25,3.25,0,0,0,11.25,28h13.5A3.25,3.25,0,0,0,28,24.75V18" transform="translate(1 1)" fill="none" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="2.5" stroke='#191919' />
-                                        <path d="M24,21.718a.524.524,0,0,0,.524.532l1.253-.16a.569.569,0,0,0,.3-.142L37.858,10.158a.753.753,0,0,0-.142-1.029l-.6-.594a.757.757,0,0,0-1.031-.142L24.276,20.174a.567.567,0,0,0-.142.3Z" transform="translate(-8 -0.25)" fill='#191919' />
+                                        <path d="M18,8H11.25A3.25,3.25,0,0,0,8,11.25v13.5A3.25,3.25,0,0,0,11.25,28h13.5A3.25,3.25,0,0,0,28,24.75V18"
+                                            transform="translate(1 1)" fill="none" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="2.5" stroke='#050505' opacity={0.1} />
+                                        <path d="M24,21.718a.524.524,0,0,0,.524.532l1.253-.16a.569.569,0,0,0,.3-.142L37.858,10.158a.753.753,0,0,0-.142-1.029l-.6-.594a.757.757,0,0,0-1.031-.142L24.276,20.174a.567.567,0,0,0-.142.3Z"
+                                            transform="translate(-8 -0.25)" fill='#050505' opacity={0.1} />
                                     </g>
                                     <g>
                                         <rect width="40" height="40" fill="none" />
                                     </g>
                                 </svg>
-                                :
-                                <svg width="40" height="40" viewBox="0 0 40 40">
-                                    <g>
-                                        <path d="M18,8H11.25A3.25,3.25,0,0,0,8,11.25v13.5A3.25,3.25,0,0,0,11.25,28h13.5A3.25,3.25,0,0,0,28,24.75V18" transform="translate(1 1)" fill="none" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="2.5" stroke='#ccc' />
-                                        <path d="M24,21.718a.524.524,0,0,0,.524.532l1.253-.16a.569.569,0,0,0,.3-.142L37.858,10.158a.753.753,0,0,0-.142-1.029l-.6-.594a.757.757,0,0,0-1.031-.142L24.276,20.174a.567.567,0,0,0-.142.3Z" transform="translate(-8 -0.25)" fill='#ccc' />
-                                    </g>
-                                    <g>
-                                        <rect width="40" height="40" fill="none" />
-                                    </g>
-                                </svg>
-                            }
-                        </div>
-                    </NavMenu>
+                            </div>
+                        </NavMenu>
+                        :
+                        <NavMenu isActive={5 === selectedMenu} onClick={() => handleNavClick(5)}>
+                            <div className='menu_icon'>
+                                {selectedMenu === 5 ?
+                                    <svg width="40" height="40" viewBox="0 0 40 40">
+                                        <g>
+                                            <path d="M18,8H11.25A3.25,3.25,0,0,0,8,11.25v13.5A3.25,3.25,0,0,0,11.25,28h13.5A3.25,3.25,0,0,0,28,24.75V18" transform="translate(1 1)" fill="none" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="2.5" stroke='#191919' />
+                                            <path d="M24,21.718a.524.524,0,0,0,.524.532l1.253-.16a.569.569,0,0,0,.3-.142L37.858,10.158a.753.753,0,0,0-.142-1.029l-.6-.594a.757.757,0,0,0-1.031-.142L24.276,20.174a.567.567,0,0,0-.142.3Z" transform="translate(-8 -0.25)" fill='#191919' />
+                                        </g>
+                                        <g>
+                                            <rect width="40" height="40" fill="none" />
+                                        </g>
+                                    </svg>
+                                    :
+                                    <svg width="40" height="40" viewBox="0 0 40 40">
+                                        <g>
+                                            <path d="M18,8H11.25A3.25,3.25,0,0,0,8,11.25v13.5A3.25,3.25,0,0,0,11.25,28h13.5A3.25,3.25,0,0,0,28,24.75V18" transform="translate(1 1)" fill="none" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="2.5" stroke='#ccc' />
+                                            <path d="M24,21.718a.524.524,0,0,0,.524.532l1.253-.16a.569.569,0,0,0,.3-.142L37.858,10.158a.753.753,0,0,0-.142-1.029l-.6-.594a.757.757,0,0,0-1.031-.142L24.276,20.174a.567.567,0,0,0-.142.3Z" transform="translate(-8 -0.25)" fill='#ccc' />
+                                        </g>
+                                        <g>
+                                            <rect width="40" height="40" fill="none" />
+                                        </g>
+                                    </svg>
+                                }
+                            </div>
+                        </NavMenu>
+                    }
+
                 </div>
-            </NavBarWrap>
+            </NavBarWrap >
         </>
     );
 }

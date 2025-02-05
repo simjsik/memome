@@ -6,7 +6,7 @@ import UsageLimit from '../components/UsageLimit';
 import LoginBox from '../login/LoginBox';
 import StatusBox from '../components/StatusBox';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { bookMarkState, DidYouLogin, postStyleState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
+import { bookMarkState, DidYouLogin, hasGuestState, postStyleState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { checkUsageLimit } from '../api/utils/checkUsageLimit';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../DB/firebaseConfig';
@@ -17,6 +17,7 @@ type LayoutProps = {
 
 function HomeContent({ children }: LayoutProps) {
     const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
+    const hasGuest = useRecoilValue(hasGuestState)
     const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
@@ -36,6 +37,10 @@ function HomeContent({ children }: LayoutProps) {
             }
 
             const loadBookmarks = async () => {
+                if (hasGuest) {
+                    return setCurrentBookmark([]);
+                }
+
                 try {
                     const bookmarks = await getDoc(doc(db, `users/${currentUser.uid}/bookmarks/bookmarkId`));
                     if (bookmarks.exists()) {
