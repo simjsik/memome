@@ -1,0 +1,20 @@
+{
+    "functions": {
+        "functions/src/**/*.ts": {
+            "runtime": "nodejs22.x",
+            "includeFiles": [
+                "functions/node_modules/firebase-functions/**"
+            ]
+        }
+    },
+    "builds": [
+        {
+            "src": "functions/src/**/*.ts",
+            "use": "@vercel/node"
+        },
+        {
+            "src": "next.config.js",
+            "use": "@vercel/next"
+        }
+    ]
+}
