@@ -4,7 +4,7 @@
             "src": "functions/src/**/*.ts",
             "use": "@vercel/node",
             "config": {
-                "runtime": "nodejs22.x",
+                "runtime": "nodejs18.x",
                 "includeFiles": "functions/node_modules/firebase-functions/**"
             }
         },
