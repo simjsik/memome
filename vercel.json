@@ -7,10 +7,6 @@
                 "runtime": "nodejs18.x",
                 "includeFiles": "functions/node_modules/firebase-functions/**"
             }
-        },
-        {
-            "src": "next.config.js",
-            "use": "@vercel/next"
         }
     ]
 }

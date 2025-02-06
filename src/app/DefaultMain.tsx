@@ -15,7 +15,6 @@ export default function DefaultMain() {
     // State
 
     useEffect(() => {
-
         router.push('/home/main');
     }, [])
 
