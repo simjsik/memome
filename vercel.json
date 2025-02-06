@@ -2,9 +2,7 @@
     "functions": {
         "functions/src/**/*.ts": {
             "runtime": "nodejs22.x",
-            "includeFiles": [
-                "functions/node_modules/firebase-functions/**"
-            ]
+            "includeFiles": "functions/node_modules/firebase-functions/**"
         }
     },
     "builds": [
