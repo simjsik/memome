@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, saveGuestSession, saveSession, sessionExists } from "../../utils/redisClient";
+import { saveGuestSession, sessionExists } from "../../utils/redisClient";
 import { generateJwt } from "../validateCsrfToken/route";
 import { adminAuth, adminDb } from "@/app/DB/firebaseAdminConfig";
 import { auth } from "@/app/DB/firebaseConfig";
@@ -9,11 +9,11 @@ export async function POST(req: NextRequest) {
     try {
         const { hasGuest, guestUid } = await req.json();
 
-        let user: any;
-        let idToken: any;
+        let user;
+        let idToken;
         let uid = guestUid;
-        let decodedToken: any;
-        let role = 1
+        let decodedToken;
+        const role = 1
         const randomName = `Guest-${Math.random().toString(36).substring(2, 6)}`;
 
         let customToken: string | null = null;
@@ -79,14 +79,15 @@ export async function POST(req: NextRequest) {
             try {
                 const userCredential = await signInWithCustomToken(auth, customToken);
                 user = userCredential.user
-                console.error(userCredential, '게스트 유저 정보')
+                if (!user) {
+                    throw new Error("유저 정보가 없습니다.");
+                }
             } catch (error) {
-                console.error("게스트 토큰이 만료 또는 유효하지 않습니다.")
+                console.error("게스트 토큰이 만료 또는 유효하지 않습니다. : " + error)
                 customToken = await adminAuth.createCustomToken(uid);
                 const userCredential = await signInWithCustomToken(auth, customToken);
                 await guestDocRef.update({ token: customToken });
                 user = userCredential.user
-                console.error(userCredential, '게스트 유저 정보')
             }
 
             idToken = await user.getIdToken();

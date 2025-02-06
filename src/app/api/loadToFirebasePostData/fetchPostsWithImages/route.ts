@@ -54,8 +54,12 @@ export async function POST(req: NextRequest) {
                     : null,
             }
         );
-    } catch (error: any) {
-        console.error('Error in fetchPostsWithImages:', error.message);
-        return error;
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error('댓글 데이터 반환 실패:', error.message);
+        } else {
+            console.error('Unexpected error:', error);
+        }
+        throw error;
     }
 };

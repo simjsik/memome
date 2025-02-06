@@ -6,7 +6,7 @@ import UsageLimit from '../components/UsageLimit';
 import LoginBox from '../login/LoginBox';
 import StatusBox from '../components/StatusBox';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { bookMarkState, DidYouLogin, hasGuestState, postStyleState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
+import { bookMarkState, hasGuestState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { checkUsageLimit } from '../api/utils/checkUsageLimit';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../DB/firebaseConfig';
@@ -16,22 +16,25 @@ type LayoutProps = {
 };
 
 function HomeContent({ children }: LayoutProps) {
-    const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
+    const currentUser = useRecoilValue<userData | null>(userState)
     const hasGuest = useRecoilValue(hasGuestState)
-    const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
+    const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
+
     // 사용량 확인
     useEffect(() => {
         if (currentUser) {
             const checkLimit = async () => {
                 try {
                     await checkUsageLimit(currentUser.uid);
-                } catch (err: any) {
-                    if (err.message.includes('사용량 제한')) {
-                        setUsageLimit(true);
-                    } else {
-                        console.log('사용량을 불러오는 중 에러가 발생했습니다.');
+                } catch (err: unknown) {
+                    if (err instanceof Error) {
+                        if (err.message.includes('사용량 제한')) {
+                            setUsageLimit(true);
+                        } else {
+                            console.log('사용량을 불러오는 중 에러가 발생했습니다.');
+                        }
                     }
                 }
             }

@@ -2,7 +2,7 @@ import { adminAuth } from "@/app/DB/firebaseAdminConfig";
 import { randomBytes } from "crypto";
 import redisClient from "../../utils/redisClient";
 import { NextResponse } from "next/server";
-
+import jwt from 'jsonwebtoken';
 export async function validateCsrfToken(token: string) {
     if (!token) {
         console.log("CSRF 토큰 없음.");
@@ -87,8 +87,12 @@ export async function GET() {
 }
 
 export function generateJwt(uid: string, role: number): string {
-    const jwt = require('jsonwebtoken');
+    const secret = process.env.JWT_SECRET;
 
-    return jwt.sign({ uid: uid, role: role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    if (!secret) {
+        throw new Error('JWT_SECRET is not defined');
+    }
+
+    return jwt.sign({ uid: uid, role: role }, secret, { expiresIn: "1h" });
 }
 

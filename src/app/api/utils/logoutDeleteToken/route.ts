@@ -4,6 +4,7 @@ import { authenticateUser, deleteSession } from "../redisClient";
 export async function POST(req: NextRequest) {
     try {
         const userToken = req.cookies.get("userToken")?.value;
+        const hasGuest = req.cookies.get("hasGuest")?.value;
 
         if (!userToken) {
             return NextResponse.json({ message: "유저 토큰이 존재하지 않습니다." }, { status: 401 });
@@ -24,6 +25,9 @@ export async function POST(req: NextRequest) {
         response.cookies.delete("hasGuest")
         response.cookies.delete("userToken")
 
+        if (!hasGuest) {
+            deleteSession(uid)
+        }
         // UID를 기반으로 Redis에서 세션 삭제
         return response;
     } catch (error) {

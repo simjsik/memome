@@ -1,5 +1,5 @@
 import { authenticateUser } from '@/app/api/utils/redisClient';
-import { fetchNoticePosts, fetchPosts } from '../../api/loadToFirebasePostData/fetchPostData';
+import { fetchNoticePosts } from '../../api/loadToFirebasePostData/fetchPostData';
 import ClientNotice from './ClientNotice';
 import { cookies } from 'next/headers';
 

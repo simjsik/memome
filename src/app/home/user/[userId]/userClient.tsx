@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { fetchPostList, fetchPosts, fetchPostsWithImages } from "@/app/api/loadToFirebasePostData/fetchPostData";
+import { fetchPostList, fetchPostsWithImages } from "@/app/api/loadToFirebasePostData/fetchPostData";
 import { ADMIN_ID, PostData, UsageLimitState, userData } from "@/app/state/PostState";
 import { css } from "@emotion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -16,13 +16,13 @@ import { NoMorePost } from "@/app/styled/PostComponents";
 
 interface ClientUserProps {
     user: userData,
-    post: PostData[],
-    initialNextPage: any;
-    imagePost: PostData[],
-    initialImageNextPage: any;
+    postData: PostData[],
+    initialNextPage: [boolean, Timestamp] | [boolean, null] | null;
+    imageData: PostData[],
+    initialImageNextPage: [boolean, Timestamp] | [boolean, null] | null;
 }
 
-export default function UserClient({ user, post: initialPosts, initialNextPage, imagePost: initialImagePosts, initialImageNextPage }: ClientUserProps) {
+export default function UserClient({ user, postData: initialPosts, initialNextPage, imageData: initialImagePosts, initialImageNextPage }: ClientUserProps) {
     const [imagePost, setImagePost] = useState<PostData[]>([])
     const ADMIN = useRecoilValue(ADMIN_ID);
     const router = useRouter();
@@ -36,7 +36,7 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
 
     // 무한 스크롤 로직
     const {
-        data,
+        data: postData,
         fetchNextPage,
         hasNextPage,
         isError,  // 에러 상태
@@ -44,16 +44,9 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         retry: false,
         queryKey: ['postList'],
         queryFn: async ({ pageParam }) => {
-            try {
-                return fetchPostList(user.uid, pageParam, 5);
-            } catch (error: any) {
-                if (error.message) {
-                    setUsageLimit(true); // 에러 상태 업데이트
-                    throw error; // 에러를 다시 던져서 useInfiniteQuery가 에러 상태를 인식하게 함
-                }
-            }
+            return fetchPostList(user.uid, pageParam, 4);
         },
-        getNextPageParam: (lastPage: any) => {
+        getNextPageParam: (lastPage) => {
             // 사용량 초과 시 페이지 요청 중단
             if (usageLimit || !lastPage.nextPage) {
                 return;
@@ -61,11 +54,11 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
             return lastPage.nextPage;
         },
         staleTime: 5 * 60 * 1000, // 5분 동안 캐시 유지
-        initialPageParam: {
+        initialPageParam:
             initialNextPage
-        }, // 초기 페이지 파라미터 설정
+        , // 초기 페이지 파라미터 설정
         initialData: {
-            pages: [{ data: initialPosts, nextPage: initialNextPage }],
+            pages: [{ postData: initialPosts, nextPage: initialNextPage }],
             pageParams: [initialNextPage],
         },
     });
@@ -88,11 +81,9 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
             return lastPage.nextPage;
         },
         staleTime: 5 * 60 * 1000,
-        initialPageParam: {
-            initialImageNextPage
-        }, // 초기 페이지 파라미터 설정
+        initialPageParam: initialImageNextPage, // 초기 페이지 파라미터 설정
         initialData: {
-            pages: [{ data: initialImagePosts, nextPage: initialImageNextPage }],
+            pages: [{ imageData: initialImagePosts, nextPage: initialImageNextPage }],
             pageParams: [initialImageNextPage],
         },
     });
@@ -108,22 +99,22 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         const uniquePosts = Array.from(
             new Map(
                 [
-                    ...(data.pages
-                        ?.flatMap((page) => page?.data || [])
+                    ...(postData.pages
+                        ?.flatMap((page) => page?.postData || [])
                         .filter((post): post is PostData => !!post) || []),
                 ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
             ).values()
         );
 
         setPosts(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
-    }, [data.pages]);
+    }, [postData.pages]);
 
     useEffect(() => {
         const uniqueImagePosts = Array.from(
             new Map(
                 [
                     ...(imageData.pages
-                        ?.flatMap((page) => page?.data || [])
+                        ?.flatMap((page) => page?.imageData || [])
                         .filter((post) => !!post) || []),
                 ].map((post) => [post.id, post])
             ).values()
@@ -192,18 +183,14 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
         };
     }, [hasNextImagePage, fetchNextImagePage, usageLimit, postTab]);
 
-    const formatDate = (createAt: any) => {
-        if (createAt?.toDate) {
+    const formatDate = (createAt: Timestamp | Date | string | number) => {
+        if ((createAt instanceof Timestamp)) {
             return createAt.toDate().toLocaleString('ko-KR', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
-            }).replace(/\. /g, '.');
-        } else if (createAt?.seconds) {
-            return new Date(createAt.seconds * 1000).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
             }).replace(/\. /g, '.');
         } else {
             const date = new Date(createAt);
@@ -212,8 +199,9 @@ export default function UserClient({ user, post: initialPosts, initialNextPage, 
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
             })
-
             return format;
         }
     }

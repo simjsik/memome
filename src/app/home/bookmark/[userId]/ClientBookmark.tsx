@@ -2,21 +2,19 @@
 "use client";
 import { fetchBookmarks } from "@/app/api/loadToFirebasePostData/fetchPostData";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
-import { auth, db } from "@/app/DB/firebaseConfig";
-import { ADMIN_ID, bookMarkState, PostData, UsageLimitState, userBookMarkState, userData, userState } from "@/app/state/PostState";
-import { NoMorePost, PostListStyle, PostWrap } from "@/app/styled/PostComponents";
+import { bookMarkState, PostData, UsageLimitState, userBookMarkState, userData, userState } from "@/app/state/PostState";
+import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { arrayRemove, doc, updateDoc } from "firebase/firestore";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { Timestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 export default function Bookmark() {
-    const ADMIN = useRecoilValue(ADMIN_ID);
-    const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
+    const currentBookmark = useRecoilValue<string[]>(bookMarkState)
     const [userBookmarks, setUserBookmarks] = useRecoilState<PostData[]>(userBookMarkState)
-    const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
+    const currentUser = useRecoilValue<userData>(userState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const router = useRouter();
     const observerLoadRef = useRef(null);
@@ -27,13 +25,13 @@ export default function Bookmark() {
         hasNextPage,
         refetch,
         isError,  // 에러 상태
-        error,    // 에러 메시지
+        // error,    // 에러 메시지
     } = useInfiniteQuery({
         retry: false,
         queryKey: ['bookmarks', currentUser?.uid],
         queryFn: async ({ pageParam = 0 }) => {
             const result = await fetchBookmarks(
-                currentUser?.uid!,
+                currentUser.uid,
                 currentBookmark, // 전역 상태를 바로 사용
                 pageParam, // 시작 인덱스
                 4, // 한 번 요청할 데이터 수
@@ -75,6 +73,7 @@ export default function Bookmark() {
 
         setUserBookmarks(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
     }, [bookmarkPages.pages])
+
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
         if (usageLimit) return console.log('함수 요청 안함.');
@@ -101,7 +100,6 @@ export default function Bookmark() {
 
     }, [hasNextPage, fetchNextPage, currentBookmark, bookmarkPages]);
 
-
     useEffect(() => {
         if (bookmarkPages.pages.length > 0) {
             fetchNextPage();
@@ -114,20 +112,14 @@ export default function Bookmark() {
         }
     }, [currentBookmark])
 
-
-
-    const formatDate = (createAt: any) => {
-        if (createAt?.toDate) {
+    const formatDate = (createAt: Timestamp | Date | string | number) => {
+        if ((createAt instanceof Timestamp)) {
             return createAt.toDate().toLocaleString('ko-KR', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
-            }).replace(/\. /g, '.');
-        } else if (createAt?.seconds) {
-            return new Date(createAt.seconds * 1000).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
             }).replace(/\. /g, '.');
         } else {
             const date = new Date(createAt);
@@ -136,8 +128,9 @@ export default function Bookmark() {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
             })
-
             return format;
         }
     }
@@ -145,31 +138,6 @@ export default function Bookmark() {
     // 포스트 보기
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
         router.push(`memo/${postId}`)
-    }
-
-    const deleteBookmark = async (postId: string | string[]) => {
-        if (currentUser) {
-            const bookmarkRef = doc(db, `users/${currentUser.uid}/bookmarks/bookmarkId`);
-
-            if (confirm('해당 북마크를 취소 하시겠습니까?')) {
-                try {
-                    await updateDoc(bookmarkRef, {
-                        bookmarkId: arrayRemove(postId),
-                    }); // 배열 형태일 때 선택한 포스트 id 삭제.
-
-                    // 북마크 해제 후 북마크 state 업데이트
-                    setCurrentBookmark((prev) => prev.filter((id) => id !== postId));
-                    alert('북마크가 해제되었습니다.');
-                } catch (error) {
-                    console.error('북마크 삭제 중 오류 발생:', error);
-                    alert(error || '북마크 삭제 중 오류가 발생했습니다.');
-                }
-                alert('북마크가 해제되었습니다.')
-                router.refresh();
-            } else {
-                return;
-            }
-        }
     }
 
     return (

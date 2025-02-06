@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     const userToken = req.cookies.get("userToken")?.value;
     const authToken = req.cookies.get("authToken")?.value;
-    let decodedToken: any; // Firebase 또는 Google에서 디코드된 토큰
+    let decodedToken; // Firebase 또는 Google에서 디코드된 토큰
     console.log(imageUrls, postTitle, posting, selectTag, checkedNotice, '포스팅 용 데이터')
     console.log(userToken?.slice(0, 8), authToken?.slice(0, 8), '포스팅 용 토큰')
     if (!authToken) {
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
 
             // imageUrls 최적화 및 업로드
             const optImageUrls = await Promise.all(
-                imageUrls.map(async (image: any) => {
+                imageUrls.map(async (image: string) => {
                     const cloudinaryUrl = await uploadImgCdn(image);
                     uploadedImageUrls.set(image, cloudinaryUrl); // 업로드된 URL을 Map에 저장
                     return cloudinaryUrl;
@@ -146,8 +146,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({
                 message: "포스트 업로드 성공",
             });
-        } catch (error) {
-            return NextResponse.json({ message: "포스팅에 실패하였습니다" }, { status: 403 });
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                return NextResponse.json({ message: "포스팅에 실패하였습니다" }, { status: 403 });
+
+            } else {
+                return NextResponse.json({ message: "포스팅에 실패하였습니다" }, { status: 403 });
+            }
         }
     }
 }

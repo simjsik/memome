@@ -1,15 +1,7 @@
 import ClientBookmark from './ClientBookmark'
-import { BookmarkWrap, TitleHeader } from '@/app/styled/PostComponents';
-import { fetchBookmarks } from '@/app/api/loadToFirebasePostData/fetchPostData';
+import { BookmarkWrap } from '@/app/styled/PostComponents';
 
-interface BookMarkProps {
-    params: {
-        userId: string
-    }
-}
-
-export default async function Bookmark({ params }: BookMarkProps) {
-    const { userId } = params
+export default async function Bookmark() {
 
     return (
         <>

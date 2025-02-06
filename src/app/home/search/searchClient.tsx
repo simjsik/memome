@@ -3,29 +3,26 @@
 
 import { searchClient } from "@/app/api/algolia";
 import { useSearchParams } from "next/navigation";
-import { InfiniteHits, InstantSearch, SearchBox, useHits, useInfiniteHits, useSearchBox } from "react-instantsearch";
+import { InstantSearch, SearchBox, useInfiniteHits, useSearchBox } from "react-instantsearch";
 import { SearchBoxWrap } from "./SearchStyle";
 import { css } from "@emotion/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { collection, doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/app/DB/firebaseConfig";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
+import { PostData } from "@/app/state/PostState";
 
 
-const formatDate = (createAt: any) => {
-    if (createAt?.toDate) {
+const formatDate = (createAt: Timestamp | Date | string | number) => {
+    if ((createAt instanceof Timestamp)) {
         return createAt.toDate().toLocaleString('ko-KR', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
-        }).replace(/\. /g, '.');
-    } else if (createAt?.seconds) {
-        return new Date(createAt.seconds * 1000).toLocaleDateString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
         }).replace(/\. /g, '.');
     } else {
         const date = new Date(createAt);
@@ -34,16 +31,18 @@ const formatDate = (createAt: any) => {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
         })
-
         return format;
     }
 }
+
 // Hit 컴포넌트 정의
 
 function CustomInfiniteHits() {
     const { query } = useSearchBox(); // 검색어 상태 가져오기
-    const { items, showMore, isLastPage } = useInfiniteHits();
+    const { items, showMore, isLastPage } = useInfiniteHits<PostData>();
 
     // 검색어가 없을 때
     if (!query.trim()) {
@@ -58,7 +57,7 @@ function CustomInfiniteHits() {
     if (items.length === 0) {
         return <NoMorePost>
             <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
-            <p>'{query}'에 대한 검색결과 없음.</p>
+            <p>&apos;{query}&apos;에 대한 검색결과 없음.</p>
             <span className="no_result_span">다른 용어를 검색해 보거나 검색어가 정확한지 확인해 보세요.</span>
         </NoMorePost>;
     }
@@ -77,9 +76,9 @@ function CustomInfiniteHits() {
     );
 }
 
-function PostHit({ hit }: { hit: any }) {
+function PostHit({ hit }: { hit: PostData }) {
     const [userData, setUserData] = useState<{ displayName: string; photoURL: string | null } | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -121,8 +120,8 @@ function PostHit({ hit }: { hit: any }) {
                 <h2 className="ais_post_title">{hit.title}</h2>
                 <div className="ais_post_content" dangerouslySetInnerHTML={{ __html: hit.content }}></div>
                 <div className="ais_post_image_wrap">
-                    {hit.images &&
-                        hit.images.map((image: string, index: number) => (
+                    {Array.isArray(hit.images) &&
+                        hit.images.map((image, index) => (
                             <div
                                 className="ais_post_images"
                                 key={index}

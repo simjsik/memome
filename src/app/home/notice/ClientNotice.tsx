@@ -1,18 +1,19 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { fetchNoticePosts, fetchPosts } from "@/app/api/loadToFirebasePostData/fetchPostData";
+import { fetchNoticePosts, } from "@/app/api/loadToFirebasePostData/fetchPostData";
 import { DidYouLogin, loginToggleState, modalState, noticeState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
-import { NoMorePost, NoticeWrap, PostWrap } from "@/app/styled/PostComponents";
+import { NoMorePost, NoticeWrap, } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Timestamp } from "firebase/firestore";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
 interface MainHomeProps {
     post: PostData[],
-    initialNextPage: any;
+    initialNextPage: [boolean, Timestamp] | [boolean, null]
 }
 
 export default function ClientNotice({ post: initialPosts, initialNextPage }: MainHomeProps) {
@@ -31,18 +32,14 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
     const pathName = usePathname();
     const observerLoadRef = useRef(null);
 
-    const formatDate = (createAt: any) => {
-        if (createAt?.toDate) {
+    const formatDate = (createAt: Timestamp | Date | string | number) => {
+        if ((createAt instanceof Timestamp)) {
             return createAt.toDate().toLocaleString('ko-KR', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
-            }).replace(/\. /g, '.');
-        } else if (createAt?.seconds) {
-            return new Date(createAt.seconds * 1000).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
             }).replace(/\. /g, '.');
         } else {
             const date = new Date(createAt);
@@ -51,19 +48,19 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
             })
-
             return format;
         }
     }
-
     // 무한 스크롤 로직
     const {
         data,
         fetchNextPage,
         hasNextPage,
         isError,  // 에러 상태
-        error,    // 에러 메시지
+        // error,    // 에러 메시지
     } = useInfiniteQuery({
         retry: false,
         queryKey: ['notices'],
@@ -77,9 +74,7 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
             return lastPage.nextPage;
         },
         staleTime: 5 * 60 * 1000, // 5분 동안 캐시 유지
-        initialPageParam: {
-            initialNextPage
-        }, // 초기 페이지 파라미터 설정
+        initialPageParam: initialNextPage, // 초기 페이지 파라미터 설정
         initialData: {
             pages: [{ data: initialPosts, nextPage: initialNextPage }],
             pageParams: [initialNextPage],

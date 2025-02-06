@@ -2,11 +2,11 @@
 'use clients';
 
 import styled from "@emotion/styled";
-import { DidYouLogin, loginToggleState, modalState, UsageLimitState, UsageLimitToggle, userData, userState } from "../state/PostState";
+import { DidYouLogin, modalState, UsageLimitState, UsageLimitToggle, userData, userState } from "../state/PostState";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export const UsageWrap = styled.div<{ Limit: boolean }>`
     display : ${(props) => (props.Limit ? 'block' : 'none')};
@@ -68,17 +68,12 @@ export const UsageWrap = styled.div<{ Limit: boolean }>`
     }
 `
 
-interface ModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
-
 export default function UsageLimit() {
-    const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
-    const [user, setUser] = useRecoilState<userData | null>(userState)
+    const setHasLogin = useSetRecoilState<boolean>(DidYouLogin)
+    const setUser = useSetRecoilState<userData>(userState)
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const [limitToggle, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
-    const [modal, setModal] = useRecoilState<boolean>(modalState);
+    const setModal = useSetRecoilState<boolean>(modalState);
 
     useEffect(() => {
         if (usageLimit) {
@@ -101,7 +96,12 @@ export default function UsageLimit() {
                 });
 
                 if (response.ok) {
-                    setUser(null); // 로그아웃 상태로 초기화
+                    setUser({
+                        name: null,
+                        email: null,
+                        photo: null,
+                        uid: '', // uid는 빈 문자열로 초기화
+                    }); // 로그아웃 상태로 초기화
                     setHasLogin(false)
                 } else {
                     alert("Failed to logout.");

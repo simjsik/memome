@@ -51,11 +51,11 @@ export async function POST(req: NextRequest) {
         );
 
         const lastVisible = postlistSnapshot.docs.at(-1); // 마지막 문서
-        // console.log(postWithComment, lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
+        console.log(postWithComment, lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
 
         return NextResponse.json(
             {
-                data: postWithComment,
+                postData: postWithComment,
                 nextPage: lastVisible
                     ? [lastVisible.data().notice, lastVisible.data().createAt as Timestamp] // 정렬 필드 값 배열로 반환
                     : null,

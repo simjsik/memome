@@ -4,7 +4,6 @@
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState, modalState, userData, userState } from "../state/PostState";
 import { css } from "@emotion/react";
-import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
 
@@ -36,11 +35,11 @@ const LogInButton = css`
 `
 export default function Logout() {
     const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
-    const [user, setUser] = useRecoilState<userData | null>(userState)
+    const [user, setUser] = useRecoilState<userData>(userState)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
-    const [modal, setModal] = useRecoilState<boolean>(modalState);
+    const setModal = useSetRecoilState<boolean>(modalState);
     // State
-    const router = useRouter();
+
 
     // hook
 
@@ -60,7 +59,12 @@ export default function Logout() {
 
                 await signOut(auth);
 
-                setUser(null); // 로그아웃 상태로 초기화
+                setUser({
+                    name: null,
+                    email: null,
+                    photo: null,
+                    uid: '', // uid는 빈 문자열로 초기화
+                }); // 로그아웃 상태로 초기화
                 setHasLogin(false)
             }
         } catch (error) {

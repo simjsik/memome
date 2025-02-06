@@ -81,8 +81,12 @@ export async function POST(req: NextRequest) {
                     : null,
             }
         );
-    } catch (error: any) {
-        console.error('Error in fetchPosts:', error.message);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error('일반 포스트 데이터 반환 실패:', error.message);
+        } else {
+            console.error('Unexpected error:', error);
+        }
         throw error;
     }
 };

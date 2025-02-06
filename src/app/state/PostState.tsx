@@ -8,7 +8,7 @@ export interface PostData {
     userId: string;
     content: string;
     images?: string[] | false;
-    createAt: any;
+    createAt: Timestamp;
     commentCount: number,
     notice: boolean,
     displayName: string,
@@ -27,7 +27,7 @@ export interface Comment {
     replyId: string;
     user: string;
     commentText: string;
-    createAt: any;
+    createAt: Timestamp;
     replies: Comment[];
     parentId: string | null;
     displayName: string,
@@ -41,7 +41,7 @@ export interface memoList {
         id: string,
         title: string,
         images: string[],
-        createAt: any,
+        createAt: Timestamp;
     }[],
     user: string
 }
@@ -50,7 +50,17 @@ export interface noticeType {
     noticeId: string,
     noticeType: string,
     noticeText: string,
-    noticeAt: any,
+    noticeAt: Timestamp,
+}
+
+export interface BookmarkPage {
+    data: PostData[];      // 각 페이지의 포스트 데이터 배열
+    nextIndexData: number; // 다음 페이지 시작 인덱스
+}
+
+export interface BookmarkCache {
+    pages: BookmarkPage[];
+    pageParams: number[];
 }
 
 // 사용량 제한 알림
@@ -119,9 +129,14 @@ export const noticeList = atom<noticeType[]>({
 })
 
 // 유저 ID
-export const userState = atom<userData | null>({
+export const userState = atom<userData>({
     key: 'userState',
-    default: null
+    default: {
+        name: null,
+        email: null,
+        photo: null,
+        uid: '', // uid는 빈 문자열로 초기화
+    },
 })
 
 // 로그인 창 토글
@@ -152,7 +167,7 @@ export const memoState = atom<memoList>({
                 id: '',
                 title: '',
                 images: [],
-                createAt: '',
+                createAt: Timestamp.now(),
             }
         ],
         user: ''

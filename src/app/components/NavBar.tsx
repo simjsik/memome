@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
-import { DidYouLogin, hasGuestState, loginToggleState, modalState, newNoticeState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
+import { DidYouLogin, hasGuestState, loginToggleState, newNoticeState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css } from '@emotion/react';
 
@@ -71,7 +71,6 @@ export default function NavBar() {
     const yourLogin = useRecoilValue(DidYouLogin)
     const currentUser = useRecoilValue<userData | null>(userState)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
-    const setModal = useSetRecoilState<boolean>(modalState);
     const [selectedMenu, setSelectedMenu] = useRecoilState<number>(selectedMenuState);
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
@@ -94,7 +93,7 @@ export default function NavBar() {
                 setSelectedMenu(1);
             }
         }
-    }, [path,])
+    }, [path, setSelectedMenu])
 
     // 내비 클릭 시 선택 메뉴 설정
     const handleNavClick = (NavTitle: number) => {

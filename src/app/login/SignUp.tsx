@@ -3,14 +3,16 @@
 
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { auth, db } from "../DB/firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
-import { LoginTitle } from "../styled/LoginStyle";
+import { auth } from "../DB/firebaseConfig";
 import { CreateInput, LoginButton, LoginButtonWrap, LoginModalWrap } from "../styled/LoginComponents";
 import { css } from "@emotion/react";
 import { signUpState } from "../state/PostState";
-import { useRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import { usePathname } from "next/navigation";
+
+interface FirebaseError extends Error {
+    code: string;
+}
 
 const SignUpForm = css`
     margin-top : 10px;
@@ -89,7 +91,7 @@ const SignUpWrap = css`
 `
 export default function SignUp() {
     const [passwordConfirm, setPasswordConfirm] = useState<boolean>(true);
-    const [signUpToggle, setSignUpToggle] = useRecoilState<boolean>(signUpState);
+    const setSignUpToggle = useSetRecoilState<boolean>(signUpState);
     const [signUpDone, setSignUpDone] = useState<boolean>(false);
     const path = usePathname();
 
@@ -105,6 +107,29 @@ export default function SignUp() {
         password: '',
         passwordConfirm: '',
     });
+
+    const firebaseErrorMessages: Record<string, string> = {
+        "auth/user-not-found": "이메일 또는 비밀번호가 올바르지 않습니다.",
+        "auth/wrong-password": "이메일 또는 비밀번호가 올바르지 않습니다.",
+        "auth/email-already-in-use": "이미 사용 중인 이메일입니다.",
+        "auth/invalid-email": "이메일 또는 비밀번호가 올바르지 않습니다.",
+        "auth/weak-password": "이메일 또는 비밀번호가 올바르지 않습니다.",
+        "auth/network-request-failed": "네트워크 오류가 발생했습니다. 연결을 확인해주세요.",
+        "auth/too-many-requests": "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
+        "auth/operation-not-allowed": "허용되지 않은 요청입니다.",
+        "auth/invalid-credential": "이메일 또는 비밀번호가 올바르지 않습니다.",
+        "auth/missing-password": "비밀번호를 입력해주세요.",
+        "auth/invalid-custom-token": "로그인 요청에 실패 했습니다. 다시 시도해주세요",
+        // 추가적인 에러 코드 필요 시 확장 가능
+    };
+
+    const isFirebaseError = (error: unknown): error is FirebaseError => {
+        return (
+            error instanceof Error &&
+            'code' in error &&
+            typeof (error).code === 'string'
+        );
+    }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -191,17 +216,17 @@ export default function SignUp() {
 
             setSignUpDone(true);
             setFormData({ displayName: '', email: '', password: '', passwordConfirm: '' });
-        } catch (error: any) {
+        } catch (error: unknown) {
             // Firebase 에러 처리
-            const errorMessage =
-                error.code === 'auth/email-already-in-use'
-                    ? '이미 사용 중인 이메일 입니다.'
-                    : error.code === 'auth/invalid-email'
-                        ? '유효하지 않는 이메일 입니다.'
-                        :
-                        '회원가입 중 오류가 발생했습니다.'
-                ;
-            setErrors((prev) => ({ ...prev, email: errorMessage }));
+            if (isFirebaseError(error)) {
+                let errorMessage: string
+                console.error("로그인 중 오류 발생:", error, error.code);
+                // Firebase 에러 코드별 메시지 처리
+                if (firebaseErrorMessages[error.code]) {
+                    errorMessage = firebaseErrorMessages[error.code];
+                }
+                setErrors((prev) => ({ ...prev, email: errorMessage }));
+            }
         }
     };
 

@@ -1,12 +1,13 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import styled from "@emotion/styled";
-import { auth, db } from "../DB/firebaseConfig";
-import { arrayRemove, arrayUnion, deleteDoc, doc, getDoc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { db } from "../DB/firebaseConfig";
+import { arrayRemove, arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { bookMarkState, memoList, memoState, PostData, userBookMarkState, userState } from "../state/PostState";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { BookmarkCache, bookMarkState, PostData, userBookMarkState, userState } from "../state/PostState";
 import { useQueryClient } from "@tanstack/react-query";
+import { FirebaseError } from "firebase/app";
 
 const Bookmark = styled.button`
 width : 32px;
@@ -24,24 +25,24 @@ interface PostId {
 export default function BookmarkBtn({ postId }: PostId) {
     const [bookmarked, setBookmarked] = useState<boolean>(false)
     const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
-    const [userBookmarks, setUserBookmarks] = useRecoilState<PostData[]>(userBookMarkState)
+    const setUserBookmarks = useSetRecoilState<PostData[]>(userBookMarkState)
 
     const currentUser = useRecoilValue(userState)
     // state
 
+    const checkBookmark = async () => {
+        const isBookmarked = currentBookmark.includes(postId);
+
+        if (isBookmarked) {
+            setBookmarked(true)
+        } else {
+            setBookmarked(false);
+        }
+    };
+
     useEffect(() => {
-        const checkBookmark = async () => {
-            const isBookmarked = currentBookmark.includes(postId);
-
-            if (isBookmarked) {
-                setBookmarked(true)
-            } else {
-                setBookmarked(false);
-            }
-        };
-
         checkBookmark();
-    }, [currentUser, postId])
+    }, [currentUser, postId, checkBookmark])
 
     const queryClient = useQueryClient();
 
@@ -62,14 +63,14 @@ export default function BookmarkBtn({ postId }: PostId) {
                     {
                         bookmarkId: arrayUnion(postId),
                     }).catch(async (error) => {
-                        if (error.code === 'not-found') {
-                            // 북마크가 없었을 때.
-                            console.log('북마크 없음. 추가 실행')
-                            await setDoc(bookmarkRef, {
-                                bookmarkId: [postId],
-                            });
+                        if (error instanceof FirebaseError && error.code === 'not-found') {
+                            console.log('북마크 없음. 추가 실행');
+                            await setDoc(bookmarkRef, { bookmarkId: [postId] });
+                        } else if (error instanceof FirebaseError) {
+                            throw new Error(error.message + ' - 북마크 추가 실패');
                         } else {
-                            throw (error + '북마크 추가 실패')
+                            // FirebaseError가 아닌 경우
+                            throw new Error('알 수 없는 에러 - 북마크 추가 실패');
                         }
                     })
                 alert('북마크 추가 완료!');
@@ -92,13 +93,13 @@ export default function BookmarkBtn({ postId }: PostId) {
                     );
 
                     // 캐싱된 데이터를 수동으로 업데이트
-                    queryClient.setQueryData(['bookmarks', currentUser.uid], (oldData: any) => {
+                    queryClient.setQueryData<BookmarkCache>(['bookmarks', currentUser.uid], (oldData) => {
                         // console.log("Before update:", oldData); // 업데이트 이전 데이터 확인
                         if (!oldData) return oldData;
 
                         const newData = {
                             ...oldData,
-                            pages: oldData.pages.map((page: any) => {
+                            pages: oldData.pages.map((page) => {
                                 // console.log("Before filter:", page.data.pages); // 필터링 전 데이터 확인
                                 const filteredData = page.data.filter((post: PostData) => post.id !== postId);
                                 // console.log("After filter:", filteredData); // 필터링 후 데이터 확인

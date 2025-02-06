@@ -31,8 +31,12 @@ export const fetchComments = async (userId: string, postId: string) => {
         const comments = commentData.comments
 
         return { commentCounts: commentCount, comments: comments };
-    } catch (error: any) {
-        console.error('Error in fetchPosts:', error.message);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error('댓글 데이터 반환 실패:', error.message);
+        } else {
+            console.error('Unexpected error:', error);
+        }
         throw error;
     }
 };
@@ -73,7 +77,7 @@ export const fetchPostList = async (
 
 
         return {
-            data: postWithComment,
+            postData: postWithComment,
             nextPage: nextPage
         };
     } catch (error) {
@@ -120,9 +124,9 @@ export const fetchPostsWithImages = async (
             imageData: postWithImage,
             nextPage: nextPage
         };
-    } catch (error: any) {
-        console.error('Error in fetchPostsWithImages:', error.message);
-        return error;
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        throw error;
     }
 };
 
@@ -169,8 +173,8 @@ export const fetchPosts = async (
             data: postWithComment,
             nextPage: nextPage
         };
-    } catch (error: any) {
-        console.error('Error in fetchPosts:', error.message);
+    } catch (error) {
+        console.error("Error fetching data:", error);
         throw error;
     }
 };
@@ -217,8 +221,8 @@ export const fetchNoticePosts = async (
             data: postWithComment,
             nextPage: nextPage
         };
-    } catch (error: any) {
-        console.error('Error in fetchPosts:', error.message);
+    } catch (error) {
+        console.error("Error fetching data:", error);
         throw error;
     }
 };
@@ -267,8 +271,8 @@ export const fetchBookmarks = async (
         const nextIndex = bookmarkData.nextIndex
 
         return { data: validPosts, nextIndexData: nextIndex };
-    } catch (error: any) {
-        console.error('Error in fetchPosts:', error.message);
+    } catch (error) {
+        console.error("Error fetching data:", error);
         throw error;
     }
 };

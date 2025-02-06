@@ -3,14 +3,14 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useRecoilState, } from "recoil";
+import { useRecoilValue, } from "recoil";
 import { modalState } from "./state/PostState";
 
 
 
 export default function DefaultMain() {
 
-    const [modal, setModal] = useRecoilState<boolean>(modalState);
+    const modal = useRecoilValue<boolean>(modalState);
     const router = useRouter();
     // State
 

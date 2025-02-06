@@ -10,34 +10,42 @@ import '../../globals.css'
 
 const queryClient = new QueryClient();
 
-function InitializeLoginComponent({ children, user, hasLogin, hasGuest }: { children: ReactNode, user: userData | null, hasLogin: boolean, hasGuest: boolean }) {
-    const setUserState = useSetRecoilState<userData | null>(userState);
+interface loginData {
+    user: userData,
+    hasLogin: boolean,
+    hasGuest: boolean
+}
+
+function InitializeLoginComponent({ children, loginData }: { children: ReactNode, loginData: loginData }) {
+    const setUserState = useSetRecoilState<userData>(userState);
     const setLoginState = useSetRecoilState<boolean>(DidYouLogin);
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setHasGuest = useSetRecoilState<boolean>(hasGuestState)
 
     const router = useRouter();
+
     useEffect(() => {
-        if (!hasLogin) {
+        if (!loginData.hasLogin) {
             setLoginToggle(true);
             router.push('/login');
             return;
         }
-        
-        setUserState(user);
+
+        setUserState(loginData.user);
         setLoginState(true);
-        setHasGuest(hasGuest);
+        setHasGuest(loginData.hasGuest);
         router.push('/home/main');
-    }, [user, hasLogin])
+    }, [loginData, loginData.user, loginData.hasLogin])
+
     return <>{children}</>; // 반드시 children을 렌더링
 }
 
-export default function ProviderClient({ children, loginData }: { children: ReactNode, loginData: any }) {
+export default function ProviderClient({ children, loginData }: { children: ReactNode, loginData: loginData }) {
     return (
         <div className={`${PretendardLight.variable} ${PretendardMedium.variable} ${PretendardBold.variable}`}>
             <QueryClientProvider client={queryClient}>
                 <RecoilRoot> {/* RecoilRoot로 감싸기 */}
-                    <InitializeLoginComponent user={loginData.user} hasLogin={loginData.hasLogin} hasGuest={loginData.hasGuest}>
+                    <InitializeLoginComponent loginData={loginData}>
                         {children}
                     </InitializeLoginComponent>
                 </RecoilRoot>

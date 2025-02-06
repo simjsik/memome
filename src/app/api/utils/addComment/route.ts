@@ -13,8 +13,8 @@ export async function POST(req: NextRequest) {
     const authToken = req.cookies.get("authToken")?.value;
     const userToken = req.cookies.get("userToken")?.value;
 
-    let decodedToken: any; // Firebase 또는 Google에서 디코드된 토큰
-    let userData: any;     // Redis에서 가져온 유저 데이터
+    let decodedToken; // Firebase 또는 Google에서 디코드된 토큰
+    let userData;     // Redis에서 가져온 유저 데이터
 
     if (!authToken) {
         return NextResponse.json({ message: "계정 토큰이 존재하지 않습니다." }, { status: 401 });

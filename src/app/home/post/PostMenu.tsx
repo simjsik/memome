@@ -10,6 +10,9 @@ import QuillResizeImage from 'quill-resize-image';
 // import 'quill/dist/quill.snow.css';
 import ReactQuill, { Quill } from 'react-quill-new';
 import styled from '@emotion/styled';
+import { Timestamp } from 'firebase/firestore';
+import Block from 'quill/blots/block';
+import { StyleAttributor } from 'parchment';
 
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
@@ -566,11 +569,10 @@ font-family : var(--font-pretendard-bold);
 color: #bdbdbd;
 }
 `
-
 export default function PostMenu({ guestCookie }: { guestCookie: string }) {
     const router = useRouter();
 
-    const quillRef = useRef<any>(null); // Quill 인스턴스 접근을 위한 ref 설정
+    const quillRef = useRef<ReactQuill | null>(null); // Quill 인스턴스 접근을 위한 ref 설정
     const tagRef = useRef<HTMLSelectElement>(null); // Quill 인스턴스 접근을 위한 ref 설정
     const styleToolRef = useRef<HTMLDivElement>(null); // Quill 인스턴스 접근을 위한 ref 설정
     const yourLogin = useRecoilValue(DidYouLogin)
@@ -626,36 +628,36 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
 
         const loadQuill = async () => {
             try {
-                // Lineheight 모듈
-                let Block = Quill.import("blots/block") as any;
 
+                // Lineheight 모듈
                 class LineHeightBlot extends Block {
-                    static create(value: any) {
-                        let node = super.create();
+                    static blotName = "lineheight";
+                    static tagName = "div";
+                    static scope = Quill.import('parchment').Scope.BLOCK;
+
+                    static create(value: string): HTMLElement {
+                        const node = super.create(value);
                         node.style.lineHeight = value;
                         return node;
                     }
 
-                    static formats(node: any) {
+                    static formats(node: HTMLElement): string | null {
                         return node.style.lineHeight || null;
                     }
                 }
 
                 LineHeightBlot.blotName = "lineheight";
                 LineHeightBlot.tagName = "div"; // 블록 요소
+
                 Quill.register(LineHeightBlot);
 
                 // Font Size 설정
-                const fontSize = Quill.import('attributors/style/size') as any;
+                const fontSize = Quill.import('attributors/style/size') as StyleAttributor;
                 fontSize.whitelist = fontsize;
                 Quill.register(fontSize, true);
 
                 // Image Resize 모듈 등록
-
-                // Quill.register('modules/ImageResize', ImageResize);
                 Quill.register("modules/ImageResize", QuillResizeImage);
-
-
 
                 setQuillLoaded(true); // Quill 로드 완료 상태 업데이트
             } catch (error) {
@@ -676,53 +678,65 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
     }, [hasGuest, yourLogin])
 
     const handleFontSizeChange = (size: string | null) => {
-        const editor = quillRef.current.getEditor();
-        const range = editor.getSelection(); // 현재 선택된 영역
-        if (range && size) {
-            editor.format('size', size); // 선택 영역에 폰트 크기 적용
-            setSelectedFontSize(size); // 상태 업데이트
+        if (quillRef.current) {
+            const editor = quillRef.current.getEditor();
+            const range = editor.getSelection(); // 현재 선택된 영역
+            if (range && size) {
+                editor.format('size', size); // 선택 영역에 폰트 크기 적용
+                setSelectedFontSize(size); // 상태 업데이트
+            }
         }
     };
 
     const handleFontColorChange = (color: string) => {
-        const editor = quillRef.current.getEditor();
-        const range = editor.getSelection();
-        if (range) {
-            const colorValue = color === '색상 없음' ? null : color
-            editor.format('color', colorValue);
-            setSelectedColor(color)
+        if (quillRef.current) {
+            const editor = quillRef.current.getEditor();
+            const range = editor.getSelection();
+            if (range) {
+                const colorValue = color === '색상 없음' ? null : color
+                editor.format('color', colorValue);
+                setSelectedColor(color)
+            }
         }
     };
 
     const handleFontBgChange = (color: string) => {
-        const editor = quillRef.current.getEditor();
-        const range = editor.getSelection();
-        if (range) {
-            const colorValue = color === '색상 없음' ? null : color
-            editor.format('background', colorValue);
-            setSelectedBgColor(color)
+        if (quillRef.current) {
+            const editor = quillRef.current.getEditor();
+            const range = editor.getSelection();
+            if (range) {
+                const colorValue = color === '색상 없음' ? null : color
+                editor.format('background', colorValue);
+                setSelectedBgColor(color)
+            }
         }
     };
 
     const handleLineheightChange = (height: string | null) => {
-        const editor = quillRef.current.getEditor();
-        const range = editor.getSelection();
-        if (range && height) {
-            editor.format('lineheight', height);
-            setSelectedLineHeight(height);
+        if (quillRef.current) {
+            if (quillRef.current) {
+                const editor = quillRef.current.getEditor();
+                const range = editor.getSelection();
+                if (range && height) {
+                    editor.format('lineheight', height);
+                    setSelectedLineHeight(height);
+                }
+            }
         }
     };
 
     const handleAlignChange = (align: string) => {
-        const editor = quillRef.current.getEditor();
-        const range = editor.getSelection();
-        if (range) {
-            if (align === 'left') {
-                editor.format('align', false); // 기본값으로 설정
-            } else {
-                editor.format('align', align); // 다른 align 스타일 적용
+        if (quillRef.current) {
+            const editor = quillRef.current.getEditor();
+            const range = editor.getSelection();
+            if (range) {
+                if (align === 'left') {
+                    editor.format('align', false); // 기본값으로 설정
+                } else {
+                    editor.format('align', align); // 다른 align 스타일 적용
+                }
+                setSelectedAlign(align);
             }
-            setSelectedAlign(align);
         }
     };
 
@@ -821,17 +835,9 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
         }
     }
 
-    const formatDate = (createAt: any) => {
-        if (createAt?.toDate) {
+    const formatDate = (createAt: Timestamp | Date | string | number) => {
+        if ((createAt instanceof Timestamp)) {
             return createAt.toDate().toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).replace(/\. /g, '.');
-        } else if (createAt?.seconds) {
-            return new Date(createAt.seconds * 1000).toLocaleDateString('ko-KR', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
@@ -848,7 +854,6 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
                 hour: '2-digit',
                 minute: '2-digit'
             })
-
             return format;
         }
     }
@@ -891,8 +896,9 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
                 const imageUrl = reader.result as string;
                 const editor = quillRef.current?.getEditor();
                 const range = editor?.getSelection();
-                editor?.insertEmbed(range.index, 'image', imageUrl);
-
+                if (range) {
+                    editor?.insertEmbed(range.index, 'image', imageUrl);
+                }
                 // imageUrls 상태에 URL 추가
                 setImageUrls((prev) => [...prev, imageUrl]);
             };
@@ -926,14 +932,15 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
         if (!editor) return;
 
         // 이미지 붙여넣기 차단 및 제한 처리
-        editor.clipboard.addMatcher('IMG', (node: any, delta: any) => {
+        editor.clipboard.addMatcher('IMG', (node: Node, delta: Delta) => {
             if (storageLoad) return delta;
 
             const imgTags = Array.from(editor.root.querySelectorAll('img'));
             const currentImageCount = imgTags.length;
 
+            const element = node as HTMLElement; // 안전하게 HTMLElement로 변환
             // 붙여넣기된 이미지 무조건 차단
-            if (node.tagName === 'IMG') {
+            if (element.tagName === 'IMG') {
                 alert('이미지 붙여넣기는 허용되지 않습니다.');
                 return new Delta(); // 빈 Delta 반환 (붙여넣기 차단)
             }
@@ -974,11 +981,11 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
             const range = editor.getSelection(); // 현재 커서 범위
             if (range) {
                 const currentFormats = editor.getFormat(range); // 커서 위치의 스타일 정보
-                setSelectedFontSize(currentFormats.size || '14px'); // 폰트 크기
-                setSelectedLineHeight(currentFormats.lineheight || '1'); // 줄 높이
-                setSelectedColor(currentFormats.color || '#191919'); // 글자 색
-                setSelectedBgColor(currentFormats.background || '#191919'); // 배경 색
-                setSelectedAlign(currentFormats.align || 'left'); // 정렬
+                setSelectedFontSize(currentFormats.size as string || '14px'); // 폰트 크기
+                setSelectedLineHeight(currentFormats.lineheight as string || '1'); // 줄 높이
+                setSelectedColor(currentFormats.color as string || '#191919'); // 글자 색
+                setSelectedBgColor(currentFormats.background as string || '#191919'); // 배경 색
+                setSelectedAlign(currentFormats.align as string || 'left'); // 정렬
             }
         };
 
@@ -1261,7 +1268,8 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
                                     <svg viewBox="0 0 32 32">
                                         <g data-name="Layer 2">
                                             <rect width="32" height="32" fill='none' />
-                                            <path xmlns="http://www.w3.org/2000/svg" d="M20.73,9h-13a.24.24,0,0,0-.25.23v2.88h.69a2.43,2.43,0,0,1,.43-1.09H13a.24.24,0,0,1,.25.22V23.7a.24.24,0,0,0,.25.23H15a.24.24,0,0,0,.25-.23V11.28a.25.25,0,0,1,.26-.22h4a2.19,2.19,0,0,1,.8,1.46H21V9.27A.24.24,0,0,0,20.73,9Z" fill='#191919' />                                            <rect x="19.74" y="19.43" width="4.5" height="4.5" rx="0.3" fill='#191919' />
+                                            <path d="M20.73,9h-13a.24.24,0,0,0-.25.23v2.88h.69a2.43,2.43,0,0,1,.43-1.09H13a.24.24,0,0,1,.25.22V23.7a.24.24,0,0,0,.25.23H15a.24.24,0,0,0,.25-.23V11.28a.25.25,0,0,1,.26-.22h4a2.19,2.19,0,0,1,.8,1.46H21V9.27A.24.24,0,0,0,20.73,9Z" fill='#191919' />
+                                            <rect x="19.74" y="19.43" width="4.5" height="4.5" rx="0.3" fill={selectColor} />
                                         </g>
                                     </svg>
                                 </button>
@@ -1293,7 +1301,8 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
                                         <g data-name="레이어 2">
                                             <g id="Layer_2" data-name="Layer 2">
                                                 <rect width="32" height="32" fill='none' />
-                                                <path d="M25.62,6H6.37A.35.35,0,0,0,6,6.31v3.86H7a3.2,3.2,0,0,1,.64-1.46h6.5a.34.34,0,0,1,.37.3V25.69a.35.35,0,0,0,.38.31h2.25a.35.35,0,0,0,.38-.31V9a.33.33,0,0,1,.37-.3h5.88a2.88,2.88,0,0,1,1.19,2h1V6.31A.35.35,0,0,0,25.62,6Z" fill='#191919' />                                            </g>
+                                                <path d="M25.62,6H6.37A.35.35,0,0,0,6,6.31v3.86H7a3.2,3.2,0,0,1,.64-1.46h6.5a.34.34,0,0,1,.37.3V25.69a.35.35,0,0,0,.38.31h2.25a.35.35,0,0,0,.38-.31V9a.33.33,0,0,1,.37-.3h5.88a2.88,2.88,0,0,1,1.19,2h1V6.31A.35.35,0,0,0,25.62,6Z" fill={selectBgColor} />
+                                            </g>
                                         </g>
                                     </svg>
                                 </button>

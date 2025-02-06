@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { css } from "@emotion/react";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { DidYouLogin, hasGuestState, loginToggleState, modalState, signUpState, userData, userState } from "../state/PostState";
+import { DidYouLogin, loginToggleState, modalState, signUpState, userData, userState } from "../state/PostState";
 import {
     CreateButton,
     GoogleButton,
@@ -15,10 +15,14 @@ import {
     LoginModalWrap,
     OtherLoginWrap
 } from "../styled/LoginComponents";
-import { getAuth, GoogleAuthProvider, sendEmailVerification, signInWithPopup, User } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { LoginOr, LoginSpan } from "../styled/LoginStyle";
 import { usePathname, useRouter } from "next/navigation";
 import SignUp from "./SignUp";
+
+interface FirebaseError extends Error {
+    code: string;
+}
 
 const LoginWrap = css`
     position : fixed;
@@ -63,20 +67,18 @@ const LogoBox = css`
     background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737169919/%EC%BB%AC%EB%9F%AC%EB%A1%9C%EA%B3%A0_snbplg.svg);
 `
 export default function LoginBox() {
-    const setUser = useSetRecoilState<userData | null>(userState)
+    const setUser = useSetRecoilState<userData>(userState)
 
     const [loginToggle, setLoginToggle] = useRecoilState<boolean>(loginToggleState)
     const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
-    const [isGuest, setIsGuest] = useRecoilState<boolean>(hasGuestState)
     const [signUpToggle, setSignUpToggle] = useRecoilState<boolean>(signUpState);
     const [modal, setModal] = useRecoilState<boolean>(modalState);
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [csrfToken, setCsrfToken] = useState<string | null>(null)
     const [loginError, setLoginError] = useState<string | null>(null);
-    const [verifyReSend, setVerifyReSend] = useState<boolean>(false);
-    const [unverifedUser, setUnverifiedUser] = useState<User | null>(null);
+    // const [verifyReSend, setVerifyReSend] = useState<boolean>(false);
+    // const [unverifedUser, setUnverifiedUser] = useState<User | null>(null);
 
     const modalRef = useRef<HTMLDivElement>(null);
     // State
@@ -121,26 +123,33 @@ export default function LoginBox() {
         // 추가적인 에러 코드 필요 시 확장 가능
     };
 
-    const handleVerifyReSend = async (user: User) => {
-        try {
-            setLoginError("인증 메일이 재전송되었습니다. 이메일을 확인해주세요.");
-            setVerifyReSend(false);
+    // const handleVerifyReSend = async (user: User) => {
+    //     try {
+    //         setLoginError("인증 메일이 재전송되었습니다. 이메일을 확인해주세요.");
+    //         setVerifyReSend(false);
 
-            await sendEmailVerification(user);
-            // 버튼 비활성화 타이머 설정
-            setTimeout(() => {
-                setVerifyReSend(true);;
-            }, 60000); // 60초
-        }
-        catch (error) {
-            setLoginError("인증 메일 전송에 실패했습니다. 다시 시도해주세요.");
-        }
+    //         await sendEmailVerification(user);
+    //         // 버튼 비활성화 타이머 설정
+    //         setTimeout(() => {
+    //             setVerifyReSend(true);;
+    //         }, 60000); // 60초
+    //     }
+    //     catch (error) {
+    //         setLoginError("인증 메일 전송에 실패했습니다. 다시 시도해주세요.");
+    //     }
+    // }
+
+    const isFirebaseError = (error: unknown): error is FirebaseError => {
+        return (
+            error instanceof Error &&
+            'code' in error &&
+            typeof (error).code === 'string'
+        );
     }
-
     const handleLogin = async (email: string, password: string) => {
         try {
             setLoginError(null);
-            setVerifyReSend(false);
+            // setVerifyReSend(false);
             const hasGuest = false;
 
             // 서버로 ID 토큰 전송
@@ -186,16 +195,26 @@ export default function LoginBox() {
             setUser(user)
             setHasLogin(true);
             router.push('/home/main');
-        } catch (error: any) {
-            console.error("로그인 중 오류 발생:", error, error.code);
+        } catch (error: unknown) {
+            if (isFirebaseError(error)) {
+                console.error("로그인 중 오류 발생:", error, error.code);
 
-            // Firebase 에러 코드별 메시지 처리
-            if (error.code && firebaseErrorMessages[error.code]) {
-                setLoginError(firebaseErrorMessages[error.code]);
+                // Firebase 에러 코드별 메시지 처리
+                if (firebaseErrorMessages[error.code]) {
+                    setLoginError(firebaseErrorMessages[error.code]);
+                } else if (error.code === "auth/email-not-verified") {
+                    // 예시: 이메일 인증 필요 에러 처리
+                    setLoginError("이메일 인증이 필요합니다. 이메일을 확인해주세요.");
+                } else {
+                    setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+                }
             } else {
+                // FirebaseError가 아닌 다른 에러인 경우
+                console.error("알 수 없는 에러 발생:", error);
                 setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
             }
             return;
+
         }
     }
 
@@ -257,13 +276,22 @@ export default function LoginBox() {
             } else {
                 setLoginError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
             }
-        } catch (error: any) {
-            console.error("로그인 중 오류 발생:", error);
+        } catch (error: unknown) {
+            if (isFirebaseError(error)) {
+                console.error("로그인 중 오류 발생:", error, error.code);
 
-            // Firebase 에러 코드별 메시지 처리
-            if (error.code && firebaseErrorMessages[error.code]) {
-                setLoginError(firebaseErrorMessages[error.code]);
+                // Firebase 에러 코드별 메시지 처리
+                if (firebaseErrorMessages[error.code]) {
+                    setLoginError(firebaseErrorMessages[error.code]);
+                } else if (error.code === "auth/email-not-verified") {
+                    // 예시: 이메일 인증 필요 에러 처리
+                    setLoginError("이메일 인증이 필요합니다. 이메일을 확인해주세요.");
+                } else {
+                    setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+                }
             } else {
+                // FirebaseError가 아닌 다른 에러인 경우
+                console.error("알 수 없는 에러 발생:", error);
                 setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
             }
             return;
@@ -323,13 +351,22 @@ export default function LoginBox() {
             setUser(user)
             setHasLogin(true);
             router.push('/home/main');
-        } catch (error: any) {
-            console.error("로그인 중 오류 발생:", error);
+        } catch (error: unknown) {
+            if (isFirebaseError(error)) {
+                console.error("로그인 중 오류 발생:", error, error.code);
 
-            // Firebase 에러 코드별 메시지 처리
-            if (error.code && firebaseErrorMessages[error.code]) {
-                setLoginError(firebaseErrorMessages[error.code]);
+                // Firebase 에러 코드별 메시지 처리
+                if (firebaseErrorMessages[error.code]) {
+                    setLoginError(firebaseErrorMessages[error.code]);
+                } else if (error.code === "auth/email-not-verified") {
+                    // 예시: 이메일 인증 필요 에러 처리
+                    setLoginError("이메일 인증이 필요합니다. 이메일을 확인해주세요.");
+                } else {
+                    setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+                }
             } else {
+                // FirebaseError가 아닌 다른 에러인 경우
+                console.error("알 수 없는 에러 발생:", error);
                 setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
             }
             return;
@@ -397,13 +434,13 @@ export default function LoginBox() {
                                                 loginError &&
                                                 <p className="login_error">{loginError}</p>
                                             }
-                                            {
+                                            {/* {
                                                 (loginError && verifyReSend) &&
                                                 <button
                                                     onClick={() => handleVerifyReSend(unverifedUser as User)}
                                                     disabled={!verifyReSend}
                                                 >인증 메일 재전송</button>
-                                            }
+                                            } */}
                                         </div>
                                         <LoginButton type="submit">로그인</LoginButton>
                                     </form>
@@ -445,13 +482,13 @@ export default function LoginBox() {
                                         loginError &&
                                         <p className="login_error">{loginError}</p>
                                     }
-                                    {
+                                    {/* {
                                         (loginError && verifyReSend) &&
                                         <button
                                             onClick={() => handleVerifyReSend(unverifedUser as User)}
                                             disabled={!verifyReSend}
                                         >인증 메일 재전송</button>
-                                    }
+                                    } */}
                                 </div>
                                 <LoginButton type="submit">로그인</LoginButton>
                             </form>

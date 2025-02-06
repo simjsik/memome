@@ -23,6 +23,9 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ message: "유저 정보 저장" }, { status: 200 });
     } catch (error) {
+        if (error) {
+            return NextResponse.json({ message: "유저 정보 저장 실패" + error }, { status: 403 });
+        }
         return NextResponse.json({ message: "유저 정보 저장 실패" }, { status: 403 });
     }
 }

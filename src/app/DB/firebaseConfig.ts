@@ -19,7 +19,9 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let analytics;
+
 if (typeof window !== "undefined") {
     isSupported().then((supported) => {
         if (supported) {

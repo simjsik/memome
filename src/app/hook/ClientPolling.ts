@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { auth, db } from "../DB/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../DB/firebaseConfig";
 import { useRecoilValue } from "recoil";
 import { userState } from "../state/PostState";
 

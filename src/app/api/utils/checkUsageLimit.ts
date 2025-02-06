@@ -19,7 +19,7 @@ export const checkUsageLimit = async (userId: string) => {
 
 
         console.log('사용량 요청 확인', userId, response);
-    } catch (error: any) {
+    } catch (error) {
         console.error('사용량 확인 중 에러 발생.' + error)
         throw error;
     }

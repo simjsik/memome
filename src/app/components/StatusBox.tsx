@@ -38,13 +38,13 @@ export const revalidate = 0;
 
 export default function StatusBox() {
     const path = usePathname();
-    const params = useParams<{ postId: any }>();
-    const postId = params?.postId
+    const params = useParams<{ postId: string }>();
+    const postId = params?.postId || ''
 
     // Function
     return (
         <>
-            { path !== '/home/post' && 
+            {path !== '/home/post' &&
                 <PostListWrap >
                     <SearchComponent></SearchComponent>
                     {

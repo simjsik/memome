@@ -6,7 +6,7 @@ interface SessionData {
     photo: string;
     email: string,
     role: number;
-    [key: string]: any;
+    [key: string]: string | number;
 }
 
 const JWT_SECRET = process.env.JWT_SECRET; // JWT 비밀키

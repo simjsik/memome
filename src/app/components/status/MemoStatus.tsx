@@ -5,7 +5,6 @@ import { db } from "@/app/DB/firebaseConfig";
 import { ADMIN_ID, Comment, DidYouLogin, memoCommentCount, memoCommentState, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
 import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, updateDoc, where } from "firebase/firestore";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import BookmarkBtn from "../BookmarkBtn";
@@ -156,7 +155,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
     const [commentList, setCommentList] = useRecoilState<Comment[]>(memoCommentState)
     const [commentCount, setCommentCount] = useRecoilState<number>(memoCommentCount)
     const [lastFetchedAt, setLastFetchedAt] = useState<Timestamp | { seconds: number; nanoseconds: number } | null>(null); // 마지막으로 문서 가져온 시간
-    const [btnStatus, setBtnStatus] = useState<boolean>(true)
     const [commentText, setCommentText] = useState<string>('')
     const [replyText, setReplyText] = useState<string>('')
     const [activeReply, setActiveReply] = useState<string | null>(null); // 활성화된 답글 ID
@@ -165,17 +163,9 @@ export default function MemoStatus({ post }: ClientPostProps) {
     const ADMIN = useRecoilValue(ADMIN_ID)
     // state
 
-    const formatDate = (createAt: any) => {
-        if (createAt?.toDate) {
+    const formatDate = (createAt: Timestamp | Date | string | number) => {
+        if ((createAt instanceof Timestamp)) {
             return createAt.toDate().toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).replace(/\. /g, '.');
-        } else if (createAt?.seconds) {
-            return new Date(createAt.seconds * 1000).toLocaleDateString('ko-KR', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
@@ -192,7 +182,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
                 hour: '2-digit',
                 minute: '2-digit'
             })
-
             return format;
         }
     }
@@ -372,7 +361,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
     // function
 
     return (
-        <MemoBox btnStatus={btnStatus}>
+        <MemoBox btnStatus>
             {hasUpdate &&
                 <button css={
                     css`

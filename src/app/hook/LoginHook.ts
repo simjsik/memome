@@ -26,16 +26,34 @@ export const loginListener = async () => {
                     photo: user.photoURL,
                     uid: user.uid,
                 } as userData,
-                hasLogin: true,
-                hasGuest: hasGuest
+                hasLogin: true as boolean,
+                hasGuest: hasGuest as boolean
             };
         } else {
             console.log("ID 토큰 및 유저 토큰이 유효하지 않습니다.");
-            return { user: null, hasLogin: false };
+            return {
+                user: {
+                    name: null,
+                    email: null,
+                    photo: null,
+                    uid: '',
+                } as userData,
+                hasLogin: false as boolean,
+                hasGuest: false as boolean
+            };
         }
     } catch (error) {
         console.error("자동 로그인 실패", error);
-        return { user: null, hasLogin: false };
+        return {
+            user: {
+                name: null,
+                email: null,
+                photo: null,
+                uid: '',
+            } as userData,
+            hasLogin: false as boolean,
+            hasGuest: false as boolean
+        };
     }
 };
 

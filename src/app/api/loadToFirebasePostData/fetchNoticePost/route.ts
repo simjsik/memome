@@ -54,10 +54,10 @@ export async function POST(req: NextRequest) {
                 const [commentSnapshot, userDoc] = await Promise.all([commentRef, userDocRef]);
 
                 postData.commentCount = commentSnapshot.size;
-                const userData = userDoc.data() || { nickname: '', photo: '' }
+                const userData = userDoc.data() || { displayName: '', photoURL: '' }
 
-                postData.displayName = userData.nickname;
-                postData.PhotoURL = userData.photo;
+                postData.displayName = userData.displayName;
+                postData.PhotoURL = userData.photoURL;
 
                 return postData;
             })
@@ -73,8 +73,12 @@ export async function POST(req: NextRequest) {
                     : null,
             }
         );
-    } catch (error: any) {
-        console.error('Error in fetchPosts:', error.message);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error('공지사항 데이터 반환 실패:', error.message);
+        } else {
+            console.error('Unexpected error:', error);
+        }
         throw error;
     }
 };

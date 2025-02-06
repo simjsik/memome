@@ -25,8 +25,8 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ message: "게스트 유저 정보가 유효하지 않습니다." }, { status: 403 });
         }
 
-        let decodedToken: any; // Firebase 또는 Google에서 디코드된 토큰
-        let userData: any;     // Redis에서 가져온 유저 데이터
+        let decodedToken; // Firebase 또는 Google에서 디코드된 토큰
+        let userData;     // Redis에서 가져온 유저 데이터
 
         if (!validateIdToken(authToken)) {
             return NextResponse.json({ message: "ID 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });

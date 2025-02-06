@@ -6,10 +6,10 @@ import { Comment, memoCommentCount, memoCommentState, UsageLimitState, userData,
 import { HomeBtn } from "@/app/styled/RouterComponents";
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
-import { DocumentData, } from "firebase/firestore";
+import { DocumentData, Timestamp, } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 
 interface ClientPostProps {
     post: DocumentData;
@@ -93,8 +93,8 @@ export default function Memo({ post, comment }: ClientPostProps) {
     const router = useRouter();
     const setCommentList = useSetRecoilState<Comment[]>(memoCommentState)
     const setCommentCount = useSetRecoilState<number>(memoCommentCount)
-    const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
-    const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+    const currentUser = useRecoilValue<userData | null>(userState)
+    const setUsageLimit = useSetRecoilState<boolean>(UsageLimitState)
 
     // state
 
@@ -104,11 +104,13 @@ export default function Memo({ post, comment }: ClientPostProps) {
             const checkLimit = async () => {
                 try {
                     await checkUsageLimit(currentUser.uid);
-                } catch (err: any) {
-                    if (err.message.includes('사용량 제한')) {
-                        setUsageLimit(true);
-                    } else {
-                        console.log('사용량을 불러오는 중 에러가 발생했습니다.');
+                } catch (err: unknown) {
+                    if (err instanceof Error) {
+                        if (err.message.includes('사용량 제한')) {
+                            setUsageLimit(true);
+                        } else {
+                            console.log('사용량을 불러오는 중 에러가 발생했습니다.');
+                        }
                     }
                 }
             }
@@ -129,17 +131,9 @@ export default function Memo({ post, comment }: ClientPostProps) {
         router.push('/home/main')
     }
 
-    const formatDate = (createAt: any) => {
-        if (createAt?.toDate) {
+    const formatDate = (createAt: Timestamp | Date | string | number) => {
+        if ((createAt instanceof Timestamp)) {
             return createAt.toDate().toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).replace(/\. /g, '.');
-        } else if (createAt?.seconds) {
-            return new Date(createAt.seconds * 1000).toLocaleDateString('ko-KR', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
@@ -156,7 +150,6 @@ export default function Memo({ post, comment }: ClientPostProps) {
                 hour: '2-digit',
                 minute: '2-digit'
             })
-
             return format;
         }
     }

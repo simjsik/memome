@@ -7,7 +7,7 @@ import { searchClient } from "../api/algolia";
 import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useRouter } from "next/navigation";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState, modalState, UsageLimitState, UsageLimitToggle } from "../state/PostState";
 // 검색 창 css
 const SearchWrap = styled.div`
@@ -324,6 +324,11 @@ position: relative;
         }
     // ---------------------------------------------------
 `
+interface hit {
+    displayName: string;
+    photoURL: string;
+    userId: string;
+}
 
 // 유저 검색 결과
 const SwiperHits = () => {
@@ -335,7 +340,7 @@ const SwiperHits = () => {
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
 
     const { query, refine } = useSearchBox();
-    const { items } = useHits();
+    const { items } = useHits<hit>();
     // 검색 결과 대기
     const [debouncedQuery, setDebouncedQuery] = useState(query);
     const [searchLoading, setSearchLoading] = useState(false); // 로딩 상태 추가
@@ -419,7 +424,7 @@ const SwiperHits = () => {
                 }}
                 navigation={true}
             >
-                {items.map((hit: any, index: number) => (
+                {items.map((hit, index: number) => (
                     <SwiperSlide key={index}>
                         <UserHitComponent hit={hit} />
                     </SwiperSlide>

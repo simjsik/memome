@@ -3,13 +3,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { ADMIN_ID, bookMarkState, DidYouLogin, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, PostState, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
+import { ADMIN_ID, DidYouLogin, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, PostState, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
 import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
-import styled from '@emotion/styled';
 import { NewPostBtn, NoMorePost, PostWrap } from '../../styled/PostComponents';
 import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, where } from 'firebase/firestore';
-import { auth, db } from '../../DB/firebaseConfig';
+import { db } from '../../DB/firebaseConfig';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchPosts } from '../../api/loadToFirebasePostData/fetchPostData';
 
@@ -19,23 +18,9 @@ import { Socket } from 'socket.io-client';
 import { usePostUpdateChecker } from '@/app/hook/ClientPolling';
 import BookmarkBtn from '@/app/components/BookmarkBtn';
 
-const PostStyleBtn = styled.button`
-position : fixed;
-left: 18px;
-bottom: 20px;
-width : 42px;
-height : 42px;
-background-repeat: no-repeat;
-background-size: cover;
-background-color : #fff;
-border : 1px solid #ededed;
-border-radius : 8px;
-cursor : pointer;
-`
-
 interface MainHomeProps {
     post: PostData[],
-    initialNextPage: any,
+    initialNextPage: [boolean, Timestamp] | null,
 }
 
 export default function MainHome({ post: initialPosts, initialNextPage }: MainHomeProps) {
@@ -47,22 +32,22 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
     // 포스트 스테이트
     const [posts, setPosts] = useRecoilState<PostData[]>(PostState)
-    const [newPosts, setNewPosts] = useState<PostData[]>([])
+    const newPosts: PostData[] = []
     const [dropToggle, setDropToggle] = useState<string>('')
-    const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
+
     // 불러온 마지막 데이터
-    const [lastFetchedAt, setLastFetchedAt] = useState(null); // 마지막으로 문서 가져온 시간
+    const [lastFetchedAt, setLastFetchedAt] = useState<Timestamp | null>(null); // 마지막으로 문서 가져온 시간
 
     // 공지사항 스테이트
-    const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
-    const [noticeLists, setNoticeLists] = useRecoilState<noticeType[]>(noticeList);
-    const [postStyle, setPostStyle] = useState<boolean>(true)
+    const setNewNotice = useSetRecoilState<boolean>(newNoticeState);
+    const setNoticeLists = useSetRecoilState<noticeType[]>(noticeList);
+    const postStyle = useState<boolean>(true)
 
     // 스토리지 기본 값 설정 용
-    const [storageLoad, setStorageLoad] = useRecoilState<boolean>(storageLoadState);
+    const setStorageLoad = useSetRecoilState<boolean>(storageLoadState);
 
     // 현재 로그인 한 유저
-    const [currentUser, setCurrentUser] = useRecoilState<userData | null>(userState)
+    const currentUser = useRecoilValue<userData | null>(userState)
 
     const ADMIN = useRecoilValue(ADMIN_ID);
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
@@ -96,7 +81,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
         });
 
         // 새 공지 수신
-        sockets.on("new-notice", (data) => {
+        sockets.on("new-notice", () => {
             // console.log("새 공지 알림:", data);
             setNewNotice(true);
         });
@@ -174,14 +159,12 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
         },
         getNextPageParam: (lastPage) => {
             // 사용량 초과 시 페이지 요청 중단
-            if (!lastPage.nextPage) return;
+            if (!lastPage.nextPage) return undefined;
 
             return lastPage.nextPage;
         },
         staleTime: 5 * 60 * 1000, // 5분 동안 캐시 유지
-        initialPageParam: {
-            initialNextPage
-        }, // 초기 페이지 파라미터 설정
+        initialPageParam: initialNextPage, // 초기 페이지 파라미터 설정
         initialData: {
             pages: [{ data: initialPosts, nextPage: initialNextPage }],
             pageParams: [initialNextPage],
@@ -310,18 +293,14 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
         router.push(`memo/${postId}`)
     }
 
-    const formatDate = (createAt: any) => {
-        if (createAt?.toDate) {
+    const formatDate = (createAt: Timestamp | Date | string | number) => {
+        if ((createAt instanceof Timestamp)) {
             return createAt.toDate().toLocaleString('ko-KR', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
-            }).replace(/\. /g, '.');
-        } else if (createAt?.seconds) {
-            return new Date(createAt.seconds * 1000).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
             }).replace(/\. /g, '.');
         } else {
             const date = new Date(createAt);
@@ -330,8 +309,9 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
             })
-
             return format;
         }
     }
@@ -396,8 +376,8 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
             if (newPostlist.length > 0) {
                 const updatedPosts = [...newPostlist].sort((a, b) => {
-                    const dateA = a.createAt?.toDate ? a.createAt.toDate() : a.createAt;
-                    const dateB = b.createAt?.toDate ? b.createAt.toDate() : b.createAt;
+                    const dateA = a.createAt.toMillis(); // Timestamp에서 밀리초로 변환
+                    const dateB = b.createAt.toMillis(); // Timestamp에서 밀리초로 변환
                     return dateB - dateA; // 최신순으로 정렬
                 });
                 setPosts([...updatedPosts, ...posts]);
@@ -470,7 +450,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
                 <NewPostBtn className='new_post_btn' onClick={handleUpdateClick}>새로운 업데이트 확인</NewPostBtn>
             }
             {/* 공지사항 제외 전체 포스트 */}
-            <PostWrap postStyle={postStyle}>
+            <PostWrap postStyle>
                 <>
                     {/* 무한 스크롤 구조 */}
                     {posts.map((post) => (

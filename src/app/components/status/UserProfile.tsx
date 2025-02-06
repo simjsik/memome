@@ -3,10 +3,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState, modalState, noticeList, noticeType, PostData, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
+import { DidYouLogin, loginToggleState, modalState, noticeList, noticeType, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
-import { db } from "@/app/DB/firebaseConfig";
-import { deleteDoc, doc, getDoc } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 import { css } from "@emotion/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { MyAlarmWrap } from "@/app/styled/PostComponents";
@@ -360,18 +359,14 @@ export default function UserProfile() {
         }
     }
 
-    const formatDate = (createAt: any) => {
-        if (createAt?.toDate) {
+    const formatDate = (createAt: Timestamp | Date | string | number) => {
+        if ((createAt instanceof Timestamp)) {
             return createAt.toDate().toLocaleString('ko-KR', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
-            }).replace(/\. /g, '.');
-        } else if (createAt?.seconds) {
-            return new Date(createAt.seconds * 1000).toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
             }).replace(/\. /g, '.');
         } else {
             const date = new Date(createAt);
@@ -380,8 +375,9 @@ export default function UserProfile() {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
             })
-
             return format;
         }
     }

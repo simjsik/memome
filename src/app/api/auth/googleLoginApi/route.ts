@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveSession } from "../../utils/redisClient";
-import { generateJwt, validateGoogleToken, validateIdToken } from "../validateCsrfToken/route";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { generateJwt, validateIdToken } from "../validateCsrfToken/route";
 import { adminAuth } from "@/app/DB/firebaseAdminConfig";
 
 export async function POST(req: NextRequest) {
