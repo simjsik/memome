@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/app/DB/firebaseAdminConfig";
-import { validateIdToken } from "../../auth/validateCsrfToken/route";
 import { authenticateUser, getSession } from "../redisClient";
 
 export async function GET(req: NextRequest) {
@@ -8,6 +7,7 @@ export async function GET(req: NextRequest) {
         // 쿠키에서 authToken 가져오기
         const authToken = req.cookies.get("authToken")?.value;
         const userToken = req.cookies.get("userToken")?.value;
+        const csrfToken = req.cookies.get("csrfToken")?.value;
         const hasGuest = req.cookies.get("hasGuest")?.value;
 
         if (!authToken) {
@@ -28,8 +28,17 @@ export async function GET(req: NextRequest) {
         let decodedToken; // Firebase 또는 Google에서 디코드된 토큰
         let userData;     // Redis에서 가져온 유저 데이터
 
-        if (!validateIdToken(authToken)) {
-            return NextResponse.json({ message: "ID 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
+        // 서버로 ID 토큰 검증을 위해 전송
+        const tokenResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
+            method: "POST",
+            // 이미 토큰을 가져왔으니 여기선 필요 없음!
+            body: JSON.stringify({ idToken: authToken, csrfToken }),
+        });
+
+        if (!tokenResponse.ok) {
+            const errorData = await tokenResponse.json();
+            console.error("Server-to-server error:", errorData.message);
+            return NextResponse.json({ message: "토큰 인증 실패." }, { status: 403 });
         }
 
         try {

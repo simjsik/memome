@@ -180,7 +180,7 @@ export default function LoginBox() {
                 const errorData = await loginResponse.json();
                 setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
                 if (loginResponse.status === 403) {
-                    if (errorData.message = 'CSRF 토큰 인증 실패.') {
+                    if (errorData.message = '토큰 인증 실패.') {
                         getCsrfToken();
                     }
                     setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
@@ -230,7 +230,7 @@ export default function LoginBox() {
 
         try {
             const provider = new GoogleAuthProvider();
-            const role = 3
+            const role = 2
             const hasGuest = false;
 
             // Google 로그인 팝업
@@ -253,7 +253,7 @@ export default function LoginBox() {
                 const errorData = await googleResponse.json();
                 setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
                 if (googleResponse.status === 403) {
-                    if (errorData.message = 'CSRF 토큰 인증 실패.') {
+                    if (errorData.message === '토큰 인증 실패.') {
                         getCsrfToken();
                     }
                     setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
@@ -305,6 +305,7 @@ export default function LoginBox() {
             const hasGuest = true;
             const guestUid = localStorage.getItem("guestUid");
             let guestResponse
+
             if (guestUid) {
                 console.log('게스트 로그인 이력 유 : 로직 실행')
                 const guestDocRef = doc(db, 'guests', guestUid);
@@ -341,6 +342,7 @@ export default function LoginBox() {
                 const userCredential = await signInAnonymously(auth);
                 const signUser = userCredential.user
                 const idToken = await signUser.getIdToken();
+                localStorage.setItem('guestUid', signUser.uid)
 
                 guestResponse = await fetch("/api/auth/loginApi", {
                     method: "POST",
@@ -356,7 +358,7 @@ export default function LoginBox() {
                 const errorData = await guestResponse.json();
                 console.log(guestResponse.status, '에러 상태')
                 if (guestResponse.status === 403) {
-                    if (errorData.message === 'CSRF 토큰 인증 실패.') {
+                    if (errorData.message === '토큰 인증 실패.') {
                         getCsrfToken();
                         throw new Error(`CSRF 토큰 확인 불가 ${guestResponse.status}: ${errorData.message}`);
                     }

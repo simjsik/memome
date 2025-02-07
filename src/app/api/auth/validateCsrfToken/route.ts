@@ -1,70 +1,7 @@
-import { adminAuth } from "@/app/DB/firebaseAdminConfig";
 import { randomBytes } from "crypto";
 import redisClient from "../../utils/redisClient";
 import { NextResponse } from "next/server";
 import jwt from 'jsonwebtoken';
-export async function validateCsrfToken(token: string) {
-    if (!token) {
-        console.log("CSRF 토큰 없음.");
-        return false;
-    }
-
-    try {
-        // Redis에서 토큰의 만료 시간 가져오기
-        const expiresAt = await redisClient.get(token);
-
-        // 토큰이 존재하지 않거나 만료된 경우
-        if (!expiresAt || Date.now() > Number(expiresAt)) {
-            console.log("CSRF 토큰 만료됨.");
-
-            // 만료된 토큰 삭제
-            await redisClient.del(token);
-
-            return false;
-        }
-
-        console.log("CSRF 토큰 유효.");
-        return true;
-    } catch (error) {
-        console.error("CSRF 검증 중 오류 발생:", error);
-        return false;
-    }
-}
-
-export async function validateIdToken(idToken: string) {
-    try {
-        const decodedToken = await adminAuth.verifyIdToken(idToken);
-        if (decodedToken) {
-            return true;
-        } else {
-            console.error('ID 토큰 검증 실패')
-            return false;
-        }
-    } catch (error) {
-        console.error("ID 토큰 검증 실패:", error);
-        return false; // 유효하지 않은 경우
-    }
-}
-
-export async function validateGoogleToken(googleToken: string) {
-    try {
-        const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${googleToken}`);
-        if (!response) {
-            console.error('구글 토큰 검증 실패')
-            return false;
-        }
-        const googleUser = await response.json();
-        if (googleUser) {
-            return true;
-        } else {
-            console.error('구글 토큰 검증 실패')
-            return false;
-        }
-    } catch (error) {
-        console.error("구글 토큰 검증 실패:", error);
-        return false; // 유효하지 않은 경우
-    }
-}
 
 // CSRF 토큰 생성 API
 export async function GET() {

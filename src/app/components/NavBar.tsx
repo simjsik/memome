@@ -75,7 +75,7 @@ export default function NavBar() {
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
-    const hasGuest = useRecoilValue(hasGuestState)
+    const [hasGuest, setHasGuest] = useRecoilState(hasGuestState)
 
     // State
     const router = useRouter();
@@ -131,6 +131,16 @@ export default function NavBar() {
         setSelectedMenu(NavTitle);
     }
 
+    useEffect(() => {
+        if (typeof hasGuest === 'string') {
+            if (hasGuest === 'false') {
+                setHasGuest(false);
+            }
+            if (hasGuest === 'true') {
+                setHasGuest(true);
+            }
+        }
+    }, [hasGuest])
     // Function
     return (
         <>

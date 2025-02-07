@@ -2,7 +2,7 @@
 "use client";
 
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState, modalState, userData, userState } from "../state/PostState";
+import { bookMarkState, DidYouLogin, loginToggleState, modalState, PostData, userBookMarkState, userData, userState } from "../state/PostState";
 import { css } from "@emotion/react";
 import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
@@ -38,6 +38,8 @@ export default function Logout() {
     const [user, setUser] = useRecoilState<userData>(userState)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setModal = useSetRecoilState<boolean>(modalState);
+    const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState)
+    const setUserCurrentBookmark = useSetRecoilState<PostData[]>(userBookMarkState)
     // State
 
 
@@ -65,6 +67,8 @@ export default function Logout() {
                     photo: null,
                     uid: '', // uid는 빈 문자열로 초기화
                 }); // 로그아웃 상태로 초기화
+                setCurrentBookmark([])
+                setUserCurrentBookmark([])
                 setHasLogin(false)
             }
         } catch (error) {

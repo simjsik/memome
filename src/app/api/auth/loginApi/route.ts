@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveGuestSession, saveSession, sessionExists } from "../../utils/redisClient";
-import { generateJwt, validateIdToken } from "../validateCsrfToken/route";
+import { generateJwt } from "../validateCsrfToken/route";
 import { adminAuth, adminDb } from "@/app/DB/firebaseAdminConfig";
 
 export async function POST(req: NextRequest) {
     try {
         const { idToken, role, hasGuest, guestUid } = await req.json();
         const csrfToken = req.cookies.get("csrfToken")?.value;
+        const randomName = `Guest-${Math.random().toString(36).substring(2, 6)}`;
+        
         let decodedToken;
         let uid;
-        console.log(idToken, role, hasGuest, guestUid)
+        let userSession;
+        let tokenResponse;
+
         if (guestUid) {
             const guestDocRef = adminDb.doc(`guests/${guestUid}`);
             const guestDoc = await guestDocRef.get();
@@ -22,7 +26,6 @@ export async function POST(req: NextRequest) {
 
             if (!guestDoc.exists) {
                 console.log('게스트 로그인 이력 무 : 로직 실행')
-                const randomName = `Guest-${Math.random().toString(36).substring(2, 6)}`;
 
                 if (!idToken) {
                     return NextResponse.json({ message: "게스트 토큰이 누락되었습니다." }, { status: 403 });
@@ -58,40 +61,45 @@ export async function POST(req: NextRequest) {
             }
         } else {
             if (!idToken) {
-                return NextResponse.json({ message: "이메일 또는 비밀번호가 올바르지 않습니다." }, { status: 403 });
+                return NextResponse.json({ message: "계정 토큰이 누락되었습니다." }, { status: 403 });
             }
 
             decodedToken = await adminAuth.verifyIdToken(idToken);
             if (!decodedToken) {
-                return NextResponse.json({ message: "계정이 올바르지 않습니다." }, { status: 403 });
+                return NextResponse.json({ message: "계정 토큰이 올바르지 않습니다." }, { status: 403 });
             }
+
+            tokenResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
+                method: "POST",
+                // 이미 토큰을 가져왔으니 여기선 필요 없음!
+                body: JSON.stringify({ idToken, csrfToken }),
+            });
 
             uid = decodedToken.uid
         }
 
-        if (!validateIdToken(idToken)) {
-            return NextResponse.json({ message: "구글 계정 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
+        if (!tokenResponse?.ok) {
+            const errorData = await tokenResponse?.json();
+            console.error("Server-to-server error:", errorData.message);
+            return NextResponse.json({ message: "토큰 인증 실패." }, { status: 403 });
         }
 
-        const userSession = {
-            uid: uid,
-            name: decodedToken.name || "",
-            photo: decodedToken.picture || "",
-            email: decodedToken.email || "",
-            role: role
-        };
-
-        // 서버로 ID 토큰 검증을 위해 전송
-        const csrfResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
-            method: "POST",
-            // 이미 토큰을 가져왔으니 여기선 필요 없음!
-            body: JSON.stringify({ idToken, csrfToken }),
-        });
-
-        if (!csrfResponse.ok) {
-            const errorData = await csrfResponse.json();
-            console.error("Server-to-server error:", errorData.message);
-            return NextResponse.json({ message: "CSRF 토큰 인증 실패." }, { status: 403 });
+        if (hasGuest) {
+            userSession = {
+                uid: uid,
+                name: decodedToken.name || randomName,
+                photo: decodedToken.picture || "",
+                email: decodedToken.email || "",
+                role: role
+            };
+        } else {
+            userSession = {
+                uid: uid,
+                name: decodedToken.name || "",
+                photo: decodedToken.picture || "",
+                email: decodedToken.email || "",
+                role: role
+            };
         }
 
         const UID = generateJwt(uid, role);

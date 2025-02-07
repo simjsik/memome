@@ -39,13 +39,12 @@ function HomeContent({ children }: LayoutProps) {
                 }
             }
 
-            const loadBookmarks = async () => {
+            const loadBookmarks = async (uid: string) => {
                 if (hasGuest) {
                     return setCurrentBookmark([]);
                 }
-
                 try {
-                    const bookmarks = await getDoc(doc(db, `users/${currentUser.uid}/bookmarks/bookmarkId`));
+                    const bookmarks = await getDoc(doc(db, `users/${uid}/bookmarks/bookmarkId`));
                     if (bookmarks.exists()) {
                         // 북마크 데이터가 있을 경우
                         const data = bookmarks.data() as { bookmarkId: string[] };
@@ -53,13 +52,14 @@ function HomeContent({ children }: LayoutProps) {
                     }
                 } catch (error) {
                     console.error("북마크 데이터를 가져오는 중 오류 발생:", error);
+                    setCurrentBookmark([]);
                 }
             }
+            loadBookmarks(currentUser.uid);
 
-            loadBookmarks();
             checkLimit();
         }
-    }, [currentUser])
+    }, [currentUser, hasGuest])
 
     useEffect(() => {
         if (usageLimit) {
