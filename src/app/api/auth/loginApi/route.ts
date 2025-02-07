@@ -1,45 +1,83 @@
-import { auth } from "@/app/DB/firebaseConfig";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { saveSession } from "../../utils/redisClient";
-import { generateJwt } from "../validateCsrfToken/route";
+import { saveGuestSession, saveSession, sessionExists } from "../../utils/redisClient";
+import { generateJwt, validateIdToken } from "../validateCsrfToken/route";
+import { adminAuth, adminDb } from "@/app/DB/firebaseAdminConfig";
 
 export async function POST(req: NextRequest) {
     try {
-        const { email, password, hasGuest } = await req.json();
-
+        const { idToken, role, hasGuest, guestUid } = await req.json();
         const csrfToken = req.cookies.get("csrfToken")?.value;
-        let role = 2
+        let decodedToken;
+        let uid;
+        console.log(idToken, role, hasGuest, guestUid)
+        if (guestUid) {
+            const guestDocRef = adminDb.doc(`guests/${guestUid}`);
+            const guestDoc = await guestDocRef.get();
+            const guestSessions = await sessionExists(guestUid)
 
-        if (email === 'simjsik75@naver.com') {
-            role = 3
+            if (!guestSessions) {
+                await guestDocRef.delete();
+                console.log('게스트 세션 없음', guestSessions)
+            }
+
+            if (!guestDoc.exists) {
+                console.log('게스트 로그인 이력 무 : 로직 실행')
+                const randomName = `Guest-${Math.random().toString(36).substring(2, 6)}`;
+
+                if (!idToken) {
+                    return NextResponse.json({ message: "게스트 토큰이 누락되었습니다." }, { status: 403 });
+                }
+
+                decodedToken = await adminAuth.verifyIdToken(idToken);
+
+                uid = decodedToken.uid
+
+                const customToken = await adminAuth.createCustomToken(uid);
+
+                const saveUserResponse = await fetch('http://localhost:3000/api/utils/saveUserProfile/Guest', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ uid, displayName: randomName, token: customToken }),
+                })
+
+                if (!saveUserResponse.ok) {
+                    const errorData = await saveUserResponse.json();
+                    throw new Error(`${saveUserResponse.status}: ${errorData.error}`);
+                }
+            } else {
+                const idToken = await guestUid.getIdToken();
+                if (!idToken) {
+                    return NextResponse.json({ message: "게스트 토큰이 유효하지 않습니다." }, { status: 403 });
+                }
+
+                decodedToken = await adminAuth.verifyIdToken(idToken);
+                if (!decodedToken) {
+                    return NextResponse.json({ message: "게스트 계정이 올바르지 않습니다." }, { status: 403 });
+                }
+                uid = decodedToken.uid
+            }
+        } else {
+            if (!idToken) {
+                return NextResponse.json({ message: "이메일 또는 비밀번호가 올바르지 않습니다." }, { status: 403 });
+            }
+
+            decodedToken = await adminAuth.verifyIdToken(idToken);
+            if (!decodedToken) {
+                return NextResponse.json({ message: "계정이 올바르지 않습니다." }, { status: 403 });
+            }
+
+            uid = decodedToken.uid
         }
 
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        if (!userCredential) {
-            return NextResponse.json({ message: "이메일 또는 비밀번호가 올바르지 않습니다." }, { status: 403 });
+        if (!validateIdToken(idToken)) {
+            return NextResponse.json({ message: "구글 계정 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
         }
-
-        const user = userCredential.user;
-        if (!user) {
-            return NextResponse.json({ message: "이메일 또는 비밀번호가 올바르지 않습니다." }, { status: 403 });
-        }
-        if (!user.emailVerified) {
-            return NextResponse.json({ message: "이메일 인증이 필요한 계정입니다." }, { status: 403 });
-        }
-
-        const idToken = await userCredential.user.getIdToken();
-        if (!idToken) {
-            return NextResponse.json({ message: "이메일 또는 비밀번호가 올바르지 않습니다." }, { status: 403 });
-        }
-
-        const uid = user.uid
 
         const userSession = {
             uid: uid,
-            name: user.displayName || "",
-            photo: user.photoURL || "",
-            email: user.email || "",
+            name: decodedToken.name || "",
+            photo: decodedToken.picture || "",
+            email: decodedToken.email || "",
             role: role
         };
 
@@ -58,9 +96,13 @@ export async function POST(req: NextRequest) {
 
         const UID = generateJwt(uid, role);
 
-        const response = NextResponse.json({ message: "Token validated", uid });
+        const response = NextResponse.json({ message: "Token validated", uid, user: userSession });
 
-        await saveSession(user.uid, userSession); // Redis에 세션 저장
+        if (hasGuest) {
+            await saveGuestSession(uid, userSession);
+        } else {
+            await saveSession(uid, userSession);
+        }
 
         response.cookies.set("authToken", idToken, {
             httpOnly: true,
@@ -88,6 +130,7 @@ export async function POST(req: NextRequest) {
         response.headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
         response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
         response.headers.set("Access-Control-Allow-Headers", "Content-Type");
+
         return response;
         // 커스텀 토큰 발급
     } catch (error) {

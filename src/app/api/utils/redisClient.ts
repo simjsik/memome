@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import { createClient } from "redis";
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
@@ -11,12 +13,14 @@ interface SessionData {
 
 const JWT_SECRET = process.env.JWT_SECRET; // JWT 비밀키
 
+
 const redisClient = createClient({
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
 });
 
 // Redis 클라이언트 연결
 redisClient.connect().catch((err) => {
+    console.log(`Connecting to Redis at ${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`);
     console.error("Redis 연결 실패:", err);
 });
 
@@ -26,7 +30,7 @@ export default redisClient;
 export async function saveSession(uid: string, data: SessionData) {
     const key = `session:${uid}`;
     console.log(data, '세션 저장 유저 정보')
-    await redisClient.set(key, JSON.stringify(data), { EX: 3600 }); // 1시간 만료
+    await redisClient.set(key, JSON.stringify(data), { EX: 3600 * 24 * 7 }); // 일주일 만료
 }
 
 // 세션 업데이트 함수
