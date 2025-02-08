@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/app/DB/firebaseAdminConfig";
-import redisClient from "../../utils/redisClient";
+import redisClient, { authenticateUser, sessionExists } from "../../utils/redisClient";
 
 export async function POST(req: NextRequest) {
     try {
-        const { idToken, csrfToken, googleToken } = await req.json();
+        const { idToken, uid } = await req.json();
 
-        if (!csrfToken) {
-            return NextResponse.json({ message: "CSRF 토큰이 누락되었습니다." }, { status: 403 });
+        const authToken = req.cookies.get("authToken")?.value;
+        const userToken = req.cookies.get("userToken")?.value;
+        const csrfToken = req.cookies.get("csrfToken")?.value;
+
+        if (!idToken && !uid) {
+            return NextResponse.json({ message: "토큰 및 UID가 누락되었습니다." }, { status: 403 });
         }
 
-        if (!idToken && !googleToken) {
-            return NextResponse.json({ message: "계정 토큰이 누락되었습니다." }, { status: 403 });
-        }
-
-        if (idToken) {
+        if (idToken) { // 로그인 시 ID 토큰 검증 용
             try {
                 const decodedToken = await adminAuth.verifyIdToken(idToken);
                 if (!decodedToken) {
@@ -25,39 +25,57 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        if (googleToken) {
+        if (uid) { // 로그인 후 유저 검증 용
+            if (!authToken) {
+                return NextResponse.json({ message: "ID 토큰이 누락 되었습니다." }, { status: 403 });
+            }
+
+            const decodedToken = await adminAuth.verifyIdToken(authToken);
+
+            if (!decodedToken) {
+                return NextResponse.json({ message: "ID 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
+            }
+
+            if (!userToken) {
+                return NextResponse.json({ message: "유저 토큰이 누락되었습니다." }, { status: 403 });
+            }
+
+            if (!await authenticateUser(userToken)) {
+                return NextResponse.json({ message: "유저 토큰이 유효하지 않습니다." }, { status: 403 });
+            }
+
+            // UID를 기반으로 Redis에서 세션 조회
             try {
-                const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${googleToken}`);
-                if (!response.ok) {
-                    return NextResponse.json({ message: "구글 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
+                const userData = await sessionExists(decodedToken.uid); // Redis에서 세션 가져오기
+                if (!userData) {
+                    return NextResponse.json({ message: "유저 세션이 만료되었거나 유효하지 않습니다." }, { status: 403 });
                 }
-                const googleUser = await response.json();
-                if (!googleUser) {
-                    return NextResponse.json({ message: "구글 유저 정보가 유효하지 않습니다." }, { status: 403 });
+            } catch (err) {
+                console.error("Redis 세션 조회 실패:", err);
+                return NextResponse.json({ message: "유저 세션이 만료되었거나 유효하지 않습니다." }, { status: 403 });
+            }
+        }
+
+        if (csrfToken) {
+            try {
+                // Redis에서 토큰의 만료 시간 가져오기
+                const expiresAt = await redisClient.get(csrfToken);
+
+                // 토큰이 존재하지 않거나 만료된 경우
+                if (!expiresAt || Date.now() > Number(expiresAt)) {
+                    console.log("CSRF 토큰 만료됨.");
+
+                    // 만료된 토큰 삭제
+                    await redisClient.del(csrfToken);
+
+                    return NextResponse.json({ message: "CSRF 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
                 }
             } catch (error) {
-                return NextResponse.json({ message: "구글 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
-            }
-        }
-
-        try {
-            // Redis에서 토큰의 만료 시간 가져오기
-            const expiresAt = await redisClient.get(csrfToken);
-
-            // 토큰이 존재하지 않거나 만료된 경우
-            if (!expiresAt || Date.now() > Number(expiresAt)) {
-                console.log("CSRF 토큰 만료됨.");
-
-                // 만료된 토큰 삭제
-                await redisClient.del(csrfToken);
-
                 return NextResponse.json({ message: "CSRF 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
             }
-        } catch (error) {
-            return NextResponse.json({ message: "CSRF 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
         }
 
-        const response = NextResponse.json({ message: "Token validated" });
+        const response = NextResponse.json({ message: "유저 검증 확인" }, { status: 200 });
 
         // 추가적인 헤더 설정
         response.headers.set("Access-Control-Allow-Credentials", "true");

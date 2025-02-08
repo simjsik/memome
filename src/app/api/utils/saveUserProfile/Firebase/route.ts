@@ -17,7 +17,6 @@ export async function POST(req: NextRequest) {
                 userId: uid,
             });
 
-
             console.log(`New Firebase user created: ${uid}`);
         }
 

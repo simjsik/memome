@@ -13,7 +13,6 @@ interface SessionData {
 
 const JWT_SECRET = process.env.JWT_SECRET; // JWT 비밀키
 
-
 const redisClient = createClient({
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
 });

@@ -10,9 +10,10 @@ import QuillResizeImage from 'quill-resize-image';
 // import 'quill/dist/quill.snow.css';
 import ReactQuill, { Quill } from 'react-quill-new';
 import styled from '@emotion/styled';
-import { Timestamp } from 'firebase/firestore';
+import { addDoc, collection, Timestamp } from 'firebase/firestore';
 import Block from 'quill/blots/block';
 import { StyleAttributor } from 'parchment';
+import { db } from '@/app/DB/firebaseConfig';
 
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
@@ -129,7 +130,7 @@ margin : 0 auto;
         position: relative;
         margin-bottom: 60px;
 
-        span{
+        .posting_limit{
             position: absolute;
             right: 10px;
             bottom: 10px;
@@ -569,7 +570,7 @@ font-family : var(--font-pretendard-bold);
 color: #bdbdbd;
 }
 `
-export default function PostMenu({ guestCookie }: { guestCookie: string }) {
+export default function PostMenu() {
     const router = useRouter();
 
     const quillRef = useRef<ReactQuill | null>(null); // Quill 인스턴스 접근을 위한 ref 설정
@@ -588,6 +589,7 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
     const [titleError, setTitleError] = useState<string>('');
     const [storageLoad, setStorageLoad] = useRecoilState<boolean>(storageLoadState);
     const [posting, setPosting] = useRecoilState<string>(PostingState);
+    const [postingError, setPostingError] = useRecoilState<string>(PostingState);
     const [postDate, setPostDate] = useState<string>('');
     const [confirmed, setConfirmed] = useState<boolean>(false);
     const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -669,7 +671,7 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
     }, []);
 
     useEffect(() => {
-        if (hasGuest === true || guestCookie === 'true') {
+        if (hasGuest === true) {
             router.push('/home/main');
         }
         if (!yourLogin) {
@@ -758,20 +760,13 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
     }
 
     // 포스트 내용 입력 시 해당 스테이트에 저장
-    const content_limit_count = 2500; // 글자수 제한
-    const content_limit_max = 2510; // 글자 입력 맥스
     const handlePostingEditor = (content: string) => {
-        // 입력이 최대 길이 초과 시 차단
-        if (content.length > content_limit_max) {
-            return;
-        }
-
-        if (content.length > content_limit_count) {
-            setTitleError('제목을 최대 20자 내외로 작성해주세요.');
-        }
-
         setPosting(content);
     }
+
+    useEffect(() => {
+        console.log(posting)
+    }, [posting])
 
     // 포스팅 제목.
     const title_limit_count = 20; // 글자수 제한
@@ -791,6 +786,70 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
         setPostTitle(value);
     }
 
+    // Cloudinary에 이미지 업로드 요청
+    const uploadImgCdn = async (image: string) => {
+        const response = await fetch('/api/uploadToCloudinary', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ image }),
+        });
+
+        if (!response.ok) {
+            throw new Error('image upload failed')
+        }
+
+        const data = await response.json();
+        if (data.url) {
+            return data.url;
+        } else {
+            throw new Error('Image upload failed');
+        }
+    };
+
+    const uploadContentImgCdn = async (content: string, uploadedImageUrls: Map<string, string>) => {
+        const imgTagRegex = /<img[^>]+src="([^">]+)"/g;
+        let updatedContent = content;
+        let match;
+
+        // img 태그 추출
+        while ((match = imgTagRegex.exec(content)) !== null) {
+            const originalUrl = match[1];
+
+            // 이미 업로드된 이미지인지 확인
+            if (uploadedImageUrls.has(originalUrl)) {
+                // 이미 업로드된 이미지 URL로 교체
+                updatedContent = updatedContent.replace(originalUrl, uploadedImageUrls.get(originalUrl)!);
+                continue;
+            }
+
+            // Cloudinary에 이미지 업로드
+            const response = await fetch('/api/uploadToCloudinary', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: originalUrl }),
+            });
+
+            if (!response.ok) {
+                console.error('콘텐츠 이미지 업로드 실패', originalUrl);
+                continue;
+            }
+
+            const data = await response.json();
+
+            // Cloudinary URL이 있다면 content의 이미지 URL 교체 및 URL 캐싱
+            if (data.url) {
+                uploadedImageUrls.set(originalUrl, data.url);
+                updatedContent = updatedContent.replace(originalUrl, data.url);
+            }
+        }
+
+        return updatedContent;
+    };
+
     // 포스팅 업로드
     const uploadThisPost = async () => {
         // 사용자 인증 확인
@@ -807,19 +866,66 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
         }
 
         if (postTitle && posting && currentUser) {
+            const uid = currentUser.uid
             try {
-                const PostringResponse = await fetch('api/uploadPost', {
+                const validateResponse = await fetch('api/validateAuthToken', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     credentials: "include",
-                    body: JSON.stringify({ imageUrls, postTitle, posting, selectTag, checkedNotice }),
+                    body: JSON.stringify({ uid }),
                 });
-                if (!PostringResponse.ok) {
-                    const errorDetails = await PostringResponse.json();
-                    throw new Error(`포스트 업로드 실패: ${errorDetails.message}`);
+
+                if (!validateResponse.ok) {
+                    const errorDetails = await validateResponse.json();
+                    throw new Error(`유저 검증 실패: ${errorDetails.message}`);
                 }
+
+                const MAX_IMG_COUNT = 4
+                const title_limit_count = 20
+                const content_limit_count = 2500
+
+                if (imageUrls.length > MAX_IMG_COUNT) {
+                    alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 업로드 가능합니다.`)
+                    return;
+                }
+                if (postTitle.length > title_limit_count) {
+                    alert(`제목을 20자 이내로 작성해 주세요.`)
+                    return;
+                }
+                if (posting.length > content_limit_count) {
+                    alert(`최대 2500자의 내용만 작성 가능합니다.`)
+                    return;
+                }
+
+                // 업로드된 이미지 URL을 추적하기 위한 Map 생성
+                const uploadedImageUrls = new Map<string, string>();
+
+                // imageUrls 최적화 및 업로드
+                const optImageUrls = await Promise.all(
+                    imageUrls.map(async (image: string) => {
+                        const cloudinaryUrl = await uploadImgCdn(image);
+                        uploadedImageUrls.set(image, cloudinaryUrl); // 업로드된 URL을 Map에 저장
+                        return cloudinaryUrl;
+                    })
+                );
+
+                // content 내 이미지 URL을 최적화된 URL로 교체
+                const optContentUrls = await uploadContentImgCdn(posting, uploadedImageUrls);
+
+                // Firestore에 데이터 추가 (Admin SDK 사용)
+
+                await addDoc(collection(db, "posts"), {
+                    tag: selectTag,
+                    title: postTitle,
+                    userId: uid, // uid로 사용자 ID 사용
+                    content: optContentUrls,
+                    images: optImageUrls ? optImageUrls : false,
+                    createAt: Timestamp.now(),
+                    commentCount: 0,
+                    notice: checkedNotice,
+                });
 
                 alert('포스팅 완료');
                 setPostingComplete(true);
@@ -931,6 +1037,8 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
         const editor = quillRef.current?.getEditor();
         if (!editor) return;
 
+        editor.clipboard.matchers = editor.clipboard.matchers.filter(matcher => matcher[0] !== 'IMG');
+
         // 이미지 붙여넣기 차단 및 제한 처리
         editor.clipboard.addMatcher('IMG', (node: Node, delta: Delta) => {
             if (storageLoad) return delta;
@@ -939,7 +1047,8 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
             const currentImageCount = imgTags.length;
 
             const element = node as HTMLElement; // 안전하게 HTMLElement로 변환
-            // 붙여넣기된 이미지 무조건 차단
+
+            // // 붙여넣기된 이미지 무조건 차단
             if (element.tagName === 'IMG') {
                 alert('이미지 붙여넣기는 허용되지 않습니다.');
                 return new Delta(); // 빈 Delta 반환 (붙여넣기 차단)
@@ -990,11 +1099,12 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
         };
 
         // Quill 이벤트 등록
-        editor.on('text-change', handleImageLimit);
+        editor.on('editor-change', handleImageLimit);
         editor.on('selection-change', handleCursorChange);
         return () => {
             // 정리 작업
-            editor.clipboard.matchers = [];
+            editor.clipboard.matchers = editor.clipboard.matchers.filter(matcher => matcher[0] !== 'IMG');
+
             editor.off('text-change', handleImageLimit);
             editor.off('selection-change', handleCursorChange);
         };
@@ -1458,7 +1568,6 @@ export default function PostMenu({ guestCookie }: { guestCookie: string }) {
                     </div>
                     <div className='ql_content'>
                         <ReactQuill ref={quillRef} formats={formats} value={posting} onChange={handlePostingEditor} modules={SetModules} />
-                        <span>{posting.length}/{content_limit_count}</span>
                     </div>
                     <button className='post_btn' onClick={uploadThisPost}>발행</button>
                 </div>

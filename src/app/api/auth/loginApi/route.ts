@@ -6,9 +6,8 @@ import { adminAuth, adminDb } from "@/app/DB/firebaseAdminConfig";
 export async function POST(req: NextRequest) {
     try {
         const { idToken, role, hasGuest, guestUid } = await req.json();
-        const csrfToken = req.cookies.get("csrfToken")?.value;
         const randomName = `Guest-${Math.random().toString(36).substring(2, 6)}`;
-        
+
         let decodedToken;
         let uid;
         let userSession;
@@ -72,7 +71,7 @@ export async function POST(req: NextRequest) {
             tokenResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
                 method: "POST",
                 // 이미 토큰을 가져왔으니 여기선 필요 없음!
-                body: JSON.stringify({ idToken, csrfToken }),
+                body: JSON.stringify({ idToken }),
             });
 
             uid = decodedToken.uid
@@ -104,7 +103,7 @@ export async function POST(req: NextRequest) {
 
         const UID = generateJwt(uid, role);
 
-        const response = NextResponse.json({ message: "Token validated", uid, user: userSession });
+        const response = NextResponse.json({ message: "로그인 성공.", uid, user: userSession }, { status: 200 });
 
         if (hasGuest) {
             await saveGuestSession(uid, userSession);
