@@ -1,9 +1,9 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { DidYouLogin, hasGuestState, loginToggleState, modalState, PostingState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
+import { DidYouLogin, hasGuestState, ImageUrlsState, loginToggleState, modalState, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import Delta from 'quill-delta';
 import QuillResizeImage from 'quill-resize-image';
@@ -14,6 +14,7 @@ import { addDoc, collection, Timestamp } from 'firebase/firestore';
 import Block from 'quill/blots/block';
 import { StyleAttributor } from 'parchment';
 import { db } from '@/app/DB/firebaseConfig';
+import { saveUnsavedPost } from '@/app/utils/saveUnsavedPost';
 
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
@@ -572,6 +573,8 @@ color: #bdbdbd;
 `
 export default function PostMenu() {
     const router = useRouter();
+    const pathname = usePathname();
+    const prevPathname = useRef<string>(pathname) as MutableRefObject<string>;
 
     const quillRef = useRef<ReactQuill | null>(null); // Quill 인스턴스 접근을 위한 ref 설정
     const tagRef = useRef<HTMLSelectElement>(null); // Quill 인스턴스 접근을 위한 ref 설정
@@ -583,17 +586,16 @@ export default function PostMenu() {
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const currentUser = useRecoilValue(userState)
     const hasGuest = useRecoilValue<boolean>(hasGuestState);
+    const [storageLoad, setStorageLoad] = useRecoilState<boolean>(storageLoadState);
 
     const [postingComplete, setPostingComplete] = useState<boolean>(false);
-    const [postTitle, setPostTitle] = useState<string>('');
-    const [titleError, setTitleError] = useState<string>('');
-    const [storageLoad, setStorageLoad] = useRecoilState<boolean>(storageLoadState);
+    const [postTitle, setPostTitle] = useRecoilState<string>(PostTitleState);
     const [posting, setPosting] = useRecoilState<string>(PostingState);
-    const [postingError, setPostingError] = useRecoilState<string>(PostingState);
+    const [imageUrls, setImageUrls] = useRecoilState<string[]>(ImageUrlsState);
+    const [selectTag, setSelectedTag] = useRecoilState<string>(SelectTagState);
+    const [titleError, setTitleError] = useState<string>('');
     const [postDate, setPostDate] = useState<string>('');
     const [confirmed, setConfirmed] = useState<boolean>(false);
-    const [imageUrls, setImageUrls] = useState<string[]>([]);
-    const [selectTag, setSelectedTag] = useState<string>('기타');
     const [checkedNotice, setCheckedNotice] = useState<boolean>(false);
 
     // tool toggle state
@@ -620,7 +622,7 @@ export default function PostMenu() {
         ]
     }
 
-    const fontsize = ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px', '36px', '40px']
+    const fontsize = ['10px', '12px', '14px', '16px', '18px', '20px', '24px']
     const lineheight = ['1', '1.5', '2', '2.5', '3', '4', '5']
     const [quillLoaded, setQuillLoaded] = useState(false);
 
@@ -759,14 +761,36 @@ export default function PostMenu() {
         setToolToggle(tool)
     }
 
+    const extractPlainText = (html: string): string => {
+        // DOMParser를 사용하여 HTML을 파싱합니다.
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        // 문서의 body에서 텍스트 내용만 추출합니다.
+        return doc.body.textContent || '';
+    }
+
+
+    const postingText = useMemo(() => extractPlainText(posting), [posting]);
+
+    const handleLeavePosting = () => {
+        if (postingText.length > 0) {
+            const unsavedPost = {
+                tag: selectTag,
+                title: postTitle,
+                content: posting,
+                date: new Date(),
+                images: imageUrls
+            }
+
+            saveUnsavedPost(unsavedPost)
+        }
+        router.push('/home/main')
+    }
     // 포스트 내용 입력 시 해당 스테이트에 저장
+
     const handlePostingEditor = (content: string) => {
         setPosting(content);
     }
-
-    useEffect(() => {
-        console.log(posting)
-    }, [posting])
 
     // 포스팅 제목.
     const title_limit_count = 20; // 글자수 제한
@@ -782,11 +806,11 @@ export default function PostMenu() {
         if (value.length > title_limit_count) {
             setTitleError('제목을 최대 20자 내외로 작성해주세요.');
         }
-
         setPostTitle(value);
     }
 
     // Cloudinary에 이미지 업로드 요청
+
     const uploadImgCdn = async (image: string) => {
         const response = await fetch('/api/uploadToCloudinary', {
             method: 'POST',
@@ -868,7 +892,7 @@ export default function PostMenu() {
         if (postTitle && posting && currentUser) {
             const uid = currentUser.uid
             try {
-                const validateResponse = await fetch('api/validateAuthToken', {
+                const validateResponse = await fetch('http://localhost:3000/api/auth/validateAuthToken', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -894,7 +918,7 @@ export default function PostMenu() {
                     alert(`제목을 20자 이내로 작성해 주세요.`)
                     return;
                 }
-                if (posting.length > content_limit_count) {
+                if (postingText.length > content_limit_count) {
                     alert(`최대 2500자의 내용만 작성 가능합니다.`)
                     return;
                 }
@@ -1049,9 +1073,9 @@ export default function PostMenu() {
             const element = node as HTMLElement; // 안전하게 HTMLElement로 변환
 
             // // 붙여넣기된 이미지 무조건 차단
-            if (element.tagName === 'IMG') {
+            if (element.getAttribute('src')?.startsWith('data:image') && !element.classList.contains('ql-editor')) {
                 alert('이미지 붙여넣기는 허용되지 않습니다.');
-                return new Delta(); // 빈 Delta 반환 (붙여넣기 차단)
+                return new Delta();
             }
 
             // 이미지 개수 초과 제한
@@ -1073,17 +1097,16 @@ export default function PostMenu() {
 
             // 이미지 개수 초과 시 초과 이미지를 삭제
             if (currentImageUrls.length > MAX_IMG_COUNT) {
-                const excessImages = currentImageUrls.slice(MAX_IMG_COUNT);
-                excessImages.forEach((src) => {
-                    const img = editor.root.querySelector(`img[src="${src}"]`);
-                    img?.remove();
-                });
+                // **초과된 이미지만 삭제 (Quill의 이미지 삽입 후 동작)**
+                imgTags.slice(MAX_IMG_COUNT).forEach((img) => img.remove());
 
                 alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 업로드 가능합니다.`);
+                return;
             }
 
             setImageUrls(currentImageUrls.slice(0, MAX_IMG_COUNT)); // 상태 업데이트
         };
+
 
         // 텍스트 커서 및 선택 범위 변경 시 도구에 반영
         const handleCursorChange = () => {
@@ -1099,23 +1122,34 @@ export default function PostMenu() {
         };
 
         // Quill 이벤트 등록
-        editor.on('editor-change', handleImageLimit);
+        editor.on('text-change', handleImageLimit);
         editor.on('selection-change', handleCursorChange);
         return () => {
-            // 정리 작업
             editor.clipboard.matchers = editor.clipboard.matchers.filter(matcher => matcher[0] !== 'IMG');
-
-            editor.off('text-change', handleImageLimit);
             editor.off('selection-change', handleCursorChange);
+            editor.off('text-change', handleImageLimit);
         };
     }, [quillRef, storageLoad, imageUrls]);
 
     useEffect(() => {
         if (!postingComplete) {
             if (/\S/.test(posting) || /\S/.test(postTitle)) {
+
+
                 const handleBeforeUnload = () => {
-                    localStorage.setItem('unsavedPost', JSON.stringify({ tag: selectTag, title: postTitle, content: posting, date: new Date(), images: imageUrls }));
+                    if (postingText.length > 0) {
+                        const unsavedPost = {
+                            tag: selectTag,
+                            title: postTitle,
+                            content: posting,
+                            date: new Date(),
+                            images: imageUrls
+                        }
+
+                        saveUnsavedPost(unsavedPost)
+                    }
                 }
+
                 window.addEventListener('beforeunload', handleBeforeUnload);
                 // 새로고침.
 
@@ -1134,6 +1168,27 @@ export default function PostMenu() {
             }
         }
     }, [postTitle, posting])
+
+    useEffect(() => {
+        return () => {
+            // 언마운트 시 실행할 코드 (예: 리소스 정리)
+            if (prevPathname.current !== pathname) {
+
+                // 경로가 변경되면 unsavedPost 저장 (포스팅 작성 중 내용이 있을 때만 저장)
+                if (postingText.length > 0) {
+                    const unsavedPost = {
+                        tag: selectTag,
+                        title: postTitle,
+                        content: posting,
+                        date: new Date(),
+                        images: imageUrls
+                    }
+
+                    saveUnsavedPost(unsavedPost)
+                }
+            }
+        };
+    }, [pathname, selectTag, postTitle, posting, imageUrls]);
 
     useEffect(() => {
         // 페이지 로드 시 내용 불러오기 팝업
@@ -1217,7 +1272,7 @@ export default function PostMenu() {
         <>
             <QuillStyle notice={checkedNotice}>
                 <div className='quill_wrap'>
-                    <button className='go_main_btn' onClick={() => router.push('/home/main')}>
+                    <button className='go_main_btn' onClick={handleLeavePosting}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22.18 22.18">
                             <g id="Layer_2" data-name="Layer 2">
                                 <polyline points="8.55 8.72 3.37 14.49 8.55 19.68" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1} />
@@ -1569,6 +1624,7 @@ export default function PostMenu() {
                     <div className='ql_content'>
                         <ReactQuill ref={quillRef} formats={formats} value={posting} onChange={handlePostingEditor} modules={SetModules} />
                     </div>
+                    <p>{postingText.length}/ 2500</p>
                     <button className='post_btn' onClick={uploadThisPost}>발행</button>
                 </div>
             </QuillStyle>

@@ -15,6 +15,14 @@ export interface PostData {
     PhotoURL: string | null,
 }
 
+export interface unsavedPostData {
+    tag: string;
+    title: string;
+    content: string;
+    images?: string[] | false;
+    date: Date;
+}
+
 export interface userData {
     name: string | null;
     email: string | null;
@@ -81,11 +89,24 @@ export const ADMIN_ID = atom<string>({
     default: '8KGNsQPu22Mod8QrXh6On0A8R5E2'
 })
 
-// 포스트 업로드 시 입력한 내용
+// 저장안된 포스트 작성 내용
 export const PostingState = atom<string>({
     key: 'PostingState',
     default: ''
 })
+export const PostTitleState = atom<string>({
+    key: 'PostTitleState',
+    default: ''
+})
+export const ImageUrlsState = atom<string[]>({
+    key: 'ImageUrlsState',
+    default: []
+})
+export const SelectTagState = atom<string>({
+    key: 'SelectTagState',
+    default: '기타'
+})
+
 
 // firebase에 저장된 포스트 데이터
 export const PostState = atom<PostData[]>({

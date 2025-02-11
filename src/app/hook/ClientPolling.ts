@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../DB/firebaseConfig";
 import { useRecoilValue } from "recoil";
 import { userState } from "../state/PostState";
@@ -36,12 +36,12 @@ const useUpdateChecker = (statusPath: string) => {
             if (currentUser) {
                 const userId = currentUser.uid
 
-                const UpdateResponse = await fetch('http://localhost:3000/api/utils/newPostUpdate', {
+                const UpdateResponse = await fetch('http://localhost:3000/api/auth/validateAuthToken', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ userId, statusPath }),
+                    body: JSON.stringify({ uid : userId }),
                 })
 
                 if (!UpdateResponse.ok) {
@@ -51,6 +51,10 @@ const useUpdateChecker = (statusPath: string) => {
                     }
                     throw new Error(`새 포스트 업데이트 실패 : ${errorDetails.message}`);
                 }
+
+                const docRef = doc(db, `users/${userId}/${statusPath}`);
+                await updateDoc(docRef, { hasUpdate: false });
+
                 setHasUpdate(false);
                 console.log('업데이트 완료')
             }

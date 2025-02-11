@@ -4,9 +4,10 @@ import styled from '@emotion/styled';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
-import { DidYouLogin, hasGuestState, loginToggleState, newNoticeState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
+import { DidYouLogin, hasGuestState, ImageUrlsState, loginToggleState, newNoticeState, PostingState, PostTitleState, SelectTagState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css } from '@emotion/react';
+import { saveUnsavedPost } from '../utils/saveUnsavedPost';
 
 const NavBarWrap = styled.div`
 position: fixed;
@@ -68,15 +69,18 @@ background : #f9f9f9;
 `
 
 export default function NavBar() {
-    const yourLogin = useRecoilValue(DidYouLogin)
-    const currentUser = useRecoilValue<userData | null>(userState)
-    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const yourLogin = useRecoilValue(DidYouLogin);
+    const currentUser = useRecoilValue<userData | null>(userState);
+    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState);
     const [selectedMenu, setSelectedMenu] = useRecoilState<number>(selectedMenuState);
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
-    const usageLimit = useRecoilValue<boolean>(UsageLimitState)
-    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
-    const [hasGuest, setHasGuest] = useRecoilState(hasGuestState)
-
+    const usageLimit = useRecoilValue<boolean>(UsageLimitState);
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle);
+    const [hasGuest, setHasGuest] = useRecoilState(hasGuestState);
+    const postTitle = useRecoilValue<string>(PostTitleState);
+    const posting = useRecoilValue<string>(PostingState);
+    const imageUrls = useRecoilValue<string[]>(ImageUrlsState);
+    const selectTag = useRecoilValue<string>(SelectTagState);
     // State
     const router = useRouter();
     const path = usePathname();
@@ -103,6 +107,16 @@ export default function NavBar() {
                 `scroll-${path}`,
                 window.scrollY.toString()
             );
+
+            const unsavedPost = {
+                tag: selectTag,
+                title: postTitle,
+                content: posting,
+                date: new Date(),
+                images: imageUrls
+            }
+
+            saveUnsavedPost(unsavedPost)
         }
 
         if (usageLimit || !yourLogin) {
