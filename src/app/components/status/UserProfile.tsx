@@ -5,11 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState, modalState, noticeList, noticeType, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
-import { Timestamp } from "firebase/firestore";
+import { deleteDoc, doc, Timestamp, } from "firebase/firestore";
 import { css } from "@emotion/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { MyAlarmWrap } from "@/app/styled/PostComponents";
 import { useRouter } from "next/navigation";
+import { db } from "@/app/DB/firebaseConfig";
 
 const ProfileWrap = styled.div`
 padding-top : 20px;
@@ -385,19 +386,31 @@ export default function UserProfile() {
     const noticeConfirm = async (noticeId: string) => {
         if (currentUser) {
             try {
-                // 게시글 존재 확인
-                const NoticeResponse = await fetch('/api/utils/noticeConfirm', {
+                const uid = currentUser.uid
+
+                // 유저 검증
+                const ValidateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ noticeId }),
+                    body: JSON.stringify({ uid }),
                 });
 
-                if (!NoticeResponse.ok) {
-                    const errorData = await NoticeResponse.json()
-                    throw new Error('게시글 삭제 중 오류가 발생했습니다.', errorData.message);
+                if (!ValidateResponse.ok) {
+                    const errorData = await ValidateResponse.json()
+                    throw new Error('유저 확인 중 오류가 발생했습니다.', errorData.message);
                 }
+
+                const noticeDoc = await doc(db, `users/${uid}/noticeList/${noticeId}`);
+
+                if (!noticeDoc) {
+                    alert('해당 게시글을 찾을 수 없습니다.')
+                    return;
+                }
+
+                // 삭제 권한 확인
+                await deleteDoc(noticeDoc);
 
                 console.log('알림 확인')
 

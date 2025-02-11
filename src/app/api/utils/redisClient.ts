@@ -57,7 +57,7 @@ export async function getSession(uid: string): Promise<SessionData | null> {
 export async function sessionExists(uid: string): Promise<boolean> {
     const key = `session:${uid}`;
     const exists = await redisClient.exists(key);
-    console.log(uid, exists, '게스트 세션 저장 유저 정보 조회')
+    console.log(uid, exists, '세션 저장 유저 정보 조회')
     return exists === 1;
 }
 
