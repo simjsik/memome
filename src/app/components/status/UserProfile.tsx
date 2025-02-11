@@ -11,6 +11,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { MyAlarmWrap } from "@/app/styled/PostComponents";
 import { useRouter } from "next/navigation";
 import { db } from "@/app/DB/firebaseConfig";
+import { uploadImgCdn } from "@/app/utils/uploadCdn";
 
 const ProfileWrap = styled.div`
 padding-top : 20px;
@@ -228,7 +229,7 @@ margin-top : 20px;
 `
 
 export default function UserProfile() {
-    const currentUser = useRecoilValue<userData | null>(userState)
+    const [currentUser, setCurrentUser] = useRecoilState<userData>(userState)
     const yourLogin = useRecoilValue(DidYouLogin)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setModal = useSetRecoilState<boolean>(modalState);
@@ -261,40 +262,90 @@ export default function UserProfile() {
     const updateToProfile = async (image: File | null, name: string | null) => {
         if (currentUser) {
             try {
+                let profileImageUrl = null
+                let userProfileDate
+                const uid = currentUser.uid
+
                 if (image) {
                     // 받아온 image인자가 File 타입이기 때문에 Cloudinary에 저장을 위해 base64로 변경
                     const base64Image = await fileToBase64(image);
 
-                    const UpdateResponse = await fetch('/api/utils/updateProfile', {
+                    const validateResponse = await fetch('http://localhost:3000/api/auth/validateAuthToken', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ image: base64Image, name }),
+                        credentials: "include",
+                        body: JSON.stringify({ uid, name }),
+                    });
+                    if (!validateResponse.ok) {
+                        const errorDetails = await validateResponse.json();
+                        throw new Error(`유저 검증 실패: ${errorDetails.message}`);
+                    }
+
+                    // 변경된 이미지가 있을 시 업데이트
+                    if (base64Image) {
+                        // 받아온 image인자가 File 타입이기 때문에 Cloudinary에 저장을 위해 base64로 변경
+                        const cdnImg = await uploadImgCdn(base64Image)
+
+                        if (cdnImg.imgUlr) {
+                            const profileImg = cdnImg.imgUlr
+                            profileImageUrl = profileImg;
+                        }
+                    } else {
+                        profileImageUrl = currentUser.photo;
+                    }
+
+                    const UpdateResponse = await fetch('http://localhost:3000/api/utils/updateProfile', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: "include",
+                        body: JSON.stringify({ uid, image: profileImageUrl, name }),
                     });
 
                     if (!UpdateResponse.ok) {
-                        const errorData = await UpdateResponse.json()
-                        throw new Error('프로필 사진 업로드 실패!', errorData.message);
+                        const errorDetails = await UpdateResponse.json();
+                        throw new Error(`유저 업데이트 실패: ${errorDetails.message}`);
                     }
 
+                    userProfileDate = {
+                        name: name,
+                        photo: profileImageUrl,
+                        email: currentUser.email,
+                        uid: uid
+                    };
+
+                    setCurrentUser(userProfileDate)
+                    setUpdateToggle(false);
                     alert('프로필 업데이트 성공!')
                     return;
                 }
 
-                const UpdateResponse = await fetch('/api/utils/updateProfile', {
+                const UpdateResponse = await fetch('http://localhost:3000/api/utils/updateProfile', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ name }),
+                    credentials: "include",
+                    body: JSON.stringify({ uid, image: profileImageUrl, name }),
                 });
 
                 if (!UpdateResponse.ok) {
-                    const errorData = await UpdateResponse.json()
-                    throw new Error('프로필 사진 업로드 실패!', errorData.message);
+                    const errorDetails = await UpdateResponse.json();
+                    throw new Error(`유저 업데이트 실패: ${errorDetails.message}`);
                 }
 
+                userProfileDate = {
+                    name: name,
+                    photo: profileImageUrl,
+                    email: currentUser.email,
+                    uid: uid
+                };
+
+                setCurrentUser(userProfileDate)
+                setUpdateToggle(false);
                 alert('프로필 업데이트 성공!')
                 return;
             } catch (error) {
