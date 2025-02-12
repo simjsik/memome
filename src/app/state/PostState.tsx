@@ -15,6 +15,11 @@ export interface PostData {
     PhotoURL: string | null,
 }
 
+export interface ImagePostData {
+    id: string;
+    images?: string[] | false;
+}
+
 export interface unsavedPostData {
     tag: string;
     title: string;

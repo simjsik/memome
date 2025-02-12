@@ -1,8 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { fetchPostList, fetchPostsWithImages } from "@/app/api/loadToFirebasePostData/fetchPostData";
-import { ADMIN_ID, PostData, UsageLimitState, userData } from "@/app/state/PostState";
+import { ADMIN_ID, ImagePostData, PostData, UsageLimitState, userData } from "@/app/state/PostState";
 import { css } from "@emotion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -13,17 +12,17 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
+import { fetchPostList } from "@/app/api/utils/fetchPostData";
 
 interface ClientUserProps {
     user: userData,
     postData: PostData[],
     initialNextPage: [boolean, Timestamp] | [boolean, null] | null;
-    imageData: PostData[],
-    initialImageNextPage: [boolean, Timestamp] | [boolean, null] | null;
+    imageData: ImagePostData[] | false,
 }
 
-export default function UserClient({ user, postData: initialPosts, initialNextPage, imageData: initialImagePosts, initialImageNextPage }: ClientUserProps) {
-    const [imagePost, setImagePost] = useState<PostData[]>([])
+export default function UserClient({ user, postData: initialPosts, initialNextPage, imageData: initialImagePosts }: ClientUserProps) {
+    const [imagePost, setImagePost] = useState<ImagePostData[]>([])
     const ADMIN = useRecoilValue(ADMIN_ID);
     const router = useRouter();
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
@@ -34,6 +33,8 @@ export default function UserClient({ user, postData: initialPosts, initialNextPa
     const observerLoadRef = useRef(null);
     const observerImageLoadRef = useRef(null);
 
+    const uid = user.uid
+
     // 무한 스크롤 로직
     const {
         data: postData,
@@ -42,9 +43,9 @@ export default function UserClient({ user, postData: initialPosts, initialNextPa
         isError,  // 에러 상태
     } = useInfiniteQuery({
         retry: false,
-        queryKey: ['postList'],
+        queryKey: ['postList', uid],
         queryFn: async ({ pageParam }) => {
-            return fetchPostList(user.uid, pageParam, 4);
+            return fetchPostList(uid, pageParam, 4);
         },
         getNextPageParam: (lastPage) => {
             // 사용량 초과 시 페이지 요청 중단
@@ -58,41 +59,10 @@ export default function UserClient({ user, postData: initialPosts, initialNextPa
             initialNextPage
         , // 초기 페이지 파라미터 설정
         initialData: {
-            pages: [{ postData: initialPosts, nextPage: initialNextPage }],
+            pages: [{ imageData: initialImagePosts, postData: initialPosts, nextPage: initialNextPage }],
             pageParams: [initialNextPage],
         },
     });
-
-    const {
-        data: imageData,
-        fetchNextPage: fetchNextImagePage,
-        hasNextPage: hasNextImagePage,
-        isError: imageIsError,  // 에러 상태
-    } = useInfiniteQuery({
-        retry: false,
-        queryKey: ['imagePostlist'],
-        queryFn: async ({ pageParam }) => {
-            return fetchPostsWithImages(user.uid, pageParam, 4);
-        },
-        getNextPageParam: (lastPage) => {
-            if (usageLimit || !lastPage.nextPage) {
-                return;
-            }
-            return lastPage.nextPage;
-        },
-        staleTime: 5 * 60 * 1000,
-        initialPageParam: initialImageNextPage, // 초기 페이지 파라미터 설정
-        initialData: {
-            pages: [{ imageData: initialImagePosts, nextPage: initialImageNextPage }],
-            pageParams: [initialImageNextPage],
-        },
-    });
-
-    useEffect(() => {
-        if (isError || imageIsError) {
-            setUsageLimit(true);
-        }
-    }, [isError])
 
     // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
     useEffect(() => {
@@ -106,21 +76,19 @@ export default function UserClient({ user, postData: initialPosts, initialNextPa
             ).values()
         );
 
-        setPosts(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
-    }, [postData.pages]);
-
-    useEffect(() => {
         const uniqueImagePosts = Array.from(
             new Map(
                 [
-                    ...(imageData.pages
+                    ...(postData.pages
                         ?.flatMap((page) => page?.imageData || [])
-                        .filter((post) => !!post) || []),
+                        .filter((post): post is ImagePostData => !!post) || []),
                 ].map((post) => [post.id, post])
             ).values()
         );
+
         setImagePost(uniqueImagePosts);
-    }, [imageData.pages]);
+        setPosts(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
+    }, [postData.pages]);
 
     // 스크롤 끝나면 포스트 요청
     const isFirstLoad = useRef(true); // 최초 실행 여부 확인
@@ -158,13 +126,13 @@ export default function UserClient({ user, postData: initialPosts, initialNextPa
 
         const observer = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting && hasNextImagePage) {
+                if (entries[0].isIntersecting && hasNextPage) {
                     if (entries[0].isIntersecting && hasNextPage) {
                         if (isFirstLoad.current) {
                             isFirstLoad.current = false; // 최초 실행을 방지하고 이후부터 동작
                             return;
                         }
-                        fetchNextImagePage();
+                        fetchNextPage();
                     }
                 }
             },
@@ -181,7 +149,7 @@ export default function UserClient({ user, postData: initialPosts, initialNextPa
             }
             observer.disconnect(); // 강제 해제
         };
-    }, [hasNextImagePage, fetchNextImagePage, usageLimit, postTab]);
+    }, [hasNextPage, fetchNextPage, usageLimit, postTab]);
 
     const formatDate = (createAt: Timestamp | Date | string | number) => {
         if ((createAt instanceof Timestamp)) {

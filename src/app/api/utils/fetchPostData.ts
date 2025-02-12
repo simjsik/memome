@@ -1,6 +1,6 @@
 import { collection, doc, getDoc, getDocs, limit, orderBy, query, startAfter, Timestamp, where } from "firebase/firestore";
 import { db } from "@/app/DB/firebaseConfig";
-import { Comment, PostData } from "@/app/state/PostState";
+import { Comment, ImagePostData, PostData } from "@/app/state/PostState";
 
 // 일반 포스트 무한 스크롤 로직
 export const fetchPosts = async (
@@ -348,76 +348,73 @@ export const fetchPostList = async (
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
 
-        const PostResponse = await fetch('http://localhost:3000/api/loadToFirebasePostData/fetchPostList', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId, pageParam, pageSize }),
-        })
-        if (!PostResponse.ok) {
-            const errorDetails = await PostResponse.json();
-            throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-        }
+        const startAfterParam = (pageParam && pageParam[1])
+            ?
+            new Timestamp(pageParam[1].seconds, pageParam[1].nanoseconds)// 변환
+            : null;
 
-        const postData = await PostResponse.json()
-        const postWithComment = postData.data
-        const nextPage = postData.nextPage
+        // 현재 포스트 작성자의 모든 글 가져오기
+        const postlistRef = collection(db, 'posts');
 
+        const queryBase = query(
+            postlistRef,
+            where('userId', '==', userId),
+            orderBy('createAt', 'desc'),
+            limit(pageSize)
+        );
+        // console.log(pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
+        const postQuery = startAfterParam
+            ?
+            query(
+                queryBase,
+                startAfter(startAfterParam),
+            )
+            :
+            queryBase
+
+        const postlistSnapshot = await getDocs(postQuery);
+
+        const postWithComment: PostData[] = await Promise.all(
+            postlistSnapshot.docs.map(async (document) => {
+                // 포스트 가져오기
+                const postData = { id: document.id, ...document.data() } as PostData;
+
+                // 댓글 개수 가져오기
+                const commentRef = collection(db, 'posts', document.id, 'comments');
+                const commentSnapshot = await getDocs(commentRef);
+                postData.commentCount = commentSnapshot.size;
+
+                return postData;
+            })
+        );
+
+        const imageData: ImagePostData[] = postlistSnapshot.docs.map((document) => {
+            const imageData = document.data();
+
+            const mappedImages: string[] | false = (imageData.images === false)
+                ? false
+                : (Array.isArray(imageData.images) ? imageData.images : []); // 만약 다른 타입이면 빈 배열로 처리
+
+            return {
+                id: document.id,
+                images: mappedImages
+            };
+        });
+
+        const lastVisible = postlistSnapshot.docs.at(-1); // 마지막 문서
+        // console.log(postWithComment, lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
 
         return {
+            imageData: imageData,
             postData: postWithComment,
-            nextPage: nextPage
+            nextPage: lastVisible
+                ? ([lastVisible.data().notice as boolean, lastVisible.data().createAt as Timestamp] as [boolean, Timestamp])
+                : null,
         };
     } catch (error) {
         console.error("Error fetching data:", error);
         throw error;
     };
 };
-
-// 이미지 포스트 무한 스크롤 로직
-export const fetchPostsWithImages = async (
-    userId: string,
-    pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
-    pageSize: number = 6, // 무한 스크롤 시 가져올 데이터 수
-) => {
-    try {
-        const LimitResponse = await fetch('http://localhost:3000/api/firebaseLimit', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'user-id': userId || '',
-            }
-        });
-        if (LimitResponse.status === 403) {
-            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
-        }
-
-        const PostResponse = await fetch('http://localhost:3000/api/loadToFirebasePostData/fetchPostsWithImages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId, pageParam, pageSize }),
-        })
-        if (!PostResponse.ok) {
-            const errorDetails = await PostResponse.json();
-            throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-        }
-
-        const postData = await PostResponse.json()
-        const postWithImage = postData.imageData
-        const nextPage = postData.nextPage
-
-        return {
-            imageData: postWithImage,
-            nextPage: nextPage
-        };
-    } catch (error) {
-        console.error("Error fetching data:", error);
-        throw error;
-    }
-};
-
 
 

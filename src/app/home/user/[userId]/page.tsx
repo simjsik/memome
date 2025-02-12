@@ -3,7 +3,7 @@ import UserClient from "./userClient";
 import { db } from "@/app/DB/firebaseConfig";
 import { userData } from "@/app/state/PostState";
 import './userStyle.css'
-import { fetchPostList, fetchPostsWithImages } from "@/app/api/loadToFirebasePostData/fetchPostData";
+import { fetchPostList } from "@/app/api/utils/fetchPostData";
 
 interface UserPageProps {
     params: {
@@ -28,8 +28,7 @@ export default async function UserHome({ params }: UserPageProps) {
         } as userData
     }
 
-    const { postData: postData, nextPage: initialNextPage } = await fetchPostList(userId, null, 4);
-    const { imageData: imageData, nextPage: initialImageNextPage } = await fetchPostsWithImages(userId, null, 4);
+    const { imageData: imageData, postData: postData, nextPage: initialNextPage } = await fetchPostList(userId, null, 4);
     return (
         <>
             <div className="user_wrap">
@@ -44,7 +43,7 @@ export default async function UserHome({ params }: UserPageProps) {
                         <span className="user_uid">@{userData?.uid.slice(0, 8)}...</span>
                     </div>
                 </div>
-                {userData && <UserClient user={userData} postData={postData} initialNextPage={initialNextPage} imageData={imageData} initialImageNextPage={initialImageNextPage} />}
+                {userData && <UserClient user={userData} postData={postData} initialNextPage={initialNextPage} imageData={imageData} />}
             </div>
         </>
     )
