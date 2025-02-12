@@ -168,6 +168,10 @@ export default function LoginBox() {
             const signUser = userCredential.user
             const idToken = await signUser.getIdToken();
 
+            if (!signUser.emailVerified) {
+                return setLoginError('인증되지 않은 계정입니다. 이메일을 확인해주세요.');
+            }
+
             // 서버로 ID 토큰 전송
             const loginResponse = await fetch("/api/auth/loginApi", {
                 method: "POST",

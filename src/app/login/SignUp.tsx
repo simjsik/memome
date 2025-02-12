@@ -194,10 +194,10 @@ export default function SignUp() {
             const displayName = formData.displayName
 
             // 사용자 정보 저장 (users 컬렉션)
-            const saveUserResponse = await fetch('/api/utils/saveUserProfile/Firebase', {
+            const saveUserResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/utils/saveUserProfile`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ uid, displayName }),
+                body: JSON.stringify({ uid, displayName, email }),
             })
 
             if (!saveUserResponse.ok) {
@@ -205,9 +205,11 @@ export default function SignUp() {
                 throw new Error(`유저 정보 저장 실패 ${saveUserResponse.status}: ${errorData.message}`);
             }
 
+            const randomName = `user-${Math.random().toString(36).substring(2, 10)}`;
+
             // Firebase Authentication의 프로필 업데이트
             await updateProfile(user, {
-                displayName: formData.displayName,
+                displayName: formData.displayName || randomName,
                 photoURL: '',
             })
 

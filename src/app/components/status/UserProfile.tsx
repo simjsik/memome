@@ -270,7 +270,7 @@ export default function UserProfile() {
                     // 받아온 image인자가 File 타입이기 때문에 Cloudinary에 저장을 위해 base64로 변경
                     const base64Image = await fileToBase64(image);
 
-                    const validateResponse = await fetch('http://localhost:3000/api/auth/validateAuthToken', {
+                    const validateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -296,7 +296,7 @@ export default function UserProfile() {
                         profileImageUrl = currentUser.photo;
                     }
 
-                    const UpdateResponse = await fetch('http://localhost:3000/api/utils/updateProfile', {
+                    const UpdateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/utils/updateProfile`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -323,7 +323,7 @@ export default function UserProfile() {
                     return;
                 }
 
-                const UpdateResponse = await fetch('http://localhost:3000/api/utils/updateProfile', {
+                const UpdateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/utils/updateProfile`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
