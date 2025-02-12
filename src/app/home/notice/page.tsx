@@ -1,7 +1,7 @@
 import { authenticateUser } from '@/app/api/utils/redisClient';
-import { fetchNoticePosts } from '../../api/loadToFirebasePostData/fetchPostData';
 import ClientNotice from './ClientNotice';
 import { cookies } from 'next/headers';
+import { fetchNoticePosts } from '@/app/api/utils/fetchPostData';
 
 const JWT_SECRET = process.env.JWT_SECRET; // JWT 비밀키
 
@@ -28,7 +28,6 @@ export default async function Home() {
     if (!uid) {
         return console.error("유저 토큰이 유효하지 않습니다.");
     }
-
 
     const { data, nextPage: initialNextPage } = await fetchNoticePosts(uid, [true, null], 5);
 

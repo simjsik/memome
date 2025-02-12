@@ -1,6 +1,7 @@
 import { db } from "@/app/DB/firebaseConfig";
 import { doc, getDoc, } from "firebase/firestore";
 import ClientPost from './ClientPost';
+import { fetchComments } from "@/app/api/utils/fetchPostData";
 
 interface MemoPageProps {
     params: {
@@ -58,21 +59,8 @@ export default async function MemoPage({ params }: MemoPageProps) {
     }
 
     // // 포스트 댓글 가져오기
-    const CommentResponse = await fetch('http://localhost:3000/api/loadToFirebasePostData/fetchComments', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ postId }),
-    })
-
-    if (!CommentResponse.ok) {
-        const errorDetails = await CommentResponse.text();
-        throw new Error(`댓글 요청 실패: ${errorDetails}`);
-    }
-
-    const commentResponse = await CommentResponse.json()
-    const comments = commentResponse.comments
+    const CommentResponse = await fetchComments(userId, postId)
+    const comments = CommentResponse.comments
 
     const postAddComment = {
         ...transformedPost,

@@ -10,13 +10,13 @@ import { NewPostBtn, NoMorePost, PostWrap } from '../../styled/PostComponents';
 import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, where } from 'firebase/firestore';
 import { db } from '../../DB/firebaseConfig';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { fetchPosts } from '../../api/loadToFirebasePostData/fetchPostData';
 
 // Swiper
 import socket from '@/app/api/utils/websocket';
 import { Socket } from 'socket.io-client';
 import { usePostUpdateChecker } from '@/app/hook/ClientPolling';
 import BookmarkBtn from '@/app/components/BookmarkBtn';
+import { fetchPosts } from '@/app/api/utils/fetchPostData';
 
 interface MainHomeProps {
     post: PostData[],
@@ -47,7 +47,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
     const setStorageLoad = useSetRecoilState<boolean>(storageLoadState);
 
     // 현재 로그인 한 유저
-    const currentUser = useRecoilValue<userData | null>(userState)
+    const currentUser = useRecoilValue<userData>(userState)
 
     const ADMIN = useRecoilValue(ADMIN_ID);
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
@@ -61,7 +61,7 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
 
     // 웹소켓 연결
     const socketRef = useRef<Socket | null>(null);
-
+    const uid = currentUser.uid
     useEffect(() => {
         // 설정 해주지 않으면 popstate 이벤트가 실행 안됨.
         window.history.pushState(null, "", window.location.pathname);
@@ -155,7 +155,18 @@ export default function MainHome({ post: initialPosts, initialNextPage }: MainHo
         retry: false, // 재시도 방지
         queryKey: ['posts'],
         queryFn: async ({ pageParam }) => {
-            return fetchPosts(currentUser?.uid, pageParam, 5);
+            const validateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ uid }),
+            });
+
+            if (!validateResponse.ok) {
+                const errorDetails = await validateResponse.json();
+                throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+            }
+            return fetchPosts(uid, pageParam, 5);
         },
         getNextPageParam: (lastPage) => {
             // 사용량 초과 시 페이지 요청 중단

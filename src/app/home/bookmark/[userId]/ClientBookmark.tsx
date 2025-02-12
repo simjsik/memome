@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
-import { fetchBookmarks } from "@/app/api/loadToFirebasePostData/fetchPostData";
+import { fetchBookmarks } from "@/app/api/utils/fetchPostData";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { bookMarkState, PostData, UsageLimitState, userBookMarkState, userData, userState } from "@/app/state/PostState";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
@@ -19,6 +19,8 @@ export default function Bookmark() {
     const router = useRouter();
     const observerLoadRef = useRef(null);
 
+    const uid = currentUser.uid
+
     const {
         data: bookmarkPages,
         fetchNextPage,
@@ -30,6 +32,17 @@ export default function Bookmark() {
         retry: false,
         queryKey: ['bookmarks', currentUser?.uid],
         queryFn: async ({ pageParam = 0 }) => {
+            const validateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ uid }),
+            });
+
+            if (!validateResponse.ok) {
+                const errorDetails = await validateResponse.json();
+                throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+            }
             const result = await fetchBookmarks(
                 currentUser.uid,
                 currentBookmark, // 전역 상태를 바로 사용

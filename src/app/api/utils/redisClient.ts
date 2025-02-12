@@ -28,21 +28,21 @@ export default redisClient;
 // 세션 저장 함수
 export async function saveSession(uid: string, data: SessionData) {
     const key = `session:${uid}`;
-    console.log(data, '세션 저장 유저 정보')
+    // console.log(data, '세션 저장 유저 정보')
     await redisClient.set(key, JSON.stringify(data), { EX: 3600 * 24 * 7 }); // 일주일 만료
 }
 
 // 세션 업데이트 함수
 export async function updateSession(uid: string, data: SessionData) {
     const key = `session:${uid}`;
-    console.log(data, '세션 업데이트 유저 정보')
+    // console.log(data, '세션 업데이트 유저 정보')
     await redisClient.set(key, JSON.stringify(data), { XX: true, KEEPTTL: true });
 }
 
 // 게스트 세션 저장 함수
 export async function saveGuestSession(uid: string, data: SessionData) {
     const key = `session:${uid}`;
-    console.log(data, '게스트 세션 저장 유저 정보')
+    // console.log(data, '게스트 세션 저장 유저 정보')
     await redisClient.set(key, JSON.stringify(data), { EX: 3600 * 24 }); // 1시간 만료
 }
 
@@ -57,7 +57,7 @@ export async function getSession(uid: string): Promise<SessionData | null> {
 export async function sessionExists(uid: string): Promise<boolean> {
     const key = `session:${uid}`;
     const exists = await redisClient.exists(key);
-    console.log(uid, exists, '세션 저장 유저 정보 조회')
+    // console.log(uid, exists, '세션 저장 유저 정보 조회')
     return exists === 1;
 }
 

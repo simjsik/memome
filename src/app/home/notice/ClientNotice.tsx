@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { fetchNoticePosts, } from "@/app/api/loadToFirebasePostData/fetchPostData";
+import { fetchNoticePosts } from "@/app/api/utils/fetchPostData";
 import { DidYouLogin, loginToggleState, modalState, noticeState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import { NoMorePost, NoticeWrap, } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
@@ -31,6 +31,7 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
 
     const pathName = usePathname();
     const observerLoadRef = useRef(null);
+    const uid = currentUser.uid
 
     const formatDate = (createAt: Timestamp | Date | string | number) => {
         if ((createAt instanceof Timestamp)) {
@@ -65,7 +66,19 @@ export default function ClientNotice({ post: initialPosts, initialNextPage }: Ma
         retry: false,
         queryKey: ['notices'],
         queryFn: async ({ pageParam }) => {
-            return fetchNoticePosts(currentUser?.uid, pageParam, 4);
+            const validateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ uid }),
+            });
+
+            if (!validateResponse.ok) {
+                const errorDetails = await validateResponse.json();
+                throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+            }
+
+            return fetchNoticePosts(uid, pageParam, 4);
         },
         getNextPageParam: (lastPage) => {
             // 사용량 초과 시 페이지 요청 중단
