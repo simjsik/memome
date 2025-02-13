@@ -1,7 +1,7 @@
 import { adminDb } from "@/app/DB/firebaseAdminConfig";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest,) {
+export async function POST(req: NextRequest) {
     const userId = req.headers.get('user-id');
     const hasGuest = req.cookies.get("hasGuest")?.value;
     let limitCount = 80

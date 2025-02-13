@@ -13,6 +13,16 @@ interface SessionData {
 
 const JWT_SECRET = process.env.JWT_SECRET; // JWT 비밀키
 
+export function generateJwt(uid: string, role: number): string {
+    const secret = process.env.JWT_SECRET;
+
+    if (!secret) {
+        throw new Error('JWT_SECRET is not defined');
+    }
+
+    return jwt.sign({ uid: uid, role: role }, secret, { expiresIn: "1h" });
+}
+
 const redisClient = createClient({
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
 });

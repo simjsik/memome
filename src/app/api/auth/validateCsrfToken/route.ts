@@ -1,7 +1,6 @@
 import { randomBytes } from "crypto";
 import redisClient from "../../utils/redisClient";
 import { NextResponse } from "next/server";
-import jwt from 'jsonwebtoken';
 
 // CSRF 토큰 생성 API
 export async function GET() {
@@ -23,13 +22,5 @@ export async function GET() {
     return response;
 }
 
-export function generateJwt(uid: string, role: number): string {
-    const secret = process.env.JWT_SECRET;
 
-    if (!secret) {
-        throw new Error('JWT_SECRET is not defined');
-    }
-
-    return jwt.sign({ uid: uid, role: role }, secret, { expiresIn: "1h" });
-}
 

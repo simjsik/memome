@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveGuestSession, saveSession, sessionExists } from "../../utils/redisClient";
-import { generateJwt } from "../validateCsrfToken/route";
+import { generateJwt, saveGuestSession, saveSession, sessionExists } from "../../utils/redisClient";
 import { adminAuth, adminDb } from "@/app/DB/firebaseAdminConfig";
 
 export async function POST(req: NextRequest) {
@@ -14,6 +13,10 @@ export async function POST(req: NextRequest) {
         let tokenResponse;
 
         if (guestUid) {
+            if (!idToken) return NextResponse.json({ message: "게스트 토큰 누락" }, { status: 403 });
+            decodedToken = await adminAuth.verifyIdToken(idToken);
+            uid = decodedToken.uid;
+
             const guestDocRef = adminDb.doc(`guests/${guestUid}`);
             const guestDoc = await guestDocRef.get();
             const guestSessions = await sessionExists(guestUid)
@@ -24,19 +27,9 @@ export async function POST(req: NextRequest) {
             }
 
             if (!guestDoc.exists) {
-                console.log('게스트 로그인 이력 무 : 로직 실행')
-
-                if (!idToken) {
-                    return NextResponse.json({ message: "게스트 토큰이 누락되었습니다." }, { status: 403 });
-                }
-
-                decodedToken = await adminAuth.verifyIdToken(idToken);
-
-                uid = decodedToken.uid
-
                 const customToken = await adminAuth.createCustomToken(uid);
 
-                const saveUserResponse = await fetch('http://localhost:3000/api/utils/saveUserProfile/Guest', {
+                const saveUserResponse = await fetch('http://localhost:3000/api/utils/saveUserProfile', {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ uid, displayName: randomName, token: customToken }),
@@ -46,6 +39,7 @@ export async function POST(req: NextRequest) {
                     const errorData = await saveUserResponse.json();
                     throw new Error(`${saveUserResponse.status}: ${errorData.error}`);
                 }
+
             } else {
                 const idToken = await guestUid.getIdToken();
                 if (!idToken) {
@@ -56,25 +50,26 @@ export async function POST(req: NextRequest) {
                 if (!decodedToken) {
                     return NextResponse.json({ message: "게스트 계정이 올바르지 않습니다." }, { status: 403 });
                 }
+
                 uid = decodedToken.uid
             }
-        } else {
-            if (!idToken) {
-                return NextResponse.json({ message: "계정 토큰이 누락되었습니다." }, { status: 403 });
-            }
 
+            tokenResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
+                method: "POST",
+                body: JSON.stringify({ idToken }),
+            });
+        } else {
             decodedToken = await adminAuth.verifyIdToken(idToken);
             if (!decodedToken) {
                 return NextResponse.json({ message: "계정 토큰이 올바르지 않습니다." }, { status: 403 });
             }
 
+            uid = decodedToken.uid
+
             tokenResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
                 method: "POST",
-                // 이미 토큰을 가져왔으니 여기선 필요 없음!
                 body: JSON.stringify({ idToken }),
             });
-
-            uid = decodedToken.uid
         }
 
         if (!tokenResponse?.ok) {

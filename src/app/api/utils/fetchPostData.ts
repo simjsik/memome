@@ -275,7 +275,8 @@ export const fetchComments = async (userId: string, postId: string) => {
         const commentSnap = await getDocs(commentQuery);
 
         if (commentSnap.empty) {
-            throw new Error('댓글이 존재하지 않습니다.');
+            console.error('댓글이 없습니다.')
+            return { comments: [] };
         }
 
         const userCache = new Map<string, { displayName: string; photoURL: string | null }>();

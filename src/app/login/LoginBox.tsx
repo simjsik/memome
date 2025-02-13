@@ -333,6 +333,7 @@ export default function LoginBox() {
                     const userCredential = await signInAnonymously(auth);
                     const signUser = userCredential.user
                     const idToken = await signUser.getIdToken();
+                    localStorage.setItem('guestUid', signUser.uid)
 
                     guestResponse = await fetch("/api/auth/loginApi", {
                         method: "POST",
@@ -356,7 +357,6 @@ export default function LoginBox() {
                 });
             }
             // 서버로 ID 토큰 전송
-
 
             if (!guestResponse.ok) {
                 const errorData = await guestResponse.json();

@@ -4,7 +4,7 @@
 import { db } from "@/app/DB/firebaseConfig";
 import { ADMIN_ID, Comment, DidYouLogin, memoCommentCount, memoCommentState, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
-import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, increment, orderBy, query, startAfter, Timestamp, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import BookmarkBtn from "../BookmarkBtn";
@@ -194,6 +194,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
 
         if (user) {
             const text = parentId ? replyText : commentText;
+            const uid = user.uid;
 
             if (!text.trim()) {
                 alert(parentId ? '답글을 입력해주세요.' : '댓글을 입력해주세요.');
@@ -201,25 +202,39 @@ export default function MemoStatus({ post }: ClientPostProps) {
             }
 
             try {
-                const CommentResponse = await fetch('/api/utils/addComment', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ postId: post, parentId, commentId, text }),
+                const validateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
+                    method: "POST",
+                    body: JSON.stringify({ uid }),
                 });
-
-                if (!CommentResponse.ok) {
-                    const errorData = await CommentResponse.json()
-                    throw new Error('댓글 작성 실패!', errorData.message);
+                if (!validateResponse?.ok) {
+                    const errorData = await validateResponse?.json();
+                    console.error("Server-to-server error:", errorData.message);
+                    throw new Error('유저 검증 실패')
                 }
 
-                const commentResponse = await CommentResponse.json()
-                const commentData = commentResponse.commentData
+                const commentRef = collection(db, `posts/${post}/comments`);
+
+                const commentData = {
+                    replyId: commentId,
+                    user: uid,
+                    commentText: text,
+                    createAt: Timestamp.now(),
+                    parentId,
+                }
+
+                // firebase에 추가
+                const newCommentRef = await addDoc(commentRef, commentData);
+                const newCommentId = newCommentRef.id;
+
+                // 댓글 수 수정
+                const postRef = doc(db, 'posts', post)
+                await updateDoc(postRef, {
+                    commentCount: increment(1)
+                })
 
                 setCommentList((prev) => [
                     ...prev,
-                    { ...commentResponse.commentData, id: commentResponse.id, createAt: commentData.createAt, displayName: user.name, PhotoURL: user.photo } as Comment
+                    { ...commentData, id: newCommentId, createAt: commentData.createAt, displayName: user.name, PhotoURL: user.photo } as Comment
                 ]);
 
                 setCommentText('');
