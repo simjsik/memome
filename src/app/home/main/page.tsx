@@ -28,20 +28,7 @@ export default async function Home() {
   if (!uid) {
     return console.error("유저 토큰이 유효하지 않습니다.");
   }
-
-  const validateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
-    method: "POST",
-    headers: {
-      Cookie: cookies().toString(),
-    },
-    body: JSON.stringify({ uid }),
-  });
-
-  if (!validateResponse.ok) {
-    const errorDetails = await validateResponse.json();
-    throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-  }
-
+  
   const { data, nextPage } = await fetchPosts(uid, null, 4);
 
   return (
