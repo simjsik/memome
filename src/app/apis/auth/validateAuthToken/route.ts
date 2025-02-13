@@ -15,12 +15,8 @@ export async function POST(req: NextRequest) {
         }
 
         if (idToken) { // 로그인 시 ID 토큰 검증 용
-            try {
-                const decodedToken = await adminAuth.verifyIdToken(idToken);
-                if (!decodedToken) {
-                    return NextResponse.json({ message: "ID 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
-                }
-            } catch (error) {
+            const decodedToken = await adminAuth.verifyIdToken(idToken);
+            if (!decodedToken) {
                 return NextResponse.json({ message: "ID 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
             }
         }
@@ -57,20 +53,16 @@ export async function POST(req: NextRequest) {
         }
 
         if (csrfToken) {
-            try {
-                // Redis에서 토큰의 만료 시간 가져오기
-                const expiresAt = await redisClient.get(csrfToken);
+            // Redis에서 토큰의 만료 시간 가져오기
+            const expiresAt = await redisClient.get(csrfToken);
 
-                // 토큰이 존재하지 않거나 만료된 경우
-                if (!expiresAt || Date.now() > Number(expiresAt)) {
-                    console.log("CSRF 토큰 만료됨.");
+            // 토큰이 존재하지 않거나 만료된 경우
+            if (!expiresAt || Date.now() > Number(expiresAt)) {
+                console.log("CSRF 토큰 만료됨.");
 
-                    // 만료된 토큰 삭제
-                    await redisClient.del(csrfToken);
+                // 만료된 토큰 삭제
+                await redisClient.del(csrfToken);
 
-                    return NextResponse.json({ message: "CSRF 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
-                }
-            } catch (error) {
                 return NextResponse.json({ message: "CSRF 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
             }
         }

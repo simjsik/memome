@@ -10,8 +10,8 @@ import {
 } from 'react-instantsearch';
 import singletonRouter from 'next/router';
 import { createInstantSearchRouterNext } from 'react-instantsearch-router-nextjs';
-import { searchClient } from '@/app/api/algolia';
 import { GetServerSideProps } from 'next';
+import { searchClient } from '../utils/algolia';
 
 type SearchPageProps = {
     serverState?: InstantSearchServerState;

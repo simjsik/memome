@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { UserPostWrap } from "./userStyle";
 import { auth, db } from "@/app/DB/firebaseConfig";
 import { deleteDoc, doc, getDoc, Timestamp } from "firebase/firestore";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilValue } from "recoil";
 import { useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
@@ -25,7 +25,7 @@ export default function UserClient({ user, postData: initialPosts, initialNextPa
     const [imagePost, setImagePost] = useState<ImagePostData[]>([])
     const ADMIN = useRecoilValue(ADMIN_ID);
     const router = useRouter();
-    const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+    const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const [posts, setPosts] = useState<PostData[]>([])
     const [postTab, setPostTab] = useState<boolean>(true)
     const [dropToggle, setDropToggle] = useState<string>('')
@@ -40,7 +40,6 @@ export default function UserClient({ user, postData: initialPosts, initialNextPa
         data: postData,
         fetchNextPage,
         hasNextPage,
-        isError,  // 에러 상태
     } = useInfiniteQuery({
         retry: false,
         queryKey: ['postList', uid],

@@ -3,12 +3,12 @@
 
 import styled from "@emotion/styled";
 import { InstantSearch, SearchBox, useHits, useSearchBox } from "react-instantsearch";
-import { searchClient } from "../api/algolia";
 import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useRouter } from "next/navigation";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState, modalState, UsageLimitState, UsageLimitToggle } from "../state/PostState";
+import { searchClient } from "../utils/algolia";
 // 검색 창 css
 const SearchWrap = styled.div`
 position: relative;

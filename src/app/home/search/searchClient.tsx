@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { searchClient } from "@/app/api/algolia";
 import { useSearchParams } from "next/navigation";
 import { InstantSearch, SearchBox, useInfiniteHits, useSearchBox } from "react-instantsearch";
 import { SearchBoxWrap } from "./SearchStyle";
@@ -13,6 +12,7 @@ import { db } from "@/app/DB/firebaseConfig";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
 import { PostData } from "@/app/state/PostState";
+import { searchClient } from "@/app/utils/algolia";
 
 
 const formatDate = (createAt: Timestamp | Date | string | number) => {
