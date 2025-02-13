@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateJwt, saveGuestSession, saveSession, sessionExists } from "../../utils/redisClient";
 import { adminAuth, adminDb } from "@/app/DB/firebaseAdminConfig";
+import { generateJwt, saveGuestSession, saveSession, sessionExists } from "@/app/utils/redisClient";
 
 export async function POST(req: NextRequest) {
     try {

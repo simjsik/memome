@@ -1,6 +1,6 @@
 import { adminAuth, adminDb } from "@/app/DB/firebaseAdminConfig";
+import { getSession, updateSession } from "@/app/utils/redisClient";
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, updateSession } from "../redisClient";
 
 export async function POST(req: NextRequest) {
     try {

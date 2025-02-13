@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/app/DB/firebaseAdminConfig";
-import redisClient, { authenticateUser, sessionExists } from "../../utils/redisClient";
+import redisClient, { authenticateUser, sessionExists } from "@/app/utils/redisClient";
 
 export async function POST(req: NextRequest) {
     try {

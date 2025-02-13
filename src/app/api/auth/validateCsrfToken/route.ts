@@ -1,5 +1,5 @@
+import redisClient from "@/app/utils/redisClient";
 import { randomBytes } from "crypto";
-import redisClient from "../../utils/redisClient";
 import { NextResponse } from "next/server";
 
 // CSRF 토큰 생성 API

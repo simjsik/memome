@@ -1,7 +1,7 @@
 import { db } from "@/app/DB/firebaseConfig";
 import { doc, getDoc, } from "firebase/firestore";
 import ClientPost from './ClientPost';
-import { fetchComments } from "@/app/api/utils/fetchPostData";
+import { fetchComments } from "@/app/utils/fetchPostData";
 
 interface MemoPageProps {
     params: {

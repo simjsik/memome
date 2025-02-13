@@ -6,17 +6,17 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { ADMIN_ID, DidYouLogin, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, PostState, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
 import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
-import { NewPostBtn, NoMorePost, PostWrap } from '../../styled/PostComponents';
 import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, where } from 'firebase/firestore';
 import { db } from '../../DB/firebaseConfig';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 // Swiper
-import socket from '@/app/api/utils/websocket';
+import socket from '@/app/utils/websocket';
 import { Socket } from 'socket.io-client';
 import { usePostUpdateChecker } from '@/app/hook/ClientPolling';
 import BookmarkBtn from '@/app/components/BookmarkBtn';
-import { fetchPosts } from '@/app/api/utils/fetchPostData';
+import { fetchPosts } from '@/app/utils/fetchPostData';
+import { NewPostBtn, NoMorePost, PostWrap } from '@/app/styled/PostComponents';
 
 interface MainHomeProps {
     post: PostData[],

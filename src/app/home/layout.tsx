@@ -7,7 +7,7 @@ import LoginBox from '../login/LoginBox';
 import StatusBox from '../components/StatusBox';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { bookMarkState, hasGuestState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
-import { checkUsageLimit } from '../api/utils/checkUsageLimit';
+import { checkUsageLimit } from '../utils/checkUsageLimit';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../DB/firebaseConfig';
 

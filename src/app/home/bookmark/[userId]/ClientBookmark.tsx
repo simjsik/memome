@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
-import { fetchBookmarks } from "@/app/api/utils/fetchPostData";
+import { fetchBookmarks } from "@/app/utils/fetchPostData";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { bookMarkState, PostData, UsageLimitState, userBookMarkState, userData, userState } from "@/app/state/PostState";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";

@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { checkUsageLimit } from "@/app/api/utils/checkUsageLimit";
+import { checkUsageLimit } from "@/app/utils/checkUsageLimit";
 import { Comment, memoCommentCount, memoCommentState, UsageLimitState, userData, userState } from "@/app/state/PostState";
 import { HomeBtn } from "@/app/styled/RouterComponents";
 import { css } from "@emotion/react";

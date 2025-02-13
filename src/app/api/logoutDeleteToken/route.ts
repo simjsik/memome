@@ -1,5 +1,5 @@
+import { authenticateUser, deleteSession } from "@/app/utils/redisClient";
 import { NextRequest, NextResponse } from "next/server";
-import { authenticateUser, deleteSession } from "../redisClient";
 
 export async function POST(req: NextRequest) {
     try {

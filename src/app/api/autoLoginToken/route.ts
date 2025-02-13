@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/app/DB/firebaseAdminConfig";
-import { authenticateUser, getSession } from "../redisClient";
+import { authenticateUser, getSession } from "@/app/utils/redisClient";
 
 export async function GET(req: NextRequest) {
     try {

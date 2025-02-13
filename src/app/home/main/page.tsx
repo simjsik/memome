@@ -1,7 +1,7 @@
 import MainHome from './MainClient';
 import { cookies } from 'next/headers';
-import { authenticateUser } from '@/app/api/utils/redisClient';
-import { fetchPosts } from '@/app/api/utils/fetchPostData';
+import { authenticateUser } from '@/app/utils/redisClient';
+import { fetchPosts } from '@/app/utils/fetchPostData';
 
 const JWT_SECRET = process.env.JWT_SECRET; // JWT 비밀키
 

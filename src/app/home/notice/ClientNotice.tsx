@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { fetchNoticePosts } from "@/app/api/utils/fetchPostData";
+import { fetchNoticePosts } from "@/app/utils/fetchPostData";
 import { DidYouLogin, loginToggleState, modalState, noticeState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import { NoMorePost, NoticeWrap, } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";

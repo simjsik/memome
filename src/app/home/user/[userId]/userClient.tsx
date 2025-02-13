@@ -12,7 +12,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
-import { fetchPostList } from "@/app/api/utils/fetchPostData";
+import { fetchPostList } from "@/app/utils/fetchPostData";
 
 interface ClientUserProps {
     user: userData,

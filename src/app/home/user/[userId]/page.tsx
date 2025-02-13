@@ -3,7 +3,7 @@ import UserClient from "./userClient";
 import { db } from "@/app/DB/firebaseConfig";
 import { userData } from "@/app/state/PostState";
 import './userStyle.css'
-import { fetchPostList } from "@/app/api/utils/fetchPostData";
+import { fetchPostList } from "@/app/utils/fetchPostData";
 
 interface UserPageProps {
     params: {

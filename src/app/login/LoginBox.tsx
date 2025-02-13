@@ -19,8 +19,8 @@ import { getAuth, GoogleAuthProvider, signInAnonymously, signInWithCustomToken, 
 import { LoginOr, LoginSpan } from "../styled/LoginStyle";
 import { usePathname, useRouter } from "next/navigation";
 import SignUp from "./SignUp";
-import { auth, db } from "../DB/firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../DB/firebaseConfig";
 
 interface FirebaseError extends Error {
     code: string;
