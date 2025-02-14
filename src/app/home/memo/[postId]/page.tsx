@@ -1,3 +1,6 @@
+/** @jsxImportSource @emotion/react */ // 최상단에 배치
+"use client";
+
 import { db } from "@/app/DB/firebaseConfig";
 import { doc, getDoc, } from "firebase/firestore";
 import ClientPost from './ClientPost';
@@ -9,7 +12,7 @@ interface MemoPageProps {
     };
 }
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 // 서버 컴포넌트
 export default async function MemoPage({ params }: MemoPageProps) {
