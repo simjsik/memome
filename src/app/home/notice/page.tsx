@@ -5,6 +5,8 @@ import { fetchNoticePosts } from '@/app/utils/fetchPostData';
 
 const JWT_SECRET = process.env.JWT_SECRET; // JWT 비밀키
 
+export const revalidate = 60; // 60초마다 페이지를 재생성(ISR)
+
 export default async function Home() {
     // 포스트 불러오기
     const cookieStore = cookies();

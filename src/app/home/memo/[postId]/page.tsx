@@ -9,7 +9,7 @@ interface MemoPageProps {
     };
 }
 
-export const revalidate = 0;
+export const revalidate = 60; // 60초마다 페이지를 재생성(ISR)
 
 // 서버 컴포넌트
 export default async function MemoPage({ params }: MemoPageProps) {

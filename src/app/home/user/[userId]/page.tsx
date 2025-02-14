@@ -5,12 +5,13 @@ import { userData } from "@/app/state/PostState";
 import './userStyle.css'
 import { fetchPostList } from "@/app/utils/fetchPostData";
 
+export const revalidate = 60; // 60초마다 페이지를 재생성(ISR)
+
 interface UserPageProps {
     params: {
         userId: string;
     };
 }
-
 export default async function UserHome({ params }: UserPageProps) {
     const { userId } = params;
 
