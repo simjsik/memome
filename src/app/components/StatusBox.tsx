@@ -1,3 +1,6 @@
+/** @jsxImportSource @emotion/react */ // 최상단에 배치
+"use client";
+
 import styled from '@emotion/styled';
 import Logout from './Logout';
 import MemoStatus from './status/MemoStatus';

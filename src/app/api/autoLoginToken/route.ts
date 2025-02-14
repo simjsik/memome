@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/app/DB/firebaseAdminConfig";
-import { authenticateUser, getSession } from "@/app/utils/redisClient";
+import { getSession } from "@/app/utils/redisClient";
 
 export async function GET(req: NextRequest) {
     try {
@@ -16,9 +16,6 @@ export async function GET(req: NextRequest) {
 
         if (!userToken) {
             return NextResponse.json({ message: "유저 토큰이 존재하지 않습니다." }, { status: 401 });
-        }
-        if (!authenticateUser(userToken)) {
-            return NextResponse.json({ message: "유저 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
         }
 
         if (!hasGuest) {
@@ -41,21 +38,11 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ message: "토큰 인증 실패." }, { status: 403 });
         }
 
-        try {
-            decodedToken = await adminAuth.verifyIdToken(authToken); // Firebase 토큰 검증
-        } catch (err) {
-            console.error("ID 토큰 검증 실패:", err);
-            return NextResponse.json({ message: "ID 토큰이 유효하지 않거나 만료되었습니다." }, { status: 403 });
-        }
+        decodedToken = await adminAuth.verifyIdToken(authToken); // Firebase 토큰 검증
 
         // UID를 기반으로 Redis에서 세션 조회
-        try {
-            userData = await getSession(decodedToken.uid); // Redis에서 세션 가져오기
-            if (!userData) {
-                return NextResponse.json({ message: "유저 세션이 만료되었거나 유효하지 않습니다." }, { status: 403 });
-            }
-        } catch (err) {
-            console.error("Redis 세션 조회 실패:", err);
+        userData = await getSession(decodedToken.uid); // Redis에서 세션 가져오기
+        if (!userData) {
             return NextResponse.json({ message: "유저 세션이 만료되었거나 유효하지 않습니다." }, { status: 403 });
         }
 

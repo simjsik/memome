@@ -1,6 +1,7 @@
-import PostMenu from './PostMenu'
+/** @jsxImportSource @emotion/react */ // 최상단에 배치
+"use client";
 
-export const revalidate = 60; // 60초마다 페이지를 재생성(ISR)
+import PostMenu from './PostMenu'
 
 export default function Post() {
     return (

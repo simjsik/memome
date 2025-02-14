@@ -4,9 +4,15 @@ import { ReactNode, useEffect } from "react";
 import { PretendardBold, PretendardLight, PretendardMedium } from "@/app/styled/FontsComponets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useSetRecoilState } from "recoil";
-import { DidYouLogin, hasGuestState, loginToggleState, userData, userState } from "@/app/state/PostState";
+import { bookMarkState, DidYouLogin, hasGuestState, loginToggleState, userData, userState } from "@/app/state/PostState";
 import { useRouter } from "next/navigation";
-import '../../globals.css'
+import "./globals.css";
+import UsageLimit from "./components/UsageLimit";
+import StatusBox from "./components/StatusBox";
+import LoginBox from "./login/LoginBox";
+import NavBar from "./components/NavBar";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./DB/firebaseConfig";
 
 const queryClient = new QueryClient();
 
@@ -21,9 +27,9 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
     const setLoginState = useSetRecoilState<boolean>(DidYouLogin);
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setHasGuest = useSetRecoilState<boolean>(hasGuestState)
+    const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState)
 
     const router = useRouter();
-
 
     useEffect(() => {
         if (!loginData.hasLogin) {
@@ -39,6 +45,30 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
         router.push('/home/main');
     }, [loginData])
 
+    // 사용량 확인
+    useEffect(() => {
+        const loadBookmarks = async (uid: string) => {
+            if (loginData.hasGuest) {
+                return setCurrentBookmark([]);
+            }
+
+            try {
+                const bookmarks = await getDoc(doc(db, `users/${uid}/bookmarks/bookmarkId`));
+                if (bookmarks.exists()) {
+                    // 북마크 데이터가 있을 경우
+                    const data = bookmarks.data() as { bookmarkId: string[] };
+                    setCurrentBookmark(data.bookmarkId); // Recoil 상태 업데이트
+                }
+            } catch (error) {
+                console.error("북마크 데이터를 가져오는 중 오류 발생:", error);
+                setCurrentBookmark([]);
+            }
+        }
+
+        loadBookmarks(loginData.user.uid);
+
+    }, [loginData.user])
+    
     return <>{children}</>; // 반드시 children을 렌더링
 }
 
@@ -48,7 +78,13 @@ export default function ProviderClient({ children, loginData }: { children: Reac
             <QueryClientProvider client={queryClient}>
                 <RecoilRoot> {/* RecoilRoot로 감싸기 */}
                     <InitializeLoginComponent loginData={loginData}>
-                        {children}
+                        <>
+                            <LoginBox />
+                            <StatusBox></StatusBox>
+                            <UsageLimit />
+                            <NavBar></NavBar>
+                            {children}
+                        </>
                     </InitializeLoginComponent>
                 </RecoilRoot>
             </QueryClientProvider>

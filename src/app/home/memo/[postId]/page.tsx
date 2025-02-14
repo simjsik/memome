@@ -1,3 +1,6 @@
+/** @jsxImportSource @emotion/react */ // 최상단에 배치
+"use client";
+
 import { db } from "@/app/DB/firebaseConfig";
 import { doc, getDoc, } from "firebase/firestore";
 import ClientPost from './ClientPost';
@@ -8,8 +11,6 @@ interface MemoPageProps {
         postId: string;
     };
 }
-
-export const revalidate = 60; // 60초마다 페이지를 재생성(ISR)
 
 // 서버 컴포넌트
 export default async function MemoPage({ params }: MemoPageProps) {
