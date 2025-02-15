@@ -1,33 +1,7 @@
-import {initializeApp} from "firebase-admin/app";
-import {getFirestore} from "firebase-admin/firestore";
-import {onDocumentCreated} from "firebase-functions/v2/firestore";
+import { initializeApp } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
 initializeApp(); // Firebase Admin 초기화
-
-
-export const setHasUpdateCommentFlag = onDocumentCreated(
-  "posts/{postId}/comments/{commentId}",
-  async (event) => {
-    const db = getFirestore();
-    try {
-      const userSnap = await db.collection("users").get();
-      const upPromises = userSnap.docs.map(async (userDoc) => {
-        const upRef = db.doc(`users/${userDoc.id}/status/commentUpdates`);
-        await upRef.set(
-          {
-            hasUpdate: true,
-            updatedAt: new Date(),
-          },
-          {merge: true}
-        );
-      });
-      // 모든 업데이트 작업이 완료될 때까지 기다림
-      await Promise.all(upPromises);
-      console.log("모든 유저의 문서가 업데이트되었습니다.");
-    } catch (error) {
-      console.error("업데이트 중 오류 발생:", error);
-    }
-  }
-);
 
 const SOCKET_SERVER_URL = "https://relieved-florence-meloudy-61e63699.koyeb.app";
 
@@ -38,7 +12,7 @@ const SOCKET_SERVER_URL = "https://relieved-florence-meloudy-61e63699.koyeb.app"
  * @param {any} postData - 포스트 데이터 (title, notice 등 포함)
  * @return {Promise<void>} - 알림 전송 작업의 완료 여부
  */
-async function sendNotice(postId : string, postData : any) {
+async function sendNotice(postId: string, postData: any) {
   try {
     const response = await fetch(`${SOCKET_SERVER_URL}/notice`, {
       method: "POST",
@@ -61,6 +35,30 @@ async function sendNotice(postId : string, postData : any) {
   }
 }
 
+export const setHasUpdateCommentFlag = onDocumentCreated(
+  "posts/{postId}/comments/{commentId}",
+  async (event) => {
+    const db = getFirestore();
+    try {
+      const userSnap = await db.collection("users").get();
+      const upPromises = userSnap.docs.map(async (userDoc) => {
+        const upRef = db.doc(`users/${userDoc.id}/status/commentUpdates`);
+        await upRef.set(
+          {
+            hasUpdate: true,
+            updatedAt: new Date(),
+          },
+          { merge: true }
+        );
+      });
+      // 모든 업데이트 작업이 완료될 때까지 기다림
+      await Promise.all(upPromises);
+      console.log("모든 유저의 문서가 업데이트되었습니다.");
+    } catch (error) {
+      console.error("업데이트 중 오류 발생:", error);
+    }
+  }
+);
 
 export const setHasUpdateFlag = onDocumentCreated(
   "posts/{postId}",
@@ -98,7 +96,7 @@ export const setHasUpdateFlag = onDocumentCreated(
               noticeText: postData.title,
               updatedAt: postData.createAt,
             },
-            {merge: true}
+            { merge: true }
           );
         });
         await batch.commit();
@@ -118,7 +116,7 @@ export const setHasUpdateFlag = onDocumentCreated(
               hasUpdate: true,
               updatedAt: new Date(),
             },
-            {merge: true}
+            { merge: true }
           );
         });
         await batch.commit();
