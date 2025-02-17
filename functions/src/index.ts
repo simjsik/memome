@@ -1,30 +1,44 @@
-import express from 'express';
-import { initializeApp } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import {initializeApp} from "firebase-admin/app";
+import {getFirestore, Timestamp} from "firebase-admin/firestore";
+import {onDocumentCreated} from "firebase-functions/v2/firestore";
 initializeApp(); // Firebase Admin 초기화
-import setCsrfToken from './route/setCsrfToken';
-import autoLogin from './route/autoLoginApi';
-import login from './route/loginApi';
-import logout from './route/logoutApi';
-import saveUser from './route/saveUserApi';
-import updateProfile from './route/updateProfile';
-import authToken from './route/validateAuthToken';
-import firebaseLimit from './route/firebaseLimit';
+import express from "express";
+import setCsrfToken from "./route/setCsrfToken";
+import autoLogin from "./route/autoLoginApi";
+import login from "./route/loginApi";
+import logout from "./route/logoutApi";
+import saveUser from "./route/saveUserApi";
+import updateProfile from "./route/updateProfile";
+import authToken from "./route/validateAuthToken";
+import firebaseLimit from "./route/firebaseLimit";
 
 const app = express();
 app.use(express.json());
 
+export interface PostData {
+  tag: string;
+  title: string;
+  id: string;
+  userId: string;
+  content: string;
+  images?: string[] | false;
+  createAt: Timestamp;
+  commentCount: number,
+  notice: boolean,
+  displayName: string,
+  PhotoURL: string | null,
+}
+
 const SOCKET_SERVER_URL = "https://relieved-florence-meloudy-61e63699.koyeb.app";
 
-app.use('/csrf', setCsrfToken);
-app.use('/autologin', autoLogin);
-app.use('/login', login);
-app.use('/logout', logout);
-app.use('/saveuser', saveUser);
-app.use('/updateprofile', updateProfile);
-app.use('/validate', authToken);
-app.use('/limit', firebaseLimit);
+app.use("/csrf", setCsrfToken);
+app.use("/autologin", autoLogin);
+app.use("/login", login);
+app.use("/logout", logout);
+app.use("/saveuser", saveUser);
+app.use("/updateprofile", updateProfile);
+app.use("/validate", authToken);
+app.use("/limit", firebaseLimit);
 
 /**
  * 공지사항 포스트일 경우에만 웹소켓 알림을 전송하는 함수
@@ -33,7 +47,7 @@ app.use('/limit', firebaseLimit);
  * @param {any} postData - 포스트 데이터 (title, notice 등 포함)
  * @return {Promise<void>} - 알림 전송 작업의 완료 여부
  */
-async function sendNotice(postId: string, postData: any) {
+async function sendNotice(postId: string, postData: PostData) {
   try {
     const response = await fetch(`${SOCKET_SERVER_URL}/notice`, {
       method: "POST",
@@ -58,7 +72,7 @@ async function sendNotice(postId: string, postData: any) {
 
 export const setHasUpdateCommentFlag = onDocumentCreated(
   "posts/{postId}/comments/{commentId}",
-  async (event) => {
+  async () => {
     const db = getFirestore();
     try {
       const userSnap = await db.collection("users").get();
@@ -69,7 +83,7 @@ export const setHasUpdateCommentFlag = onDocumentCreated(
             hasUpdate: true,
             updatedAt: new Date(),
           },
-          { merge: true }
+          {merge: true}
         );
       });
       // 모든 업데이트 작업이 완료될 때까지 기다림
@@ -104,7 +118,7 @@ export const setHasUpdateFlag = onDocumentCreated(
     const postData = newPost.data();
     console.log("새 포스트 데이터:", postData);
     if (postData.notice) {
-      await sendNotice(postId, postData);
+      await sendNotice(postId, postData as PostData);
       try {
         const userSnap = await db.collection("users").get();
         const batch = db.batch();
@@ -117,7 +131,7 @@ export const setHasUpdateFlag = onDocumentCreated(
               noticeText: postData.title,
               updatedAt: postData.createAt,
             },
-            { merge: true }
+            {merge: true}
           );
         });
         await batch.commit();
@@ -137,7 +151,7 @@ export const setHasUpdateFlag = onDocumentCreated(
               hasUpdate: true,
               updatedAt: new Date(),
             },
-            { merge: true }
+            {merge: true}
           );
         });
         await batch.commit();

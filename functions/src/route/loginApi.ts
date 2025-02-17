@@ -1,87 +1,105 @@
-import { Request, Response } from "express";
-import { adminAuth, adminDb } from "../DB/firebaseAdminConfig";
-import { generateJwt, saveGuestSession, saveSession, sessionExists } from "../utils/redisClient";
+import * as dotenv from "dotenv";
+import express from "express";
+import {Request, Response} from "express";
+import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
+import {
+    generateJwt,
+    saveGuestSession,
+    saveSession,
+    sessionExists,
+} from "../utils/redisClient";
 import cookieParser from 'cookie-parser';
 
-const express = require('express');
+dotenv.config();
+
 const router = express.Router();
 const app = express();
 app.use(cookieParser());
 
+const API_URL = process.env.API_URL;
+
 router.post('/login', async (req: Request, res: Response) => {
     try {
-        const { idToken, role, hasGuest, guestUid } = await req.body;
-        const randomName = `Guest-${Math.random().toString(36).substring(2, 6)}`;
+        const {idToken, role, hasGuest, guestUid} = await req.body;
+        const randomName =
+         `Guest-${Math.random().toString(36).substring(2, 6)}`;
 
-        let decodedToken
+        let decodedToken;
         let uid;
         let userSession;
         let tokenResponse;
 
         if (guestUid) {
-            if (!idToken) return res.status(403).json({ message: "게스트 토큰 누락" });
+            if (!idToken) return res.status(403).json({message: "게스트 토큰 누락"});
             decodedToken = await adminAuth.verifyIdToken(idToken);
             uid = decodedToken.uid;
 
             const guestDocRef = adminDb.doc(`guests/${guestUid}`);
             const guestDoc = await guestDocRef.get();
-            const guestSessions = await sessionExists(guestUid)
+            const guestSessions = await sessionExists(guestUid);
 
             if (!guestSessions) {
                 await guestDocRef.delete();
-                console.log('게스트 세션 없음', guestSessions)
+                console.log('게스트 세션 없음', guestSessions);
             }
 
             if (!guestDoc.exists) {
                 const customToken = await adminAuth.createCustomToken(uid);
 
-                const saveUserResponse = await fetch('http://localhost:3000/api/utils/saveUserProfile', {
+                const saveUserResponse = await fetch(`${API_URL}/validate`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ uid, displayName: randomName, token: customToken }),
-                })
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        uid, displayName: randomName, token: customToken,
+                    }),
+                });
 
                 if (!saveUserResponse.ok) {
                     const errorData = await saveUserResponse.json();
-                    throw new Error(`${saveUserResponse.status}: ${errorData.error}`);
+                    throw new Error(`${403}: ${errorData.error}`);
                 }
-
             } else {
                 const idToken = await guestUid.getIdToken();
                 if (!idToken) {
-                    return res.status(403).json({ message: "게스트 토큰이 유효하지 않습니다." });
+                    return res.status(403).json({
+                         message: "게스트 토큰이 유효하지 않습니다.",
+                        });
                 }
 
                 decodedToken = await adminAuth.verifyIdToken(idToken);
                 if (!decodedToken) {
-                    return res.status(403).json({ message: "게스트 계정이 올바르지 않습니다." });
+                    return res.status(403).json({
+                         message: "게스트 계정이 올바르지 않습니다.",
+                         });
                 }
 
-                uid = decodedToken.uid
+                uid = decodedToken.uid;
             }
 
-            tokenResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
+            // 서버로 ID 토큰 검증을 위해 전송
+            tokenResponse = await fetch(`${API_URL}/validate`, {
                 method: "POST",
-                body: JSON.stringify({ idToken }),
+                // 이미 토큰을 가져왔으니 여기선 필요 없음!
+                body: JSON.stringify({idToken}),
             });
         } else {
             decodedToken = await adminAuth.verifyIdToken(idToken);
             if (!decodedToken) {
-                return res.status(403).json({ message: "계정 토큰이 올바르지 않습니다." });
+                return res.status(403).json({message: "계정 토큰이 올바르지 않습니다."});
             }
 
-            uid = decodedToken.uid
+            uid = decodedToken.uid;
 
-            tokenResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
+            tokenResponse = await fetch(`${API_URL}/validate`, {
                 method: "POST",
-                body: JSON.stringify({ idToken }),
+                body: JSON.stringify({idToken}),
             });
         }
 
         if (!tokenResponse?.ok) {
             const errorData = await tokenResponse?.json();
             console.error("Server-to-server error:", errorData.message);
-            return res.status(403).json({ message: "토큰 인증 실패." });
+            return res.status(403).json({message: "토큰 인증 실패."});
         }
 
         if (hasGuest) {
@@ -90,7 +108,7 @@ router.post('/login', async (req: Request, res: Response) => {
                 name: decodedToken.name || randomName,
                 photo: decodedToken.picture || "",
                 email: decodedToken.email || "",
-                role: role
+                role: role,
             };
         } else {
             userSession = {
@@ -98,13 +116,17 @@ router.post('/login', async (req: Request, res: Response) => {
                 name: decodedToken.name || "",
                 photo: decodedToken.picture || "",
                 email: decodedToken.email || "",
-                role: role
+                role: role,
             };
         }
 
         const UID = generateJwt(uid, role);
 
-        const response = res.status(200).json({ message: "로그인 성공.", uid, user: userSession });
+        const response = res.status(200).json({
+            message: "로그인 성공.",
+            uid,
+            user: userSession,
+        });
 
         if (hasGuest) {
             await saveGuestSession(uid, userSession);
@@ -144,11 +166,11 @@ router.post('/login', async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Login error:", error);
         if (error === "auth/user-not-found") {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({message: "User not found"});
         } else if (error === "auth/wrong-password") {
-            return res.status(401).json({ message: "Incorrect password" });
+            return res.status(401).json({message: "Incorrect password"});
         }
-        return res.status(500).json({ message: "Login failed" });
+        return res.status(500).json({message: "Login failed"});
     }
 });
 

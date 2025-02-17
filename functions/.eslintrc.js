@@ -14,7 +14,7 @@ module.exports = {
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    project: ["tsconfig.json", "tsconfig.dev.json"],
+    project: ["./tsconfig.json", "./tsconfig.dev.json"],
     sourceType: "module",
   },
   ignorePatterns: [
@@ -26,8 +26,10 @@ module.exports = {
     "import",
   ],
   rules: {
-    "quotes": ["error", "double"],
+    "quotes": "off",
     "import/no-unresolved": 0,
-    "indent": ["error", 2],
+    "indent": "off",
+    "linebreak-style": ["error", "windows"],
+    "new-cap": "off",
   },
 };
