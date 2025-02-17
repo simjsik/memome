@@ -1,9 +1,30 @@
+import express from 'express';
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 initializeApp(); // Firebase Admin 초기화
+import setCsrfToken from './route/setCsrfToken';
+import autoLogin from './route/autoLoginApi';
+import login from './route/loginApi';
+import logout from './route/logoutApi';
+import saveUser from './route/saveUserApi';
+import updateProfile from './route/updateProfile';
+import authToken from './route/validateAuthToken';
+import firebaseLimit from './route/firebaseLimit';
+
+const app = express();
+app.use(express.json());
 
 const SOCKET_SERVER_URL = "https://relieved-florence-meloudy-61e63699.koyeb.app";
+
+app.use('/csrf', setCsrfToken);
+app.use('/autologin', autoLogin);
+app.use('/login', login);
+app.use('/logout', logout);
+app.use('/saveuser', saveUser);
+app.use('/updateprofile', updateProfile);
+app.use('/validate', authToken);
+app.use('/limit', firebaseLimit);
 
 /**
  * 공지사항 포스트일 경우에만 웹소켓 알림을 전송하는 함수
