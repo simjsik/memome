@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
 dotenv.config();
 import {createClient} from "redis";
 import jwt, {JwtPayload} from "jsonwebtoken";
@@ -13,12 +13,28 @@ interface SessionData {
 
 const JWT_SECRET = process.env.JWT_SECRET; // JWT 비밀키
 
-const redisClient = createClient({url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`});
-
-// Redis 클라이언트 연결
-redisClient.connect().catch((err) => {
-    console.error("Redis 연결 실패:", err);
+const redisClient = createClient({
+    username: 'default',
+    password: 'cK3USae7OkI80yxXbpu5XhtAXXbPQhIy',
+    socket: {
+        host: 'redis-14533.c253.us-central1-1.gce.redns.redis-cloud.com',
+        port: 14533,
+    },
 });
+
+redisClient.on('error', (err) => console.error("Redis 클라이언트 에러", err));
+
+(async () => {
+    try {
+        await redisClient.connect();
+        // 테스트용 코드; 실제 배포 시에는 테스트 코드는 제거
+        await redisClient.set('foo', 'bar');
+        const result = await redisClient.get('foo');
+        console.log(result); // "bar"
+    } catch (err) {
+        console.error("Redis 연결 실패:", err);
+    }
+})();
 
 export default redisClient;
 

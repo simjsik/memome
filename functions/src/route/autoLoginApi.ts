@@ -1,6 +1,5 @@
 import * as dotenv from "dotenv";
-import express from "express";
-import {Request, Response} from "express";
+import express, {Request, Response} from "express";
 import {adminAuth} from "../DB/firebaseAdminConfig";
 import {getSession} from "../utils/redisClient";
 import cookieParser from "cookie-parser";
