@@ -1,7 +1,5 @@
 import LoginBox from './LoginBox';
-
-export const revalidate = 60; // 60초마다 페이지를 재생성(ISR)
-
+export const dynamic = "force-static"; // 정적 렌더링 설정
 export default function Login() {
 
   return (
