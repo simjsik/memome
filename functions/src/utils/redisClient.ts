@@ -119,8 +119,7 @@ export async function deleteSession(uid: string) {
 /**
  * 유저 인증 함수
  *
- * @param {string} token - 알림을 보낼 포스트의 ID
- * @param {SessionData} data - 포스트 데이터 (title, notice 등 포함)
+ * @param {string} token - 유저 토큰
  * @return {Promise<boolean | string>} - 알림 전송 작업의 완료 여부
  */
 export async function authenticateUser(

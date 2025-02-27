@@ -1,6 +1,5 @@
-import express from "express";
+import express, {Request, Response} from "express";
 import cookieParser from "cookie-parser";
-import {Request, Response} from "express";
 import {adminDb} from "../DB/firebaseAdminConfig";
 
 const router = express.Router();

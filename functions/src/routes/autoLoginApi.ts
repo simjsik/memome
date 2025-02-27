@@ -1,14 +1,15 @@
-import * as dotenv from "dotenv";
-import express, {Request, Response} from "express";
-import {adminAuth} from "../DB/firebaseAdminConfig";
-import {getSession} from "../utils/redisClient";
-import cookieParser from "cookie-parser";
-
+import dotenv from "dotenv";
 dotenv.config();
+import {Request, Response, Router} from "express";
+import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
 
-const router = express.Router();
-const app = express();
-app.use(cookieParser());
+interface userData {
+    displayName: string;
+    photoURL: string;
+    userId: string;
+}
+
+const router = Router();
 
 const API_URL = process.env.API_URL;
 
@@ -49,22 +50,22 @@ router.get('/autoLogin', async (req: Request, res: Response) => {
         ); // Firebase 토큰 검증
 
         // UID를 기반으로 Redis에서 세션 조회
-        const userData = await getSession(decodedToken.uid); // Redis에서 세션 가져오기
+        const userRef = adminDb.collection('users').doc(decodedToken.uid);
+        const userSnapshot = await userRef.get();
+        const userData = userSnapshot.data() as userData;
+
         if (!userData) {
-            return res.status(403).json({
-                message: "유저 세션이 만료되었거나 유효하지 않습니다.",
-            });
+            return res.status(403).json({message: "유저 정보가 존재하지 않습니다."});
         }
 
         // 사용자 정보 반환
         return res.status(200).json({
             message: "자동 로그인 성공",
             user: {
-                uid: decodedToken.uid,
-                email: userData.email,
-                displayName: userData.name || "Anonymous",
-                photoURL: userData.photo || null,
-            },
+                userId: decodedToken.uid,
+                displayName: userData.displayName || "Anonymous",
+                photoURL: userData.photoURL || null,
+            } as userData,
             hasGuest: hasGuest,
         });
     } catch (error) {

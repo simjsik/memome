@@ -1,16 +1,8 @@
 import * as dotenv from "dotenv";
-import express from "express";
-import {Request, Response} from "express";
-import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
-import {
-    generateJwt,
-    saveGuestSession,
-    saveSession,
-    sessionExists,
-} from "../utils/redisClient";
-import cookieParser from 'cookie-parser';
-
 dotenv.config();
+import express, {Request, Response} from "express";
+import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
+import cookieParser from 'cookie-parser';
 
 const router = express.Router();
 const app = express();
@@ -36,12 +28,6 @@ router.post('/login', async (req: Request, res: Response) => {
 
             const guestDocRef = adminDb.doc(`guests/${guestUid}`);
             const guestDoc = await guestDocRef.get();
-            const guestSessions = await sessionExists(guestUid);
-
-            if (!guestSessions) {
-                await guestDocRef.delete();
-                console.log('게스트 세션 없음', guestSessions);
-            }
 
             if (!guestDoc.exists) {
                 const customToken = await adminAuth.createCustomToken(uid);
@@ -90,7 +76,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
             uid = decodedToken.uid;
 
-            tokenResponse = await fetch(`${API_URL}/validate`, {
+            tokenResponse = await fetch(`${process.env.API_URL}/validate`, {
                 method: "POST",
                 body: JSON.stringify({idToken}),
             });
@@ -98,7 +84,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
         if (!tokenResponse?.ok) {
             const errorData = await tokenResponse?.json();
-            console.error("Server-to-server error:", errorData.message);
+            console.error("토큰 인증 실패:", errorData.message);
             return res.status(403).json({message: "토큰 인증 실패."});
         }
 
@@ -120,28 +106,24 @@ router.post('/login', async (req: Request, res: Response) => {
             };
         }
 
-        const UID = generateJwt(uid, role);
-
         const response = res.status(200).json({
             message: "로그인 성공.",
             uid,
             user: userSession,
         });
 
-        if (hasGuest) {
-            await saveGuestSession(uid, userSession);
-        } else {
-            await saveSession(uid, userSession);
+        const CsrfResponse = await fetch(`${process.env.API_URL}/csrf`, {
+            method: "POST",
+            body: JSON.stringify({uid}),
+        });
+
+        if (!CsrfResponse.ok) {
+            const errorData = await CsrfResponse.json();
+            console.error("CSRF 토큰 발급 실패:", errorData.message);
+            return res.status(403).json({message: "CSRF 토큰 발급 실패."});
         }
 
         res.cookie("authToken", idToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            path: "/",
-        });
-
-        res.cookie("userToken", UID, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
@@ -155,14 +137,7 @@ router.post('/login', async (req: Request, res: Response) => {
             path: "/",
         });
 
-        // 추가적인 헤더 설정
-        res.set("Access-Control-Allow-Credentials", "true");
-        res.set("Access-Control-Allow-Origin", "http://localhost:3000");
-        res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        res.set("Access-Control-Allow-Headers", "Content-Type");
-
         return response;
-        // 커스텀 토큰 발급
     } catch (error) {
         console.error("Login error:", error);
         if (error === "auth/user-not-found") {
