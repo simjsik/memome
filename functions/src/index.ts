@@ -156,9 +156,18 @@ export const setHasUpdateFlag = onDocumentCreated(
   }
 );
 
+const corsOptions = {
+  origin: true, // 명시적 출처 지정 (개발용)
+  credentials: true, // 쿠키/인증 헤더 허용
+  allowedHeaders:
+  ['Content-Type', 'Authorization', 'X-CSRF-Token'], // 커스텀 헤더 추가
+  methods: ['GET', 'POST'], // 허용 메서드
+};
+
 // Express 앱 초기화
 const app = express();
-app.use(cors({origin: true})); // CORS 허용
+app.use(cors(corsOptions)); // CORS 허용
+app.options('*', cors(corsOptions)); // 모든 OPTIONS 요청에 대해 CORS 헤더 적용
 app.use(express.json());
 app.use(cookieParser());
 

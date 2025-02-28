@@ -3,7 +3,7 @@ import { userData } from "../state/PostState";
 
 export const loginListener = async () => {
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/autoLoginToken`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/autoLogin`, {
             method: "GET",
             headers: {
                 Cookie: cookies().toString(),

@@ -9,17 +9,20 @@ app.use(cookieParser());
 router.post('/validate', async (req: Request, res: Response) => {
     try {
         const {idToken, uid} = await req.body;
-
+        console.log(idToken.slice(0, 8), "유저 아이디 토큰 ( Validate API )");
         const authToken = req.cookies.authToken;
         const csrfToken = req.cookies.csrfToken;
 
         if (!idToken && !uid) {
+            console.log("유저 아이디 토큰 및 UID 누락");
             return res.status(403).json({message: "토큰 및 UID가 누락되었습니다."});
         }
 
         if (idToken) { // 로그인 시 ID 토큰 검증 용
+            console.log("유저 아이디 토큰 확인. 검증 진행");
             const decodedToken = await adminAuth.verifyIdToken(idToken);
             if (!decodedToken) {
+                console.log("유저 아이디 토큰 검증 실패.");
                 return res.status(403).json({
                      message: "ID 토큰이 유효하지 않거나 만료되었습니다.",
                     });
@@ -27,8 +30,9 @@ router.post('/validate', async (req: Request, res: Response) => {
         }
 
         if (uid) { // 로그인 후 유저 검증 용
+            console.log("유저 아이디 UID 확인. 검증 진행");
             if (!authToken) {
-                return res.status(403).json({message: "ID 토큰이 누락 되었습니다."});
+                return res.status(403).json({message: "UID가 누락 되었습니다."});
             }
 
             const decodedToken = await adminAuth.verifyIdToken(authToken);

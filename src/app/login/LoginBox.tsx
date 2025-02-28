@@ -91,7 +91,7 @@ export default function LoginBox() {
     // hook
     const getCsrfToken = async () => {
         try {
-            const csrfResponse = await fetch("/api/auth/validateCsrfToken", {
+            const csrfResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/csrf`, {
                 method: "GET",
                 credentials: "include",
             });
@@ -104,11 +104,6 @@ export default function LoginBox() {
             console.error("CSRF 토큰 요청 중 오류:", error);
         }
     };
-
-    useEffect(() => {
-        getCsrfToken();
-    }, []);
-
 
     const firebaseErrorMessages: Record<string, string> = {
         "auth/user-not-found": "이메일 또는 비밀번호가 올바르지 않습니다.",
@@ -173,7 +168,7 @@ export default function LoginBox() {
             }
 
             // 서버로 ID 토큰 전송
-            const loginResponse = await fetch("/api/auth/loginApi", {
+            const loginResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",

@@ -1,4 +1,4 @@
-import * as dotenv from "dotenv";
+import dotenv from "dotenv";
 dotenv.config();
 import express, {Request, Response} from "express";
 import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
@@ -15,7 +15,7 @@ router.post('/login', async (req: Request, res: Response) => {
         const {idToken, role, hasGuest, guestUid} = await req.body;
         const randomName =
          `Guest-${Math.random().toString(36).substring(2, 6)}`;
-
+        console.log(idToken.slice(0, 8), '유저 아이디 토큰 ( Login API )');
         let decodedToken;
         let uid;
         let userSession;
@@ -32,7 +32,7 @@ router.post('/login', async (req: Request, res: Response) => {
             if (!guestDoc.exists) {
                 const customToken = await adminAuth.createCustomToken(uid);
 
-                const saveUserResponse = await fetch(`${API_URL}/validate`, {
+                const saveUserResponse = await fetch(`${API_URL}/saveUser`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({
@@ -65,7 +65,7 @@ router.post('/login', async (req: Request, res: Response) => {
             // 서버로 ID 토큰 검증을 위해 전송
             tokenResponse = await fetch(`${API_URL}/validate`, {
                 method: "POST",
-                // 이미 토큰을 가져왔으니 여기선 필요 없음!
+                headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({idToken}),
             });
         } else {
@@ -78,6 +78,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
             tokenResponse = await fetch(`${process.env.API_URL}/validate`, {
                 method: "POST",
+                headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({idToken}),
             });
         }
@@ -114,6 +115,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
         const CsrfResponse = await fetch(`${process.env.API_URL}/csrf`, {
             method: "POST",
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify({uid}),
         });
 

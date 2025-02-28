@@ -8,6 +8,7 @@ const router = Router();
 router.get('/csrf', async (req : Request, res: Response) => {
     try {
         const {uid} = await req.body;
+        console.log(uid, '유저 UID ( Csrf API )');
 
         const csrfToken = randomBytes(32).toString("hex");
 
