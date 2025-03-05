@@ -49,7 +49,7 @@ export default function Logout() {
         try {
             const confirmed = confirm('로그아웃 하시겠습니까?')
             if (confirmed && user) {
-                const response = await fetch("/api/utils/logoutDeleteToken", {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/logout`, {
                     method: "POST",
                     credentials: 'include',
                 });
@@ -72,8 +72,8 @@ export default function Logout() {
                 setHasLogin(false)
             }
         } catch (error) {
-            console.error("Error during logout:", error);
-            alert("An error occurred during logout.");
+            console.error("로그아웃 에러:", error);
+            alert("로그아웃 시도 중 에러가 발생했습니다..");
         }
     }
 

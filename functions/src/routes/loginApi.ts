@@ -107,15 +107,10 @@ router.post('/login', async (req: Request, res: Response) => {
             };
         }
 
-        const response = res.status(200).json({
-            message: "로그인 성공.",
-            uid,
-            user: userSession,
-        });
-
         const CsrfResponse = await fetch(`${process.env.API_URL}/csrf`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
+            credentials: "include",
             body: JSON.stringify({uid}),
         });
 
@@ -125,21 +120,43 @@ router.post('/login', async (req: Request, res: Response) => {
             return res.status(403).json({message: "CSRF 토큰 발급 실패."});
         }
 
-        res.cookie("authToken", idToken, {
+        const {csrfToken} = await CsrfResponse.json();
+        console.log(csrfToken, 'csrf 토큰 ( login API )');
+        console.log(
+            process.env.NODE_ENV === "production", 'secure 값 확인 ( login API )'
+        );
+        res.cookie("csrfToken", csrfToken, {
+            domain: "localhost",
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+            secure: false,
+            sameSite: "lax",
             path: "/",
+            maxAge: 3600 * 1000,
+        });
+
+        res.cookie("authToken", idToken, {
+            domain: "localhost",
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+            path: "/",
+            maxAge: 3600 * 1000,
         });
 
         res.cookie("hasGuest", hasGuest, {
+            domain: "localhost",
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+            secure: false,
+            sameSite: "lax",
             path: "/",
+            maxAge: 3600 * 1000,
         });
 
-        return response;
+        return res.status(200).json({
+            message: "로그인 성공.",
+            uid,
+            user: userSession,
+        });
     } catch (error) {
         console.error("Login error:", error);
         if (error === "auth/user-not-found") {

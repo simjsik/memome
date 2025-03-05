@@ -9,11 +9,11 @@ app.use(cookieParser());
 router.post('/validate', async (req: Request, res: Response) => {
     try {
         const {idToken, uid} = await req.body;
-        console.log(idToken.slice(0, 8), "유저 아이디 토큰 ( Validate API )");
+        console.log(idToken.slice(0, 8), uid, "유저 토큰 및 UID ( Validate API )");
         const authToken = req.cookies.authToken;
         const csrfToken = req.cookies.csrfToken;
 
-        if (!idToken && !uid) {
+        if (!idToken && (!uid && !csrfToken)) {
             console.log("유저 아이디 토큰 및 UID 누락");
             return res.status(403).json({message: "토큰 및 UID가 누락되었습니다."});
         }
@@ -32,8 +32,12 @@ router.post('/validate', async (req: Request, res: Response) => {
         if (uid) { // 로그인 후 유저 검증 용
             console.log("유저 아이디 UID 확인. 검증 진행");
             if (!authToken) {
-                return res.status(403).json({message: "UID가 누락 되었습니다."});
+                return res.status(403).json({message: "유저 ID 토큰이 누락 되었습니다."});
             }
+            if (!csrfToken) {
+                return res.status(403).json({message: "CSRF 토큰이 누락 되었습니다."});
+            }
+            console.log(csrfToken.slice(0, 8), "유저 CSRF 토큰 ( Validate API )");
 
             const decodedToken = await adminAuth.verifyIdToken(authToken);
 
@@ -75,6 +79,7 @@ router.post('/validate', async (req: Request, res: Response) => {
                         const CsrfResponse = await fetch(
                             `${process.env.API_URL}/csrf`, {
                             method: "POST",
+                            headers: {"Content-Type": "application/json"},
                             body: JSON.stringify({uid}),
                         });
                         if (!CsrfResponse.ok) {
@@ -96,9 +101,8 @@ router.post('/validate', async (req: Request, res: Response) => {
             }
         }
 
-        const response = res.status(200).json({message: "유저 검증 확인"});
-
-        return response;
+        console.log("유저 검증 완료.");
+        return res.status(200).json({message: "유저 검증 확인"});
     } catch (error) {
         console.error("토큰 인증 실패:", error);
         return res.status(500).json({message: "토큰 인증 실패"});

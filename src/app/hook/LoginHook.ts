@@ -5,25 +5,22 @@ export const loginListener = async () => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/autoLogin`, {
             method: "GET",
+            credentials: "include",
             headers: {
                 Cookie: cookies().toString(),
             },
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`자동 로그인 요청 에러 ${response.status}: ${errorData.message}`);
-        }
-
         if (response.ok) {
             // 비동기 데이터 처리 시 Promise로 남겨질 걸 생각해 await 사용.
             const data = await response.json();
             const { user, hasGuest } = data;
+            console.log(user, '자동 로그인 리스터 유저 정보')
             return {
                 user: {
-                    name: user.displayName,
+                    name: user.name,
                     email: user.email,
-                    photo: user.photoURL,
+                    photo: user.photo,
                     uid: user.uid,
                 } as userData,
                 hasLogin: true as boolean,

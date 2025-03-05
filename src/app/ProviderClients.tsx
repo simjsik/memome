@@ -37,7 +37,7 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
             router.push('/login');
             return;
         }
-
+        console.log(loginData.user,'자동 로그인 유저 정보')
         // 상태 업데이트
         setUserState(loginData.user);
         setLoginState(true);

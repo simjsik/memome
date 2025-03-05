@@ -88,23 +88,6 @@ export default function LoginBox() {
     const router = useRouter();
     const path = usePathname();
 
-    // hook
-    const getCsrfToken = async () => {
-        try {
-            const csrfResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/csrf`, {
-                method: "GET",
-                credentials: "include",
-            });
-
-            if (!csrfResponse.ok) {
-                console.error("CSRF 토큰 발급 실패:", await csrfResponse.text());
-                throw new Error("CSRF 토큰 발급 실패");
-            }
-        } catch (error) {
-            console.error("CSRF 토큰 요청 중 오류:", error);
-        }
-    };
-
     const firebaseErrorMessages: Record<string, string> = {
         "auth/user-not-found": "이메일 또는 비밀번호가 올바르지 않습니다.",
         "auth/wrong-password": "이메일 또는 비밀번호가 올바르지 않습니다.",
@@ -179,9 +162,6 @@ export default function LoginBox() {
                 const errorData = await loginResponse.json();
                 setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
                 if (loginResponse.status === 403) {
-                    if (errorData.message = '토큰 인증 실패.') {
-                        getCsrfToken();
-                    }
                     setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
                     throw new Error(`CSRF 토큰 확인 불가 ${loginResponse.status}: ${errorData.message}`);
                 }
@@ -252,9 +232,6 @@ export default function LoginBox() {
                 const errorData = await googleResponse.json();
                 setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
                 if (googleResponse.status === 403) {
-                    if (errorData.message === '토큰 인증 실패.') {
-                        getCsrfToken();
-                    }
                     setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
                     throw new Error(`CSRF 토큰 확인 불가 ${googleResponse.status}: ${errorData.message}`);
                 }
@@ -357,11 +334,8 @@ export default function LoginBox() {
                 const errorData = await guestResponse.json();
                 console.log(guestResponse.status, '에러 상태')
                 if (guestResponse.status === 403) {
-                    if (errorData.message === '토큰 인증 실패.') {
-                        getCsrfToken();
-                        throw new Error(`CSRF 토큰 확인 불가 ${guestResponse.status}: ${errorData.message}`);
-                    }
                     setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
+                    throw new Error(`CSRF 토큰 확인 불가 ${guestResponse.status}: ${errorData.message}`);
                 }
                 setLoginError('게스트 로그인에 실패했습니다. 다시 시도 해주세요.')
                 throw new Error(`서버 요청 에러 ${guestResponse.status}: ${errorData.message}`);

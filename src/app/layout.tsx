@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import "./globals.css";
-import { userData } from './state/PostState';
 import loginListener from './hook/LoginHook';
 import ProviderClient from './ProviderClients';
 
@@ -8,14 +7,8 @@ type LayoutProps = {
   children: ReactNode;
 };
 
-interface loginData {
-  user: userData,
-  hasLogin: boolean,
-  hasGuest: boolean
-}
-
 const loginData = await loginListener();
-
+console.log(loginData, '레이아웃 유저 정보 전달')
 export default async function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="ko">

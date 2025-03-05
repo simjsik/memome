@@ -13,6 +13,14 @@ const nextConfig = {
             },
         ];
     },
+    async rewrites() {
+        return [
+            {
+                source: "/api/:path*",
+                destination: "https://us-central1-meloudy-96af8.cloudfunctions.net/ApiRouter/:path*",
+            },
+        ];
+    },
 };
 
 
