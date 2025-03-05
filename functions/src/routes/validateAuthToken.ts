@@ -9,12 +9,12 @@ app.use(cookieParser());
 router.post('/validate', async (req: Request, res: Response) => {
     try {
         const {idToken, uid} = await req.body;
-        console.log(idToken.slice(0, 8), uid, "유저 토큰 및 UID ( Validate API )");
+        console.log(idToken?.slice(0, 8), uid, "유저 토큰 및 UID ( Validate API )");
         const authToken = req.cookies.authToken;
         const csrfToken = req.cookies.csrfToken;
 
         if (!idToken && (!uid && !csrfToken)) {
-            console.log("유저 아이디 토큰 및 UID 누락");
+            console.log("유저 아이디 토큰 및 UID 누락 ( Validate API )");
             return res.status(403).json({message: "토큰 및 UID가 누락되었습니다."});
         }
 
@@ -30,11 +30,15 @@ router.post('/validate', async (req: Request, res: Response) => {
         }
 
         if (uid) { // 로그인 후 유저 검증 용
-            console.log("유저 아이디 UID 확인. 검증 진행");
+            console.log("유저 아이디 UID 확인. 검증 진행 ( Validate API )");
+            console.log(authToken?.slice(0, 8), "유저 ID 토큰 ( Validate API )");
+            console.log(csrfToken?.slice(0, 8), "CSRF 토큰 ( Validate API )");
             if (!authToken) {
+                console.log("유저 ID 토큰 누락. 검증 실패 ( Validate API )");
                 return res.status(403).json({message: "유저 ID 토큰이 누락 되었습니다."});
             }
             if (!csrfToken) {
+                console.log("CSRF 토큰 누락. 검증 실패 ( Validate API )");
                 return res.status(403).json({message: "CSRF 토큰이 누락 되었습니다."});
             }
             console.log(csrfToken.slice(0, 8), "유저 CSRF 토큰 ( Validate API )");
@@ -42,6 +46,7 @@ router.post('/validate', async (req: Request, res: Response) => {
             const decodedToken = await adminAuth.verifyIdToken(authToken);
 
             if (!decodedToken) {
+                console.log("ID 토큰 검증 실패 ( Validate API )");
                 return res.status(403).json(
                     {message: "ID 토큰이 유효하지 않거나 만료되었습니다."}
                 );
@@ -52,6 +57,7 @@ router.post('/validate', async (req: Request, res: Response) => {
             const userData = userSnapshot.data();
 
             if (!userData) {
+                console.log("유저 세션 검증 실패 ( Validate API )");
                 return res.status(403).json({
                     message: "유저 세션이 만료되었거나 유효하지 않습니다.",
                 });

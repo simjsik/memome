@@ -6,7 +6,7 @@ const router = express.Router();
 const app = express();
 app.use(cookieParser());
 
-router.get('/limit', async (req: Request, res: Response) => {
+router.post('/limit', async (req: Request, res: Response) => {
     const {userId} = req.body;
     const hasGuest = req.cookies.hasGuest;
 

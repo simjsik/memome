@@ -151,7 +151,7 @@ export default function MainHome() {
     retry: false, // 재시도 방지
     queryKey: ['posts'],
     queryFn: async ({ pageParam }) => {
-      const validateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/validate`, {
+      const validateResponse = await fetch(`/api/validate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -453,7 +453,7 @@ export default function MainHome() {
     document.addEventListener('mousedown', handleOutsideClick); // 이벤트 리스너 추가
     return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
   }, []);
-  
+
   return (
     <>
       {hasUpdate &&

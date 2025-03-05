@@ -9,12 +9,12 @@ export const fetchPosts = async (
     pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
 ) => {
     try {
-        const LimitResponse = await fetch('http://localhost:3000/api/firebaseLimit', {
+        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'user-id': userId || '',
-            }
+            },
+            body: JSON.stringify({ userId }),
         });
         if (LimitResponse.status === 403) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
@@ -27,7 +27,7 @@ export const fetchPosts = async (
             ]
             : null;
 
-        // console.log(startAfterParam?.at(1) instanceof Timestamp, 'PageParam 타입 확인');
+        console.log(startAfterParam?.at(1) instanceof Timestamp, 'PageParam 타입 확인');
 
         const queryBase =
             query(
@@ -38,7 +38,7 @@ export const fetchPosts = async (
                 limit(pageSize) // 필요한 수 만큼 데이터 가져오기
             )
 
-        // console.log(pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
+        console.log(pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
 
         const postQuery = startAfterParam
             ?
@@ -49,7 +49,7 @@ export const fetchPosts = async (
             :
             queryBase
 
-        // console.log(pageParam, 'pageParam', postQuery, 'postQuery', '시작쿼리')
+        console.log(pageParam, 'pageParam', postQuery, 'postQuery', '시작쿼리')
 
         const postSnapshot = await getDocs(postQuery);
 
@@ -75,7 +75,7 @@ export const fetchPosts = async (
         );
 
         const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
-        // console.log(lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
+        console.log(lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
 
         return {
             data: postWithComment,
@@ -91,25 +91,24 @@ export const fetchPosts = async (
 
 // 공지사항 포스트 무한 스크롤 로직
 export const fetchNoticePosts = async (
-    userId: string | null = null,
-    pageParam: [boolean, Timestamp] | [boolean, null],
-    pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
+    userId: string,
+    pageParam: Timestamp | undefined,
 ) => {
     try {
-        const LimitResponse = await fetch('http://localhost:3000/api/firebaseLimit', {
+        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'user-id': userId || '',
-            }
+            },
+            body: JSON.stringify({ userId }),
         });
         if (LimitResponse.status === 403) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
 
-        const startAfterParam = (pageParam && pageParam[1])
+        const startAfterParam = pageParam
             ?
-            new Timestamp(pageParam[1].seconds, pageParam[1].nanoseconds)// 변환
+            new Timestamp(pageParam.seconds, pageParam.nanoseconds)// 변환
             : null;
 
         const queryBase =
@@ -117,8 +116,10 @@ export const fetchNoticePosts = async (
                 collection(db, 'posts'),
                 where('notice', '==', true),
                 orderBy('createAt', 'desc'),
-                limit(pageSize) // 필요한 수 만큼 데이터 가져오기
+                limit(4) // 필요한 수 만큼 데이터 가져오기
             )
+
+        console.log(pageParam, '= 페이지 시간', '받은 인자')
 
         const postQuery = startAfterParam
             ?
@@ -128,7 +129,8 @@ export const fetchNoticePosts = async (
             )
             :
             queryBase
-
+            
+        console.log(pageParam, 'pageParam', postQuery, 'postQuery', '시작쿼리')
         const postSnapshot = await getDocs(postQuery);
 
         const postWithComment: PostData[] = await Promise.all(
@@ -154,12 +156,12 @@ export const fetchNoticePosts = async (
         );
 
         const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
-
+        console.log(lastVisible?.data(), lastVisible?.data().createAt, '보내는 인자')
         return {
             data: postWithComment,
             nextPage: lastVisible
-                ? ([lastVisible.data().notice as boolean, lastVisible.data().createAt as Timestamp] as [boolean, Timestamp])
-                : ([true, null] as [boolean, null]),
+                ? lastVisible.data().createAt as Timestamp
+                : undefined,
         };
     } catch (error) {
         console.error("Error fetching data:", error);
