@@ -8,7 +8,7 @@ type LayoutProps = {
 };
 
 const loginData = await loginListener();
-console.log(loginData, '레이아웃 유저 정보 전달')
+
 export default async function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="ko">

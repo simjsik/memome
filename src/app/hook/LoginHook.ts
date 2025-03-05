@@ -15,7 +15,6 @@ export const loginListener = async () => {
             // 비동기 데이터 처리 시 Promise로 남겨질 걸 생각해 await 사용.
             const data = await response.json();
             const { user, hasGuest } = data;
-            console.log(user, '자동 로그인 리스터 유저 정보')
             return {
                 user: {
                     name: user.name,

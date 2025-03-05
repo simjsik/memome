@@ -453,6 +453,7 @@ export default function MainHome() {
     document.addEventListener('mousedown', handleOutsideClick); // 이벤트 리스너 추가
     return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
   }, []);
+  
   return (
     <>
       {hasUpdate &&
