@@ -3,6 +3,8 @@ import "./globals.css";
 import loginListener from './hook/LoginHook';
 import ProviderClient from './ProviderClients';
 
+export const dynamic = "force-dynamic";
+
 type LayoutProps = {
   children: ReactNode;
 };

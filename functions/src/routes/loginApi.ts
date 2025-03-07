@@ -126,25 +126,25 @@ router.post('/login', async (req: Request, res: Response) => {
             process.env.NODE_ENV === "production", 'secure 값 확인 ( login API )'
         );
         res.cookie("csrfToken", csrfToken, {
-            domain: "localhost",
+            domain: "memome-delta.vercel.app",
             httpOnly: true,
-            secure: false,
+            secure: true,
             sameSite: "lax",
             path: "/",
             maxAge: 3600 * 1000,
         });
 
         res.cookie("authToken", idToken, {
-            domain: "localhost",
+            domain: "memome-delta.vercel.app",
             httpOnly: true,
-            secure: false,
+            secure: true,
             sameSite: "lax",
             path: "/",
             maxAge: 3600 * 1000,
         });
 
         res.cookie("hasGuest", hasGuest, {
-            domain: "localhost",
+            domain: "memome-delta.vercel.app",
             httpOnly: true,
             secure: false,
             sameSite: "lax",
