@@ -5,8 +5,7 @@ import { Comment, ImagePostData, PostData } from "@/app/state/PostState";
 // 일반 포스트 무한 스크롤 로직
 export const fetchPosts = async (
     userId: string,
-    pageParam: [boolean, Timestamp] | null = null,
-    pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
+    pageParam: Timestamp | undefined,
 ) => {
     try {
         const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
@@ -21,30 +20,27 @@ export const fetchPosts = async (
         }
 
         const startAfterParam = pageParam
-            ? [
-                pageParam[0], // 첫 번째 값 (예: true/false)
-                new Timestamp(pageParam[1].seconds, pageParam[1].nanoseconds) // 변환
-            ]
+            ?
+            new Timestamp(pageParam.seconds, pageParam.nanoseconds) // 변환
             : null;
 
-        console.log(startAfterParam?.at(1) instanceof Timestamp, 'PageParam 타입 확인');
+        console.log(startAfterParam instanceof Timestamp, 'PageParam 타입 확인');
 
         const queryBase =
             query(
                 collection(db, 'posts'),
                 where('notice', '==', false),
-                orderBy('notice', 'desc'),
                 orderBy('createAt', 'desc'),
-                limit(pageSize) // 필요한 수 만큼 데이터 가져오기
+                limit(4) // 필요한 수 만큼 데이터 가져오기
             )
 
-        console.log(pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
+        console.log(pageParam, '= 페이지 시간', '= 페이지 사이즈', '받은 인자')
 
         const postQuery = startAfterParam
             ?
             query(
                 queryBase,
-                startAfter(...startAfterParam),
+                startAfter(startAfterParam),
             )
             :
             queryBase
@@ -75,13 +71,13 @@ export const fetchPosts = async (
         );
 
         const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
-        console.log(lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
+        console.log(lastVisible?.data(), lastVisible?.data().createAt, '보내는 인자')
 
         return {
             data: postWithComment,
             nextPage: lastVisible
-                ? ([lastVisible.data().notice as boolean, lastVisible.data().createAt as Timestamp] as [boolean, Timestamp])
-                : null,
+                ? lastVisible.data().createAt as Timestamp
+                : undefined,
         };
     } catch (error) {
         console.error("Error fetching data:", error);
@@ -108,7 +104,7 @@ export const fetchNoticePosts = async (
 
         const startAfterParam = pageParam
             ?
-            new Timestamp(pageParam.seconds, pageParam.nanoseconds)// 변환
+            [true, new Timestamp(pageParam.seconds, pageParam.nanoseconds)]// 변환
             : null;
 
         const queryBase =
@@ -125,11 +121,11 @@ export const fetchNoticePosts = async (
             ?
             query(
                 queryBase,
-                startAfter(startAfterParam),
+                startAfter(...startAfterParam),
             )
             :
             queryBase
-            
+
         console.log(pageParam, 'pageParam', postQuery, 'postQuery', '시작쿼리')
         const postSnapshot = await getDocs(postQuery);
 

@@ -8,7 +8,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, where } from 'firebase/firestore';
 import { db } from '../../DB/firebaseConfig';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 
 // Swiper
 import socket from '@/app/utils/websocket';
@@ -145,9 +145,15 @@ export default function MainHome() {
     data,
     fetchNextPage,
     hasNextPage,
-    isError,  // 에러 상태
-    error,    // 에러 메시지
-  } = useInfiniteQuery({
+    isError,
+    error,
+  } = useInfiniteQuery<
+    { data: PostData[]; nextPage: Timestamp | undefined }, // TQueryFnData
+    Error, // TError
+    InfiniteData<{ data: PostData[]; nextPage: Timestamp | undefined }>,
+    string[], // TQueryKey
+    Timestamp | undefined // TPageParam
+  >({
     retry: false, // 재시도 방지
     queryKey: ['posts'],
     queryFn: async ({ pageParam }) => {
@@ -157,27 +163,16 @@ export default function MainHome() {
         credentials: "include",
         body: JSON.stringify({ uid }),
       });
-
       if (!validateResponse.ok) {
         const errorDetails = await validateResponse.json();
         throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
       }
-      return fetchPosts(uid, pageParam, 5);
+
+      return fetchPosts(uid, pageParam);
     },
-    getNextPageParam: (lastPage) => {
-      // 사용량 초과 시 페이지 요청 중단
-      if (!lastPage.nextPage) return undefined;
-      return lastPage.nextPage;
-    },
-    staleTime: 5 * 60 * 1000, // 5분 동안 캐시 유지
-    initialPageParam: null as [boolean, Timestamp] | null,
-    initialData: {
-      pages: [{
-        data: [] as PostData[],
-        nextPage: null, // 빈 초기 상태: nextPage는 null
-      }],
-      pageParams: [null],
-    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    staleTime: 5 * 60 * 1000,
+    initialPageParam: undefined,
   });
 
   // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
@@ -188,13 +183,15 @@ export default function MainHome() {
     const fetchedPosts = data?.pages?.flatMap((page) => page?.data || []) || [];
     if (fetchedPosts.length === 0 && newPosts.length === 0) return;
 
+    const newPost = data?.pages
+      ?.flatMap((page) => page?.data || [])
+      .filter((post): post is PostData => !!post) || [];
+
     const uniquePosts = Array.from(
       new Map(
         [
           ...posts, // fetchNewPosts로 가져온 최신 데이터
-          ...(data.pages
-            ?.flatMap((page) => page?.data || [])
-            .filter((post): post is PostData => !!post) || []),
+          ...newPost,
         ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
       ).values()
     );
@@ -203,7 +200,7 @@ export default function MainHome() {
     if (JSON.stringify(uniquePosts) !== JSON.stringify(posts)) {
       setPosts(uniquePosts);
     }
-  }, [newPosts, data.pages, usageLimit]);
+  }, [posts, setPosts, newPosts, data?.pages, usageLimit]);
 
   useEffect(() => {
     if (isError) {
