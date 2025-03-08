@@ -3,12 +3,14 @@ dotenv.config();
 import express, {Request, Response} from "express";
 import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
 import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 const app = express();
 app.use(cookieParser());
 
 const API_URL = process.env.API_URL;
+const secret = process.env.JWT_SECRET;
 
 router.post('/login', async (req: Request, res: Response) => {
     try {
@@ -83,6 +85,13 @@ router.post('/login', async (req: Request, res: Response) => {
             });
         }
 
+        if (!secret) {
+            console.error("JWT 비밀 키 확인 불가");
+            return res.status(403).json({message: "JWT 비밀 키 확인 불가."});
+        }
+
+        const userToken = jwt.sign({uid, role}, secret, {expiresIn: "1h"});
+
         if (!tokenResponse?.ok) {
             const errorData = await tokenResponse?.json();
             console.error("토큰 인증 실패:", errorData.message);
@@ -122,9 +131,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
         const {csrfToken} = await CsrfResponse.json();
         console.log(csrfToken, 'csrf 토큰 ( login API )');
-        console.log(
-            process.env.NODE_ENV === "production", 'secure 값 확인 ( login API )'
-        );
+
         res.cookie("csrfToken", csrfToken, {
             domain: "memome-delta.vercel.app",
             httpOnly: true,
@@ -135,6 +142,15 @@ router.post('/login', async (req: Request, res: Response) => {
         });
 
         res.cookie("authToken", idToken, {
+            domain: "memome-delta.vercel.app",
+            httpOnly: true,
+            secure: true,
+            sameSite: "lax",
+            path: "/",
+            maxAge: 3600 * 1000,
+        });
+
+        res.cookie("userToken", userToken, {
             domain: "memome-delta.vercel.app",
             httpOnly: true,
             secure: true,

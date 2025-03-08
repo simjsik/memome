@@ -9,6 +9,7 @@ import { css } from '@emotion/react';
 import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, where } from 'firebase/firestore';
 import { db } from '../../DB/firebaseConfig';
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
+import sanitizeHtml from "sanitize-html";
 
 // Swiper
 import socket from '@/app/utils/websocket';
@@ -18,7 +19,7 @@ import BookmarkBtn from '@/app/components/BookmarkBtn';
 import { fetchPosts } from '@/app/utils/fetchPostData';
 import { NewPostBtn, NoMorePost, PostWrap } from '@/app/styled/PostComponents';
 
-export default function MainHome() {
+export default function MainHome({ nextPageParam }: { nextPageParam: Timestamp }) {
   // window.history.scrollRestoration = 'manual'
 
   const yourLogin = useRecoilValue(DidYouLogin)
@@ -168,11 +169,11 @@ export default function MainHome() {
         throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
       }
 
-      return fetchPosts(uid, pageParam);
+      return fetchPosts(uid, pageParam, 4);
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 5 * 60 * 1000,
-    initialPageParam: undefined,
+    initialPageParam: nextPageParam,
   });
 
   // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
@@ -451,6 +452,17 @@ export default function MainHome() {
     return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
   }, []);
 
+  // 위험한 HTML 태그/속성 제거
+  const cleanHtml = (content : string) => {
+    return sanitizeHtml(content, {
+      allowedTags: ["p", "strong", "em", "a", "ul", "li"], // 허용할 태그
+      allowedAttributes: {
+        a: ["href", "target", "rel"], // 허용할 속성
+      },
+      allowedSchemes: ["http", "https"], // 허용할 URL 스키마
+    });
+  }
+
   return (
     <>
       {hasUpdate &&
@@ -464,7 +476,7 @@ export default function MainHome() {
             <div
               key={post.id}
               className='post_box'
-              onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}>
+            >
               {/* 작성자 프로필 */}
               <div className='post_profile_wrap'>
                 <div className='user_profile'>
@@ -499,13 +511,13 @@ export default function MainHome() {
                 </button>
               </div>
               {/* 포스트 내용 */}
-              < div className='post_content_wrap' >
+              <div className='post_content_wrap' onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}>
                 {/* 포스트 제목 */}
                 < div className='post_title_wrap' >
                   <span className='post_tag'>[{post.tag}]</span>
                   <h2 className='post_title'>{post.title}</h2>
                 </div>
-                <div className='post_text' dangerouslySetInnerHTML={{ __html: post.content }}></div>
+                <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml(post.content) }}></div>
                 {/* 이미지 */}
                 {(post.images && post.images.length > 0) && (
                   <div className='post_pr_img_wrap'>

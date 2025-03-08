@@ -6,6 +6,7 @@ import { Comment, ImagePostData, PostData } from "@/app/state/PostState";
 export const fetchPosts = async (
     userId: string,
     pageParam: Timestamp | undefined,
+    pageSize: number,
 ) => {
     try {
         const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
@@ -31,7 +32,7 @@ export const fetchPosts = async (
                 collection(db, 'posts'),
                 where('notice', '==', false),
                 orderBy('createAt', 'desc'),
-                limit(4) // 필요한 수 만큼 데이터 가져오기
+                limit(pageSize) // 필요한 수 만큼 데이터 가져오기
             )
 
         console.log(pageParam, '= 페이지 시간', '= 페이지 사이즈', '받은 인자')
