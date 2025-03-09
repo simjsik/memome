@@ -14,7 +14,7 @@ export const loginListener = async () => {
         if (response.ok) {
             // 비동기 데이터 처리 시 Promise로 남겨질 걸 생각해 await 사용.
             const data = await response.json();
-            const { user } = data;
+            const { user, hasGuest } = data;
             return {
                 user: {
                     name: user.name,
@@ -23,7 +23,7 @@ export const loginListener = async () => {
                     uid: user.uid,
                 } as userData,
                 hasLogin: true as boolean,
-                hasGuest: true as boolean
+                hasGuest: hasGuest === true || hasGuest === false
             };
         } else {
             console.log("ID 토큰 및 유저 토큰이 유효하지 않습니다.");
