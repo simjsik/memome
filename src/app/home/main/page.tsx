@@ -13,8 +13,10 @@ export const metadata = {
 // 서버 컴포넌트
 export default async function MemoPage() {
     const uid = headers().get('x-user-uid');
+    console.log(uid, '메인 페이지 서버 컴포넌트 UID')
 
     const initialPosts = await fetchPosts(uid as string, undefined, 10); // 초기 10개 포스트
+    console.log(initialPosts, '메인 페이지 서버 컴포넌트 초기 데이터')
 
     return (
         <>
