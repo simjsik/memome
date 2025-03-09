@@ -32,11 +32,14 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
     const router = useRouter();
 
     const loadBookmarks = async (uid: string) => {
+        console.log('북마크 데이터 요청 함수 실행')
         if (loginData.hasGuest) {
+            console.log('게스트 북마크 데이터 요청 취소')
             return setCurrentBookmark([]);
         }
 
         try {
+            console.log('북마크 데이터 요청')
             const bookmarks = await getDoc(doc(db, `users/${uid}/bookmarks/bookmarkId`));
             console.log(bookmarks.exists(), '북마크 유무');
             if (bookmarks.exists()) {
@@ -68,7 +71,7 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
     useEffect(() => {
         console.log(loginData.user, '로그인 유저 정보')
         loadBookmarks(loginData.user.uid);
-    }, [loginData.user])
+    }, [loginData, loginData.user])
 
     return <>{children}</>; // 반드시 children을 렌더링
 }
