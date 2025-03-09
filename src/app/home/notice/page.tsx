@@ -1,5 +1,10 @@
 import ClientNotice from "./NoticeClient";
-export const dynamic = "force-static"; // 정적 렌더링 설정
+
+export const metadata = {
+    title: "공지사항 목록",
+    description: "최신 공지사항 메모를 확인하세요.",
+};
+
 // 서버 컴포넌트
 export default async function MemoPage() {
     return (

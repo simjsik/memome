@@ -19,7 +19,7 @@ import BookmarkBtn from '@/app/components/BookmarkBtn';
 import { fetchPosts } from '@/app/utils/fetchPostData';
 import { NewPostBtn, NoMorePost, PostWrap } from '@/app/styled/PostComponents';
 
-export default function MainHome({ nextPageParam }: { nextPageParam: Timestamp }) {
+export default function MainHome() {
   // window.history.scrollRestoration = 'manual'
 
   const yourLogin = useRecoilValue(DidYouLogin)
@@ -173,7 +173,7 @@ export default function MainHome({ nextPageParam }: { nextPageParam: Timestamp }
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 5 * 60 * 1000,
-    initialPageParam: nextPageParam,
+    initialPageParam: undefined,
   });
 
   // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
