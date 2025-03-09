@@ -32,7 +32,7 @@ export default function Bookmark() {
         retry: false,
         queryKey: ['bookmarks', currentUser?.uid],
         queryFn: async ({ pageParam = 0 }) => {
-            const validateResponse = await fetch(`api/validate`, {
+            const validateResponse = await fetch(`/api/validate`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
