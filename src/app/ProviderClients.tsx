@@ -55,20 +55,19 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
             router.push('/login');
             return;
         }
-        
+
         // 상태 업데이트
         setUserState(loginData.user);
         setLoginState(true);
         setHasGuest(loginData.hasGuest);
+        loadBookmarks(loginData.user.uid);
         router.push('/home/main');
     }, [loginData])
 
-    // 사용량 확인
     useEffect(() => {
-        console.log(loginData, loginData.user, '유저 정보')
-        loadBookmarks(loginData.user.uid);
+        console.log(loginData.user, '로그인 유저 정보')
     }, [loginData.user])
-    
+
     return <>{children}</>; // 반드시 children을 렌더링
 }
 
