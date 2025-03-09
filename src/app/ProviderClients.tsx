@@ -60,12 +60,12 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
         setUserState(loginData.user);
         setLoginState(true);
         setHasGuest(loginData.hasGuest);
-        loadBookmarks(loginData.user.uid);
         router.push('/home/main');
     }, [loginData])
 
     useEffect(() => {
         console.log(loginData.user, '로그인 유저 정보')
+        loadBookmarks(loginData.user.uid);
     }, [loginData.user])
 
     return <>{children}</>; // 반드시 children을 렌더링
