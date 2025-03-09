@@ -13,7 +13,7 @@ type LayoutProps = {
 export default async function RootLayout({ children }: LayoutProps) {
   const autologin = await loginListener();
   const loginData = { user: autologin.user as userData, hasLogin: autologin.hasLogin as boolean, hasGuest: autologin.hasGuest as boolean }
-
+  console.log(typeof autologin.hasGuest, '자동 로그인 유저 정보 타입');
   return (
     <html lang="ko">
       <body>
