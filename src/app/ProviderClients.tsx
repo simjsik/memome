@@ -38,10 +38,12 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
 
         try {
             const bookmarks = await getDoc(doc(db, `users/${uid}/bookmarks/bookmarkId`));
+            console.log(bookmarks.exists(), '북마크 유무');
             if (bookmarks.exists()) {
                 // 북마크 데이터가 있을 경우
                 const data = bookmarks.data() as { bookmarkId: string[] };
                 setCurrentBookmark(data.bookmarkId); // Recoil 상태 업데이트
+                console.log(data.bookmarkId, '북마크 리스트 목록');
             }
         } catch (error) {
             console.error("북마크 데이터를 가져오는 중 오류 발생:", error);
