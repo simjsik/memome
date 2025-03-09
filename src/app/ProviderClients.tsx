@@ -64,7 +64,7 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
         // 상태 업데이트
         setUserState(loginData.user);
         setLoginState(true);
-        setHasGuest(loginData.hasGuest);
+        setHasGuest(loginData.hasGuest as boolean);
         router.push('/home/main');
     }, [loginData])
 
