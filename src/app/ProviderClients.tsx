@@ -32,7 +32,7 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
     const router = useRouter();
 
     const loadBookmarks = async (uid: string) => {
-        console.log('북마크 데이터 요청 함수 실행')
+        console.log('북마크 데이터 요청 함수 실행', loginData.hasGuest)
         if (loginData.hasGuest) {
             console.log('게스트 북마크 데이터 요청 취소')
             return setCurrentBookmark([]);
