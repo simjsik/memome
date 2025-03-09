@@ -33,7 +33,7 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
 
     const loadBookmarks = async (uid: string) => {
         console.log('북마크 데이터 요청 함수 실행', typeof loginData.hasGuest, loginData.hasGuest)
-        if (loginData.hasGuest === true) {
+        if (loginData.hasGuest) {
             console.log('게스트 북마크 데이터 요청 취소')
             return setCurrentBookmark([]);
         }
