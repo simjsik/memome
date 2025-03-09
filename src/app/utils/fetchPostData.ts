@@ -175,12 +175,12 @@ export const fetchBookmarks = async (
 ) => {
     if (bookmarkIds.length <= 0) return;
     try {
-        const LimitResponse = await fetch('http://localhost:3000/api/firebaseLimit', {
+        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'user-id': userId || '',
-            }
+            },
+            body: JSON.stringify({ userId }),
         });
         if (LimitResponse.status === 403) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
