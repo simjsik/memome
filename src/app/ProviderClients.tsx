@@ -31,6 +31,24 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
 
     const router = useRouter();
 
+    const loadBookmarks = async (uid: string) => {
+        if (loginData.hasGuest) {
+            return setCurrentBookmark([]);
+        }
+
+        try {
+            const bookmarks = await getDoc(doc(db, `users/${uid}/bookmarks/bookmarkId`));
+            if (bookmarks.exists()) {
+                // 북마크 데이터가 있을 경우
+                const data = bookmarks.data() as { bookmarkId: string[] };
+                setCurrentBookmark(data.bookmarkId); // Recoil 상태 업데이트
+            }
+        } catch (error) {
+            console.error("북마크 데이터를 가져오는 중 오류 발생:", error);
+            setCurrentBookmark([]);
+        }
+    }
+
     useEffect(() => {
         if (!loginData.hasLogin) {
             setLoginToggle(true);
@@ -47,26 +65,8 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
 
     // 사용량 확인
     useEffect(() => {
-        const loadBookmarks = async (uid: string) => {
-            if (loginData.hasGuest) {
-                return setCurrentBookmark([]);
-            }
-
-            try {
-                const bookmarks = await getDoc(doc(db, `users/${uid}/bookmarks/bookmarkId`));
-                if (bookmarks.exists()) {
-                    // 북마크 데이터가 있을 경우
-                    const data = bookmarks.data() as { bookmarkId: string[] };
-                    setCurrentBookmark(data.bookmarkId); // Recoil 상태 업데이트
-                }
-            } catch (error) {
-                console.error("북마크 데이터를 가져오는 중 오류 발생:", error);
-                setCurrentBookmark([]);
-            }
-        }
-
+        console.log(loginData, loginData.user, '유저 정보')
         loadBookmarks(loginData.user.uid);
-
     }, [loginData.user])
     
     return <>{children}</>; // 반드시 children을 렌더링

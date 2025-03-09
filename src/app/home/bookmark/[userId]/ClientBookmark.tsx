@@ -43,12 +43,14 @@ export default function Bookmark() {
                 const errorDetails = await validateResponse.json();
                 throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
             }
+
             const result = await fetchBookmarks(
                 currentUser.uid,
                 currentBookmark, // 전역 상태를 바로 사용
                 pageParam, // 시작 인덱스
                 4, // 한 번 요청할 데이터 수
             );
+            
             if (!result) throw new Error('사용량 제한 초과');
             return result;
         },
