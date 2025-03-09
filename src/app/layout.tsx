@@ -9,9 +9,9 @@ type LayoutProps = {
   children: ReactNode;
 };
 
-const loginData = await loginListener();
-
 export default async function RootLayout({ children }: LayoutProps) {
+  const loginData = await loginListener();
+
   return (
     <html lang="ko">
       <body>
