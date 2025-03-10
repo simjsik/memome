@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+"use client";
 import styled from "@emotion/styled";
 
 export const PostDetailWrap = styled.div`
