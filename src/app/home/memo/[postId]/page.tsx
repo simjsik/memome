@@ -6,7 +6,6 @@ import sanitizeHtml from "sanitize-html";
 import { adminDb } from "@/app/DB/firebaseAdminConfig";
 import { Timestamp } from 'firebase/firestore';
 
-export const dynamic = "force-dynamic"; // 동적 렌더링 설정
 export const revalidate = 600;
 
 interface MemoPageProps {
