@@ -29,19 +29,7 @@ export default async function MemoPage({ params }: MemoPageProps) {
     const post = postSnap.data();
     const userId = post?.userId;
 
-    // 포스트 데이터에 유저 이름 매핑하기
-    const userDocRef = adminDb.collection("users").doc(userId); // DocumentReference 생성
-    const userDoc = await userDocRef.get(); // 문서 데이터 가져오기
 
-    const userData = userDoc.exists ? userDoc.data() : { displayName: "unknown", photoURL: null } // .data() 호출 필요
-
-    const transformedPost = {
-        ...post,
-        postId: postId,
-        createAt: new Date(post?.createAt.seconds * 1000).toISOString(), // ISO 형식 문자열
-        displayName: userData?.nickname,
-        photoURL: userData?.photo,
-    }
 
     // // 포스트 댓글 가져오기
     const CommentResponse = await fetchComments(userId, postId)
@@ -56,7 +44,6 @@ export default async function MemoPage({ params }: MemoPageProps) {
                 <div>
                     <div className="user_id">
                         <div className="user_profile"
-                            style={{ backgroundImage: `url(${transformedPost.photoURL})` }}
                         ></div>
                         <p>
                         </p>
