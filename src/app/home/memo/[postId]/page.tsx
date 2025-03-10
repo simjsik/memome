@@ -2,7 +2,6 @@ import ClientPost from './ClientPost';
 import { fetchComments } from "@/app/utils/fetchPostData";
 import { PostDetailWrap } from "./memoStyle";
 import { adminDb } from "@/app/DB/firebaseAdminConfig";
-import { Timestamp } from 'firebase/firestore';
 
 export const dynamic = "force-dynamic"; // 동적 렌더링 설정
 export const revalidate = 600;
@@ -12,7 +11,6 @@ interface MemoPageProps {
         postId: string;
     };
 }
-
 
 
 // 서버 컴포넌트
@@ -49,15 +47,6 @@ export default async function MemoPage({ params }: MemoPageProps) {
     const CommentResponse = await fetchComments(userId, postId)
     const comments = CommentResponse.comments
 
-    const formatDate = (timestamp: Timestamp) => {
-        return timestamp.toDate().toLocaleString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).replace(/\. /g, '.');
-    };
 
     // Function
     return (
@@ -65,23 +54,15 @@ export default async function MemoPage({ params }: MemoPageProps) {
             <ClientPost comment={comments} />
             <PostDetailWrap>
                 <div>
-                    <span className="post_category">{post?.tag}</span>
-                    <div className="post_title_wrap">
-                        <p className="post_title">
-                            {post?.title}
+                    <div className="user_id">
+                        <div className="user_profile"
+                            style={{ backgroundImage: `url(${transformedPost.photoURL})` }}
+                        ></div>
+                        <p>
                         </p>
-                        <div className="user_id">
-                            <div className="user_profile"
-                                style={{ backgroundImage: `url(${transformedPost.photoURL})` }}
-                            ></div>
-                            <p>
-                                {transformedPost.displayName} · {formatDate(post?.createAt)}
-                            </p>
-                        </div>
                     </div>
                 </div>
-                <div className="post_content_wrap" dangerouslySetInnerHTML={{ __html: (post?.content) }}></div>
-            </PostDetailWrap>
+            </PostDetailWrap >
         </>
     )
 }

@@ -9,7 +9,6 @@ import { css } from '@emotion/react';
 import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, where } from 'firebase/firestore';
 import { db } from '../../DB/firebaseConfig';
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
-import sanitizeHtml from "sanitize-html";
 
 // Swiper
 import socket from '@/app/utils/websocket';
@@ -452,16 +451,6 @@ export default function MainHome() {
     return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
   }, []);
 
-  // 위험한 HTML 태그/속성 제거
-  const cleanHtml = (content : string) => {
-    return sanitizeHtml(content, {
-      allowedTags: ["p", "strong", "em", "a", "ul", "li"], // 허용할 태그
-      allowedAttributes: {
-        a: ["href", "target", "rel"], // 허용할 속성
-      },
-      allowedSchemes: ["http", "https"], // 허용할 URL 스키마
-    });
-  }
 
   return (
     <>
@@ -517,7 +506,7 @@ export default function MainHome() {
                   <span className='post_tag'>[{post.tag}]</span>
                   <h2 className='post_title'>{post.title}</h2>
                 </div>
-                <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml(post.content) }}></div>
+                <div className='post_text' dangerouslySetInnerHTML={{ __html: (post.content) }}></div>
                 {/* 이미지 */}
                 {(post.images && post.images.length > 0) && (
                   <div className='post_pr_img_wrap'>
