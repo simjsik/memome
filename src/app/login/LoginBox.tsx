@@ -155,7 +155,6 @@ export default function LoginBox() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-project-host": window.location.origin,
                 },
                 credentials: "include",
                 body: JSON.stringify({ idToken, role, hasGuest }),

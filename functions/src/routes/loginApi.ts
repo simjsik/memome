@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import express, {CookieOptions, Request, Response} from "express";
+import express, {Request, Response} from "express";
 import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
 import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
@@ -17,27 +17,6 @@ router.post('/login', async (req: Request, res: Response) => {
         const {idToken, role, hasGuest, guestUid} = await req.body;
         const randomName =
          `Guest-${Math.random().toString(36).substring(2, 6)}`;
-
-         const hostHeader = req.headers['x-project-host'] || "";
-         const host = typeof hostHeader === "string" ? hostHeader : "";
-         let hostSecure = true;
-         let cookieDomain = "memome-delta.vercel.app"; // 기본값은 프로덕션 도메인
-
-         try {
-           const url = new URL(host);
-           cookieDomain = url.hostname;
-           // 프로토콜과 포트 제거 (예: "localhost" 또는 "memome-delta.vercel.app")
-         } catch (error) {
-           // 유효하지 않은 URL인 경우 기본값 유지
-           console.error("Invalid host URL:", error);
-         }
-
-         // 로컬 환경 확인 (호스트명이 localhost인 경우)
-         if (cookieDomain === "localhost") {
-           cookieDomain = "localhost";
-           hostSecure = false;
-         }
-
         console.log(idToken.slice(0, 8), '유저 아이디 토큰 ( Login API )');
         let decodedToken;
         let uid;
@@ -152,27 +131,42 @@ router.post('/login', async (req: Request, res: Response) => {
 
         const {csrfToken} = await CsrfResponse.json();
         console.log(csrfToken, 'csrf 토큰 ( login API )');
-        console.log(host, cookieDomain, hostSecure, 'API 호출 환경');
 
-        const cookieOptions: CookieOptions = {
+        res.cookie("csrfToken", csrfToken, {
+            domain: "memome-delta.vercel.app",
             httpOnly: true,
-            secure: hostSecure,
+            secure: true,
             sameSite: "lax",
             path: "/",
             maxAge: 3600 * 1000,
-        };
+        });
 
-        if (cookieDomain !== "localhost") {
-            cookieOptions.domain = cookieDomain;
-        }
+        res.cookie("authToken", idToken, {
+            domain: "memome-delta.vercel.app",
+            httpOnly: true,
+            secure: true,
+            sameSite: "lax",
+            path: "/",
+            maxAge: 3600 * 1000,
+        });
 
-        res.cookie("csrfToken", csrfToken, cookieOptions);
+        res.cookie("userToken", userToken, {
+            domain: "memome-delta.vercel.app",
+            httpOnly: true,
+            secure: true,
+            sameSite: "lax",
+            path: "/",
+            maxAge: 3600 * 1000,
+        });
 
-        res.cookie("authToken", idToken, cookieOptions);
-
-        res.cookie("userToken", userToken, cookieOptions);
-
-        res.cookie("hasGuest", hasGuest, cookieOptions);
+        res.cookie("hasGuest", hasGuest, {
+            domain: "memome-delta.vercel.app",
+            httpOnly: true,
+            secure: true,
+            sameSite: "lax",
+            path: "/",
+            maxAge: 3600 * 1000,
+        });
 
         return res.status(200).json({
             message: "로그인 성공.",
