@@ -151,9 +151,12 @@ export default function LoginBox() {
             }
 
             // 서버로 ID 토큰 전송
-            const loginResponse = await fetch(`/api/login`, {
+            const loginResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/login`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-project-host": window.location.origin,
+                },
                 credentials: "include",
                 body: JSON.stringify({ idToken, role, hasGuest }),
             });

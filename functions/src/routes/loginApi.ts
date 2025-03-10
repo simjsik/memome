@@ -17,6 +17,27 @@ router.post('/login', async (req: Request, res: Response) => {
         const {idToken, role, hasGuest, guestUid} = await req.body;
         const randomName =
          `Guest-${Math.random().toString(36).substring(2, 6)}`;
+
+         const hostHeader = req.headers['x-project-host'] || "";
+         const host = typeof hostHeader === "string" ? hostHeader : "";
+         let hostSecure = true;
+         let cookieDomain = "memome-delta.vercel.app"; // 기본값은 프로덕션 도메인
+
+         try {
+           const url = new URL(host);
+           cookieDomain = url.hostname;
+           // 프로토콜과 포트 제거 (예: "localhost" 또는 "memome-delta.vercel.app")
+         } catch (error) {
+           // 유효하지 않은 URL인 경우 기본값 유지
+           console.error("Invalid host URL:", error);
+         }
+
+         // 로컬 환경 확인 (호스트명이 localhost인 경우)
+         if (cookieDomain === "localhost") {
+           cookieDomain = "localhost";
+           hostSecure = false;
+         }
+
         console.log(idToken.slice(0, 8), '유저 아이디 토큰 ( Login API )');
         let decodedToken;
         let uid;
@@ -131,38 +152,39 @@ router.post('/login', async (req: Request, res: Response) => {
 
         const {csrfToken} = await CsrfResponse.json();
         console.log(csrfToken, 'csrf 토큰 ( login API )');
+        console.log(host, cookieDomain, hostSecure, 'API 호출 환경');
 
         res.cookie("csrfToken", csrfToken, {
-            domain: "memome-delta.vercel.app",
+            domain: cookieDomain,
             httpOnly: true,
-            secure: true,
+            secure: hostSecure,
             sameSite: "lax",
             path: "/",
             maxAge: 3600 * 1000,
         });
 
         res.cookie("authToken", idToken, {
-            domain: "memome-delta.vercel.app",
+            domain: cookieDomain,
             httpOnly: true,
-            secure: true,
+            secure: hostSecure,
             sameSite: "lax",
             path: "/",
             maxAge: 3600 * 1000,
         });
 
         res.cookie("userToken", userToken, {
-            domain: "memome-delta.vercel.app",
+            domain: cookieDomain,
             httpOnly: true,
-            secure: true,
+            secure: hostSecure,
             sameSite: "lax",
             path: "/",
             maxAge: 3600 * 1000,
         });
 
         res.cookie("hasGuest", hasGuest, {
-            domain: "memome-delta.vercel.app",
+            domain: cookieDomain,
             httpOnly: true,
-            secure: false,
+            secure: hostSecure,
             sameSite: "lax",
             path: "/",
             maxAge: 3600 * 1000,

@@ -157,10 +157,15 @@ export const setHasUpdateFlag = onDocumentCreated(
 );
 
 const corsOptions = {
-  origin: true, // 명시적 출처 지정 (개발용)
+  origin: ["https://memome-delta.vercel.app", "http://localhost:3000"], // 명시적 출처 지정 (개발용)
   credentials: true, // 쿠키/인증 헤더 허용
   allowedHeaders:
-  ['Content-Type', 'Authorization', 'X-CSRF-Token'], // 커스텀 헤더 추가
+  [
+    'Content-Type',
+    'Authorization',
+    'x-user-uid',
+    'x-project-host',
+  ], // 커스텀 헤더 추가
   methods: ['GET', 'POST'], // 허용 메서드
 };
 
