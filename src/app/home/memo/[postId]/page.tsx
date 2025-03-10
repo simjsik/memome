@@ -1,10 +1,10 @@
-import { db } from "@/app/DB/firebaseConfig";
-import { doc, getDoc, Timestamp, } from "firebase/firestore";
 import ClientPost from './ClientPost';
 import { fetchComments } from "@/app/utils/fetchPostData";
 import { PostDetailWrap } from "./memoStyle";
 import { Metadata } from "next";
 import sanitizeHtml from "sanitize-html";
+import { adminDb } from "@/app/DB/firebaseAdminConfig";
+import { Timestamp } from 'firebase/firestore';
 
 export const dynamic = "force-dynamic"; // 동적 렌더링 설정
 export const revalidate = 600;
@@ -17,23 +17,23 @@ interface MemoPageProps {
 
 // 동적 메타데이터 설정
 export async function generateMetadata({ params }: MemoPageProps): Promise<Metadata> {
-    const postRef = doc(db, "posts", params.postId);
-    const postSnap = await getDoc(postRef);
+    const postRef = adminDb.collection("posts").doc(params.postId);
+    const postSnap = await postRef.get();
 
-    if (!postSnap.exists()) {
+    if (!postSnap.exists) {
         return { title: "페이지를 찾을 수 없음" };
     }
 
     const post = postSnap.data();
 
     return {
-        title: post.title,
-        description: post.content.slice(0, 150) + "...",
+        title: post?.title,
+        description: post?.content.slice(0, 150) + "...",
         openGraph: {
-            title: post.title,
-            description: post.content.slice(0, 150) + "...",
+            title: post?.title,
+            description: post?.content.slice(0, 150) + "...",
             type: "article",
-            images: [{ url: post.images?.[0] || "/default.jpg" }]
+            images: [{ url: post?.images?.[0] || "/default.jpg" }]
         }
     };
 }
@@ -54,28 +54,28 @@ export default async function MemoPage({ params }: MemoPageProps) {
     const { postId } = params;
 
     // 포스트 데이터 가져오기
-    const postRef = doc(db, 'posts', postId);
-    const postSnap = await getDoc(postRef);
+    const postRef = adminDb.collection('posts').doc(postId);
+    const postSnap = await postRef.get();
 
-    if (!postSnap.exists()) {
+    if (!postSnap.exists) {
         return { title: "페이지를 찾을 수 없음" };
     }
 
     const post = postSnap.data();
-    const userId = post.userId;
+    const userId = post?.userId;
 
     // 포스트 데이터에 유저 이름 매핑하기
-    const userDocRef = doc(db, "users", userId); // DocumentReference 생성
-    const userDoc = await getDoc(userDocRef); // 문서 데이터 가져오기
+    const userDocRef = adminDb.collection("users").doc(userId); // DocumentReference 생성
+    const userDoc = await userDocRef.get(); // 문서 데이터 가져오기
 
-    const userData = userDoc.exists() ? userDoc.data() : { displayName: "unknown", photoURL: null } // .data() 호출 필요
+    const userData = userDoc.exists ? userDoc.data() : { displayName: "unknown", photoURL: null } // .data() 호출 필요
 
     const transformedPost = {
         ...post,
         postId: postId,
-        createAt: new Date(post.createAt.seconds * 1000).toISOString(), // ISO 형식 문자열
-        displayName: userData.nickname,
-        photoURL: userData.photo,
+        createAt: new Date(post?.createAt.seconds * 1000).toISOString(), // ISO 형식 문자열
+        displayName: userData?.nickname,
+        photoURL: userData?.photo,
     }
 
     // // 포스트 댓글 가져오기
@@ -91,24 +91,24 @@ export default async function MemoPage({ params }: MemoPageProps) {
             minute: '2-digit'
         }).replace(/\. /g, '.');
     };
-    
+
     // Function
     return (
         <>
             <ClientPost comment={comments} />
             <PostDetailWrap>
                 <div>
-                    <span className="post_category">{post.tag}</span>
+                    <span className="post_category">{post?.tag}</span>
                     <div className="post_title_wrap">
                         <p className="post_title">
-                            {post.title}
+                            {post?.title}
                         </p>
                         <div className="user_id">
                             <div className="user_profile"
                                 style={{ backgroundImage: `url(${transformedPost.photoURL})` }}
                             ></div>
                             <p>
-                                {transformedPost.displayName} · {formatDate(post.createAt)}
+                                {transformedPost.displayName} · {formatDate(post?.createAt)}
                             </p>
                         </div>
                     </div>
