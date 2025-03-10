@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import express, {Request, Response} from "express";
+import express, {CookieOptions, Request, Response} from "express";
 import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
 import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
@@ -154,41 +154,25 @@ router.post('/login', async (req: Request, res: Response) => {
         console.log(csrfToken, 'csrf 토큰 ( login API )');
         console.log(host, cookieDomain, hostSecure, 'API 호출 환경');
 
-        res.cookie("csrfToken", csrfToken, {
-            domain: cookieDomain,
+        const cookieOptions: CookieOptions = {
             httpOnly: true,
             secure: hostSecure,
             sameSite: "lax",
             path: "/",
             maxAge: 3600 * 1000,
-        });
+        };
 
-        res.cookie("authToken", idToken, {
-            domain: cookieDomain,
-            httpOnly: true,
-            secure: hostSecure,
-            sameSite: "lax",
-            path: "/",
-            maxAge: 3600 * 1000,
-        });
+        if (cookieDomain !== "localhost") {
+            cookieOptions.domain = cookieDomain;
+        }
 
-        res.cookie("userToken", userToken, {
-            domain: cookieDomain,
-            httpOnly: true,
-            secure: hostSecure,
-            sameSite: "lax",
-            path: "/",
-            maxAge: 3600 * 1000,
-        });
+        res.cookie("csrfToken", csrfToken, cookieOptions);
 
-        res.cookie("hasGuest", hasGuest, {
-            domain: cookieDomain,
-            httpOnly: true,
-            secure: hostSecure,
-            sameSite: "lax",
-            path: "/",
-            maxAge: 3600 * 1000,
-        });
+        res.cookie("authToken", idToken, cookieOptions);
+
+        res.cookie("userToken", userToken, cookieOptions);
+
+        res.cookie("hasGuest", hasGuest, cookieOptions);
 
         return res.status(200).json({
             message: "로그인 성공.",
