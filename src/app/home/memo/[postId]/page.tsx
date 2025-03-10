@@ -1,7 +1,6 @@
 import ClientPost from './ClientPost';
 import { fetchComments } from "@/app/utils/fetchPostData";
 import { PostDetailWrap } from "./memoStyle";
-import sanitizeHtml from "sanitize-html";
 import { adminDb } from "@/app/DB/firebaseAdminConfig";
 import { Timestamp } from 'firebase/firestore';
 
@@ -14,15 +13,7 @@ interface MemoPageProps {
     };
 }
 
-const cleanHtml = (content: string) => {
-    return sanitizeHtml(content, {
-        allowedTags: ["p", "strong", "em", "a", "ul", "li", "br"], // 허용할 태그
-        allowedAttributes: {
-            a: ["href", "target", "rel"], // 링크 속성만 허용
-        },
-        allowedSchemes: ["http", "https"], // http, https 링크만 허용
-    });
-};
+
 
 // 서버 컴포넌트
 export default async function MemoPage({ params }: MemoPageProps) {
@@ -89,7 +80,7 @@ export default async function MemoPage({ params }: MemoPageProps) {
                         </div>
                     </div>
                 </div>
-                <div className="post_content_wrap" dangerouslySetInnerHTML={{ __html: cleanHtml(post?.content) }}></div>
+                <div className="post_content_wrap" dangerouslySetInnerHTML={{ __html: (post?.content) }}></div>
             </PostDetailWrap>
         </>
     )
