@@ -1,7 +1,6 @@
 import ClientPost from './ClientPost';
 import { fetchComments } from "@/app/utils/fetchPostData";
 import { PostDetailWrap } from "./memoStyle";
-import { Metadata } from "next";
 import sanitizeHtml from "sanitize-html";
 import { adminDb } from "@/app/DB/firebaseAdminConfig";
 import { Timestamp } from 'firebase/firestore';
@@ -15,28 +14,7 @@ interface MemoPageProps {
     };
 }
 
-// 동적 메타데이터 설정
-export async function generateMetadata({ params }: MemoPageProps): Promise<Metadata> {
-    const postRef = adminDb.collection("posts").doc(params.postId);
-    const postSnap = await postRef.get();
 
-    if (!postSnap.exists) {
-        return { title: "페이지를 찾을 수 없음" };
-    }
-
-    const post = postSnap.data();
-
-    return {
-        title: post?.title,
-        description: post?.content.slice(0, 150) + "...",
-        openGraph: {
-            title: post?.title,
-            description: post?.content.slice(0, 150) + "...",
-            type: "article",
-            images: [{ url: post?.images?.[0] || "/default.jpg" }]
-        }
-    };
-}
 
 const cleanHtml = (content: string) => {
     return sanitizeHtml(content, {
