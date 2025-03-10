@@ -17,7 +17,9 @@ interface MemoPageProps {
 
 // 동적 메타데이터 설정
 export async function generateMetadata({ params }: MemoPageProps): Promise<Metadata> {
-    const postRef = adminDb.collection("posts").doc(params.postId);
+    const { postId } = params;
+
+    const postRef = adminDb.collection("posts").doc(postId);
     const postSnap = await postRef.get();
 
     if (!postSnap.exists) {
