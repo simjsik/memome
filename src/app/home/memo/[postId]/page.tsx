@@ -73,14 +73,6 @@ export default async function MemoPage({ params }: MemoPageProps) {
 
     const userData = userDoc.exists ? userDoc.data() : { displayName: "unknown", photoURL: null } // .data() 호출 필요
 
-    const transformedPost = {
-        ...post,
-        postId: postId,
-        createAt: new Date(post?.createAt.seconds * 1000).toISOString(), // ISO 형식 문자열
-        displayName: userData?.nickname,
-        photoURL: userData?.photo,
-    }
-
     // // 포스트 댓글 가져오기
     const CommentResponse = await fetchComments(userId, postId)
     const comments = CommentResponse.comments
@@ -108,10 +100,10 @@ export default async function MemoPage({ params }: MemoPageProps) {
                         </p>
                         <div className="user_id">
                             <div className="user_profile"
-                                style={{ backgroundImage: `url(${transformedPost.photoURL})` }}
+                                style={{ backgroundImage: `url(${userData?.photoURL})` }}
                             ></div>
                             <p>
-                                {transformedPost.displayName} · {formatDate(post?.createAt)}
+                                {userData?.displayName} · {formatDate(post?.createAt)}
                             </p>
                         </div>
                     </div>

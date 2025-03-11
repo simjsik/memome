@@ -163,28 +163,16 @@ export default function MemoStatus({ post }: ClientPostProps) {
     const ADMIN = useRecoilValue(ADMIN_ID)
     // state
 
-    const formatDate = (createAt: Timestamp | Date | string | number) => {
-        if ((createAt instanceof Timestamp)) {
-            return createAt.toDate().toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).replace(/\. /g, '.');
-        } else {
-            const date = new Date(createAt);
+    const formatDate = (timestamp: Timestamp) => {
+        return timestamp.toDate().toLocaleString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).replace(/\. /g, '.');
+    };
 
-            const format = date.toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            })
-            return format;
-        }
-    }
 
     const addComment = async (parentId: string | null = null, commentId: string) => {
         if (!hasLogin) {
@@ -333,8 +321,8 @@ export default function MemoStatus({ post }: ClientPostProps) {
                     orderBy("createAt", "asc"),
                     startAfter(
                         lastFetchedAt instanceof Timestamp
-                            ? lastFetchedAt.toDate()
-                            : new Timestamp(lastFetchedAt.seconds, lastFetchedAt.nanoseconds).toDate()
+                            ? lastFetchedAt
+                            : new Timestamp(lastFetchedAt.seconds, lastFetchedAt.nanoseconds)
                     )
                 )
                 : query(commentRef, orderBy("createAt", "asc"));

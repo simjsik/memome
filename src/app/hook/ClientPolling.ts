@@ -36,17 +36,16 @@ const useUpdateChecker = (statusPath: string) => {
             if (currentUser) {
                 const userId = currentUser.uid
 
-                const UpdateResponse = await fetch('http://localhost:3000/api/auth/validateAuthToken', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ uid : userId }),
-                })
+                const validateResponse = await fetch(`/api/validate`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ uid: userId }),
+                });
 
-                if (!UpdateResponse.ok) {
-                    const errorDetails = await UpdateResponse.json();
-                    if (UpdateResponse.status === 403) {
+                if (!validateResponse.ok) {
+                    const errorDetails = await validateResponse.json();
+                    if (validateResponse.status === 403) {
                         throw new Error(`새 포스트 업데이트 실패 : ${errorDetails.message}`);
                     }
                     throw new Error(`새 포스트 업데이트 실패 : ${errorDetails.message}`);
