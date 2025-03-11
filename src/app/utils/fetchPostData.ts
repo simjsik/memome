@@ -334,24 +334,24 @@ export const fetchComments = async (userId: string, postId: string) => {
 
 export const fetchPostList = async (
     userId: string,
-    pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
-    pageSize: number = 4, // 무한 스크롤 시 가져올 데이터 수.
+    pageParam: Timestamp | undefined,
+    pageSize: number,
 ) => {
     try {
-        const LimitResponse = await fetch('http://localhost:3000/api/firebaseLimit', {
+        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'user-id': userId || '',
-            }
+            },
+            body: JSON.stringify({ userId }),
         });
         if (LimitResponse.status === 403) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
 
-        const startAfterParam = (pageParam && pageParam[1])
+        const startAfterParam = pageParam
             ?
-            new Timestamp(pageParam[1].seconds, pageParam[1].nanoseconds)// 변환
+            new Timestamp(pageParam.seconds, pageParam.nanoseconds)// 변환
             : null;
 
         // 현재 포스트 작성자의 모든 글 가져오기
@@ -407,10 +407,10 @@ export const fetchPostList = async (
 
         return {
             imageData: imageData,
-            postData: postWithComment,
+            data: postWithComment,
             nextPage: lastVisible
-                ? ([lastVisible.data().notice as boolean, lastVisible.data().createAt as Timestamp] as [boolean, Timestamp])
-                : null,
+                ? lastVisible.data().createAt as Timestamp
+                : undefined,
         };
     } catch (error) {
         console.error("Error fetching data:", error);

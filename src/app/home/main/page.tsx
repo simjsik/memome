@@ -1,7 +1,7 @@
 import MainHome from "./MainClient";
 
 export const metadata = {
-    title: "메모 목록",
+    title: "MEMOME :: 홈",
     description: "최근 공유된 메모를 확인해보세요.",
 };
 
