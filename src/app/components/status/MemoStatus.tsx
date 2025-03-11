@@ -340,6 +340,13 @@ export default function MemoStatus({ post }: ClientPostProps) {
                 : query(commentRef, orderBy("createAt", "asc"));
             const snapshot = await getDocs(commentQuery);
 
+            if (snapshot.empty) {
+                // 새로운 댓글이 없는 경우: lastFetchedAt는 그대로 유지
+                clearUpdate();
+                console.error("새로운 댓글이 없습니다.");
+                return;
+            }
+
             // 댓글 데이터 생성
             const newComments = snapshot.docs.map((doc) => ({
                 id: doc.id,
