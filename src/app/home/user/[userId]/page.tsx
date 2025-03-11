@@ -25,10 +25,10 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
 
     return {
         title: `MEMOME :: ${userData?.displayName}`,
-        description: userData?.uid.slice(0, 8) + "...",
+        description: userId.slice(0, 8) + "...",
         openGraph: {
             title: userData?.displayName,
-            description: userData?.uid.slice(0, 8) + "...",
+            description: userId.slice(0, 8) + "...",
             type: "article",
             images: [{ url: userData?.photoURL || "/default.jpg" }]
         }
