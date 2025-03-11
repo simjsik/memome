@@ -202,8 +202,10 @@ export default function MemoStatus({ post }: ClientPostProps) {
             }
 
             try {
-                const validateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
+                const validateResponse = await fetch(`/api/validate`, {
                     method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
                     body: JSON.stringify({ uid }),
                 });
                 if (!validateResponse?.ok) {
@@ -325,7 +327,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
             const commentRef = collection(db, "posts", post, "comments");
             console.log("Last fetched at:", lastFetchedAt);
 
-            const Q = lastFetchedAt
+            const commentQuery = lastFetchedAt
                 ? query(
                     commentRef,
                     orderBy("createAt", "asc"),
@@ -336,7 +338,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                     )
                 )
                 : query(commentRef, orderBy("createAt", "asc"));
-            const snapshot = await getDocs(Q);
+            const snapshot = await getDocs(commentQuery);
 
             // 댓글 데이터 생성
             const newComments = snapshot.docs.map((doc) => ({

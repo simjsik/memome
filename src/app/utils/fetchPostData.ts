@@ -254,19 +254,21 @@ export const fetchComments = async (userId: string, postId: string) => {
         console.log(postId)
 
         if (!postId || postId === "undefined") {
-            throw new Error('존재하지 않는 포스트입니다.');
+            console.error('존재하지 않는 포스트입니다.')
+            return { comments: [] };
         }
 
-        const LimitResponse = await fetch('http://localhost:3000/api/firebaseLimit', {
+        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'user-id': userId || '',
-            }
+            },
+            body: JSON.stringify({ userId }),
         });
         if (LimitResponse.status === 403) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
+
 
         // 2. 댓글 가져오기
         const commentRef = collection(db, 'posts', postId, 'comments');
@@ -330,7 +332,6 @@ export const fetchComments = async (userId: string, postId: string) => {
     }
 };
 
-// 포스트 페이지 입장 시 '작성자'의 모든 글
 export const fetchPostList = async (
     userId: string,
     pageParam: [boolean, Timestamp] | [boolean, null] | null = null,
