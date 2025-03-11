@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: MemoPageProps): Promise<Metad
     const post = postSnap.data();
 
     return {
-        title: post?.title,
+        title: `MEMO :: ${post?.title}`,
         description: post?.content.slice(0, 150) + "...",
         openGraph: {
             title: post?.title,
