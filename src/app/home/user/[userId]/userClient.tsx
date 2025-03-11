@@ -237,7 +237,7 @@ export default function UserClient({ user }: ClientUserProps) {
         <>
             <UserPostWrap>
                 <div className="user_tab_wrap">
-                    <button className="memo_tab" onClick={() => setPostTab(true)}>메모 {posts.length}</button>
+                    <button className="memo_tab" onClick={() => setPostTab(true)}>메모</button>
                     <button className="image_tab" onClick={() => setPostTab(false)}>이미지</button>
                 </div>
                 {postTab ?
