@@ -288,8 +288,8 @@ export default function UserProfile() {
                         // 받아온 image인자가 File 타입이기 때문에 Cloudinary에 저장을 위해 base64로 변경
                         const cdnImg = await uploadImgCdn(base64Image)
 
-                        if (cdnImg.imgUlr) {
-                            const profileImg = cdnImg.imgUlr
+                        if (cdnImg.imgUrl) {
+                            const profileImg = cdnImg.imgUrl
                             profileImageUrl = profileImg;
                         }
                     } else {
