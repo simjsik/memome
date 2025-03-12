@@ -11,8 +11,9 @@ import { collection, doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/app/DB/firebaseConfig";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
-import { PostData } from "@/app/state/PostState";
+import { DidYouLogin, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle } from "@/app/state/PostState";
 import { searchClient } from "@/app/utils/algolia";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 
 
 const formatDate = (createAt: Timestamp | Date | string | number) => {
@@ -76,9 +77,35 @@ function CustomInfiniteHits() {
     );
 }
 
+
+
+
 function PostHit({ hit }: { hit: PostData }) {
     const [userData, setUserData] = useState<{ displayName: string; photoURL: string | null } | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const yourLogin = useRecoilValue(DidYouLogin)
+    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const setModal = useSetRecoilState<boolean>(modalState);
+    const usageLimit = useRecoilValue<boolean>(UsageLimitState)
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
+    
+    const router = useRouter();
+
+    // 포스트 보기
+    const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
+        if (!yourLogin || usageLimit) {
+            if (usageLimit) {
+                return setLimitToggle(true);
+            }
+            if (!yourLogin) {
+                setLoginToggle(true);
+                setModal(true);
+                return;
+            }
+        }
+        router.push(`memo/${postId}`)
+    }
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -116,7 +143,7 @@ function PostHit({ hit }: { hit: PostData }) {
                 <p className="ais_user_name">{userData.displayName}</p>
                 <span className="ais_user_uid">@{hit.userId.slice(0, 6)}... · {formatDate(hit.createAt)}</span>
             </div>
-            <div className="ais_post_content_wrap">
+            <div className="ais_post_content_wrap" onClick={(event) => { event.preventDefault(); handlePostClick(hit.id); }}>
                 <h2 className="ais_post_title">{hit.title}</h2>
                 <div className="ais_post_content" dangerouslySetInnerHTML={{ __html: hit.content }}></div>
                 <div className="ais_post_image_wrap">
