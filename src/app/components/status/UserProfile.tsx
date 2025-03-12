@@ -440,7 +440,7 @@ export default function UserProfile() {
                 const uid = currentUser.uid
 
                 // 유저 검증
-                const ValidateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/validateAuthToken`, {
+                const ValidateResponse = await fetch(`/api/validate`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
