@@ -105,7 +105,7 @@ function PostHit({ hit }: { hit: PostData }) {
                 return;
             }
         }
-        router.push(`/memo/${postId}`)
+        router.push(`memo/${postId}`)
     }
 
     useEffect(() => {
