@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
-'use clients';
+"use client";
 
 import styled from "@emotion/styled";
 import { DidYouLogin, modalState, UsageLimitState, UsageLimitToggle, userData, userState } from "../state/PostState";
