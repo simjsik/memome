@@ -794,7 +794,7 @@ export default function PostMenu() {
 
             saveUnsavedPost(unsavedPost)
         }
-        router.push('/home/main')
+        router.push('/home/main');
     }
 
     // 포스트 내용 입력 시 해당 스테이트에 저장
@@ -897,7 +897,7 @@ export default function PostMenu() {
                 alert('포스팅 완료');
                 setPostingComplete(true);
                 localStorage.removeItem('unsavedPost');
-                router.back();
+                router.push('/home/main')
             } catch (error) {
                 alert('포스팅에 실패하였습니다: ' + error);
             }
