@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import "./globals.css";
 import NavBar from "../components/NavBar";
 import StatusBox from "../components/StatusBox";
 import UsageLimit from "../components/UsageLimit";
