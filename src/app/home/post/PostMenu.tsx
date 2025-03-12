@@ -873,8 +873,8 @@ export default function PostMenu() {
                 const optImageUrls = await Promise.all(
                     imageUrls.map(async (image: string) => {
                         const cloudinaryUrl = await uploadImgCdn(image);
-                        uploadedImageUrls.set(image, cloudinaryUrl.imgUlr); // 업로드된 URL을 Map에 저장
-                        return cloudinaryUrl;
+                        uploadedImageUrls.set(image, cloudinaryUrl.imgUrl); // 업로드된 URL을 Map에 저장
+                        return cloudinaryUrl.imgUrl;
                     })
                 );
 
@@ -888,7 +888,7 @@ export default function PostMenu() {
                     title: postTitle,
                     userId: uid, // uid로 사용자 ID 사용
                     content: optContentUrls,
-                    images: optImageUrls ? optImageUrls : false,
+                    images: optImageUrls.length > 0 ? optImageUrls : false,
                     createAt: Timestamp.now(),
                     commentCount: 0,
                     notice: checkedNotice,

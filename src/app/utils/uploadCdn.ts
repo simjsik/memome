@@ -13,7 +13,7 @@ export const uploadImgCdn = async (image: string) => {
 
     const data = await response.json();
     if (data.url) {
-        return { imgUlr: data.url };
+        return { imgUrl: data.url };
     } else {
         throw new Error('Image upload failed');
     }
