@@ -105,7 +105,7 @@ export const fetchNoticePosts = async (
 
         const startAfterParam = pageParam
             ?
-            [true, new Timestamp(pageParam.seconds, pageParam.nanoseconds)]// 변환
+            new Timestamp(pageParam.seconds, pageParam.nanoseconds)// 변환
             : null;
 
         const queryBase =
@@ -122,7 +122,7 @@ export const fetchNoticePosts = async (
             ?
             query(
                 queryBase,
-                startAfter(...startAfterParam),
+                startAfter(startAfterParam),
             )
             :
             queryBase
