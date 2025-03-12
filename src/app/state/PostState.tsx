@@ -13,6 +13,7 @@ export interface PostData {
     notice: boolean,
     displayName: string,
     PhotoURL: string | null,
+    objectID?: string,
 }
 
 export interface ImagePostData {
