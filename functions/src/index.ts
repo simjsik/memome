@@ -16,6 +16,7 @@ import logoutRouter from "./routes/logoutApi";
 import saveUserRouter from "./routes/saveUserApi";
 import limitRouter from "./routes/firebaseLimit";
 import updateProfileRouter from "./routes/updateProfile";
+import uploadCdnImageRouter from "./routes/uploadCdnImage";
 
 export interface PostData {
     tag: string;
@@ -195,6 +196,7 @@ app.use('/', logoutRouter);
 app.use('/', saveUserRouter);
 app.use('/', limitRouter);
 app.use('/', updateProfileRouter);
+app.use('/', uploadCdnImageRouter);
 
 // Firebase Functions로 배포
 export const ApiRouter = onRequest(app);

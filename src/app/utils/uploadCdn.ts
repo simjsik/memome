@@ -1,5 +1,5 @@
 export const uploadImgCdn = async (image: string) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/uploadToCloudinary`, {
+    const response = await fetch(`/api/cloudinary`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ export const uploadContentImgCdn = async (content: string, uploadedImageUrls: Ma
         }
 
         // Cloudinary에 이미지 업로드
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/uploadToCloudinary`, {
+        const response = await fetch(`/api/cloudinary`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
