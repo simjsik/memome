@@ -6,7 +6,7 @@ const router = express.Router();
 const app = express();
 app.use(cookieParser());
 
-router.post('/saveUser', async (req: Request, res: Response) => {
+router.post('/updateProfile', async (req: Request, res: Response) => {
     try {
         const {image, name, uid} = req.body;
 
@@ -15,7 +15,7 @@ router.post('/saveUser', async (req: Request, res: Response) => {
         const userData = userSnapshot.data();
 
         if (!userData) {
-            return res.status(403).json({message: "유저 세션 정보가 존재하지 않습니다."});
+            return res.status(403).json({message: "유저 정보가 존재하지 않습니다."});
         }
 
         // Firebase Authentication의 프로필 업데이트

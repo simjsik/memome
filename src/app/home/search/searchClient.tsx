@@ -145,7 +145,7 @@ function PostHit({ hit }: { hit: PostData }) {
                 <span className="ais_user_uid">@{hit.userId.slice(0, 6)}... · {formatDate(hit.createAt)}</span>
             </div>
             <div className="ais_post_content_wrap" onClick={(event) => { event.preventDefault(); handlePostClick(hit.objectID as string); }}>
-                <h2 className="ais_post_title">{hit.title} | {hit.objectID}</h2>
+                <h2 className="ais_post_title">{hit.title}</h2>
                 <div className="ais_post_content" dangerouslySetInnerHTML={{ __html: hit.content }}></div>
                 <div className="ais_post_image_wrap">
                     {Array.isArray(hit.images) &&
