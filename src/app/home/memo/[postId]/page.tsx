@@ -43,11 +43,15 @@ export async function generateMetadata({ params }: MemoPageProps): Promise<Metad
 
 const cleanHtml = (content: string) => {
     return sanitizeHtml(content, {
-        allowedTags: ["p", "strong", "em", "a", "ul", "li", "br"], // 허용할 태그
+        allowedTags: ["p", "strong", "em", "a", "ul", "li", "br", "img"], // 허용할 태그
         allowedAttributes: {
             a: ["href", "target", "rel"], // 링크 속성만 허용
+            img: ["src"],
         },
         allowedSchemes: ["http", "https"], // http, https 링크만 허용
+        allowedSchemesByTag: {
+            img: ["http", "https", "data"], // img 태그의 src 속성에서 http, https, data 허용
+        },
     });
 };
 

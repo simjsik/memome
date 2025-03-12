@@ -12,7 +12,6 @@ interface ClientPostProps {
     comment: Comment[];
 }
 
-
 export default function Memo({ comment }: ClientPostProps) {
     const router = useRouter();
     const setCommentList = useSetRecoilState<Comment[]>(memoCommentState)
