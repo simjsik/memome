@@ -7,10 +7,6 @@ import { RecoilRoot, useSetRecoilState } from "recoil";
 import { bookMarkState, DidYouLogin, hasGuestState, loginToggleState, userData, userState } from "@/app/state/PostState";
 import { useRouter } from "next/navigation";
 import "./globals.css";
-import UsageLimit from "./components/UsageLimit";
-import StatusBox from "./components/StatusBox";
-import LoginBox from "./login/LoginBox";
-import NavBar from "./components/NavBar";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./DB/firebaseConfig";
 
@@ -83,10 +79,6 @@ export default function ProviderClient({ children, loginData }: { children: Reac
                 <RecoilRoot> {/* RecoilRoot로 감싸기 */}
                     <InitializeLoginComponent loginData={loginData}>
                         <>
-                            <LoginBox />
-                            <StatusBox></StatusBox>
-                            <UsageLimit />
-                            <NavBar></NavBar>
                             {children}
                         </>
                     </InitializeLoginComponent>
