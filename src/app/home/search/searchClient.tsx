@@ -94,6 +94,7 @@ function PostHit({ hit }: { hit: PostData }) {
 
     // 포스트 보기
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
+        console.log(postId, '검색 페이지 이동 포스트 ID');
         if (!yourLogin || usageLimit) {
             if (usageLimit) {
                 return setLimitToggle(true);
@@ -104,7 +105,7 @@ function PostHit({ hit }: { hit: PostData }) {
                 return;
             }
         }
-        router.push(`memo/${postId}`)
+        router.push(`home/memo/${postId}`)
     }
 
     useEffect(() => {
