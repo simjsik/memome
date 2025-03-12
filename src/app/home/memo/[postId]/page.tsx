@@ -46,12 +46,19 @@ const cleanHtml = (content: string) => {
         allowedTags: ["p", "strong", "em", "a", "ul", "li", "br", "img"], // 허용할 태그
         allowedAttributes: {
             a: ["href", "target", "rel"], // 링크 속성만 허용
-            img: ["src", "stlye"],
+            img: ["src", "style"],
         },
         allowedSchemes: ["http", "https"], // http, https 링크만 허용
         allowedSchemesByTag: {
             img: ["http", "https", "data"], // img 태그의 src 속성에서 http, https, data 허용
         },
+        allowedStyles: {
+            '*': {
+                // "width"와 "height"만 허용
+                'width': [/^\d+(?:px|%)$/],
+                'height': [/^\d+(?:px|%)$/]
+            }
+        }
     });
 };
 
