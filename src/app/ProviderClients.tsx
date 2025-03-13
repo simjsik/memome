@@ -3,7 +3,7 @@
 import { ReactNode, useEffect } from "react";
 import { PretendardBold, PretendardLight, PretendardMedium } from "@/app/styled/FontsComponets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RecoilRoot, useSetRecoilState } from "recoil";
+import { RecoilRoot, useRecoilState, useSetRecoilState } from "recoil";
 import { bookMarkState, DidYouLogin, hasGuestState, loginToggleState, userData, userState } from "@/app/state/PostState";
 import { useRouter } from "next/navigation";
 import "./globals.css";
@@ -19,7 +19,7 @@ interface loginData {
 }
 
 function InitializeLoginComponent({ children, loginData }: { children: ReactNode, loginData: loginData }) {
-    const setUserState = useSetRecoilState<userData>(userState);
+    const [currentUser, setUserState] = useRecoilState<userData>(userState);
     const setLoginState = useSetRecoilState<boolean>(DidYouLogin);
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setHasGuest = useSetRecoilState<boolean>(hasGuestState)
@@ -66,8 +66,11 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
 
     useEffect(() => {
         console.log(loginData.user, '로그인 유저 정보')
-        loadBookmarks(loginData.user.uid);
-    }, [loginData, loginData.user])
+        if (currentUser.uid) {
+            loadBookmarks(loginData.user.uid);
+        }
+        
+    }, [currentUser, loginData, loginData.user])
 
     return <>{children}</>; // 반드시 children을 렌더링
 }
