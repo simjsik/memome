@@ -67,9 +67,10 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
     useEffect(() => {
         console.log(loginData.user, '로그인 유저 정보')
         if (currentUser.uid) {
+            console.log(currentUser.uid, '북마크 요청 유저 UID')
             loadBookmarks(loginData.user.uid);
         }
-        
+
     }, [currentUser, loginData, loginData.user])
 
     return <>{children}</>; // 반드시 children을 렌더링
