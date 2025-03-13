@@ -37,7 +37,6 @@ border-radius : 4px;
 cursor : pointer;
 }
 `
-export const revalidate = 0;
 
 export default function StatusBox() {
     const path = usePathname();
