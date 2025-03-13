@@ -8,31 +8,31 @@ app.use(cookieParser());
 router.post('/logout', async (req: Request, res: Response) => {
     try {
         // httpOnly 쿠키 삭제
-        res.clearCookie("authToken", {
-            domain: "memome-delta.vercel.app",
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-        });
         res.clearCookie("csrfToken", {
             domain: "memome-delta.vercel.app",
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: true,
+            sameSite: "lax",
+            path: "/",
+        });
+        res.clearCookie("authToken", {
+            domain: "memome-delta.vercel.app",
+            httpOnly: true,
+            secure: true,
             sameSite: "lax",
             path: "/",
         });
         res.clearCookie("userToken", {
             domain: "memome-delta.vercel.app",
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: true,
             sameSite: "lax",
             path: "/",
         });
         res.clearCookie("hasGuest", {
             domain: "memome-delta.vercel.app",
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: true,
             sameSite: "lax",
             path: "/",
         });
