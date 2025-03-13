@@ -171,27 +171,28 @@ export default function SignUp() {
 
         // 기본 검증 (유저 명 길이, 비밀번호 길이, 이메일 형식)        
         if (displayName.length > 12) {
-            setPasswordConfirm(false);
             setErrors((prev) => ({ ...prev, displayName: '유저 명은 최대 12자 이내로 작성해주세요.' }));
             return;
         }
 
         if (password.length <= 6) {
+            setPasswordConfirm(false);
             setErrors((prev) => ({ ...prev, password: '비밀번호는 6자 이상이어야 합니다.' }));
             return;
         }
 
         if (passwordConfirm !== password) {
+            setPasswordConfirm(false);
             setErrors((prev) => ({ ...prev, passwordConfirm: '입력하신 비밀번호와 일치하지 않습니다.' }));
             return;
         }
 
         try {
             // 이메일/비밀번호로 계정 생성
+            console.log(email, password, '계정 생성 데이터')
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             const uid = user.uid
-            const displayName = formData.displayName
 
             // 사용자 정보 저장 (users 컬렉션)
             const saveUserResponse = await fetch(`/api/saveUser`, {
@@ -222,7 +223,7 @@ export default function SignUp() {
             // Firebase 에러 처리
             if (isFirebaseError(error)) {
                 let errorMessage: string
-                console.error("로그인 중 오류 발생:", error, error.code);
+                console.error("회원가입 중 오류 발생:", error, error.code);
                 // Firebase 에러 코드별 메시지 처리
                 if (firebaseErrorMessages[error.code]) {
                     errorMessage = firebaseErrorMessages[error.code];
