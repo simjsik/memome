@@ -53,7 +53,6 @@ export default function Logout() {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "x-project-host": window.location.origin,
                     },
                     credentials: 'include',
                 });
