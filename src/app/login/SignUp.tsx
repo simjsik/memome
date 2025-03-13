@@ -194,7 +194,7 @@ export default function SignUp() {
             const displayName = formData.displayName
 
             // 사용자 정보 저장 (users 컬렉션)
-            const saveUserResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/utils/saveUserProfile`, {
+            const saveUserResponse = await fetch(`/api/saveUser`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ uid, displayName, email }),
