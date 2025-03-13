@@ -44,28 +44,16 @@ export default function Bookmark() {
                 throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
             }
 
-            const result = await fetchBookmarks(
+            return fetchBookmarks(
                 currentUser.uid,
                 currentBookmark, // 전역 상태를 바로 사용
                 pageParam, // 시작 인덱스
                 4, // 한 번 요청할 데이터 수
             );
-            
-            if (!result) throw new Error('사용량 제한 초과');
-            return result;
         },
-        getNextPageParam: (lastPage) => lastPage.nextIndexData, // 다음 페이지 인덱스 반환
+        getNextPageParam: (lastPage) => lastPage?.nextIndexData, // 다음 페이지 인덱스 반환
         staleTime: 5 * 60 * 1000, // 5분 동안 데이터 캐싱 유지
         initialPageParam: 0, // 초기 페이지 파라미터 설정
-        initialData: {
-            pages: [
-                {
-                    data: [], // 초기 북마크 데이터
-                    nextIndexData: 0, // 초기 다음 페이지 인덱스
-                },
-            ],
-            pageParams: [0], // 초기 페이지 인덱스
-        },
     });
 
     useEffect(() => {
@@ -79,7 +67,7 @@ export default function Bookmark() {
             new Map(
                 [
                     ...userBookmarks, // fetchNewPosts로 가져온 최신 데이터
-                    ...(bookmarkPages.pages
+                    ...(bookmarkPages?.pages
                         ?.flatMap((page) => page?.data || [])
                         .filter((post): post is PostData => !!post) || []),
                 ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
@@ -87,13 +75,13 @@ export default function Bookmark() {
         );
 
         setUserBookmarks(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
-    }, [bookmarkPages.pages])
+    }, [bookmarkPages?.pages])
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
         if (usageLimit) return console.log('함수 요청 안함.');
 
-        if (currentBookmark.length > 0 || bookmarkPages.pages.length > 0) {
+        if (currentBookmark.length > 0 || (bookmarkPages && bookmarkPages.pages.length > 0)) {
             const observer = new IntersectionObserver(
                 (entries) => {
                     if (entries[0].isIntersecting && hasNextPage) {
@@ -116,7 +104,7 @@ export default function Bookmark() {
     }, [hasNextPage, fetchNextPage, currentBookmark, bookmarkPages]);
 
     useEffect(() => {
-        if (bookmarkPages.pages.length > 0) {
+        if (bookmarkPages && bookmarkPages.pages.length > 0) {
             fetchNextPage();
         }
     }, [])

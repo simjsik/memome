@@ -241,7 +241,7 @@ export const fetchBookmarks = async (
         const nextIndex = startIdx + pageSize < bookmarkIds.length ? startIdx + pageSize : undefined;
 
         // console.log(validPosts, '보내줄 포스트', nextIndex, '다음 페이지 기준')
-        return { data: validPosts, nextIndexData: nextIndex };
+        return { data: validPosts, nextIndexData: nextIndex ? nextIndex : undefined };
     } catch (error) {
         console.error("Error fetching data:", error);
         throw error;
