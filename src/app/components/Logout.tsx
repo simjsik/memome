@@ -49,7 +49,7 @@ export default function Logout() {
         try {
             const confirmed = confirm('로그아웃 하시겠습니까?')
             if (confirmed && user) {
-                const response = await fetch("/api/logout", {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/logout`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
