@@ -435,9 +435,6 @@ export default function LoginBox() {
         };
     }, [hasLogin]);
 
-    useEffect(() => {
-        console.log("isLoading 상태 변경:", isLoading);
-    }, [isLoading]);
     // Function
     return (
         <>
