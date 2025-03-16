@@ -21,6 +21,7 @@ import { usePathname, useRouter } from "next/navigation";
 import SignUp from "./SignUp";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../DB/firebaseConfig";
+import { BeatLoader } from "react-spinners";
 
 interface FirebaseError extends Error {
     code: string;
@@ -75,6 +76,7 @@ export default function LoginBox() {
     const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
     const [signUpToggle, setSignUpToggle] = useRecoilState<boolean>(signUpState);
     const [modal, setModal] = useRecoilState<boolean>(modalState);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -202,7 +204,8 @@ export default function LoginBox() {
                 setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
             }
             return;
-
+        } finally {
+            setIsLoading(false); // 무조건 실행
         }
     }
 
@@ -272,6 +275,8 @@ export default function LoginBox() {
                 setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
             }
             return;
+        } finally {
+            setIsLoading(false); // 무조건 실행
         }
     };
 
@@ -375,6 +380,8 @@ export default function LoginBox() {
                 setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
             }
             return;
+        } finally {
+            setIsLoading(false); // 무조건 실행
         }
     }
 
@@ -448,7 +455,7 @@ export default function LoginBox() {
                                                 >인증 메일 재전송</button>
                                             } */}
                                         </div>
-                                        <LoginButton type="submit">로그인</LoginButton>
+                                        {isLoading ? <BeatLoader /> : <LoginButton type="submit">로그인</LoginButton>}
                                     </form>
                                     <LoginSpan>처음 이신가요?</LoginSpan >
                                     <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
