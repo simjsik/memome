@@ -422,7 +422,10 @@ export default function LoginBox() {
             document.removeEventListener('mousedown', handleBackgroundClick);
         };
     }, [hasLogin]);
-
+    
+    useEffect(() => {
+        console.log("isLoading 상태 변경:", isLoading);
+      }, [isLoading]);
     // Function
     return (
         <>
@@ -458,7 +461,7 @@ export default function LoginBox() {
                                                 >인증 메일 재전송</button>
                                             } */}
                                         </div>
-                                        {isLoading ? <LoginButton type="submit"><BeatLoader color="#000" size={8}/></LoginButton> : <LoginButton type="submit">로그인</LoginButton>}
+                                        {isLoading ? <LoginButton><BeatLoader color="#000" size={8}/></LoginButton> : <LoginButton type="submit">로그인</LoginButton>}
                                     </form>
                                     <LoginSpan>처음 이신가요?</LoginSpan >
                                     <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
