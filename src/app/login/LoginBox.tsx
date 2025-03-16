@@ -130,7 +130,10 @@ export default function LoginBox() {
     }
 
     const handleLogin = async (email: string, password: string) => {
+        if (isLoading) return;
+        
         try {
+            setIsLoading(true);
             let role = 2
 
             if (email === 'simjsik75@naver.com') {
