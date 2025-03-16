@@ -437,7 +437,7 @@ export default function LoginBox() {
                                     <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
                                         <LoginInputWrap>
                                             <div>
-                                                <p>이메일 또는 아이디</p><BeatLoader />
+                                                <p>이메일 또는 아이디</p>
                                                 <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
                                             </div>
                                             <div>
@@ -458,7 +458,7 @@ export default function LoginBox() {
                                                 >인증 메일 재전송</button>
                                             } */}
                                         </div>
-                                        {isLoading ? <LoginButton type="submit"><BeatLoader /></LoginButton> : <LoginButton type="submit">로그인</LoginButton>}
+                                        {isLoading ? <LoginButton type="submit"><BeatLoader color="#000" size={8}/></LoginButton> : <LoginButton type="submit">로그인</LoginButton>}
                                     </form>
                                     <LoginSpan>처음 이신가요?</LoginSpan >
                                     <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
