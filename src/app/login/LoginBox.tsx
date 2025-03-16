@@ -77,6 +77,7 @@ export default function LoginBox() {
     const [signUpToggle, setSignUpToggle] = useRecoilState<boolean>(signUpState);
     const [modal, setModal] = useRecoilState<boolean>(modalState);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [loadingTag, setLoadingTag] = useState<string | null>(null);
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -131,16 +132,17 @@ export default function LoginBox() {
 
     const handleLogin = async (email: string, password: string) => {
         if (isLoading) return;
+        setLoginError(null);
 
         try {
             setIsLoading(true);
+            setLoadingTag('Login');
             let role = 2
 
             if (email === 'simjsik75@naver.com') {
                 role = 3
             }
 
-            setLoginError(null);
             // setVerifyReSend(false);
             const hasGuest = false;
 
@@ -209,13 +211,18 @@ export default function LoginBox() {
             return;
         } finally {
             setIsLoading(false); // 무조건 실행
+            setLoadingTag(null);
         }
     }
 
     const handleGoogleLogin = async () => {
+        if (isLoading) return;
         setLoginError(null);
 
         try {
+            setIsLoading(true);
+            setLoadingTag('Google');
+
             const provider = new GoogleAuthProvider();
             const role = 2
             const hasGuest = false;
@@ -280,12 +287,16 @@ export default function LoginBox() {
             return;
         } finally {
             setIsLoading(false); // 무조건 실행
+            setLoadingTag(null);
         }
     };
 
     const handleGuestLogin = async () => {
+        if (isLoading) return;
         setLoginError(null);
         try {
+            setIsLoading(true);
+            setLoadingTag('Guest');
 
             const role = 1;
             const hasGuest = true;
@@ -385,6 +396,7 @@ export default function LoginBox() {
             return;
         } finally {
             setIsLoading(false); // 무조건 실행
+            setLoadingTag(null);
         }
     }
 
@@ -461,16 +473,15 @@ export default function LoginBox() {
                                                 >인증 메일 재전송</button>
                                             } */}
                                         </div>
-                                        {isLoading ? <LoginButton><BeatLoader color="#000" size={8} /></LoginButton> : <LoginButton type="submit">로그인</LoginButton>}
+                                        {(loadingTag === 'Login' && isLoading) ? <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> : <LoginButton type="submit">로그인</LoginButton>}
                                     </form>
                                     <LoginSpan>처음 이신가요?</LoginSpan >
                                     <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
-
                                     <OtherLoginWrap>
                                         <LoginOr>또는</LoginOr>
                                         <div>
-                                            <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>
-                                            <GuestButton onClick={handleGuestLogin}>게스트 로그인</GuestButton>
+                                            {(loadingTag === 'Google' && isLoading) ? <GoogleButton><BeatLoader color="#000" size={8} /></GoogleButton> : <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>}
+                                            {(loadingTag === 'Guest' && isLoading) ? <GuestButton><BeatLoader color="#000" size={8} /></GuestButton> : <GuestButton onClick={handleGuestLogin}>게스트 로그인</GuestButton>}
                                         </div>
                                     </OtherLoginWrap>
                                 </LoginModalWrap>
@@ -509,16 +520,15 @@ export default function LoginBox() {
                                         >인증 메일 재전송</button>
                                     } */}
                                 </div>
-                                {isLoading ? <LoginButton><BeatLoader color="#000" size={8} /></LoginButton> : <LoginButton type="submit">로그인</LoginButton>}
+                                {(loadingTag === 'Login' && isLoading) ? <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> : <LoginButton type="submit">로그인</LoginButton>}
                             </form>
                             <LoginSpan>처음 이신가요?</LoginSpan >
                             <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
-
                             <OtherLoginWrap>
                                 <LoginOr>또는</LoginOr>
                                 <div>
-                                    <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>
-                                    <GuestButton onClick={handleGuestLogin}>게스트 로그인</GuestButton>
+                                    {(loadingTag === 'Google' && isLoading) ? <GoogleButton><BeatLoader color="#000" size={7} /></GoogleButton> : <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>}
+                                    {(loadingTag === 'Guest' && isLoading) ? <GuestButton><BeatLoader color="#000" size={7} /></GuestButton> : <GuestButton onClick={handleGuestLogin}>게스트 로그인</GuestButton>}
                                 </div>
                             </OtherLoginWrap>
                         </LoginButtonWrap>
