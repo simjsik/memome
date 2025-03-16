@@ -315,7 +315,7 @@ export default function LoginBox() {
                     const signUser = userCredential.user
                     const idToken = signUser.getIdToken();
 
-                    guestResponse = await fetch("/api/auth/loginApi", {
+                    guestResponse = await fetch("/api/login", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         credentials: "include",
