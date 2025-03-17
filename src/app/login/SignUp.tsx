@@ -165,8 +165,7 @@ export default function SignUp() {
         }
     }, [formData])
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
         const { displayName, email, password, passwordConfirm } = formData;
 
         // 기본 검증 (유저 명 길이, 비밀번호 길이, 이메일 형식)        
@@ -250,7 +249,7 @@ export default function SignUp() {
                     </LoginButtonWrap>
                     :
                     <LoginButtonWrap className="sign_up_wrap">
-                        <form onSubmit={handleSubmit} css={SignUpForm}>
+                        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} css={SignUpForm}>
                             <div>
                                 <label>이메일</label>
                                 <CreateInput
@@ -323,7 +322,7 @@ export default function SignUp() {
                     </LoginModalWrap>
                     :
                     <LoginModalWrap className="sign_up_wrap">
-                        <form onSubmit={handleSubmit} css={SignUpForm}>
+                        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} css={SignUpForm}>
                             <div>
                                 <label>이메일</label>
                                 <CreateInput

@@ -282,7 +282,7 @@ export default function LoginBox() {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",
-                    body: JSON.stringify({ idToken, role: 1, hasGuest: true, ...(guestUid && { guestUid }) }),
+                    body: JSON.stringify({ idToken, role: 1, hasGuest: true, ...(guestUid && { uid: guestUid }) }),
                 });
             };
 

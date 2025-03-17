@@ -15,14 +15,14 @@ export interface newUser {
 }
 
 router.post('/saveUser', async (req: Request, res: Response) => {
-    const {uid, displayName, email, token, photoURL} = req.body;
+    const {uid, displayName, email, idToken, photoURL} = req.body;
     let randomName;
     let userRef;
     try {
         userRef = adminDb.doc(`users/${uid}`);
         randomName = `user-${Math.random().toString(36).substring(2, 10)}`;
 
-        if (token) {
+        if (idToken) {
             userRef = adminDb.doc(`guests/${uid}`);
             randomName = `Guest-${Math.random().toString(36).substring(2, 10)}`;
         }
@@ -37,8 +37,8 @@ router.post('/saveUser', async (req: Request, res: Response) => {
                 uid: uid,
             };
 
-            if (token) {
-                userData.token = token;
+            if (idToken) {
+                userData.token = idToken;
             }
 
             await userRef.set(userData);
