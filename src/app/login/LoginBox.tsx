@@ -143,8 +143,8 @@ export default function LoginBox() {
             const signUser = userCredential.user
             const idToken = await signUser.getIdToken();
 
-            const ADMIN_GOOGLE_EMAILS = process.env.ADMIN_GOOGLE_EMAILS?.split(',') || [];
-            const role = ADMIN_GOOGLE_EMAILS.includes(userCredential.user.email ?? '') ? 3 : 2;
+            const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || [];
+            const role = ADMIN_EMAILS.includes(userCredential.user.email ?? '') ? 3 : 2;
 
             if (!signUser.emailVerified) {
                 return setLoginError('인증되지 않은 계정입니다. 이메일을 확인해주세요.');
@@ -216,8 +216,8 @@ export default function LoginBox() {
             // userCredential를 전부 보내주면 보안 상 문제가 생김. ( 최소 권한 원칙 )
 
             // 역할 동적 할당 (환경 변수 기반)
-            const ADMIN_GOOGLE_EMAILS = process.env.ADMIN_GOOGLE_EMAILS?.split(',') || [];
-            const role = ADMIN_GOOGLE_EMAILS.includes(userCredential.user.email ?? '') ? 3 : 2;
+            const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || [];
+            const role = ADMIN_EMAILS.includes(userCredential.user.email ?? '') ? 3 : 2;
 
             // 서버로 ID 토큰 전송
             const googleResponse = await fetch("/api/login", {
