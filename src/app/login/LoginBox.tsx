@@ -282,7 +282,7 @@ export default function LoginBox() {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",
-                    body: JSON.stringify({ idToken, role: 1, hasGuest: true, ...(guestUid && { uid: guestUid }) }),
+                    body: JSON.stringify({ idToken, role: 1, hasGuest: true, guestUid }),
                 });
             };
 
@@ -304,9 +304,10 @@ export default function LoginBox() {
                 const userCredential = await signInAnonymously(auth);
                 const signUser = userCredential.user
                 const idToken = await signUser.getIdToken();
-                localStorage.setItem('guestUid', signUser.uid)
+                const guestUid = signUser.uid
+                localStorage.setItem('guestUid', guestUid);
 
-                guestResponse = await handleGuestResponse(idToken)
+                guestResponse = await handleGuestResponse(idToken, guestUid)
             }
             // 서버로 ID 토큰 전송
 

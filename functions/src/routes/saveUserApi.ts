@@ -15,14 +15,16 @@ export interface newUser {
 }
 
 router.post('/saveUser', async (req: Request, res: Response) => {
-    const {uid, displayName, email, idToken, photoURL} = req.body;
+    const {uid, displayName, email, token, photoURL} = await req.body;
     let randomName;
     let userRef;
+
+    console.log(uid, token.slice(0, 8), '유저 정보 저장 API');
     try {
         userRef = adminDb.doc(`users/${uid}`);
         randomName = `user-${Math.random().toString(36).substring(2, 10)}`;
 
-        if (idToken) {
+        if (token) {
             userRef = adminDb.doc(`guests/${uid}`);
             randomName = `Guest-${Math.random().toString(36).substring(2, 10)}`;
         }
@@ -37,8 +39,9 @@ router.post('/saveUser', async (req: Request, res: Response) => {
                 uid: uid,
             };
 
-            if (idToken) {
-                userData.token = idToken;
+            // 일반 유저를 대비해 토큰은 게스트 유저일 때만 저장
+            if (token) {
+                userData.token = token;
             }
 
             await userRef.set(userData);
