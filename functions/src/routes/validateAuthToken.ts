@@ -12,6 +12,7 @@ router.post('/validate', async (req: Request, res: Response) => {
         console.log(idToken?.slice(0, 8), uid, "유저 토큰 및 UID ( Validate API )");
         const authToken = req.cookies.authToken;
         const csrfToken = req.cookies.csrfToken;
+        const hasGuest = req.cookies.hasGuest;
 
         if (!idToken && (!uid && !csrfToken)) {
             console.log("유저 아이디 토큰 및 UID 누락 ( Validate API )");
@@ -41,7 +42,6 @@ router.post('/validate', async (req: Request, res: Response) => {
                 console.log("CSRF 토큰 누락. 검증 실패 ( Validate API )");
                 return res.status(403).json({message: "CSRF 토큰이 누락 되었습니다."});
             }
-            console.log(csrfToken.slice(0, 8), "유저 CSRF 토큰 ( Validate API )");
 
             const decodedToken = await adminAuth.verifyIdToken(authToken);
 
@@ -52,7 +52,9 @@ router.post('/validate', async (req: Request, res: Response) => {
                 );
             }
 
-            const userRef = adminDb.collection('users').doc(uid);
+            const userRef = hasGuest ?
+            adminDb.collection('guests').doc(uid) :
+            adminDb.collection('users').doc(uid);
             const userSnapshot = await userRef.get();
             const userData = userSnapshot.data();
 
@@ -64,7 +66,6 @@ router.post('/validate', async (req: Request, res: Response) => {
             }
 
             if (csrfToken) {
-                // Redis에서 토큰의 만료 시간 가져오기
                 const csrfDoc = await
                 adminDb.collection("csrfTokens").doc(uid).get();
 

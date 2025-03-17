@@ -17,10 +17,11 @@ import { usePostUpdateChecker } from '@/app/hook/ClientPolling';
 import BookmarkBtn from '@/app/components/BookmarkBtn';
 import { fetchPosts } from '@/app/utils/fetchPostData';
 import { NewPostBtn, NoMorePost, PostWrap } from '@/app/styled/PostComponents';
+import LoadingWrap from '@/app/components/LoadingWrap';
+import { BeatLoader } from "react-spinners";
+
 
 export default function MainHome() {
-  // window.history.scrollRestoration = 'manual'
-
   const yourLogin = useRecoilValue(DidYouLogin)
   const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
   const setModal = useSetRecoilState<boolean>(modalState);
@@ -53,8 +54,10 @@ export default function MainHome() {
   const pathName = usePathname();
   const observerLoadRef = useRef(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [dataLoading, setDataLoading] = useState<boolean>(false);
 
-  // 웹소켓 연결
+  // 웹소켓 연결---------------------------------------------------------------------------------
   const socketRef = useRef<Socket | null>(null);
   const uid = currentUser.uid
 
@@ -106,6 +109,7 @@ export default function MainHome() {
     };
   }, []);
 
+  // 사용 제한 시 웹소켓 연결 해제
   useEffect(() => {
     if (usageLimit) {
       const sockets = socketRef.current;
@@ -140,7 +144,8 @@ export default function MainHome() {
     }
   }, [currentUser])
 
-  // 무한 스크롤 로직
+
+  // 무한 스크롤 로직----------------------------------------------------------------------------
   const {
     data,
     fetchNextPage,
@@ -157,18 +162,31 @@ export default function MainHome() {
     retry: false, // 재시도 방지
     queryKey: ['posts'],
     queryFn: async ({ pageParam }) => {
-      const validateResponse = await fetch(`/api/validate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ uid }),
-      });
-      if (!validateResponse.ok) {
-        const errorDetails = await validateResponse.json();
-        throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-      }
+      try {
+        setDataLoading(true);
+        const validateResponse = await fetch(`/api/validate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ uid }),
+        });
+        if (!validateResponse.ok) {
+          const errorDetails = await validateResponse.json();
+          throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+        }
 
-      return fetchPosts(uid, pageParam, 4);
+        return await fetchPosts(uid, pageParam, 4);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error("일반 오류 발생:", error.message);
+          throw error;
+        } else {
+          console.error("알 수 없는 에러 유형:", error);
+          throw new Error("알 수 없는 에러가 발생했습니다.");
+        }
+      } finally {
+        setDataLoading(false);
+      }
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 5 * 60 * 1000,
@@ -202,15 +220,6 @@ export default function MainHome() {
     }
   }, [posts, setPosts, newPosts, data?.pages, usageLimit]);
 
-  useEffect(() => {
-    if (isError) {
-      console.log('사용 제한!', error.message)
-      if (error.message === '사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.') {
-        setUsageLimit(true);
-      }
-    }
-  }, [isError])
-
   // 스크롤 끝나면 포스트 요청
   useEffect(() => {
     if (!yourLogin || usageLimit) {
@@ -242,6 +251,17 @@ export default function MainHome() {
       if (observerLoadRef.current) obsever.unobserve(observerLoadRef.current);
     };
   }, [hasNextPage, fetchNextPage, yourLogin])
+
+  // 에러 시 사용 제한
+  useEffect(() => {
+    if (isError) {
+      console.log('사용 제한!', error.message)
+      if (error.message === '사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.') {
+        setUsageLimit(true);
+      }
+    }
+  }, [isError])
+
 
   // 포스트 삭제
   const deletePost = async (postId: string) => {
@@ -322,15 +342,6 @@ export default function MainHome() {
     }
   }
 
-  useEffect(() => {
-    if (posts) {
-      let lastPost = null
-
-      lastPost = posts[0]?.createAt
-      setLastFetchedAt(lastPost)
-    }
-  }, [posts])
-
   // 새 문서 가져오기
   const fetchNewPosts = async () => {
     try {
@@ -396,6 +407,16 @@ export default function MainHome() {
     }
   };
 
+  // 새 문서 업데이트를 위한 마지막 포스트 데이터 추출
+  useEffect(() => {
+    if (posts) {
+      let lastPost = null
+
+      lastPost = posts[0]?.createAt
+      setLastFetchedAt(lastPost)
+    }
+  }, [posts])
+
   // 버튼 클릭 시 새 데이터 로드
   const handleUpdateClick = () => {
     fetchNewPosts();
@@ -451,14 +472,21 @@ export default function MainHome() {
     return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
   }, []);
 
-
+  useEffect(() => {
+    setIsLoading(false);
+  }, [])
+  if (isLoading) {
+    return (
+      <LoadingWrap />
+    )
+  }
   return (
     <>
       {hasUpdate &&
         <NewPostBtn className='new_post_btn' onClick={handleUpdateClick}>새로운 업데이트 확인</NewPostBtn>
       }
       {/* 공지사항 제외 전체 포스트 */}
-      <PostWrap postStyle>
+      <PostWrap>
         <>
           {/* 무한 스크롤 구조 */}
           {posts.map((post) => (
@@ -534,8 +562,9 @@ export default function MainHome() {
           ))
           }
           {postStyle && < div ref={observerLoadRef} style={{ height: '1px' }} />}
+          {dataLoading && <BeatLoader color="#red" size={8} />}
           {
-            !hasNextPage &&
+            (!hasNextPage && !dataLoading && !isLoading) &&
             <NoMorePost>
               <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
               <p>모두 확인했습니다.</p>

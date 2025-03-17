@@ -3,7 +3,7 @@
 
 import styled from "@emotion/styled";
 
-export const PostWrap = styled.div<{ postStyle: boolean }>`
+export const PostWrap = styled.div`
 // 포스트 리스트 스타일 별 우측이 간소화
 position : absolute;
 left : 500px;
@@ -20,7 +20,7 @@ border-right : 1px solid #ededed;
     // 포스트 박스
     .post_box{
       position: relative;
-      display : ${(props) => (props.postStyle ? 'block' : 'flex')};
+      display : block;
       flex : 1 0 100%;
       background: #fff;
       padding : 20px;
@@ -166,11 +166,11 @@ border-right : 1px solid #ededed;
       }
 
       .post_comment{
-        font-family : ${(props) => (props.postStyle ? 'var(--font-pretendard-medium)' : 'var(--font-pretendard-bold)')};
-        font-size : ${(props) => (props.postStyle ? '16px' : '14px')};
-        color: ${(props) => (props.postStyle ? '#191919' : 'red')};
-        margin-left : ${(props) => (props.postStyle ? '0px' : '4px')};
-        display : ${(props) => (props.postStyle ? 'flex' : 'block')};
+        font-family : var(--font-pretendard-medium);
+        font-size : 16px;
+        color: #191919;
+        margin-left : 0px;
+        display : flex;
         line-height : 32px;
       }
 
@@ -307,12 +307,6 @@ border-right : 1px solid #ededed;
         }
       }
 //----------------------------------------------------
-.post_style_btn{
-  background-image : ${(props) => (props.postStyle ?
-    'url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1734335094/%ED%8E%98%EC%9D%B4%EC%A7%80%EB%84%A4%EC%9D%B4%EC%85%98_b1hizm.svg)'
-    :
-    'url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1734335094/%EC%8A%A4%ED%81%AC%EB%A1%A4_xermsf.svg)')};
-}
 `
 export const NoticeWrap = styled.div`
     position: absolute;
