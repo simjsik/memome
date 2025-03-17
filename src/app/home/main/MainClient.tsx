@@ -562,7 +562,7 @@ export default function MainHome() {
           ))
           }
           {postStyle && < div ref={observerLoadRef} style={{ height: '1px' }} />}
-          {dataLoading && <BeatLoader color="#red" size={8} />}
+          {dataLoading && <BeatLoader color="red" size={8} />}
           {
             (!hasNextPage && !dataLoading && !isLoading) &&
             <NoMorePost>
