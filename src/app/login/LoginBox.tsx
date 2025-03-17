@@ -275,6 +275,7 @@ export default function LoginBox() {
             const guestUid = localStorage.getItem("guestUid");
             let guestResponse;
 
+            console.log(guestUid, '게스트 UID')
             // 공통 게스트 로그인 로직
             const handleGuestResponse = async (idToken: string, guestUid?: string) => {
                 return await fetch("/api/login", {
