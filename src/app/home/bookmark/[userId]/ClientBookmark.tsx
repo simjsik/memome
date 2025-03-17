@@ -146,7 +146,7 @@ export default function Bookmark() {
     return (
         <>
             {!usageLimit &&
-                <PostWrap postStyle={true}>
+                <PostWrap>
                     {/* 무한 스크롤 구조 */}
                     {userBookmarks.map((post) => (
                         <div
