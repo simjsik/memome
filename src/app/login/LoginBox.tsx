@@ -102,7 +102,8 @@ export default function LoginBox() {
         "auth/operation-not-allowed": "허용되지 않은 요청입니다.",
         "auth/invalid-credential": "이메일 또는 비밀번호가 올바르지 않습니다.",
         "auth/missing-password": "비밀번호를 입력해주세요.",
-        "auth/invalid-custom-token": "로그인 요청에 실패 했습니다. 다시 시도해주세요",
+        "auth/invalid-custom-token": "로그인 요청에 실패 했습니다. 다시 시도해주세요.",
+        "auth/email-not-verified": "인증이 필요한 이메일입니다. 이메일을 확인해주세요.",
         // 추가적인 에러 코드 필요 시 확장 가능
     };
 
@@ -143,13 +144,9 @@ export default function LoginBox() {
                 role = 3
             }
 
-            // setVerifyReSend(false);
             const hasGuest = false;
 
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            if (!userCredential) {
-                return setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.');
-            }
             const signUser = userCredential.user
             const idToken = await signUser.getIdToken();
 
@@ -180,35 +177,28 @@ export default function LoginBox() {
             const data = await loginResponse.json();
             const { uid, user } = data;
 
-            const userData = {
+            setUser({
                 name: user.name,
                 email: user.email,
                 photo: user.photo,
                 uid: uid,
-            }
-
-            setUser(userData)
+            })
             setHasLogin(true);
-            router.push('/home/main');
+            await router.push('/home/main');
         } catch (error: unknown) {
+            // Firebase 에러 타입 보존
             if (isFirebaseError(error)) {
-                console.error("로그인 중 오류 발생:", error, error.code);
+                console.error("Firebase 오류 발생:", error.code, error.message);
+                setLoginError(firebaseErrorMessages[error.code] ?? "알 수 없는 오류가 발생했습니다.");
 
-                // Firebase 에러 코드별 메시지 처리
-                if (firebaseErrorMessages[error.code]) {
-                    setLoginError(firebaseErrorMessages[error.code]);
-                } else if (error.code === "auth/email-not-verified") {
-                    // 예시: 이메일 인증 필요 에러 처리
-                    setLoginError("이메일 인증이 필요합니다. 이메일을 확인해주세요.");
+                if (error instanceof Error) {
+                    console.error("일반 오류 발생:", error.message);
+                    setLoginError(error.message);
                 } else {
-                    setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+                    console.error("알 수 없는 에러 유형:", error);
+                    setLoginError("알 수 없는 오류가 발생했습니다.");
                 }
-            } else {
-                // FirebaseError가 아닌 다른 에러인 경우
-                console.error("알 수 없는 에러 발생:", error);
-                setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
             }
-            return;
         } finally {
             setIsLoading(false); // 무조건 실행
             setLoadingTag(null);
@@ -223,68 +213,55 @@ export default function LoginBox() {
             setIsLoading(true);
             setLoadingTag('Google');
 
-            const provider = new GoogleAuthProvider();
-            const role = 2
-            const hasGuest = false;
-
             // Google 로그인 팝업
+            const provider = new GoogleAuthProvider();
             const userCredential = await signInWithPopup(auths, provider);
-            if (!userCredential) {
-                return setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.');
-            }
             const googleToken = await userCredential.user.getIdToken();
             // userCredential를 전부 보내주면 보안 상 문제가 생김. ( 최소 권한 원칙 )
+
+            // 역할 동적 할당 (환경 변수 기반)
+            const ADMIN_GOOGLE_EMAILS = process.env.ADMIN_GOOGLE_EMAILS?.split(',') || [];
+            const role = ADMIN_GOOGLE_EMAILS.includes(userCredential.user.email ?? '') ? 3 : 2;
 
             // 서버로 ID 토큰 전송
             const googleResponse = await fetch("/api/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                body: JSON.stringify({ idToken: googleToken, role, hasGuest }),
+                body: JSON.stringify({ idToken: googleToken, role, hasGuest: false }),
             });
 
             if (!googleResponse.ok) {
-                const errorData = await googleResponse.json();
-                setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
-                if (googleResponse.status === 403) {
-                    setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
-                    throw new Error(`CSRF 토큰 확인 불가 ${googleResponse.status}: ${errorData.message}`);
-                }
-                throw new Error(`서버 요청 에러 ${googleResponse.status}: ${errorData.message}`);
+                const errorMsg = googleResponse.status === 403
+                    ? '로그인 시도 실패. 다시 시도 해주세요.'
+                    : '구글 로그인에 실패했습니다.';
+                throw new Error(errorMsg);
             }
 
             const data = await googleResponse.json();
             const { uid, user } = data;
 
-            const userData = {
+            setUser({
                 name: user.name,
                 email: user.email,
                 photo: user.photo,
                 uid: uid,
-            }
-
-            setUser(userData);
+            })
             setHasLogin(true);
-            router.push('/home/main');
+            await router.push('/home/main');
         } catch (error: unknown) {
             if (isFirebaseError(error)) {
-                console.error("로그인 중 오류 발생:", error, error.code);
-
+                console.error("Firebase 오류 발생:", error.code, error.message);
+                setLoginError(firebaseErrorMessages[error.code] ?? "알 수 없는 오류가 발생했습니다.");
                 // Firebase 에러 코드별 메시지 처리
-                if (firebaseErrorMessages[error.code]) {
-                    setLoginError(firebaseErrorMessages[error.code]);
-                } else if (error.code === "auth/email-not-verified") {
-                    // 예시: 이메일 인증 필요 에러 처리
-                    setLoginError("이메일 인증이 필요합니다. 이메일을 확인해주세요.");
+                if (error instanceof Error) {
+                    console.error("일반 오류 발생:", error.message);
+                    setLoginError(error.message);
                 } else {
-                    setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+                    console.error("알 수 없는 에러 유형:", error);
+                    setLoginError("알 수 없는 오류가 발생했습니다.");
                 }
-            } else {
-                // FirebaseError가 아닌 다른 에러인 경우
-                console.error("알 수 없는 에러 발생:", error);
-                setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
             }
-            return;
         } finally {
             setIsLoading(false); // 무조건 실행
             setLoadingTag(null);
@@ -294,6 +271,7 @@ export default function LoginBox() {
     const handleGuestLogin = async () => {
         if (isLoading) return;
         setLoginError(null);
+
         try {
             setIsLoading(true);
             setLoadingTag('Guest');
@@ -301,99 +279,75 @@ export default function LoginBox() {
             const role = 1;
             const hasGuest = true;
             const guestUid = localStorage.getItem("guestUid");
-            let guestResponse
+            let guestResponse;
+
+            // 공통 게스트 로그인 로직
+            const handleGuestResponse = async (idToken: string, guestUid?: string) => {
+                return await fetch("/api/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ idToken, role, hasGuest, ...(guestUid && { guestUid }) }),
+                });
+            };
 
             if (guestUid) {
                 console.log('게스트 로그인 이력 유 : 로직 실행')
+
                 const guestDocRef = doc(db, 'guests', guestUid);
                 const guestDoc = await getDoc(guestDocRef);
                 const customToken = guestDoc.data()?.token as string;
                 console.log(customToken, '게스트 커스텀 토큰')
 
-                try {
-                    const userCredential = await signInWithCustomToken(auth, customToken);
-                    const signUser = userCredential.user
-                    const idToken = signUser.getIdToken();
+                const userCredential = await signInWithCustomToken(auth, customToken);
+                const idToken = await userCredential.user.getIdToken();
 
-                    guestResponse = await fetch("/api/login", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        credentials: "include",
-                        body: JSON.stringify({ idToken, role, hasGuest, guestUid }),
-                    });
-                } catch (error) {
-                    console.error("로그인 중 오류 발생:", error);
-                    const userCredential = await signInAnonymously(auth);
-                    const signUser = userCredential.user
-                    const idToken = await signUser.getIdToken();
-                    localStorage.setItem('guestUid', signUser.uid)
-
-                    guestResponse = await fetch("/api/login", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        credentials: "include",
-                        body: JSON.stringify({ idToken, role, hasGuest }),
-                    });
-                    // 에러 처리 로직 추가
-                }
+                guestResponse = await handleGuestResponse(idToken, guestUid)
             } else {
+                console.log('게스트 로그인 이력 무 : 로직 실행')
+
                 const userCredential = await signInAnonymously(auth);
                 const signUser = userCredential.user
                 const idToken = await signUser.getIdToken();
                 localStorage.setItem('guestUid', signUser.uid)
 
-                guestResponse = await fetch("/api/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ idToken, role, hasGuest }),
-                });
+                guestResponse = await handleGuestResponse(idToken)
             }
             // 서버로 ID 토큰 전송
 
             if (!guestResponse.ok) {
                 const errorData = await guestResponse.json();
-                console.log(guestResponse.status, '에러 상태')
-                if (guestResponse.status === 403) {
-                    setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
-                    throw new Error(`CSRF 토큰 확인 불가 ${guestResponse.status}: ${errorData.message}`);
-                }
-                setLoginError('게스트 로그인에 실패했습니다. 다시 시도 해주세요.')
+                const errorMessage = guestResponse.status === 403
+                    ? '로그인 시도 실패. 다시 시도 해주세요.'
+                    : '게스트 로그인에 실패했습니다. 다시 시도 해주세요.';
+                setLoginError(errorMessage);
                 throw new Error(`서버 요청 에러 ${guestResponse.status}: ${errorData.message}`);
             }
 
             const data = await guestResponse.json();
             const { uid, user } = data;
 
-            const userData = {
+            setUser({
                 name: user.name,
                 email: user.email,
                 photo: user.photo,
                 uid: uid,
-            }
-
-            setUser(userData)
+            })
             setHasLogin(true);
-            router.push('/home/main');
+            await router.push('/home/main');
         } catch (error: unknown) {
+            // Firebase 에러 타입 보존
             if (isFirebaseError(error)) {
-                console.error("로그인 중 오류 발생:", error, error.code);
-
-                // Firebase 에러 코드별 메시지 처리
-                if (firebaseErrorMessages[error.code]) {
-                    setLoginError(firebaseErrorMessages[error.code]);
-                } else if (error.code === "auth/email-not-verified") {
-                    // 예시: 이메일 인증 필요 에러 처리
-                    setLoginError("이메일 인증이 필요합니다. 이메일을 확인해주세요.");
+                console.error("Firebase 오류 발생:", error.code, error.message);
+                setLoginError(firebaseErrorMessages[error.code] ?? "알 수 없는 오류가 발생했습니다.");
+                if (error instanceof Error) {
+                    console.error("일반 오류 발생:", error.message);
+                    setLoginError(error.message);
                 } else {
-                    setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
+                    console.error("알 수 없는 에러 유형:", error);
+                    setLoginError("알 수 없는 오류가 발생했습니다.");
                 }
-            } else {
-                // FirebaseError가 아닌 다른 에러인 경우
-                console.error("알 수 없는 에러 발생:", error);
-                setLoginError("알 수 없는 오류가 발생했습니다. 다시 시도해주세요.");
             }
-            return;
         } finally {
             setIsLoading(false); // 무조건 실행
             setLoadingTag(null);
