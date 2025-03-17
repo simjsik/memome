@@ -272,7 +272,7 @@ export default function LoginBox() {
             setIsLoading(true);
             setLoadingTag('Guest');
 
-            const guestUid = localStorage.getItem("guestUid");
+            let guestUid = localStorage.getItem("guestUid");
             let guestResponse;
 
             console.log(guestUid, '게스트 UID')
@@ -304,8 +304,7 @@ export default function LoginBox() {
                 const userCredential = await signInAnonymously(auth);
                 const signUser = userCredential.user
                 const idToken = await signUser.getIdToken();
-                const guestUid = signUser.uid
-                localStorage.setItem('guestUid', guestUid);
+                guestUid = signUser.uid
 
                 guestResponse = await handleGuestResponse(idToken, guestUid)
             }
@@ -323,6 +322,7 @@ export default function LoginBox() {
             const data = await guestResponse.json();
             const { uid, user } = data;
 
+            localStorage.setItem('guestUid', uid);
             setUser({
                 name: user.name,
                 email: user.email,
