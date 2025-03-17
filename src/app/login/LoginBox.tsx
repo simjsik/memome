@@ -328,7 +328,7 @@ export default function LoginBox() {
                     const idToken = await signUser.getIdToken();
                     localStorage.setItem('guestUid', signUser.uid)
 
-                    guestResponse = await fetch("/api/auth/loginApi", {
+                    guestResponse = await fetch("/api/login", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         credentials: "include",
@@ -342,7 +342,7 @@ export default function LoginBox() {
                 const idToken = await signUser.getIdToken();
                 localStorage.setItem('guestUid', signUser.uid)
 
-                guestResponse = await fetch("/api/auth/loginApi", {
+                guestResponse = await fetch("/api/login", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",
