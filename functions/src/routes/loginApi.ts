@@ -44,16 +44,11 @@ router.post('/login', async (req: Request, res: Response) => {
 
                 if (!saveUserResponse.ok) {
                     const errorData = await saveUserResponse.json();
-                    throw new Error(`${403}: ${errorData.error}`);
+                    return res.status(saveUserResponse.status).json({
+                        message: `유저 저장 실패 : ${errorData.error}`,
+                    });
                 }
             } else {
-                const idToken = await guestUid.getIdToken();
-                if (!idToken) {
-                    return res.status(403).json({
-                         message: "게스트 토큰이 유효하지 않습니다.",
-                        });
-                }
-
                 decodedToken = await adminAuth.verifyIdToken(idToken);
                 if (!decodedToken) {
                     return res.status(403).json({

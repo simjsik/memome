@@ -9,33 +9,29 @@ app.use(cookieParser());
 export interface newUser {
     displayName: string | null;
     photoURL: string | null;
-    email: string | null;
     uid: string;
     token?: string;
 }
 
 router.post('/saveUser', async (req: Request, res: Response) => {
-    const {uid, displayName, email, token, photoURL} = await req.body;
-    let randomName;
-    let userRef;
+    const {uid, displayName, token, photoURL} = req.body;
 
-    console.log(uid, token.slice(0, 8), '유저 정보 저장 API');
+    console.log(uid, token?.slice(0, 8), '유저 정보 저장 API');
     try {
-        userRef = adminDb.doc(`users/${uid}`);
-        randomName = `user-${Math.random().toString(36).substring(2, 10)}`;
+        const userRef = token ?
+         adminDb.doc(`guests/${uid}`) :
+         adminDb.doc(`users/${uid}`);
 
-        if (token) {
-            userRef = adminDb.doc(`guests/${uid}`);
-            randomName = `Guest-${Math.random().toString(36).substring(2, 10)}`;
-        }
+        const randomName = token ?
+         `Guest-${Math.random().toString(36).substring(2, 10)}` :
+         `user-${Math.random().toString(36).substring(2, 10)}`;
 
         const userSnapshot = await userRef.get();
-
+        console.log(randomName, '유저 정보 저장 API');
         if (!userSnapshot.exists) {
             const userData: newUser = {
                 displayName: displayName || randomName,
                 photoURL: photoURL || "",
-                email: email,
                 uid: uid,
             };
 
@@ -47,6 +43,7 @@ router.post('/saveUser', async (req: Request, res: Response) => {
             await userRef.set(userData);
             console.log(`New Firebase user created: ${uid}`);
         }
+        console.log(userSnapshot.exists, '유저 정보 저장 API');
 
         return res.status(200).json({message: "유저 정보 저장"});
     } catch (error) {
