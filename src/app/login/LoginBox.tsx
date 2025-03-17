@@ -138,17 +138,13 @@ export default function LoginBox() {
         try {
             setIsLoading(true);
             setLoadingTag('Login');
-            let role = 2
-
-            if (email === 'simjsik75@naver.com') {
-                role = 3
-            }
-
-            const hasGuest = false;
 
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const signUser = userCredential.user
             const idToken = await signUser.getIdToken();
+
+            const ADMIN_GOOGLE_EMAILS = process.env.ADMIN_GOOGLE_EMAILS?.split(',') || [];
+            const role = ADMIN_GOOGLE_EMAILS.includes(userCredential.user.email ?? '') ? 3 : 2;
 
             if (!signUser.emailVerified) {
                 return setLoginError('인증되지 않은 계정입니다. 이메일을 확인해주세요.');
@@ -161,7 +157,7 @@ export default function LoginBox() {
                     "Content-Type": "application/json",
                 },
                 credentials: "include",
-                body: JSON.stringify({ idToken, role, hasGuest }),
+                body: JSON.stringify({ idToken, role, hasGuest: false }),
             });
 
             if (!loginResponse.ok) {
@@ -276,8 +272,6 @@ export default function LoginBox() {
             setIsLoading(true);
             setLoadingTag('Guest');
 
-            const role = 1;
-            const hasGuest = true;
             const guestUid = localStorage.getItem("guestUid");
             let guestResponse;
 
@@ -287,7 +281,7 @@ export default function LoginBox() {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",
-                    body: JSON.stringify({ idToken, role, hasGuest, ...(guestUid && { guestUid }) }),
+                    body: JSON.stringify({ idToken, role: 1, hasGuest: true, ...(guestUid && { guestUid }) }),
                 });
             };
 
