@@ -306,7 +306,8 @@ export default function LoginBox() {
                 }
 
                 customTokenResponse = await handleCustomTokenResponse(guestUid);
-                const customToken = await customTokenResponse.json()
+                const data = await customTokenResponse.json();
+                const { customToken } = data;
 
                 const userCredential = await signInWithCustomToken(auth, customToken);
                 const idToken = await userCredential.user.getIdToken();
