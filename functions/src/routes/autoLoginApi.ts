@@ -26,11 +26,8 @@ router.get('/autoLogin', async (req: Request, res: Response) => {
         );
 
         if (!authToken) {
-            return res.status(403).json({message: "계정 토큰이 존재하지 않습니다."});
-        }
-
-        if (!hasGuest) {
-            return res.status(403).json({message: "게스트 유저 정보가 유효하지 않습니다."});
+            console.log('계정 토큰 확인 불가 ( Auto Login API )');
+            return res.status(401).json({message: "계정 토큰이 존재하지 않습니다."});
         }
 
         // 서버로 ID 토큰 검증을 위해 전송
@@ -52,7 +49,10 @@ router.get('/autoLogin', async (req: Request, res: Response) => {
         ); // Firebase 토큰 검증
 
         // UID를 기반으로 Redis에서 세션 조회
-        const userRef = adminDb.collection('users').doc(decodedToken.uid);
+        const userRef = hasGuest === 'true' ?
+        adminDb.collection('guests').doc(decodedToken.uid) :
+        adminDb.collection('users').doc(decodedToken.uid);
+
         const userSnapshot = await userRef.get();
         const userData = userSnapshot.data();
 
