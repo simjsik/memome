@@ -32,13 +32,11 @@ router.post('/login', async (req: Request, res: Response) => {
             const guestDoc = await guestDocRef.get();
 
             if (!guestDoc.exists) {
-                const customToken = await adminAuth.createCustomToken(uid);
-
                 const saveUserResponse = await fetch(`${API_URL}/saveUser`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({
-                        uid, displayName: randomName, token: customToken,
+                        uid, displayName: randomName, hasGuest: true,
                     }),
                 });
 
@@ -80,18 +78,17 @@ router.post('/login', async (req: Request, res: Response) => {
             });
         }
 
-        if (!secret) {
-            console.error("JWT 비밀 키 확인 불가");
-            return res.status(403).json({message: "JWT 비밀 키 확인 불가."});
-        }
-
-        const userToken = jwt.sign({uid, role}, secret, {expiresIn: "1h"});
-
         if (!tokenResponse?.ok) {
             const errorData = await tokenResponse?.json();
             console.error("토큰 인증 실패:", errorData.message);
             return res.status(403).json({message: "토큰 인증 실패."});
         }
+
+        if (!secret) {
+            console.error("JWT 비밀 키 확인 불가");
+            return res.status(403).json({message: "JWT 비밀 키 확인 불가."});
+        }
+        const userToken = jwt.sign({uid, role}, secret, {expiresIn: "1h"});
 
         if (hasGuest) {
             userSession = {
@@ -117,7 +114,6 @@ router.post('/login', async (req: Request, res: Response) => {
             credentials: "include",
             body: JSON.stringify({uid}),
         });
-
         if (!CsrfResponse.ok) {
             const errorData = await CsrfResponse.json();
             console.error("CSRF 토큰 발급 실패:", errorData.message);

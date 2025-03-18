@@ -274,8 +274,10 @@ export default function LoginBox() {
 
             let guestUid = localStorage.getItem("guestUid");
             let guestResponse;
+            let customTokenResponse;
 
             console.log(guestUid, '게스트 UID')
+
             // 공통 게스트 로그인 로직
             const handleGuestResponse = async (idToken: string, guestUid?: string) => {
                 return await fetch("/api/login", {
@@ -285,14 +287,26 @@ export default function LoginBox() {
                     body: JSON.stringify({ idToken, role: 1, hasGuest: true, guestUid }),
                 });
             };
+            const handleCustomTokenResponse = async (guestUid?: string) => {
+                return await fetch("/api/customToken", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ guestUid }),
+                });
+            };
 
             if (guestUid) {
                 console.log('게스트 로그인 이력 유 : 로직 실행')
 
                 const guestDocRef = doc(db, 'guests', guestUid);
-                const guestDoc = await getDoc(guestDocRef);
-                const customToken = guestDoc.data()?.token as string;
-                console.log(customToken, '게스트 커스텀 토큰')
+                const guestsDoc = await getDoc(guestDocRef);
+                if (!guestsDoc.exists()) { // 🔥 존재하지 않는 UID 차단
+                    return setLoginError('게스트 로그인에 실패했습니다. 다시 시도 해주세요.')
+                }
+
+                customTokenResponse = await handleCustomTokenResponse(guestUid);
+                const customToken = await customTokenResponse.json()
 
                 const userCredential = await signInWithCustomToken(auth, customToken);
                 const idToken = await userCredential.user.getIdToken();

@@ -9,20 +9,18 @@ app.use(cookieParser());
 export interface newUser {
     displayName: string | null;
     photoURL: string | null;
-    uid: string;
-    token?: string;
+    userId: string;
 }
 
 router.post('/saveUser', async (req: Request, res: Response) => {
-    const {uid, displayName, token, photoURL} = req.body;
+    const {uid, displayName, photoURL, hasGuest} = req.body;
 
-    console.log(uid, token?.slice(0, 8), '유저 정보 저장 API');
     try {
-        const userRef = token ?
+        const userRef = hasGuest ?
          adminDb.doc(`guests/${uid}`) :
          adminDb.doc(`users/${uid}`);
 
-        const randomName = token ?
+        const randomName = hasGuest ?
          `Guest-${Math.random().toString(36).substring(2, 10)}` :
          `user-${Math.random().toString(36).substring(2, 10)}`;
 
@@ -32,13 +30,8 @@ router.post('/saveUser', async (req: Request, res: Response) => {
             const userData: newUser = {
                 displayName: displayName || randomName,
                 photoURL: photoURL || "",
-                uid: uid,
+                userId: uid,
             };
-
-            // 일반 유저를 대비해 토큰은 게스트 유저일 때만 저장
-            if (token) {
-                userData.token = token;
-            }
 
             await userRef.set(userData);
             console.log(`New Firebase user created: ${uid}`);
