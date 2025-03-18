@@ -1,9 +1,9 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { PostWrap } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { BeatLoader } from "react-spinners";
+import { PostWrap } from "./styled/PostComponents";
 
 export default function LoadingWrap() {
     return (
