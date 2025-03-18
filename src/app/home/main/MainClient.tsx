@@ -17,7 +17,6 @@ import { usePostUpdateChecker } from '@/app/hook/ClientPolling';
 import BookmarkBtn from '@/app/components/BookmarkBtn';
 import { fetchPosts } from '@/app/utils/fetchPostData';
 import { NewPostBtn, NoMorePost, PostWrap } from '@/app/styled/PostComponents';
-import LoadingWrap from '@/app/components/LoadingWrap';
 import { BeatLoader } from "react-spinners";
 
 
@@ -54,7 +53,6 @@ export default function MainHome() {
   const pathName = usePathname();
   const observerLoadRef = useRef(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [dataLoading, setDataLoading] = useState<boolean>(false);
 
   // 웹소켓 연결---------------------------------------------------------------------------------
@@ -472,14 +470,6 @@ export default function MainHome() {
     return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
   }, []);
 
-  useEffect(() => {
-    setIsLoading(false);
-  }, [])
-  if (isLoading) {
-    return (
-      <LoadingWrap />
-    )
-  }
   return (
     <>
       {hasUpdate &&
@@ -564,7 +554,7 @@ export default function MainHome() {
           {postStyle && < div ref={observerLoadRef} style={{ height: '1px' }} />}
           {dataLoading && <BeatLoader color="red" size={8} />}
           {
-            (!hasNextPage && !dataLoading && !isLoading) &&
+            (!hasNextPage && !dataLoading) &&
             <NoMorePost>
               <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
               <p>모두 확인했습니다.</p>
