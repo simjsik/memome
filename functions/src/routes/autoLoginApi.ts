@@ -21,7 +21,9 @@ router.get('/autoLogin', async (req: Request, res: Response) => {
         const authToken = req.cookies.authToken;
         const hasGuest = req.cookies.hasGuest;
 
-        console.log(authToken?.slice(0, 8), '유저 ID 토큰 ( Auto Login API )');
+        console.log(
+            authToken?.slice(0, 8), hasGuest, '유저 정보 ( Auto Login API )'
+        );
 
         if (!authToken) {
             return res.status(403).json({message: "계정 토큰이 존재하지 않습니다."});
@@ -42,7 +44,7 @@ router.get('/autoLogin', async (req: Request, res: Response) => {
         if (!tokenResponse.ok) {
             const errorData = await tokenResponse.json();
             console.error("토큰 인증 실패:", errorData.message);
-            return res.status(403).json({message: "토큰 인증 실패."});
+            return res.status(401).json({message: "토큰 인증 실패."});
         }
 
         const decodedToken = await adminAuth.verifyIdToken(

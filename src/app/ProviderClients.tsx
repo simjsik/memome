@@ -61,6 +61,7 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
         setUserState(loginData.user);
         setLoginState(true);
         setHasGuest(loginData.hasGuest);
+        console.log(loginData, '로그인 유저 정보 확인 후 이동')
         router.push('/home/main');
     }, [loginData])
 
@@ -70,7 +71,6 @@ function InitializeLoginComponent({ children, loginData }: { children: ReactNode
             console.log(currentUser.uid, '북마크 요청 유저 UID')
             loadBookmarks(currentUser.uid);
         }
-
     }, [currentUser, loginData, loginData.user])
 
     return <>{children}</>; // 반드시 children을 렌더링
