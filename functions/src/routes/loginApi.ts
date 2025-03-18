@@ -2,12 +2,10 @@ import dotenv from "dotenv";
 dotenv.config();
 import express, {Request, Response} from "express";
 import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
-import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
+import {randomBytes} from "crypto";
 
 const router = express.Router();
-const app = express();
-app.use(cookieParser());
 
 const API_URL = process.env.API_URL;
 const secret = process.env.JWT_SECRET;
@@ -30,6 +28,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
             const guestDocRef = adminDb.doc(`guests/${guestUid}`);
             const guestDoc = await guestDocRef.get();
+            const guestData = guestDoc.data();
 
             if (!guestDoc.exists) {
                 const saveUserResponse = await fetch(`${API_URL}/saveUser`, {
@@ -57,6 +56,13 @@ router.post('/login', async (req: Request, res: Response) => {
                 uid = decodedToken.uid;
             }
 
+            userSession = {
+                uid: uid,
+                name: guestData?.displayName || "",
+                photo: guestData?.photoURL || "",
+                role: role,
+            };
+
             // 서버로 ID 토큰 검증을 위해 전송
             tokenResponse = await fetch(`${API_URL}/validate`, {
                 method: "POST",
@@ -70,6 +76,14 @@ router.post('/login', async (req: Request, res: Response) => {
             }
 
             uid = decodedToken.uid;
+
+            userSession = {
+                uid: uid,
+                name: decodedToken.name || "",
+                photo: decodedToken.picture || "",
+                email: decodedToken.email || "",
+                role: role,
+            };
 
             tokenResponse = await fetch(`${process.env.API_URL}/validate`, {
                 method: "POST",
@@ -90,37 +104,7 @@ router.post('/login', async (req: Request, res: Response) => {
         }
         const userToken = jwt.sign({uid, role}, secret, {expiresIn: "1h"});
 
-        if (hasGuest) {
-            userSession = {
-                uid: uid,
-                name: decodedToken.name || randomName,
-                photo: decodedToken.picture || "",
-                email: decodedToken.email || "",
-                role: role,
-            };
-        } else {
-            userSession = {
-                uid: uid,
-                name: decodedToken.name || "",
-                photo: decodedToken.picture || "",
-                email: decodedToken.email || "",
-                role: role,
-            };
-        }
-
-        const CsrfResponse = await fetch(`${process.env.API_URL}/csrf`, {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            credentials: "include",
-            body: JSON.stringify({uid}),
-        });
-        if (!CsrfResponse.ok) {
-            const errorData = await CsrfResponse.json();
-            console.error("CSRF 토큰 발급 실패:", errorData.message);
-            return res.status(403).json({message: "CSRF 토큰 발급 실패."});
-        }
-
-        const {csrfToken} = await CsrfResponse.json();
+        const csrfToken = randomBytes(32).toString("hex");
         console.log(csrfToken, 'csrf 토큰 ( login API )');
 
         res.cookie("csrfToken", csrfToken, {

@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
-import {Request, Response, Router} from "express";
+import express, {Request, Response, Router} from "express";
 import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
-
+import cookieParser from "cookie-parser";
 interface userData {
     name: string;
     photo: string;
@@ -10,6 +10,8 @@ interface userData {
 }
 
 const router = Router();
+const app = express();
+app.use(cookieParser());
 
 const API_URL = process.env.API_URL;
 
@@ -19,7 +21,7 @@ router.get('/autoLogin', async (req: Request, res: Response) => {
         const authToken = req.cookies.authToken;
         const hasGuest = req.cookies.hasGuest;
 
-        console.log(authToken.slice(0, 8), '유저 ID 토큰 ( Auto Login API )');
+        console.log(authToken?.slice(0, 8), '유저 ID 토큰 ( Auto Login API )');
 
         if (!authToken) {
             return res.status(403).json({message: "계정 토큰이 존재하지 않습니다."});

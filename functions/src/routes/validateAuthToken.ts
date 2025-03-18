@@ -1,6 +1,7 @@
 import express, {Request, Response} from "express";
 import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
 import cookieParser from "cookie-parser";
+import {randomBytes} from "crypto";
 
 const router = express.Router();
 const app = express();
@@ -8,7 +9,7 @@ app.use(cookieParser());
 
 router.post('/validate', async (req: Request, res: Response) => {
     try {
-        const {idToken, uid} = await req.body;
+        const {idToken, uid} = req.body;
         console.log(idToken?.slice(0, 8), uid, "유저 토큰 및 UID ( Validate API )");
         const authToken = req.cookies.authToken;
         const csrfToken = req.cookies.csrfToken;
@@ -44,11 +45,16 @@ router.post('/validate', async (req: Request, res: Response) => {
             }
 
             const decodedToken = await adminAuth.verifyIdToken(authToken);
-
             if (!decodedToken) {
                 console.log("ID 토큰 검증 실패 ( Validate API )");
                 return res.status(403).json(
                     {message: "ID 토큰이 유효하지 않거나 만료되었습니다."}
+                );
+            }
+            if (decodedToken.uid != uid) {
+                console.log("유저 UID 검증 실패 ( Validate API )");
+                return res.status(403).json(
+                    {message: "UID가 일치하지 않습니다."}
                 );
             }
 
@@ -56,6 +62,7 @@ router.post('/validate', async (req: Request, res: Response) => {
             const userRef = hasGuest === 'true' ?
             adminDb.collection('guests').doc(uid) :
             adminDb.collection('users').doc(uid);
+
             const userSnapshot = await userRef.get();
             const userData = userSnapshot.data();
 
@@ -66,49 +73,35 @@ router.post('/validate', async (req: Request, res: Response) => {
                 });
             }
 
-            if (csrfToken) {
-                const csrfDoc = await
-                adminDb.collection("csrfTokens").doc(uid).get();
+            const csrfRef = await adminDb.collection("csrfTokens").doc(uid);
+            const csrfDoc = await csrfRef.get();
 
-                const csrfData = csrfDoc.data();
+            const csrfData = csrfDoc.data();
 
-                if (!csrfDoc.data() || !csrfData) {
+            const expiresAt = csrfData?.expiresAt;
+
+            // 토큰이 존재하지 않거나 만료된 경우
+            if (Date.now() > Number(expiresAt) || !csrfData) {
+                try {
+                    const csrfToken = randomBytes(32).toString("hex");
+
+                    // Firestore에 CSRF 토큰 저장 (유효기간 24시간)
+                    await adminDb.collection("csrfTokens").doc(uid).set({
+                        csrfToken,
+                        uid,
+                        expiresAt: Date.now() + 3600000, // 1시간 후 만료
+                    }, {merge: true});
+                    console.log("CSRF 토큰 재발급.");
+                } catch (error) {
                     return res.status(403).json(
-                        {message: "CSRF 토큰이 존재하지 않습니다."}
+                        {message: "CSRF 토큰 재발급 실패.", error}
                     );
                 }
-
-                const expiresAt = csrfData.expiresAt;
-
-                // 토큰이 존재하지 않거나 만료된 경우
-                if (Date.now() > Number(expiresAt)) {
-                    await adminDb.collection("csrfTokens").doc(uid).delete();
-                    try {
-                        const CsrfResponse = await fetch(
-                            `${process.env.API_URL}/csrf`, {
-                            method: "POST",
-                            headers: {"Content-Type": "application/json"},
-                            body: JSON.stringify({uid}),
-                        });
-                        if (!CsrfResponse.ok) {
-                            return res.status(403).json(
-                                {message: "CSRF 토큰 재발급 실패."}
-                            );
-                        }
-                    } catch (error) {
-                        return res.status(403).json(
-                            {message: "CSRF 토큰 재발급 실패.", error}
-                        );
-                    }
-                    console.log("CSRF 토큰 만료됨.");
-
-                    return res.status(403).json({
-                        message: "CSRF 토큰이 유효하지 않거나 만료되었습니다.",
-                    });
-                }
+                return res.status(403).json({
+                    message: "CSRF 토큰이 유효하지 않거나 만료되었습니다.",
+                });
             }
         }
-
         console.log("유저 검증 완료.");
         return res.status(200).json({message: "유저 검증 확인"});
     } catch (error) {
