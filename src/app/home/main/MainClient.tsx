@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { ADMIN_ID, DidYouLogin, loadingState, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, PostState, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
+import { ADMIN_ID, DidYouLogin, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, PostState, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
 import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, where } from 'firebase/firestore';
@@ -24,7 +24,7 @@ export default function MainHome() {
   const yourLogin = useRecoilValue(DidYouLogin)
   const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
   const setModal = useSetRecoilState<boolean>(modalState);
-  const setLoading = useSetRecoilState(loadingState);
+  // const setLoading = useSetRecoilState(loadingState);
 
   // 포스트 스테이트
   const [posts, setPosts] = useRecoilState<PostData[]>(PostState)
@@ -62,8 +62,8 @@ export default function MainHome() {
   useEffect(() => {
     // 설정 해주지 않으면 popstate 이벤트가 실행 안됨.
     window.history.pushState(null, "", window.location.pathname);
-    setLoading(false);
-    console.log('로딩 오프( 메인 페이지 )')
+    // setLoading(false);
+    // console.log('로딩 오프( 메인 페이지 )')
 
     if (!yourLogin) {
       router.push('/login');
