@@ -1,12 +1,34 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { MoonLoader } from "react-spinners";
-import { LoadingBox } from "./LoadingWrap";
+import { loadingState } from "../state/PostState";
+import { useRecoilValue } from "recoil";
+import styled from "@emotion/styled";
+
+const LoadingWrap = styled.div`
+    position: absolute;
+    width: 600px;
+    left: 500px;
+    top: 0;
+    bottom: 0;
+  >span{
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    display: block;
+  }
+`
 
 export default function GlobalLoadingWrap() {
+    const loading = useRecoilValue(loadingState);
+
     return (
-        <LoadingBox>
-            <MoonLoader color="#0087ff" size={12} />
-        </LoadingBox>
+        <>
+            {loading &&
+                <LoadingWrap>
+                    <MoonLoader color="#0087ff" />
+                </LoadingWrap >
+            }
+        </>
     )
 }
