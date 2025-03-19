@@ -63,6 +63,8 @@ export default function MainHome() {
     // 설정 해주지 않으면 popstate 이벤트가 실행 안됨.
     window.history.pushState(null, "", window.location.pathname);
     setLoading(false);
+    console.log('로딩 오프( 메인 페이지 )')
+
     if (!yourLogin) {
       router.push('/login');
       setLoginToggle(true);

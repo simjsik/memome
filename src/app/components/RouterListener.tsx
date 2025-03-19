@@ -9,10 +9,11 @@ export default function RouteChangeListener() {
     const setLoading = useSetRecoilState(loadingState);
     const pathName = usePathname();
     useEffect(() => {
-        console.log('페이지 이동')
+        console.log('페이지 이동( 로딩 UI )')
 
         // 페이지 이탈 시 스크롤 위치 저장
         const handleLoading = () => {
+            console.log('로딩 온( 로딩 UI )')
             setLoading(true)
         };
 

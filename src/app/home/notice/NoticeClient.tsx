@@ -32,9 +32,10 @@ export default function ClientNotice() {
     const uid = currentUser.uid
 
     useEffect(() => {
+        console.log('로딩 오프( 공지 페이지 )')
         setLoading(false)
     }, [])
-    
+
     const formatDate = (createAt: Timestamp | Date | string | number) => {
         if ((createAt instanceof Timestamp)) {
             return createAt.toDate().toLocaleString('ko-KR', {
