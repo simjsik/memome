@@ -2,7 +2,7 @@
 "use client";
 
 import { fetchNoticePosts } from "@/app/utils/fetchPostData";
-import { DidYouLogin, loginToggleState, modalState, noticeState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
+import { DidYouLogin, loadingState, loginToggleState, modalState, noticeState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import { NoMorePost, NoticeWrap, } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
@@ -19,6 +19,8 @@ export default function ClientNotice() {
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [dataLoading, setDataLoading] = useState<boolean>(false);
+    const setLoading = useSetRecoilState(loadingState);
+
     // 포스트 스테이트
     const [notices, setNotices] = useRecoilState<PostData[]>(noticeState)
 
@@ -29,6 +31,10 @@ export default function ClientNotice() {
     const observerLoadRef = useRef(null);
     const uid = currentUser.uid
 
+    useEffect(() => {
+        setLoading(false)
+    }, [])
+    
     const formatDate = (createAt: Timestamp | Date | string | number) => {
         if ((createAt instanceof Timestamp)) {
             return createAt.toDate().toLocaleString('ko-KR', {
@@ -250,7 +256,7 @@ export default function ClientNotice() {
 
                         </div>
                     ))}
-                    {!dataLoading && <div ref={observerLoadRef} style={{ height: '1px' }} /> }
+                    {!dataLoading && <div ref={observerLoadRef} style={{ height: '1px' }} />}
                     {dataLoading && <LoadingWrap />}
                     {!dataLoading && !hasNextPage &&
                         <NoMorePost>

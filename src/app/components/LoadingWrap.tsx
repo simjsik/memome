@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import styled from "@emotion/styled";
-import { BeatLoader } from "react-spinners";
+import { MoonLoader } from "react-spinners";
 
 export const LoadingBox = styled.div`
 position : relative;
@@ -19,7 +19,8 @@ height : 60px;
 export default function LoadingWrap() {
     return (
         <LoadingBox>
-            <BeatLoader color="#0087ff" size={8} />
+            <MoonLoader color="#0087ff" size={8} />
         </LoadingBox>
     )
 }
+

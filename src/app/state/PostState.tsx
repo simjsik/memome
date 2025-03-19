@@ -236,3 +236,8 @@ export const signUpState = atom<boolean>({
     key: 'signUpState',
     default: false
 })
+
+export const loadingState = atom<boolean>({
+    key : 'loadingState',
+    default : false
+})
