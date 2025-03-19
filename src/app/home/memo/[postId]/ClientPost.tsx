@@ -2,7 +2,7 @@
 "use client";
 
 import { checkUsageLimit } from "@/app/utils/checkUsageLimit";
-import { Comment, memoCommentCount, memoCommentState, UsageLimitState, userData, userState } from "@/app/state/PostState";
+import { Comment, loadingState, memoCommentCount, memoCommentState, UsageLimitState, userData, userState } from "@/app/state/PostState";
 import { HomeBtn } from "@/app/styled/RouterComponents";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -18,6 +18,7 @@ export default function Memo({ comment }: ClientPostProps) {
     const setCommentCount = useSetRecoilState<number>(memoCommentCount)
     const currentUser = useRecoilValue<userData | null>(userState)
     const setUsageLimit = useSetRecoilState<boolean>(UsageLimitState)
+    const setLoading = useSetRecoilState<boolean>(loadingState);
 
     // state
 
@@ -41,6 +42,8 @@ export default function Memo({ comment }: ClientPostProps) {
         } else {
             console.log('제한 안함')
         }
+
+        setLoading(false)
     }, [])
 
     useEffect(() => {

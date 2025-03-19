@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
-import { DidYouLogin, hasGuestState, ImageUrlsState, loginToggleState, modalState, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
+import { DidYouLogin, hasGuestState, ImageUrlsState, loadingState, loginToggleState, modalState, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
@@ -598,16 +598,15 @@ export default function PostMenu() {
     const [postDate, setPostDate] = useState<string>('');
     const [confirmed, setConfirmed] = useState<boolean>(false);
     const [checkedNotice, setCheckedNotice] = useState<boolean>(false);
+    const setLoading = useSetRecoilState<boolean>(loadingState);
+    //  State
 
-    // tool toggle state
     const [toolToggle, setToolToggle] = useState<string>('');
     const [selectFontSize, setSelectedFontSize] = useState<string>('14px');
     const [selectColor, setSelectedColor] = useState<string>('#191919');
     const [selectBgColor, setSelectedBgColor] = useState<string>('#ffffff');
     const [selectLineheight, setSelectedLineHeight] = useState<string>('1.5');
     const [selectAlign, setSelectedAlign] = useState<string>('left');
-    //  State
-
     const colorPallete = {
         color: [
             '#191919', '#999999', '#ffcdc0', '#ffe3c8', '#fff8b2', '#e3fdc8', '#c2f4db', '#bdfbfa', '#b0f1ff', '#9bdfff',
@@ -626,6 +625,7 @@ export default function PostMenu() {
     const fontsize = ['10px', '12px', '14px', '16px', '18px', '20px', '24px']
     const lineheight = ['1', '1.5', '2', '2.5', '3', '4', '5']
     const [quillLoaded, setQuillLoaded] = useState(false);
+    // tool toggle state
 
     // quill 모듈 로드
     useEffect(() => {
@@ -671,6 +671,7 @@ export default function PostMenu() {
         };
 
         loadQuill();
+        setLoading(false)
     }, []);
 
     // 게스트라면 글 작성 X

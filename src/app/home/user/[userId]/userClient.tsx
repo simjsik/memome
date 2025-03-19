@@ -1,14 +1,14 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { ADMIN_ID, ImagePostData, PostData, UsageLimitState, userData } from "@/app/state/PostState";
+import { ADMIN_ID, ImagePostData, loadingState, PostData, UsageLimitState, userData } from "@/app/state/PostState";
 import { css } from "@emotion/react";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { UserPostWrap } from "./userStyle";
 import { auth, db } from "@/app/DB/firebaseConfig";
 import { deleteDoc, doc, getDoc, Timestamp } from "firebase/firestore";
-import { useRecoilValue } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
@@ -31,11 +31,17 @@ export default function UserClient({ user }: ClientUserProps) {
     const [posts, setPosts] = useState<PostData[]>([])
     const [postTab, setPostTab] = useState<boolean>(true)
     const [dropToggle, setDropToggle] = useState<string>('')
+    const setLoading = useSetRecoilState<boolean>(loadingState);
+
     const dropdownRef = useRef<HTMLDivElement>(null);
     const observerLoadRef = useRef(null);
     const observerImageLoadRef = useRef(null);
 
     const uid = user.uid
+
+    useEffect(() => {
+        setLoading(false)
+    }, [])
 
     // 무한 스크롤 로직
     const {

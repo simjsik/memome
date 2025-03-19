@@ -2,14 +2,14 @@
 "use client";
 import { fetchBookmarks } from "@/app/utils/fetchPostData";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
-import { bookMarkState, PostData, UsageLimitState, userBookMarkState, userData, userState } from "@/app/state/PostState";
+import { bookMarkState, loadingState, PostData, UsageLimitState, userBookMarkState, userData, userState } from "@/app/state/PostState";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Timestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import LoadingWrap from "@/app/components/LoadingWrap";
 
 export default function Bookmark() {
@@ -18,6 +18,7 @@ export default function Bookmark() {
     const currentUser = useRecoilValue<userData>(userState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [dataLoading, setDataLoading] = useState<boolean>(false);
+    const setLoading = useSetRecoilState<boolean>(loadingState);
 
     const router = useRouter();
     const observerLoadRef = useRef(null);
@@ -124,6 +125,7 @@ export default function Bookmark() {
         if (bookmarkPages && bookmarkPages.pages.length > 0) {
             fetchNextPage();
         }
+        setLoading(false)
     }, [])
 
     useEffect(() => {

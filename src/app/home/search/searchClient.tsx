@@ -11,7 +11,7 @@ import { collection, doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/app/DB/firebaseConfig";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
-import { DidYouLogin, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle } from "@/app/state/PostState";
+import { DidYouLogin, loadingState, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle } from "@/app/state/PostState";
 import { searchClient } from "@/app/utils/algolia";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 
@@ -213,9 +213,11 @@ const CustomSearch = () => {
 export default function SearchClient() {
     const searchParams = useSearchParams();
     const query = searchParams?.get('query') || '';
+    const setLoading = useSetRecoilState<boolean>(loadingState);
 
     useEffect(() => {
         console.log(query)
+        setLoading(false)
     }, [])
     return (
         <InstantSearch searchClient={searchClient} indexName="post_index">
