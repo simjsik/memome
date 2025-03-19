@@ -36,7 +36,6 @@ export default function MainHome() {
   // 공지사항 스테이트
   const setNewNotice = useSetRecoilState<boolean>(newNoticeState);
   const setNoticeLists = useSetRecoilState<noticeType[]>(noticeList);
-  const postStyle = useState<boolean>(true)
 
   // 스토리지 기본 값 설정 용
   const setStorageLoad = useSetRecoilState<boolean>(storageLoadState);
@@ -551,7 +550,7 @@ export default function MainHome() {
             </div >
           ))
           }
-          {postStyle && < div ref={observerLoadRef} style={{ height: '1px' }} />}
+          {!dataLoading && < div ref={observerLoadRef} style={{ height: '1px' }} />}
           {dataLoading && <LoadingWrap />}
           {
             (!hasNextPage && !dataLoading) &&
