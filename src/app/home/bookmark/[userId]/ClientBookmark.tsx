@@ -8,14 +8,17 @@ import { css } from "@emotion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Timestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
+import LoadingWrap from "@/app/components/LoadingWrap";
 
 export default function Bookmark() {
     const currentBookmark = useRecoilValue<string[]>(bookMarkState)
     const [userBookmarks, setUserBookmarks] = useRecoilState<PostData[]>(userBookMarkState)
     const currentUser = useRecoilValue<userData>(userState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+    const [dataLoading, setDataLoading] = useState<boolean>(false);
+
     const router = useRouter();
     const observerLoadRef = useRef(null);
 
@@ -32,24 +35,38 @@ export default function Bookmark() {
         retry: false,
         queryKey: ['bookmarks', currentUser?.uid],
         queryFn: async ({ pageParam = 0 }) => {
-            const validateResponse = await fetch(`/api/validate`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ uid }),
-            });
+            try {
+                setDataLoading(true);
+                const validateResponse = await fetch(`/api/validate`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ uid }),
+                });
 
-            if (!validateResponse.ok) {
-                const errorDetails = await validateResponse.json();
-                throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+                if (!validateResponse.ok) {
+                    const errorDetails = await validateResponse.json();
+                    throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+                }
+
+                return fetchBookmarks(
+                    currentUser.uid,
+                    currentBookmark, // 전역 상태를 바로 사용
+                    pageParam, // 시작 인덱스
+                    4, // 한 번 요청할 데이터 수
+                );
+            } catch (error) {
+                if (error instanceof Error) {
+                    console.error("일반 오류 발생:", error.message);
+                    throw error;
+                } else {
+                    console.error("알 수 없는 에러 유형:", error);
+                    throw new Error("알 수 없는 에러가 발생했습니다.");
+                }
+            } finally {
+                setDataLoading(false);
             }
 
-            return fetchBookmarks(
-                currentUser.uid,
-                currentBookmark, // 전역 상태를 바로 사용
-                pageParam, // 시작 인덱스
-                4, // 한 번 요청할 데이터 수
-            );
         },
         getNextPageParam: (lastPage) => lastPage?.nextIndexData, // 다음 페이지 인덱스 반환
         staleTime: 5 * 60 * 1000, // 5분 동안 데이터 캐싱 유지
@@ -212,6 +229,7 @@ export default function Bookmark() {
                     ))
                     }
                     < div ref={observerLoadRef} style={{ height: '1px' }} />
+                    {dataLoading && <LoadingWrap />}
                     {
                         (!hasNextPage && userBookmarks.length > 0) &&
                         <NoMorePost>

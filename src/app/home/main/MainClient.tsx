@@ -17,7 +17,7 @@ import { usePostUpdateChecker } from '@/app/hook/ClientPolling';
 import BookmarkBtn from '@/app/components/BookmarkBtn';
 import { fetchPosts } from '@/app/utils/fetchPostData';
 import { NewPostBtn, NoMorePost, PostWrap } from '@/app/styled/PostComponents';
-import { BeatLoader } from "react-spinners";
+import LoadingWrap from '@/app/components/LoadingWrap';
 
 
 export default function MainHome() {
@@ -552,7 +552,7 @@ export default function MainHome() {
           ))
           }
           {postStyle && < div ref={observerLoadRef} style={{ height: '1px' }} />}
-          {dataLoading && <BeatLoader color="red" size={8} />}
+          {dataLoading && <LoadingWrap />}
           {
             (!hasNextPage && !dataLoading) &&
             <NoMorePost>

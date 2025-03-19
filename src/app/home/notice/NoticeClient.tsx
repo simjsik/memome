@@ -8,8 +8,9 @@ import { css } from "@emotion/react";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { Timestamp } from "firebase/firestore";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, } from "react";
+import { useEffect, useRef, useState, } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import LoadingWrap from "@/app/components/LoadingWrap";
 
 export default function ClientNotice() {
     const yourLogin = useRecoilValue(DidYouLogin)
@@ -17,7 +18,7 @@ export default function ClientNotice() {
     const setModal = useSetRecoilState<boolean>(modalState);
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
-
+    const [dataLoading, setDataLoading] = useState<boolean>(false);
     // 포스트 스테이트
     const [notices, setNotices] = useRecoilState<PostData[]>(noticeState)
 
@@ -67,18 +68,32 @@ export default function ClientNotice() {
         retry: false,
         queryKey: ['notices'],
         queryFn: async ({ pageParam }) => {
-            const validateResponse = await fetch(`/api/validate`, {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ uid }),
-            });
-            if (!validateResponse.ok) {
-                const errorDetails = await validateResponse.json();
-                throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-            }
+            try {
+                setDataLoading(true);
 
-            return fetchNoticePosts(uid, pageParam);
+                const validateResponse = await fetch(`/api/validate`, {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ uid }),
+                });
+                if (!validateResponse.ok) {
+                    const errorDetails = await validateResponse.json();
+                    throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+                }
+
+                return fetchNoticePosts(uid, pageParam);
+            } catch (error) {
+                if (error instanceof Error) {
+                    console.error("일반 오류 발생:", error.message);
+                    throw error;
+                } else {
+                    console.error("알 수 없는 에러 유형:", error);
+                    throw new Error("알 수 없는 에러가 발생했습니다.");
+                }
+            } finally {
+                setDataLoading(false);
+            }
         },
         getNextPageParam: (lastPage) => lastPage.nextPage,
         staleTime: 5 * 60 * 1000,
@@ -236,6 +251,7 @@ export default function ClientNotice() {
                         </div>
                     ))}
                     < div ref={observerLoadRef} style={{ height: '1px' }} />
+                    {dataLoading && <LoadingWrap />}
                     {!hasNextPage &&
                         <NoMorePost>
                             <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>

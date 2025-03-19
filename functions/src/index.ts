@@ -71,7 +71,7 @@ export const setHasUpdateCommentFlag = onDocumentCreated(
     const db = getFirestore();
     try {
       const userSnap = await db.collection("users").get();
-      const upPromises = userSnap.docs.map(async (userDoc) => {
+      const userPromises = userSnap.docs.map(async (userDoc) => {
         const upRef = db.doc(`users/${userDoc.id}/status/commentUpdates`);
         await upRef.set(
           {
@@ -81,8 +81,19 @@ export const setHasUpdateCommentFlag = onDocumentCreated(
           {merge: true}
         );
       });
+      const guestSnap = await db.collection("guests").get();
+      const guestPromises = guestSnap.docs.map(async (userDoc) => {
+        const upRef = db.doc(`guests/${userDoc.id}/status/commentUpdates`);
+        await upRef.set(
+          {
+            hasUpdate: true,
+            updatedAt: new Date(),
+          },
+          {merge: true}
+        );
+      });
       // 모든 업데이트 작업이 완료될 때까지 기다림
-      await Promise.all(upPromises);
+      await Promise.all([...userPromises, ...guestPromises]);
       console.log("모든 유저의 문서가 업데이트되었습니다.");
     } catch (error) {
       console.error("업데이트 중 오류 발생:", error);
@@ -115,10 +126,23 @@ export const setHasUpdateFlag = onDocumentCreated(
     if (postData.notice) {
       await sendNotice(postId, postData as PostData);
       try {
-        const userSnap = await db.collection("users").get();
         const batch = db.batch();
+        const userSnap = await db.collection("users").get();
         userSnap.docs.forEach((userDoc) => {
           const upRef = db.collection(`users/${userDoc.id}/noticeList`).doc();
+          batch.set(
+            upRef,
+            {
+              noticeType: "새 공지사항",
+              noticeText: postData.title,
+              updatedAt: postData.createAt,
+            },
+            {merge: true}
+          );
+        });
+        const guestSnap = await db.collection("guests").get();
+        guestSnap.docs.forEach((userDoc) => {
+          const upRef = db.collection(`guests/${userDoc.id}/noticeList`).doc();
           batch.set(
             upRef,
             {
@@ -136,10 +160,22 @@ export const setHasUpdateFlag = onDocumentCreated(
       }
     } else {
       try {
-        const userSnap = await db.collection("users").get();
         const batch = db.batch();
+        const userSnap = await db.collection("users").get();
         userSnap.docs.forEach((userDoc) => {
           const upRef = db.doc(`users/${userDoc.id}/status/postUpdates`);
+          batch.set(
+            upRef,
+            {
+              hasUpdate: true,
+              updatedAt: new Date(),
+            },
+            {merge: true}
+          );
+        });
+        const guestSnap = await db.collection("guests").get();
+        guestSnap.docs.forEach((userDoc) => {
+          const upRef = db.doc(`guests/${userDoc.id}/status/postUpdates`);
           batch.set(
             upRef,
             {
