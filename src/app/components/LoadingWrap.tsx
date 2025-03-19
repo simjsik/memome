@@ -1,10 +1,25 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
-
+import styled from "@emotion/styled";
 import { BeatLoader } from "react-spinners";
+
+export const LoadingBox = styled.div`
+width : 100%;
+height : 60px;
+  >span{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(50%, 50%);
+    display: block;
+  }
+`
 
 export default function LoadingWrap() {
     return (
-        <BeatLoader color="blue" size={8} />
+
+        <LoadingBox>
+            <BeatLoader color="blue" size={8} />
+        </LoadingBox>
     )
 }
