@@ -80,6 +80,12 @@ router.post('/validate', async (req: Request, res: Response) => {
 
             const expiresAt = csrfData?.expiresAt;
 
+            if (csrfToken === csrfData?.csrfToken) {
+                return res.status(403).json({
+                    message: "CSRF 토큰 불일치",
+                });
+            }
+
             // 토큰이 존재하지 않거나 만료된 경우
             if (Date.now() > Number(expiresAt) || !csrfData) {
                 try {
@@ -97,9 +103,6 @@ router.post('/validate', async (req: Request, res: Response) => {
                         {message: "CSRF 토큰 재발급 실패.", error}
                     );
                 }
-                return res.status(403).json({
-                    message: "CSRF 토큰이 유효하지 않거나 만료되었습니다.",
-                });
             }
         }
         console.log("유저 검증 완료.");
