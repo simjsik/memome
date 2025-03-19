@@ -4,6 +4,7 @@ import styled from "@emotion/styled";
 import { BeatLoader } from "react-spinners";
 
 export const LoadingBox = styled.div`
+position : relative;
 width : 100%;
 height : 60px;
   >span{
@@ -17,9 +18,8 @@ height : 60px;
 
 export default function LoadingWrap() {
     return (
-
         <LoadingBox>
-            <BeatLoader color="blue" size={8} />
+            <BeatLoader color="#0087ff" size={8} />
         </LoadingBox>
     )
 }
