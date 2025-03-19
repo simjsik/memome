@@ -551,7 +551,7 @@ export default function MainHome() {
           ))
           }
           {!dataLoading && < div ref={observerLoadRef} style={{ height: '1px' }} />}
-          {dataLoading && <LoadingWrap />}
+          <LoadingWrap />
           {
             (!hasNextPage && !dataLoading) &&
             <NoMorePost>
