@@ -38,7 +38,7 @@ border-right : 1px solid #ededed;
             width: 36px;
             height: 36px;
             border: none;
-            background-color: #fff;
+            background-color: transparent;
             cursor: pointer;
 
             div{

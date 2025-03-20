@@ -145,7 +145,7 @@ export default function BookmarkBtn({ postId }: PostId) {
                     {bookmarked ?
                         <>
                             <motion.path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z"
-                                fill="#0087ff" stroke="#0087ff" strokeWidth="2.5"
+                                fill="#0087ff" stroke="#0087ff" strokeWidth="2"
                                 variants={pathVariants}
                                 whileHover="onHover"
                             >
@@ -156,7 +156,7 @@ export default function BookmarkBtn({ postId }: PostId) {
                         :
                         <>
                             <motion.path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z"
-                                fill="transparent" stroke="#ccc" strokeWidth="2.5"
+                                fill="transparent" stroke="#ccc" strokeWidth="2"
                                 variants={pathVariants}
                                 whileHover="offHover"
                             >

@@ -14,7 +14,7 @@ import { NoMorePost } from "@/app/styled/PostComponents";
 import { DidYouLogin, loadingState, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle } from "@/app/state/PostState";
 import { searchClient } from "@/app/utils/algolia";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-
+import { motion } from "framer-motion";
 
 const formatDate = (createAt: Timestamp | Date | string | number) => {
     if ((createAt instanceof Timestamp)) {
@@ -138,14 +138,18 @@ function PostHit({ hit }: { hit: PostData }) {
 
     return (
         <li className="ais_result_wrap">
-            <div className="ais_profile_wrap">
+            <motion.div className="ais_profile_wrap"
+                whileHover={{
+                    backgroundColor: "#f5ftft",
+                }}
+            >
                 <div
                     className="ais_user_photo"
                     style={{ backgroundImage: `url(${userData.photoURL})` }}
                 ></div>
                 <p className="ais_user_name">{userData.displayName}</p>
                 <span className="ais_user_uid">@{hit.userId.slice(0, 6)}... · {formatDate(hit.createAt)}</span>
-            </div>
+            </motion.div>
             <div className="ais_post_content_wrap" onClick={(event) => { event.preventDefault(); handlePostClick(hit.objectID as string); }}>
                 <h2 className="ais_post_title">{hit.title}</h2>
                 <div className="ais_post_content" dangerouslySetInnerHTML={{ __html: hit.content }}></div>

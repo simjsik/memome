@@ -9,6 +9,7 @@ import { css } from '@emotion/react';
 import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, where } from 'firebase/firestore';
 import { db } from '../../DB/firebaseConfig';
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
+import { motion } from "framer-motion";
 
 // Swiper
 import socket from '@/app/utils/websocket';
@@ -486,7 +487,10 @@ export default function MainHome() {
         <>
           {/* 무한 스크롤 구조 */}
           {!loading && posts.map((post) => (
-            <div
+            <motion.div
+              whileHover={{
+                backgroundColor: "#f5ftft",
+              }}
               key={post.id}
               className='post_box'
             >
@@ -554,7 +558,7 @@ export default function MainHome() {
                   <BookmarkBtn postId={post.id}></BookmarkBtn>
                 </div>
               </div>
-            </div >
+            </motion.div >
           ))
           }
           {!dataLoading && < div ref={observerLoadRef} style={{ height: '1px' }} />}

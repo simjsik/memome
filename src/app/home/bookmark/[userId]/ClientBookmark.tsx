@@ -10,6 +10,8 @@ import { Timestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
+import { motion } from "framer-motion";
+
 import LoadingWrap from "@/app/components/LoadingWrap";
 
 export default function Bookmark() {
@@ -175,10 +177,14 @@ export default function Bookmark() {
                 <PostWrap>
                     {/* 무한 스크롤 구조 */}
                     {!loading && userBookmarks.map((post) => (
-                        <div
+                        <motion.div
                             key={post.id}
                             className='post_box'
-                            onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}>
+                            onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}
+                            whileHover={{
+                                backgroundColor: "#f5ftft",
+                            }}
+                        >
                             {/* 작성자 프로필 */}
                             <div className='post_profile_wrap'>
                                 <div className='user_profile'>
@@ -234,7 +240,7 @@ export default function Bookmark() {
                                     <BookmarkBtn postId={post.id}></BookmarkBtn>
                                 </div>
                             </div>
-                        </div >
+                        </motion.div >
                     ))
                     }
                     {!dataLoading && <div ref={observerLoadRef} style={{ height: '1px' }} />}

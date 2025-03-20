@@ -10,6 +10,7 @@ import { Timestamp } from "firebase/firestore";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { motion } from "framer-motion";
 import LoadingWrap from "@/app/components/LoadingWrap";
 
 export default function ClientNotice() {
@@ -204,7 +205,12 @@ export default function ClientNotice() {
                 <>
                     {/* 무한 스크롤 구조 */}
                     {!loading && notices.map((post) => (
-                        <div key={post.id} className='post_box'>
+                        <motion.div
+                            key={post.id} className='post_box'
+                            whileHover={{
+                                backgroundColor: "#f5ftft",
+                            }}
+                        >
                             {/* 작성자 프로필 */}
                             <div className='post_profile'>
                                 <div className='user_profile'
@@ -258,7 +264,7 @@ export default function ClientNotice() {
                                 </div>
                             </div>
 
-                        </div>
+                        </motion.div>
                     ))}
                     {!dataLoading && <div ref={observerLoadRef} style={{ height: '1px' }} />}
                     {dataLoading && <LoadingWrap />}

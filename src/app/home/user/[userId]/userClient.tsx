@@ -3,6 +3,7 @@
 
 import { ADMIN_ID, ImagePostData, loadingState, PostData, UsageLimitState, userData } from "@/app/state/PostState";
 import { css } from "@emotion/react";
+import { motion } from "framer-motion";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { UserPostWrap } from "./userStyle";
@@ -13,6 +14,7 @@ import { useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
 import { fetchPostList } from "@/app/utils/fetchPostData";
+
 
 interface ClientUserProps {
     user: userData,
@@ -253,7 +255,11 @@ export default function UserClient({ user }: ClientUserProps) {
                 {postTab ?
                     <>
                         {!loading && posts.map((post) => (
-                            <div key={post.id} className="user_post_list_wrap">
+                            <motion.div key={post.id} className="user_post_list_wrap"
+                                whileHover={{
+                                    backgroundColor: "#f5ftft",
+                                }}
+                            >
                                 <div className="user_post_top">
                                     <div className="user_post_photo"
                                         css={css`background-image : url(${user.photo})`}
@@ -306,7 +312,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                     </div>
                                     <BookmarkBtn postId={post.id}></BookmarkBtn>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                         {postTab && < div className="postObserver" ref={observerLoadRef} style={{ height: '1px' }} />}
                         {
@@ -331,7 +337,11 @@ export default function UserClient({ user }: ClientUserProps) {
                         <div className="user_image_post_wrap">
                             {!loading && imagePost.map((post) => (
                                 post.images &&
-                                <div key={post.id} className="user_image_wrap">
+                                <motion.div key={post.id} className="user_image_wrap"
+                                    whileHover={{
+                                        backgroundColor: "#f5ftft",
+                                    }}
+                                >
                                     {post.images.length > 0 && (
                                         <>
                                             {post.images.map((imageUrl, index) => (
@@ -343,7 +353,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                             < div className="image_list_icon"></div>
                                         </>
                                     )}
-                                </div>
+                                </motion.div>
                             ))}
                         </div>
                         {!postTab && < div className="imageObserver" ref={observerImageLoadRef} style={{ height: '1px' }} />}
