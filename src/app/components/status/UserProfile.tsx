@@ -241,7 +241,7 @@ export default function UserProfile() {
     const [updateUserNameError, setUpdateUserNameError] = useState<string | null>(null)
     const [updateUserPhoto, setUpdateUserPhoto] = useState<File | null>(null)
     const [updateUserPhotoError, setUpdateUserPhotoError] = useState<string | null>(null)
-    const [updateUserPhotoPreview, setUpdateUserPhotoPreview] = useState<string | null>(null)
+    const [updateUserPhotoPreview, setUpdateUserPhotoPreview] = useState<string | null>(currentUser.photo)
     const [loading, setLoading] = useState(false);
     // state
     const updatePhotoRef = useRef<HTMLInputElement | null>(null)
@@ -403,7 +403,7 @@ export default function UserProfile() {
             setUpdateUserPhoto(null)
             setUpdateUserNameError(null)
             setUpdateUserPhotoError(null)
-            setUpdateUserPhotoPreview(null)
+            setUpdateUserPhotoPreview(currentUser.photo)
         }
 
         if (updatePhotoRef.current) {
