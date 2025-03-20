@@ -88,7 +88,9 @@ export const SearchBoxWrap = styled.div`
     .ais_user_name{
         margin-right : 4px;
     }
-
+    .ais_user_name:hover{
+        text-decoration : underline;
+    }
     .ais_user_uid{
         font-family : var(--font-pretendard-light);
         font-size : 14px;

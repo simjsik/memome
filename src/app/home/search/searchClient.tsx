@@ -15,6 +15,7 @@ import { DidYouLogin, loadingState, loginToggleState, modalState, PostData, Usag
 import { searchClient } from "@/app/utils/algolia";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { motion } from "framer-motion";
+import { useHandleUsernameClick } from "@/app/utils/handleClick";
 
 const formatDate = (createAt: Timestamp | Date | string | number) => {
     if ((createAt instanceof Timestamp)) {
@@ -128,6 +129,8 @@ function PostHit({ hit }: { hit: PostData }) {
         fetchUserData();
     }, [hit.userId]);
 
+    const handleUsernameClick = useHandleUsernameClick();
+
     if (isLoading) {
         return <p>Loading...</p>;
     }
@@ -141,13 +144,15 @@ function PostHit({ hit }: { hit: PostData }) {
             <motion.div className="ais_profile_wrap"
                 whileHover={{
                     backgroundColor: "#f5f5f5",
+                    transition: { duration: 0.1 },
                 }}
             >
                 <div
                     className="ais_user_photo"
                     style={{ backgroundImage: `url(${userData.photoURL})` }}
                 ></div>
-                <p className="ais_user_name">{userData.displayName}</p>
+                <p className="ais_user_name"
+                    onClick={(e) => { e.preventDefault(); handleUsernameClick(hit.userId); }}>{userData.displayName}</p>
                 <span className="ais_user_uid">@{hit.userId.slice(0, 6)}... · {formatDate(hit.createAt)}</span>
             </motion.div>
             <div className="ais_post_content_wrap" onClick={(event) => { event.preventDefault(); handlePostClick(hit.objectID as string); }}>
@@ -174,7 +179,7 @@ function PostHit({ hit }: { hit: PostData }) {
                     <BookmarkBtn postId={hit.id}></BookmarkBtn>
                 </div>
             </div>
-        </li>
+        </li >
     );
 }
 

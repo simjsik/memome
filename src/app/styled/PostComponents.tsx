@@ -141,6 +141,10 @@ border-right : 1px solid #ededed;
         margin-right : 4px;
       }
 
+      .user_name:hover{
+          text-decoration : underline;
+      }
+
       .post_bottom_wrap{
         display: flex;
         margin-top: 20px;
@@ -352,6 +356,11 @@ export const NoticeWrap = styled.div`
         line-height: 36px;
         margin-right: 4px;
     }
+
+    .user_name:hover{
+        text-decoration : underline;
+    }
+
     .user_uid,
     .post_date{
         font-family : var(--font-pretendard-light);

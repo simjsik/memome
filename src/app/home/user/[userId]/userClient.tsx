@@ -258,6 +258,7 @@ export default function UserClient({ user }: ClientUserProps) {
                             <motion.div key={post.id} className="user_post_list_wrap"
                                 whileHover={{
                                     backgroundColor: "#f5ftft",
+                                    transition: { duration: 0.1 },
                                 }}
                             >
                                 <div className="user_post_top">

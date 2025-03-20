@@ -12,6 +12,7 @@ import { useEffect, useRef, useState, } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { motion } from "framer-motion";
 import LoadingWrap from "@/app/components/LoadingWrap";
+import { useHandleUsernameClick } from "@/app/utils/handleClick";
 
 export default function ClientNotice() {
     const yourLogin = useRecoilValue(DidYouLogin)
@@ -199,6 +200,8 @@ export default function ClientNotice() {
             window.removeEventListener('popstate', saveScrollPosition);
         };
     }, [pathName]);
+
+    const handleUsernameClick = useHandleUsernameClick();
     return (
         <>
             <NoticeWrap>
@@ -209,6 +212,7 @@ export default function ClientNotice() {
                             key={post.id} className='post_box'
                             whileHover={{
                                 backgroundColor: "#f5f5f5",
+                                transition: { duration: 0.1 },
                             }}
                         >
                             {/* 작성자 프로필 */}
@@ -216,7 +220,9 @@ export default function ClientNotice() {
                                 <div className='user_profile'
                                     css={css`background-image : url(${post.PhotoURL})`}
                                 ></div>
-                                <p className='user_name'>
+                                <p className='user_name'
+                                    onClick={(e) => { e.preventDefault(); handleUsernameClick(post.userId); }}
+                                >
                                     {post.displayName}
                                 </p>
                                 <span className='user_uid'>

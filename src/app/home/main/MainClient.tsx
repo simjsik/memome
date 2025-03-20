@@ -19,6 +19,7 @@ import BookmarkBtn from '@/app/components/BookmarkBtn';
 import { fetchPosts } from '@/app/utils/fetchPostData';
 import { NewPostBtn, NoMorePost, PostWrap } from '@/app/styled/PostComponents';
 import LoadingWrap from '@/app/components/LoadingWrap';
+import { useHandleUsernameClick } from '@/app/utils/handleClick';
 
 
 export default function MainHome() {
@@ -427,7 +428,6 @@ export default function MainHome() {
     fetchNewPosts();
   };
 
-  const { hasUpdate, clearUpdate } = usePostUpdateChecker();
 
   // 페이지 이동 시 스크롤 위치 저장
   useEffect(() => {
@@ -477,6 +477,8 @@ export default function MainHome() {
     return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
   }, []);
 
+  const { hasUpdate, clearUpdate } = usePostUpdateChecker();
+  const handleUsernameClick = useHandleUsernameClick();
   return (
     <>
       {hasUpdate &&
@@ -490,6 +492,7 @@ export default function MainHome() {
             <motion.div
               whileHover={{
                 backgroundColor: "#f5f5f5",
+                transition: { duration: 0.1 },
               }}
               key={post.id}
               className='post_box'
@@ -501,7 +504,9 @@ export default function MainHome() {
                     css={css`background-image : url(${post.PhotoURL})`}
                   >
                   </div>
-                  <p className='user_name'>
+                  <p className='user_name'
+                    onClick={(e) => { e.preventDefault(); handleUsernameClick(post.userId); }}
+                  >
                     {post.displayName}
                   </p>
                   <span className='user_uid'>

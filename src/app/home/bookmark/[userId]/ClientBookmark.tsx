@@ -13,6 +13,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { motion } from "framer-motion";
 
 import LoadingWrap from "@/app/components/LoadingWrap";
+import { useHandleUsernameClick } from "@/app/utils/handleClick";
 
 export default function Bookmark() {
     const currentBookmark = useRecoilValue<string[]>(bookMarkState)
@@ -170,7 +171,8 @@ export default function Bookmark() {
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
         router.push(`memo/${postId}`)
     }
-
+    
+    const handleUsernameClick = useHandleUsernameClick();
     return (
         <>
             {!usageLimit &&
@@ -183,6 +185,7 @@ export default function Bookmark() {
                             onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}
                             whileHover={{
                                 backgroundColor: "#f5f5f5",
+                                transition: { duration: 0.1 },
                             }}
                         >
                             {/* 작성자 프로필 */}
@@ -192,7 +195,9 @@ export default function Bookmark() {
                                         css={css`background-image : url(${post.PhotoURL})`}
                                     >
                                     </div>
-                                    <p className='user_name'>
+                                    <p className='user_name'
+                                        onClick={(e) => { e.preventDefault(); handleUsernameClick(post.userId); }}
+                                    >
                                         {post.displayName}
                                     </p>
                                     <span className='user_uid'>
