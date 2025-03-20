@@ -22,6 +22,7 @@ import SignUp from "./SignUp";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../DB/firebaseConfig";
 import { BeatLoader } from "react-spinners";
+import { motion } from "framer-motion";
 
 interface FirebaseError extends Error {
     code: string;
@@ -401,6 +402,29 @@ export default function LoginBox() {
     }, [hasLogin]);
 
     // Function
+
+    const EmotionLoginBtn = motion(LoginButton);
+    const GoogleLoginBtn = motion(GoogleButton);
+    const GuestLoginBtn = motion(GuestButton);
+
+    const btnVariants = {
+        loginHover: {
+            backgroundColor: "#007ce9",
+            transition: { duration: 0.3 },
+        },
+        otherHover: {
+            backgroundColor: "#f7f9fa",
+            transition: { duration: 0.3 },
+        },
+        loginClick: {
+            backgroundColor: "#2b9cff",
+            transition: { duration: 0.3 },
+        },
+        otherClick: {
+            backgroundColor: "#f5f8fa",
+            transition: { duration: 0.3 },
+        },
+    };
     return (
         <>
             {path !== '/login' ?
@@ -435,15 +459,28 @@ export default function LoginBox() {
                                                 >인증 메일 재전송</button>
                                             } */}
                                         </div>
-                                        {(loadingTag === 'Login' && isLoading) ? <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> : <LoginButton type="submit">로그인</LoginButton>}
+                                        {(loadingTag === 'Login' && isLoading) ?
+                                            <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> :
+                                            <EmotionLoginBtn
+                                                variants={btnVariants}
+                                                whileHover="loginHover"
+                                                whileTap="loginClick"
+                                                type="submit">로그인</EmotionLoginBtn>
+                                        }
                                     </form>
                                     <LoginSpan>처음 이신가요?</LoginSpan >
                                     <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
                                     <OtherLoginWrap>
                                         <LoginOr>또는</LoginOr>
                                         <div>
-                                            {(loadingTag === 'Google' && isLoading) ? <GoogleButton><BeatLoader color="#000" size={8} /></GoogleButton> : <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>}
-                                            {(loadingTag === 'Guest' && isLoading) ? <GuestButton><BeatLoader color="#000" size={8} /></GuestButton> : <GuestButton onClick={handleGuestLogin}>게스트 로그인</GuestButton>}
+                                            {(loadingTag === 'Google' && isLoading) ? <GoogleLoginBtn><BeatLoader color="#000" size={8} /></GoogleLoginBtn> : <GoogleLoginBtn
+                                                variants={btnVariants}
+                                                whileHover="otherHover"
+                                                whileTap="otherClick" onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleLoginBtn>}
+                                            {(loadingTag === 'Guest' && isLoading) ? <GuestLoginBtn><BeatLoader color="#000" size={8} /></GuestLoginBtn> : <GuestLoginBtn
+                                                variants={btnVariants}
+                                                whileHover="otherHover"
+                                                whileTap="otherClick" onClick={handleGuestLogin}>게스트 로그인</GuestLoginBtn>}
                                         </div>
                                     </OtherLoginWrap>
                                 </LoginModalWrap>
@@ -482,15 +519,28 @@ export default function LoginBox() {
                                         >인증 메일 재전송</button>
                                     } */}
                                 </div>
-                                {(loadingTag === 'Login' && isLoading) ? <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> : <LoginButton type="submit">로그인</LoginButton>}
+                                {(loadingTag === 'Login' && isLoading) ?
+                                    <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> :
+                                    <EmotionLoginBtn
+                                        variants={btnVariants}
+                                        whileHover="loginHover"
+                                        whileTap="loginClick"
+                                        type="submit">로그인</EmotionLoginBtn>
+                                }
                             </form>
                             <LoginSpan>처음 이신가요?</LoginSpan >
                             <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
                             <OtherLoginWrap>
                                 <LoginOr>또는</LoginOr>
                                 <div>
-                                    {(loadingTag === 'Google' && isLoading) ? <GoogleButton><BeatLoader color="#000" size={7} /></GoogleButton> : <GoogleButton onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleButton>}
-                                    {(loadingTag === 'Guest' && isLoading) ? <GuestButton><BeatLoader color="#000" size={7} /></GuestButton> : <GuestButton onClick={handleGuestLogin}>게스트 로그인</GuestButton>}
+                                    {(loadingTag === 'Google' && isLoading) ? <GoogleLoginBtn><BeatLoader color="#000" size={8} /></GoogleLoginBtn> : <GoogleLoginBtn
+                                        variants={btnVariants}
+                                        whileHover="otherHover"
+                                        whileTap="otherClick" onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleLoginBtn>}
+                                    {(loadingTag === 'Guest' && isLoading) ? <GuestLoginBtn><BeatLoader color="#000" size={8} /></GuestLoginBtn> : <GuestLoginBtn
+                                        variants={btnVariants}
+                                        whileHover="otherHover"
+                                        whileTap="otherClick" onClick={handleGuestLogin}>게스트 로그인</GuestLoginBtn>}
                                 </div>
                             </OtherLoginWrap>
                         </LoginButtonWrap>
