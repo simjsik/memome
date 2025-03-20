@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { UserPostWrap } from "./userStyle";
 import { auth, db } from "@/app/DB/firebaseConfig";
 import { deleteDoc, doc, getDoc, Timestamp } from "firebase/firestore";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
@@ -31,17 +31,13 @@ export default function UserClient({ user }: ClientUserProps) {
     const [posts, setPosts] = useState<PostData[]>([])
     const [postTab, setPostTab] = useState<boolean>(true)
     const [dropToggle, setDropToggle] = useState<string>('')
-    const setLoading = useSetRecoilState<boolean>(loadingState);
+    const [loading, setLoading] = useRecoilState(loadingState);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const observerLoadRef = useRef(null);
     const observerImageLoadRef = useRef(null);
 
     const uid = user.uid
-
-    useEffect(() => {
-        setLoading(false)
-    }, [])
 
     // 무한 스크롤 로직
     const {
@@ -256,7 +252,7 @@ export default function UserClient({ user }: ClientUserProps) {
                 </div>
                 {postTab ?
                     <>
-                        {posts.map((post) => (
+                        {!loading && posts.map((post) => (
                             <div key={post.id} className="user_post_list_wrap">
                                 <div className="user_post_top">
                                     <div className="user_post_photo"
@@ -314,7 +310,7 @@ export default function UserClient({ user }: ClientUserProps) {
                         ))}
                         {postTab && < div className="postObserver" ref={observerLoadRef} style={{ height: '1px' }} />}
                         {
-                            (!hasNextPage && posts.length > 0) &&
+                            (!hasNextPage && posts.length > 0 && !loading) &&
                             <NoMorePost>
                                 <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
                                 <p>모두 확인했습니다.</p>
@@ -322,8 +318,8 @@ export default function UserClient({ user }: ClientUserProps) {
                             </NoMorePost>
                         }
                         {
-                            posts.length === 0 &&
-                            <NoMorePost>
+                            (posts.length === 0 && !loading) &&
+                            < NoMorePost >
                                 <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
                                 <p>메모가 없습니다.</p>
                                 <span>새 메모를 작성 해보세요.</span>
@@ -333,7 +329,7 @@ export default function UserClient({ user }: ClientUserProps) {
                     :
                     <>
                         <div className="user_image_post_wrap">
-                            {imagePost.map((post) => (
+                            {!loading && imagePost.map((post) => (
                                 post.images &&
                                 <div key={post.id} className="user_image_wrap">
                                     {post.images.length > 0 && (
@@ -352,7 +348,7 @@ export default function UserClient({ user }: ClientUserProps) {
                         </div>
                         {!postTab && < div className="imageObserver" ref={observerImageLoadRef} style={{ height: '1px' }} />}
                         {
-                            (!hasNextPage && imagePost.length > 0) &&
+                            (!hasNextPage && imagePost.length > 0 && !loading) &&
                             <NoMorePost>
                                 <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
                                 <p>모두 확인했습니다.</p>
@@ -360,7 +356,7 @@ export default function UserClient({ user }: ClientUserProps) {
                             </NoMorePost>
                         }
                         {
-                            imagePost.length === 0 &&
+                            (imagePost.length === 0 && !loading) &&
                             <NoMorePost>
                                 <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
                                 <p>메모가 없습니다.</p>

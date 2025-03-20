@@ -24,7 +24,7 @@ export default function MainHome() {
   const yourLogin = useRecoilValue(DidYouLogin)
   const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
   const setModal = useSetRecoilState<boolean>(modalState);
-  const setLoading = useSetRecoilState(loadingState);
+  const [loading, setLoading] = useRecoilState(loadingState);
 
   // 포스트 스테이트
   const [posts, setPosts] = useRecoilState<PostData[]>(PostState)
@@ -485,7 +485,7 @@ export default function MainHome() {
       <PostWrap>
         <>
           {/* 무한 스크롤 구조 */}
-          {posts.map((post) => (
+          {!loading && posts.map((post) => (
             <div
               key={post.id}
               className='post_box'
@@ -560,7 +560,7 @@ export default function MainHome() {
           {!dataLoading && < div ref={observerLoadRef} style={{ height: '1px' }} />}
           {dataLoading && <LoadingWrap />}
           {
-            (!hasNextPage && !dataLoading) &&
+            (!hasNextPage && !dataLoading && !loading) &&
             <NoMorePost>
               <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
               <p>모두 확인했습니다.</p>

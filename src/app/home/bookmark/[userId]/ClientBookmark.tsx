@@ -9,7 +9,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Timestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import LoadingWrap from "@/app/components/LoadingWrap";
 
 export default function Bookmark() {
@@ -18,7 +18,7 @@ export default function Bookmark() {
     const currentUser = useRecoilValue<userData>(userState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [dataLoading, setDataLoading] = useState<boolean>(false);
-    const setLoading = useSetRecoilState<boolean>(loadingState);
+    const [loading, setLoading] = useRecoilState(loadingState);
 
     const router = useRouter();
     const observerLoadRef = useRef(null);
@@ -126,7 +126,6 @@ export default function Bookmark() {
         if (bookmarkPages && bookmarkPages.pages.length > 0) {
             fetchNextPage();
         }
-        setLoading(false)
     }, [])
 
     useEffect(() => {
@@ -175,7 +174,7 @@ export default function Bookmark() {
             {!usageLimit &&
                 <PostWrap>
                     {/* 무한 스크롤 구조 */}
-                    {userBookmarks.map((post) => (
+                    {!loading && userBookmarks.map((post) => (
                         <div
                             key={post.id}
                             className='post_box'
@@ -241,7 +240,7 @@ export default function Bookmark() {
                     {!dataLoading && <div ref={observerLoadRef} style={{ height: '1px' }} />}
                     {dataLoading && <LoadingWrap />}
                     {
-                        (!dataLoading && !hasNextPage && userBookmarks.length > 0) &&
+                        (!dataLoading && !hasNextPage && userBookmarks.length > 0 && !loading) &&
                         <NoMorePost>
                             <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
                             <p>모두 확인했습니다.</p>
@@ -249,7 +248,7 @@ export default function Bookmark() {
                         </NoMorePost>
                     }
                     {
-                        !dataLoading && userBookmarks.length === 0 &&
+                        (!dataLoading && userBookmarks.length === 0 && !loading) &&
                         <NoMorePost>
                             <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
                             <p>북마크된 메모가 없습니다.</p>
