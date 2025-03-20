@@ -8,15 +8,16 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { BookmarkCache, bookMarkState, PostData, userBookMarkState, userState } from "../state/PostState";
 import { useQueryClient } from "@tanstack/react-query";
 import { FirebaseError } from "firebase/app";
+import { motion, useAnimation } from "framer-motion";
 
 const Bookmark = styled.button`
-width : 32px;
-height : 32px;
-cursor : pointer;
-border : none;
-background : none;
-padding : 2px;
-`
+    width : 32px;
+    height : 32px;
+    cursor : pointer;
+    border : none;
+    background : none;
+    padding : 2px;
+`;
 
 interface PostId {
     postId: string;
@@ -30,19 +31,21 @@ export default function BookmarkBtn({ postId }: PostId) {
     const currentUser = useRecoilValue(userState)
     // state
 
-    const checkBookmark = async () => {
-        const isBookmarked = currentBookmark.includes(postId);
-
-        if (isBookmarked) {
-            setBookmarked(true)
-        } else {
-            setBookmarked(false);
-        }
-    };
+    const controls = useAnimation();
 
     useEffect(() => {
+        const checkBookmark = async () => {
+            const isBookmarked = currentBookmark.includes(postId);
+
+            if (isBookmarked) {
+                setBookmarked(true)
+            } else {
+                setBookmarked(false);
+            }
+        };
+
         checkBookmark();
-    }, [currentUser, postId, checkBookmark])
+    }, [currentUser, postId])
 
     const queryClient = useQueryClient();
 
@@ -117,9 +120,34 @@ export default function BookmarkBtn({ postId }: PostId) {
         }
     }
 
+    const MotionBookmark = motion(Bookmark);
+
     // function
     return (
-        <Bookmark onClick={(event) => { event.preventDefault(); event.stopPropagation(); addBookmark(postId); }}>
+        <MotionBookmark
+            as={motion.button}
+            whileHover={{
+                scale: 1.05,
+                backgroundColor: "#3b82f6",
+                transition: { duration: 0.3 },
+            }}
+            whileTap={{
+                scale: 0.95,
+                rotate: "2deg",
+                transition: { duration: 0.1 },
+            }}
+            onHoverEnd={() => {
+                controls.start({
+                    scale: [0.95, 1.1, 1],
+                    transition: {
+                        duration: 1,
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 10
+                    }
+                });
+            }}
+            onClick={(event) => { event.preventDefault(); event.stopPropagation(); addBookmark(postId); }}>
             <svg width="28" height="28" viewBox="0 0 38 38">
                 <g>
                     {bookmarked ?
@@ -139,6 +167,6 @@ export default function BookmarkBtn({ postId }: PostId) {
                     }
                 </g>
             </svg>
-        </Bookmark>
+        </MotionBookmark>
     )
 }
