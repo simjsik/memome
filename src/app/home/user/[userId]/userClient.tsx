@@ -339,7 +339,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                 post.images &&
                                 <motion.div key={post.id} className="user_image_wrap"
                                     whileHover={{
-                                        backgroundColor: "#f5ftft",
+                                        backgroundColor: "#f5f5f5",
                                     }}
                                 >
                                     {post.images.length > 0 && (

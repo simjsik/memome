@@ -154,7 +154,7 @@ border-right : 1px solid #ededed;
         height: 32px;
         border : none;
         border-radius : 4px;
-        background : #fff;
+        background : transparent;
         cursor : pointer
       }
 

@@ -182,7 +182,7 @@ export default function Bookmark() {
                             className='post_box'
                             onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}
                             whileHover={{
-                                backgroundColor: "#f5ftft",
+                                backgroundColor: "#f5f5f5",
                             }}
                         >
                             {/* 작성자 프로필 */}

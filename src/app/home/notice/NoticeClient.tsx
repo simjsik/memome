@@ -208,7 +208,7 @@ export default function ClientNotice() {
                         <motion.div
                             key={post.id} className='post_box'
                             whileHover={{
-                                backgroundColor: "#f5ftft",
+                                backgroundColor: "#f5f5f5",
                             }}
                         >
                             {/* 작성자 프로필 */}

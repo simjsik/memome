@@ -489,7 +489,7 @@ export default function MainHome() {
           {!loading && posts.map((post) => (
             <motion.div
               whileHover={{
-                backgroundColor: "#f5ftft",
+                backgroundColor: "#f5f5f5",
               }}
               key={post.id}
               className='post_box'
