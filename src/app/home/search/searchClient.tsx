@@ -83,13 +83,14 @@ function CustomInfiniteHits() {
 function PostHit({ hit }: { hit: PostData }) {
     const [userData, setUserData] = useState<{ displayName: string; photoURL: string | null } | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const setLoading = useSetRecoilState<boolean>(loadingState);
 
     const yourLogin = useRecoilValue(DidYouLogin)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setModal = useSetRecoilState<boolean>(modalState);
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
-    
+
     const router = useRouter();
 
     // 포스트 보기
@@ -120,6 +121,7 @@ function PostHit({ hit }: { hit: PostData }) {
                 console.error('Error fetching user data:', error);
             } finally {
                 setIsLoading(false);
+                setLoading(false);
             }
         };
 

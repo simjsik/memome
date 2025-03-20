@@ -51,6 +51,7 @@ export default function Memo({ comment }: ClientPostProps) {
             setCommentList(comment);
             setCommentCount(comment.length);
         }
+        setLoading(false); // 초기 로딩 해제
     }, [comment]);
 
     const handleHomeBtn = () => {

@@ -31,11 +31,6 @@ export default function ClientNotice() {
     const observerLoadRef = useRef(null);
     const uid = currentUser.uid
 
-    useEffect(() => {
-        console.log('로딩 오프( 공지 페이지 )')
-        setLoading(false)
-    }, [])
-
     const formatDate = (createAt: Timestamp | Date | string | number) => {
         if ((createAt instanceof Timestamp)) {
             return createAt.toDate().toLocaleString('ko-KR', {
@@ -64,6 +59,7 @@ export default function ClientNotice() {
         data,
         fetchNextPage,
         hasNextPage,
+        isLoading,
         isError,
     } = useInfiniteQuery<
         { data: PostData[]; nextPage: Timestamp | undefined }, // TQueryFnData
@@ -164,6 +160,13 @@ export default function ClientNotice() {
             setUsageLimit(true);
         }
     }, [isError])
+
+    // 초기 데이터 로딩
+    useEffect(() => {
+        if (!isLoading) {
+            setLoading(false); // 초기 로딩 해제
+        }
+    }, [isLoading, setLoading])
 
     useEffect(() => {
         // 페이지 진입 시 스크롤 위치 복원

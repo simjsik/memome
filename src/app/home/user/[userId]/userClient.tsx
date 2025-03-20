@@ -48,6 +48,7 @@ export default function UserClient({ user }: ClientUserProps) {
         data,
         fetchNextPage,
         hasNextPage,
+        isLoading,
     } = useInfiniteQuery<
         FetchPostListResponse,
         Error,
@@ -162,6 +163,13 @@ export default function UserClient({ user }: ClientUserProps) {
             observer.disconnect(); // 강제 해제
         };
     }, [hasNextPage, fetchNextPage, usageLimit, postTab]);
+
+    // 초기 데이터 로딩
+    useEffect(() => {
+        if (!isLoading) {
+            setLoading(false); // 초기 로딩 해제
+        }
+    }, [isLoading, setLoading])
 
     const formatDate = (createAt: Timestamp | Date | string | number) => {
         if ((createAt instanceof Timestamp)) {

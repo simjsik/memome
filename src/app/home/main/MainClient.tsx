@@ -263,7 +263,7 @@ export default function MainHome() {
   // 초기 데이터 로딩
   useEffect(() => {
     if (!isLoading) {
-      setLoading(false); // ✨ 초기 로딩 해제
+      setLoading(false); // 초기 로딩 해제
     }
   }, [isLoading, setLoading])
 

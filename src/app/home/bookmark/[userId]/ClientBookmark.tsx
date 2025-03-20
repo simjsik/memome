@@ -30,6 +30,7 @@ export default function Bookmark() {
         fetchNextPage,
         hasNextPage,
         refetch,
+        isLoading,
         isError,  // 에러 상태
         // error,    // 에러 메시지
     } = useInfiniteQuery({
@@ -133,6 +134,13 @@ export default function Bookmark() {
             refetch();
         }
     }, [currentBookmark])
+
+    // 초기 데이터 로딩
+    useEffect(() => {
+        if (!isLoading) {
+            setLoading(false); // 초기 로딩 해제
+        }
+    }, [isLoading, setLoading])
 
     const formatDate = (createAt: Timestamp | Date | string | number) => {
         if ((createAt instanceof Timestamp)) {
