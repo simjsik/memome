@@ -558,7 +558,7 @@ export default function UserProfile() {
                                 </div>
                                 <span className="update_error">{updateUserPhotoError}</span>
                                 {/* 업데이트 감지 시 버튼 */}
-                                {(updateUserName !== currentUser?.name || Boolean(updateUserPhoto)) &&
+                                {(updateUserName !== currentUser?.name || Boolean(updateUserPhoto) || updateUserPhotoPreview !== currentUser?.photo) &&
                                     <div className="update_btn_wrap">
                                         <p>{loading ? '저장하지 않은 변경 사항이 있습니다!' : ''}</p>
                                         <button className="reset_update_btn" onClick={handleProfileReset}>
