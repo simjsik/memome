@@ -62,8 +62,6 @@ export default function MainHome() {
   useEffect(() => {
     // 설정 해주지 않으면 popstate 이벤트가 실행 안됨.
     window.history.pushState(null, "", window.location.pathname);
-    setLoading(false);
-    console.log('로딩 오프( 메인 페이지 )')
 
     if (!yourLogin) {
       router.push('/login');
@@ -143,7 +141,6 @@ export default function MainHome() {
       if (!currentUser.uid) return console.log('유저 없음');
     }
   }, [currentUser])
-
 
   // 무한 스크롤 로직----------------------------------------------------------------------------
   const {
@@ -261,7 +258,6 @@ export default function MainHome() {
       }
     }
   }, [isError])
-
 
   // 포스트 삭제
   const deletePost = async (postId: string) => {
@@ -467,6 +463,9 @@ export default function MainHome() {
         setDropToggle(''); // 드롭다운 닫기
       }
     };
+
+    setLoading(false);
+    console.log('로딩 오프( 메인 페이지 )')
 
     document.addEventListener('mousedown', handleOutsideClick); // 이벤트 리스너 추가
     return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
