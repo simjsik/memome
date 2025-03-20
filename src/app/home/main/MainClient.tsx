@@ -147,6 +147,7 @@ export default function MainHome() {
     data,
     fetchNextPage,
     hasNextPage,
+    isLoading,
     isError,
     error,
   } = useInfiniteQuery<
@@ -258,6 +259,13 @@ export default function MainHome() {
       }
     }
   }, [isError])
+
+  // 초기 데이터 로딩
+  useEffect(() => {
+    if (!isLoading) {
+      setLoading(false); // ✨ 초기 로딩 해제
+    }
+  }, [isLoading, setLoading])
 
   // 포스트 삭제
   const deletePost = async (postId: string) => {
@@ -463,9 +471,6 @@ export default function MainHome() {
         setDropToggle(''); // 드롭다운 닫기
       }
     };
-
-    setLoading(false);
-    console.log('로딩 오프( 메인 페이지 )')
 
     document.addEventListener('mousedown', handleOutsideClick); // 이벤트 리스너 추가
     return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
