@@ -8,7 +8,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { BookmarkCache, bookMarkState, PostData, userBookMarkState, userState } from "../state/PostState";
 import { useQueryClient } from "@tanstack/react-query";
 import { FirebaseError } from "firebase/app";
-import { motion, useAnimation } from "framer-motion";
+import { motion } from "framer-motion";
 
 const Bookmark = styled.button`
     width : 32px;
@@ -30,8 +30,6 @@ export default function BookmarkBtn({ postId }: PostId) {
 
     const currentUser = useRecoilValue(userState)
     // state
-
-    const controls = useAnimation();
 
     useEffect(() => {
         const checkBookmark = async () => {
@@ -114,13 +112,10 @@ export default function BookmarkBtn({ postId }: PostId) {
     }
 
     const MotionBookmark = motion(Bookmark);
-    const MotionBookmarkSVG = motion.svg;
-    const MotionBookmarkPath = motion.path;
 
     const pathVariants = {
-        initial: { fill: "none", stroke: "#ccc" },
-        onHover: { fill: "none", stroke: "#191919", transition: { duration: 0.3 } },
-        offHover: { fill: "#0087ff", stroke: "none", transition: { duration: 0.3 } },
+        offHover: { fill: "transparent", stroke: "#191919", transition: { duration: 0.3 } },
+        onHover: { fill: "#0087ff", stroke: "#0087ff", transition: { duration: 0.3 } },
     };
     // function
     return (
@@ -137,47 +132,41 @@ export default function BookmarkBtn({ postId }: PostId) {
             }}
             whileTap={{
                 scale: 0.95,
-                transition: { duration: 0.1 },
-            }}
-            onHoverEnd={() => {
-                controls.start({
-                    scale: [0.95, 1.1, 1],
-                    transition: {
-                        duration: 1,
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 10
-                    }
-                });
+                transition: {
+                    type: "spring",
+                    duration: 0.3,
+                    stiffness: 300,
+                    damping: 10
+                },
             }}
             onClick={(event) => { event.preventDefault(); event.stopPropagation(); addBookmark(postId); }}>
-            <MotionBookmarkSVG width="28" height="28" viewBox="0 0 38 38">
+            <motion.svg width="28" height="28" viewBox="0 0 38 38">
                 <g>
                     {bookmarked ?
                         <>
-                            <MotionBookmarkPath d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z"
+                            <motion.path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z"
                                 fill="#0087ff" stroke="#0087ff" strokeWidth="2.5"
                                 variants={pathVariants}
                                 whileHover="onHover"
                             >
-                            </MotionBookmarkPath>
+                            </motion.path>
                             <rect width="28" height="28" fill="none" stroke="none">
                             </rect>
                         </>
                         :
                         <>
-                            <MotionBookmarkPath d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z"
-                                fill="none" stroke="#ccc" strokeWidth="2.5"
+                            <motion.path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z"
+                                fill="transparent" stroke="#ccc" strokeWidth="2.5"
                                 variants={pathVariants}
-                                whileHover="onHover"
+                                whileHover="offHover"
                             >
-                            </MotionBookmarkPath>
+                            </motion.path>
                             <rect width="28" height="28" fill="none" stroke="none">
                             </rect>
                         </>
                     }
                 </g>
-            </MotionBookmarkSVG>
+            </motion.svg>
         </MotionBookmark>
     )
 }
