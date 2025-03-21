@@ -487,6 +487,7 @@ export default function MainHome() {
       {/* 공지사항 제외 전체 포스트 */}
       <PostWrap>
         <>
+          <LoadingWrap />
           {/* 무한 스크롤 구조 */}
           {!loading && posts.map((post) => (
             <motion.div
@@ -567,7 +568,6 @@ export default function MainHome() {
           ))
           }
           {!dataLoading && < div ref={observerLoadRef} style={{ height: '1px' }} />}
-          {dataLoading && <LoadingWrap />}
           {
             (!hasNextPage && !dataLoading && !loading) &&
             <NoMorePost>

@@ -339,7 +339,7 @@ export default function SignUp() {
                                     variants={btnVariants}
                                     whileHover="otherHover"
                                     whileTap="otherClick"
-                                    className="login_back" onClick={() => router.push('/login')}>기존 계정으로 로그인</motion.button>
+                                    className="login_back" onClick={(e) => { e.preventDefault(); router.push('/login') }}>기존 계정으로 로그인</motion.button>
                             </form>
                         </LoginButtonWrap >
                 }
