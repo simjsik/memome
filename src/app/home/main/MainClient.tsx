@@ -164,6 +164,7 @@ export default function MainHome() {
     queryKey: ['posts'],
     queryFn: async ({ pageParam }) => {
       try {
+        console.log('일반 포스트 요청')
         setDataLoading(true);
         const validateResponse = await fetch(`/api/validate`, {
           method: "POST",
