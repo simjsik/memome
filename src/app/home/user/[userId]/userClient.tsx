@@ -257,7 +257,7 @@ export default function UserClient({ user }: ClientUserProps) {
                         {!loading && posts.map((post) => (
                             <motion.div key={post.id} className="user_post_list_wrap"
                                 whileHover={{
-                                    backgroundColor: "#f5ftft",
+                                    backgroundColor: "#fafbfc",
                                     transition: { duration: 0.1 },
                                 }}
                             >

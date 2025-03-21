@@ -10,7 +10,7 @@ height : 60px;
   >span{
     position: absolute;
     left: 50%;
-    top: 50%;
+    top: 25%;
     display: block;
   }
 `

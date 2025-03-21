@@ -143,7 +143,7 @@ function PostHit({ hit }: { hit: PostData }) {
         <li className="ais_result_wrap">
             <motion.div className="ais_profile_wrap"
                 whileHover={{
-                    backgroundColor: "#f5f5f5",
+                    backgroundColor: "#fafbfc",
                     transition: { duration: 0.1 },
                 }}
             >

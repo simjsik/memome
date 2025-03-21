@@ -211,7 +211,7 @@ export default function ClientNotice() {
                         <motion.div
                             key={post.id} className='post_box'
                             whileHover={{
-                                backgroundColor: "#f5f5f5",
+                                backgroundColor: "#fafbfc",
                                 transition: { duration: 0.1 },
                             }}
                         >

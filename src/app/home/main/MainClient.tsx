@@ -487,12 +487,11 @@ export default function MainHome() {
       {/* 공지사항 제외 전체 포스트 */}
       <PostWrap>
         <>
-          <LoadingWrap />
           {/* 무한 스크롤 구조 */}
           {!loading && posts.map((post) => (
             <motion.div
               whileHover={{
-                backgroundColor: "#f5f5f5",
+                backgroundColor: "#fafbfc",
                 transition: { duration: 0.1 },
               }}
               key={post.id}
@@ -568,6 +567,7 @@ export default function MainHome() {
           ))
           }
           {!dataLoading && < div ref={observerLoadRef} style={{ height: '1px' }} />}
+          {dataLoading && <LoadingWrap />}
           {
             (!hasNextPage && !dataLoading && !loading) &&
             <NoMorePost>
