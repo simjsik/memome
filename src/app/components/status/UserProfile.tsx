@@ -12,6 +12,10 @@ import { MyAlarmWrap } from "@/app/styled/PostComponents";
 import { useRouter } from "next/navigation";
 import { db } from "@/app/DB/firebaseConfig";
 import { uploadImgCdn } from "@/app/utils/uploadCdn";
+import { motion } from "framer-motion";
+import { btnVariants } from "@/app/styled/motionVariant";
+import { BeatLoader } from "react-spinners";
+
 
 const ProfileWrap = styled.div`
 padding-top : 20px;
@@ -167,7 +171,6 @@ margin-top : 20px;
                 line-height: 18px;
                 text-align: center;
                 -webkit-text-decoration: underline;
-                text-decoration: underline;
                 font-family: var(--font-pretendard-light);
                 cursor: pointer;
             }
@@ -527,13 +530,16 @@ export default function UserProfile() {
                         border : 1px solid #333;
                         border-radius : 50%;
                     `}></div>
-                <button className="update_toggle_btn" onClick={handleUpdateToggle}>
+                <motion.button
+                    variants={btnVariants}
+                    whileHover="otherHover"
+                    whileTap="otherClick" className="update_toggle_btn" onClick={handleUpdateToggle}>
                     {updateToggle ?
                         '프로필 수정 취소'
                         :
                         '프로필 수정'
                     }
-                </button>
+                </motion.button>
             </div>
             {
                 updateToggle ?
@@ -550,8 +556,15 @@ export default function UserProfile() {
                                 <div className="user_photo_change_wrap">
                                     <label>사진</label>
                                     <div className="photo_btn_wrap">
-                                        <label className="photo_update" htmlFor={'photo_input'}>사진 변경</label>
-                                        <button className="photo_reset" onClick={handleResetPhoto}>사진 제거</button>
+                                        <motion.label
+                                            variants={btnVariants}
+                                            whileHover="otherHover"
+                                            whileTap="otherClick" className="photo_update" htmlFor={'photo_input'}>사진 변경</motion.label>
+                                        <motion.button
+                                            whileHover={{
+                                                textDecoration: "underline",
+                                            }}
+                                            className="photo_reset" onClick={handleResetPhoto}>사진 제거</motion.button>
                                     </div>
                                     <div className="photo_preview" css={css`background-image : url(${updateUserPhotoPreview})`}></div>
                                     <input id="photo_input" ref={updatePhotoRef} onChange={handlePhotoChange} type="file" accept="image/*" />
@@ -560,13 +573,21 @@ export default function UserProfile() {
                                 {/* 업데이트 감지 시 버튼 */}
                                 {(updateUserName !== currentUser?.name || Boolean(updateUserPhoto) || updateUserPhotoPreview !== currentUser?.photo) &&
                                     <div className="update_btn_wrap">
-                                        <p>{loading ? '저장하지 않은 변경 사항이 있습니다!' : ''}</p>
+                                        <p>저장하지 않은 변경 사항이 있습니다!</p>
                                         <button className="reset_update_btn" onClick={handleProfileReset}>
                                             되돌리기
                                         </button>
-                                        <button className="update_btn" onClick={(e) => { e.preventDefault(); updateToProfile(updateUserPhoto, updateUserName); }}>
-                                            변경 사항 적용
-                                        </button>
+                                        {loading ?
+                                            <motion.button className="update_btn" onClick={(e) => { e.preventDefault(); updateToProfile(updateUserPhoto, updateUserName); }}>
+                                                <BeatLoader color="#000" size={8} />
+                                            </motion.button>
+                                            : <motion.button
+                                                variants={btnVariants}
+                                                whileHover="loginHover"
+                                                whileTap="loginClick" className="update_btn" onClick={(e) => { e.preventDefault(); updateToProfile(updateUserPhoto, updateUserName); }}>
+                                                변경 사항 적용
+                                            </motion.button>
+                                        }
                                     </div>
                                 }
                             </div>

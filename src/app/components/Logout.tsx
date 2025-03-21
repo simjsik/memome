@@ -6,6 +6,8 @@ import { bookMarkState, DidYouLogin, loginToggleState, modalState, PostData, use
 import { css } from "@emotion/react";
 import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
+import { motion } from "framer-motion";
+import { btnVariants } from "../styled/motionVariant";
 
 const LogoutButton = css`
     position : absolute;
@@ -85,16 +87,23 @@ export default function Logout() {
         setModal(true);
     }
 
-
     // Function
     return (
         <>
             {(hasLogin) ?
                 <div>
-                    <button onClick={handleLogout} css={LogoutButton}>로그아웃</button>
+                    <motion.button
+                        variants={btnVariants}
+                        whileHover="otherHover"
+                        whileTap="otherClick"
+                        onClick={handleLogout} css={LogoutButton}>로그아웃</motion.button>
                 </div>
                 :
-                <button onClick={handleLoginToggle} css={LogInButton}>로그인</button>
+                <motion.button
+                    variants={btnVariants}
+                    whileHover="loginHover"
+                    whileTap="loginClick"
+                    onClick={handleLoginToggle} css={LogInButton}>로그인</motion.button>
             }
         </>
     )
