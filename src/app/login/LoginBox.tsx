@@ -38,11 +38,11 @@ const LoginWrap = css`
         text-align: center;
         margin: 0 auto;
 
-        p:nth-of-type(0){
+        p:nth-of-type(1){
             font-size: 12px;
             font-family: var(--font-pretendard-light);
         }
-        p:nth-of-type(0){
+        p:nth-of-type(2){
             font-size: 12px;
             font-family: var(--font-pretendard-bold);
             margin-top: 4px;
@@ -58,7 +58,7 @@ width : 100%;
 height : 100%;
 background : rgba(0,0,0,0.8);
 `
-const LogoBox = css`
+export const LogoBox = css`
     position: absolute;
     left: 50%;
     top: 80px;
