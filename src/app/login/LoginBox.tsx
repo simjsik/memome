@@ -465,7 +465,7 @@ export default function LoginBox() {
                                     }
                                 </form>
                                 <LoginSpan>처음 이신가요?</LoginSpan >
-                                <CreateButton onClick={() => router.push('/home/login/signup')}>회원가입</CreateButton>
+                                <CreateButton onClick={() => router.push('/login/signup')}>회원가입</CreateButton>
                                 <OtherLoginWrap>
                                     <LoginOr>또는</LoginOr>
                                     <div>
@@ -521,7 +521,7 @@ export default function LoginBox() {
                             }
                         </form>
                         <LoginSpan>처음 이신가요?</LoginSpan >
-                        <CreateButton onClick={() => router.push('/home/login/signup')}>회원가입</CreateButton>
+                        <CreateButton onClick={() => router.push('/login/signup')}>회원가입</CreateButton>
                         <OtherLoginWrap>
                             <LoginOr>또는</LoginOr>
                             <div>

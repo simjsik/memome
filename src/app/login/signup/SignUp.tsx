@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { signUpState } from "@/app/state/PostState";
 import { CreateInput, LoginButton, LoginButtonWrap, LoginModalWrap } from "@/app/styled/LoginComponents";
 import { auth } from "@/app/DB/firebaseConfig";
+import { motion } from "framer-motion";
 
 interface FirebaseError extends Error {
     code: string;
@@ -232,6 +233,26 @@ export default function SignUp() {
         }
     };
 
+    const EmotionLoginBtn = motion(LoginButton);
+    const btnVariants = {
+        loginHover: {
+            backgroundColor: "#007ce9",
+            transition: { duration: 0.3 },
+        },
+        otherHover: {
+            backgroundColor: "#f7f9fa",
+            transition: { duration: 0.3 },
+        },
+        loginClick: {
+            backgroundColor: "#2b9cff",
+            transition: { duration: 0.3 },
+        },
+        otherClick: {
+            backgroundColor: "#f5f8fa",
+            transition: { duration: 0.3 },
+        },
+    };
+
     return (
         <>
             {path === '/login' ?
@@ -244,7 +265,11 @@ export default function SignUp() {
                             </div>
                             <div className="sign_up_img" css={css`background : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009340/%EA%B0%80%EC%9E%85OK_tj25fs.svg);`}></div>
                             <span>로그인 후 다양한 이야기를 메모 해주세요!</span>
-                            <LoginButton onClick={() => setSignUpToggle(false)}>로그인 하러가기</LoginButton>
+                            <EmotionLoginBtn
+                                variants={btnVariants}
+                                whileHover="loginHover"
+                                whileTap="loginClick"
+                                onClick={() => setSignUpToggle(false)}>로그인 하러가기</EmotionLoginBtn>
                         </div>
                     </LoginButtonWrap>
                     :
@@ -303,7 +328,11 @@ export default function SignUp() {
                                 </div>
                                 {errors.displayName && <p className="sign_error" style={{ color: 'red' }}>{errors.displayName}</p>}
                             </div>
-                            <LoginButton type="submit">회원가입</LoginButton>
+                            <EmotionLoginBtn
+                                variants={btnVariants}
+                                whileHover="loginHover"
+                                whileTap="loginClick"
+                                type="submit">회원가입</EmotionLoginBtn>
                             <button className="login_back" onClick={() => setSignUpToggle(false)}>기존 계정으로 로그인</button>
                         </form>
                     </LoginButtonWrap >
@@ -376,7 +405,11 @@ export default function SignUp() {
                                 </div>
                                 {errors.displayName && <p className="sign_error" style={{ color: 'red' }}>{errors.displayName}</p>}
                             </div>
-                            <LoginButton type="submit">회원가입</LoginButton>
+                            <EmotionLoginBtn
+                                variants={btnVariants}
+                                whileHover="loginHover"
+                                whileTap="loginClick"
+                                type="submit">회원가입</EmotionLoginBtn>
                             <button className="login_back" onClick={() => setSignUpToggle(false)}>기존 계정으로 로그인</button>
                         </form>
                     </LoginModalWrap >
