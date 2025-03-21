@@ -163,32 +163,18 @@ export default function MainHome() {
     retry: false, // 재시도 방지
     queryKey: ['posts'],
     queryFn: async ({ pageParam }) => {
-      try {
-        console.log('일반 포스트 요청')
-        setDataLoading(true);
-        const validateResponse = await fetch(`/api/validate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ uid }),
-        });
-        if (!validateResponse.ok) {
-          const errorDetails = await validateResponse.json();
-          throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-        }
-
-        return await fetchPosts(uid, pageParam, 4);
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          console.error("일반 오류 발생:", error.message);
-          throw error;
-        } else {
-          console.error("알 수 없는 에러 유형:", error);
-          throw new Error("알 수 없는 에러가 발생했습니다.");
-        }
-      } finally {
-        setDataLoading(false);
+      const validateResponse = await fetch(`/api/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ uid }),
+      });
+      if (!validateResponse.ok) {
+        const errorDetails = await validateResponse.json();
+        throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
       }
+      setDataLoading(false);
+      return await fetchPosts(uid, pageParam, 4);
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 5 * 60 * 1000,
