@@ -266,6 +266,8 @@ export default function UserProfile() {
     const updateToProfile = async (image: File | null, name: string | null) => {
         if (currentUser) {
             try {
+                setLoading(true);
+
                 let profileImageUrl = null
                 let userProfileDate
                 const uid = currentUser.uid
@@ -354,6 +356,8 @@ export default function UserProfile() {
                 return;
             } catch (error) {
                 alert('프로필 사진 업로드에 실패' + error)
+            } finally{
+                setLoading(false);
             }
         }
 
@@ -377,7 +381,6 @@ export default function UserProfile() {
             setUpdateUserPhotoPreview(imageUrl)
             setUpdateUserPhoto(e.target.files[0]);
         }
-        setLoading(true);
     }
 
     const handleResetPhoto = () => {
@@ -388,7 +391,6 @@ export default function UserProfile() {
     // 유저 별명 변경 시 설정
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
-
         if (e.target.value.length > 12) {
             setUpdateUserNameError('별명은 최대 12자 이내로 가능합니다.')
         }
@@ -398,7 +400,6 @@ export default function UserProfile() {
         }
 
         setUpdateUserName(e.target.value)
-        setLoading(true);
     }
 
     const handleProfileReset = () => {
@@ -580,7 +581,7 @@ export default function UserProfile() {
                                         </button>
                                         {loading ?
                                             <motion.button className="update_btn" onClick={(e) => { e.preventDefault(); updateToProfile(updateUserPhoto, updateUserName); }}>
-                                                <BeatLoader color="#000" size={8} />
+                                                <BeatLoader color="#fff" size={8} />
                                             </motion.button>
                                             : <motion.button
                                                 variants={btnVariants}
