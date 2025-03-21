@@ -1,12 +1,13 @@
 .user_wrap {
+    position: relative;
+    left: 500px;
+    top: 40px;
     width: 650px;
     height: -moz-fit-content;
     height: fit-content;
-    margin: 40px 0px 0px 500px;
     border: 1px solid #ededed;
     border-radius: 10px;
     background: #fff;
-
 }
 
 .user_photo_wrap,
