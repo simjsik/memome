@@ -74,6 +74,7 @@ height : 100%;
 
     p{
     line-height : 32px;
+    font-size : 14px;
     }
 }
 
@@ -608,7 +609,10 @@ export default function UserProfile() {
                                     border-radius : 50%;
                                 `}></div>
                                 <p>새 메모를 작성하세요</p>
-                                <button className="memo_btn" onClick={handleMemoClick}>메모</button>
+                                <motion.button
+                                    variants={btnVariants}
+                                    whileHover="otherHover"
+                                    whileTap="otherClick" className="memo_btn" onClick={handleMemoClick}>메모</motion.button>
                             </div>
                             <MyAlarmWrap className="my_alarm_wrap">
                                 <Swiper
@@ -628,7 +632,10 @@ export default function UserProfile() {
                                                     <p>{notice.noticeType}</p>
                                                 </div>
                                                 <p className="alram_date">{formatDate(notice.noticeAt)}</p>
-                                                <button onClick={() => noticeConfirm(notice.noticeId)}>알림 확인</button>
+                                                <motion.button
+                                                    variants={btnVariants}
+                                                    whileHover="loginHover"
+                                                    whileTap="loginClick" onClick={() => noticeConfirm(notice.noticeId)}>알림 확인</motion.button>
                                             </div>
                                         </SwiperSlide>
                                     ))}

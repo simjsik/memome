@@ -65,7 +65,6 @@ position: relative;
     .search_input_wrap{
     width : 100%;
     height : 42px;
-    margin-right : 4px;
 
         .search_img{
         position: absolute;
