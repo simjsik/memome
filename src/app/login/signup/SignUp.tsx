@@ -4,12 +4,11 @@
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { css } from "@emotion/react";
-import { useSetRecoilState } from "recoil";
-import { signUpState } from "@/app/state/PostState";
 import { CreateInput, LoginButton, LoginButtonWrap, } from "@/app/styled/LoginComponents";
 import { auth } from "@/app/DB/firebaseConfig";
 import { motion } from "framer-motion";
-import { LogoBox } from "../LoginBox";
+import { LoginWrap, LogoBox } from "../LoginBox";
+import { useRouter } from "next/navigation";
 
 interface FirebaseError extends Error {
     code: string;
@@ -92,8 +91,9 @@ const SignUpWrap = css`
 `
 export default function SignUp() {
     const [passwordConfirm, setPasswordConfirm] = useState<boolean>(true);
-    const setSignUpToggle = useSetRecoilState<boolean>(signUpState);
     const [signUpDone, setSignUpDone] = useState<boolean>(false);
+
+    const router = useRouter();
 
     const [formData, setFormData] = useState({
         displayName: '',
@@ -233,6 +233,7 @@ export default function SignUp() {
     };
 
     const EmotionLoginBtn = motion(LoginButton);
+
     const btnVariants = {
         loginHover: {
             backgroundColor: "#007ce9",
@@ -254,94 +255,100 @@ export default function SignUp() {
 
     return (
         <>
-            <div className="logo_box" css={LogoBox}></div>
-            {
-                signUpDone ?
-                    <LoginButtonWrap className="sign_up_wrap" css={SignUpWrap}>
-                        <div className="sign_up_complete">
-                            <div className="sign_up_text">
-                                <p>회원가입이</p>
-                                <p>완료되었습니다.</p>
+            <div css={LoginWrap}>
+                <div className="logo_box" css={LogoBox}></div>
+                {
+                    signUpDone ?
+                        <LoginButtonWrap className="sign_up_wrap" css={SignUpWrap}>
+                            <div className="sign_up_complete">
+                                <div className="sign_up_text">
+                                    <p>회원가입이</p>
+                                    <p>완료되었습니다.</p>
+                                </div>
+                                <div className="sign_up_img" css={css`background : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009340/%EA%B0%80%EC%9E%85OK_tj25fs.svg);`}></div>
+                                <span>로그인 후 다양한 이야기를 메모 해주세요!</span>
+                                <EmotionLoginBtn
+                                    variants={btnVariants}
+                                    whileHover="loginHover"
+                                    whileTap="loginClick"
+                                    onClick={() => router.push('/login')}>로그인 하러가기</EmotionLoginBtn>
                             </div>
-                            <div className="sign_up_img" css={css`background : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009340/%EA%B0%80%EC%9E%85OK_tj25fs.svg);`}></div>
-                            <span>로그인 후 다양한 이야기를 메모 해주세요!</span>
-                            <EmotionLoginBtn
-                                variants={btnVariants}
-                                whileHover="loginHover"
-                                whileTap="loginClick"
-                                onClick={() => setSignUpToggle(false)}>로그인 하러가기</EmotionLoginBtn>
-                        </div>
-                    </LoginButtonWrap>
-                    :
-                    <LoginButtonWrap className="sign_up_wrap">
-                        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} css={SignUpForm}>
-                            <div>
-                                <label>이메일</label>
-                                <CreateInput
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                />
-                                {errors.email && <p className="sign_error" style={{ color: 'red' }}>{errors.email}</p>}
-                            </div>
-                            <div>
-                                <label>비밀번호</label>
-                                <CreateInput
-                                    type="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                />
-                                {errors.password && <p className="sign_error" style={{ color: 'red' }}>{errors.password}</p>}
-                            </div>
-                            <div>
-                                <label>비밀번호 재확인</label>
-                                <div className="password_confirm_wrap">
+                        </LoginButtonWrap>
+                        :
+                        <LoginButtonWrap className="sign_up_wrap">
+                            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} css={SignUpForm}>
+                                <div>
+                                    <label>이메일</label>
+                                    <CreateInput
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                    />
+                                    {errors.email && <p className="sign_error" style={{ color: 'red' }}>{errors.email}</p>}
+                                </div>
+                                <div>
+                                    <label>비밀번호</label>
                                     <CreateInput
                                         type="password"
-                                        name="passwordConfirm"
-                                        value={formData.passwordConfirm}
+                                        name="password"
+                                        value={formData.password}
                                         onChange={handleChange}
                                     />
-                                    {formData.passwordConfirm.length > 0 ?
-                                        passwordConfirm ?
-                                            <div className="password_confirm" style={{ backgroundImage: "url('https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737001778/%EB%8F%BC_u51jrc.svg')" }}></div>
+                                    {errors.password && <p className="sign_error" style={{ color: 'red' }}>{errors.password}</p>}
+                                </div>
+                                <div>
+                                    <label>비밀번호 재확인</label>
+                                    <div className="password_confirm_wrap">
+                                        <CreateInput
+                                            type="password"
+                                            name="passwordConfirm"
+                                            value={formData.passwordConfirm}
+                                            onChange={handleChange}
+                                        />
+                                        {formData.passwordConfirm.length > 0 ?
+                                            passwordConfirm ?
+                                                <div className="password_confirm" style={{ backgroundImage: "url('https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737001778/%EB%8F%BC_u51jrc.svg')" }}></div>
+                                                :
+                                                <div className="password_confirm" style={{ backgroundImage: "url('https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737001779/%EC%95%88%EB%8F%BC_ncnsvh.svg')" }}></div>
                                             :
-                                            <div className="password_confirm" style={{ backgroundImage: "url('https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737001779/%EC%95%88%EB%8F%BC_ncnsvh.svg')" }}></div>
-                                        :
-                                        ''
-                                    }
+                                            ''
+                                        }
+                                    </div>
+                                    {errors.passwordConfirm && <p className="sign_error" style={{ color: 'red' }}>{errors.passwordConfirm}</p>}
                                 </div>
-                                {errors.passwordConfirm && <p className="sign_error" style={{ color: 'red' }}>{errors.passwordConfirm}</p>}
-                            </div>
-                            <div>
-                                <label>유저 명</label>
-                                <div className="display_name_wrap">
-                                    <CreateInput
-                                        type="text"
-                                        name="displayName"
-                                        value={formData.displayName}
-                                        onChange={handleChange}
-                                    />
-                                    <span>{formData.displayName.length} / 12</span>
+                                <div>
+                                    <label>유저 명</label>
+                                    <div className="display_name_wrap">
+                                        <CreateInput
+                                            type="text"
+                                            name="displayName"
+                                            value={formData.displayName}
+                                            onChange={handleChange}
+                                        />
+                                        <span>{formData.displayName.length} / 12</span>
+                                    </div>
+                                    {errors.displayName && <p className="sign_error" style={{ color: 'red' }}>{errors.displayName}</p>}
                                 </div>
-                                {errors.displayName && <p className="sign_error" style={{ color: 'red' }}>{errors.displayName}</p>}
-                            </div>
-                            <EmotionLoginBtn
-                                variants={btnVariants}
-                                whileHover="loginHover"
-                                whileTap="loginClick"
-                                type="submit">회원가입</EmotionLoginBtn>
-                            <button className="login_back" onClick={() => setSignUpToggle(false)}>기존 계정으로 로그인</button>
-                        </form>
-                    </LoginButtonWrap >
-            }
-            <div className="copyright_box">
-                <p>본 사이트는 포트폴리오 사이트입니다.</p>
-                <p>로그인 및 회원가입 시 사이트 이용에 필요한 정보 외 사용되지 않습니다.</p>
-                <span>ⓒ 2025. SIM HYEOK BO All rights reserved.</span>
-            </div>
+                                <EmotionLoginBtn
+                                    variants={btnVariants}
+                                    whileHover="loginHover"
+                                    whileTap="loginClick"
+                                    type="submit">회원가입</EmotionLoginBtn>
+                                <motion.button
+                                    variants={btnVariants}
+                                    whileHover="otherHover"
+                                    whileTap="otherClick"
+                                    className="login_back" onClick={() => router.push('/login')}>기존 계정으로 로그인</motion.button>
+                            </form>
+                        </LoginButtonWrap >
+                }
+                <div className="copyright_box">
+                    <p>본 사이트는 포트폴리오 사이트입니다.</p>
+                    <p>로그인 및 회원가입 시 사이트 이용에 필요한 정보 외 사용되지 않습니다.</p>
+                    <span>ⓒ 2025. SIM HYEOK BO All rights reserved.</span>
+                </div>
+            </div >
         </>
     )
 }

@@ -27,7 +27,7 @@ interface FirebaseError extends Error {
     code: string;
 }
 
-const LoginWrap = css`
+export const LoginWrap = css`
     position : fixed;
     left : 0;
     width : 100%;
@@ -102,6 +102,7 @@ export default function LoginBox() {
         "auth/invalid-credential": "이메일 또는 비밀번호가 올바르지 않습니다.",
         "auth/missing-password": "비밀번호를 입력해주세요.",
         "auth/invalid-custom-token": "로그인 요청에 실패 했습니다. 다시 시도해주세요.",
+        "auth/popup-closed-by-user": "로그인 요청에 실패 했습니다. 다시 시도해주세요.",
         "auth/email-not-verified": "인증이 필요한 이메일입니다. 이메일을 확인해주세요.",
         // 추가적인 에러 코드 필요 시 확장 가능
     };
