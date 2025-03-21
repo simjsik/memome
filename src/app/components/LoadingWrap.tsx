@@ -11,7 +11,6 @@ height : 60px;
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(50%, 50%);
     display: block;
   }
 `
@@ -19,7 +18,7 @@ height : 60px;
 export default function LoadingWrap() {
     return (
         <LoadingBox>
-            <MoonLoader color="#0087ff" size={8} />
+            <MoonLoader color="#0087ff" size={24} />
         </LoadingBox>
     )
 }
