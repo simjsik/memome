@@ -249,7 +249,7 @@ export default function Bookmark() {
                     ))
                     }
                     {!dataLoading && <div ref={observerLoadRef} style={{ height: '1px' }} />}
-                    {dataLoading && <LoadingWrap />}
+                    {(!loading && dataLoading) && <LoadingWrap />}
                     {
                         (!dataLoading && !hasNextPage && userBookmarks.length > 0 && !loading) &&
                         <NoMorePost>

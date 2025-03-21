@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
 import { fetchPostList } from "@/app/utils/fetchPostData";
+import LoadingWrap from "@/app/components/LoadingWrap";
 
 
 interface ClientUserProps {
@@ -34,6 +35,8 @@ export default function UserClient({ user }: ClientUserProps) {
     const [postTab, setPostTab] = useState<boolean>(true)
     const [dropToggle, setDropToggle] = useState<string>('')
     const [loading, setLoading] = useRecoilState(loadingState);
+    const [dataLoading, setDataLoading] = useState<boolean>(false);
+
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const observerLoadRef = useRef(null);
@@ -57,18 +60,32 @@ export default function UserClient({ user }: ClientUserProps) {
         retry: false,
         queryKey: ['postList', uid],
         queryFn: async ({ pageParam }) => {
-            const validateResponse = await fetch(`/api/validate`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ uid }),
-            });
-            if (!validateResponse.ok) {
-                const errorDetails = await validateResponse.json();
-                throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-            }
+            try {
+                setDataLoading(true)
 
-            return fetchPostList(uid, pageParam, 4);
+                const validateResponse = await fetch(`/api/validate`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ uid }),
+                });
+                if (!validateResponse.ok) {
+                    const errorDetails = await validateResponse.json();
+                    throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+                }
+
+                return fetchPostList(uid, pageParam, 4);
+            } catch (error) {
+                if (error instanceof Error) {
+                    console.error("일반 오류 발생:", error.message);
+                    throw error;
+                } else {
+                    console.error("알 수 없는 에러 유형:", error);
+                    throw new Error("알 수 없는 에러가 발생했습니다.");
+                }
+            } finally {
+                setDataLoading(false)
+            }
         },
         getNextPageParam: (lastPage) => lastPage.nextPage,
         staleTime: 5 * 60 * 1000,
@@ -316,6 +333,7 @@ export default function UserClient({ user }: ClientUserProps) {
                             </motion.div>
                         ))}
                         {postTab && < div className="postObserver" ref={observerLoadRef} style={{ height: '1px' }} />}
+                        {(!loading && dataLoading) && <LoadingWrap />}
                         {
                             (!hasNextPage && posts.length > 0 && !loading) &&
                             <NoMorePost>
@@ -358,6 +376,7 @@ export default function UserClient({ user }: ClientUserProps) {
                             ))}
                         </div>
                         {!postTab && < div className="imageObserver" ref={observerImageLoadRef} style={{ height: '1px' }} />}
+                        {(!loading && dataLoading) && <LoadingWrap />}
                         {
                             (!hasNextPage && imagePost.length > 0 && !loading) &&
                             <NoMorePost>
@@ -376,7 +395,6 @@ export default function UserClient({ user }: ClientUserProps) {
                         }
                     </>
                 }
-
             </UserPostWrap >
         </>
     )

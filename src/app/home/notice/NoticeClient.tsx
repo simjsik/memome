@@ -273,7 +273,7 @@ export default function ClientNotice() {
                         </motion.div>
                     ))}
                     {!dataLoading && <div ref={observerLoadRef} style={{ height: '1px' }} />}
-                    {dataLoading && <LoadingWrap />}
+                    {(!loading && dataLoading) && <LoadingWrap />}
                     {(!dataLoading && !hasNextPage && !loading) &&
                         <NoMorePost>
                             <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
