@@ -3,12 +3,12 @@
 
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { auth } from "../DB/firebaseConfig";
-import { CreateInput, LoginButton, LoginButtonWrap, LoginModalWrap } from "../styled/LoginComponents";
 import { css } from "@emotion/react";
-import { signUpState } from "../state/PostState";
 import { useSetRecoilState } from "recoil";
 import { usePathname } from "next/navigation";
+import { signUpState } from "@/app/state/PostState";
+import { CreateInput, LoginButton, LoginButtonWrap, LoginModalWrap } from "@/app/styled/LoginComponents";
+import { auth } from "@/app/DB/firebaseConfig";
 
 interface FirebaseError extends Error {
     code: string;

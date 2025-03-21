@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { css } from "@emotion/react";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState, modalState, signUpState, userData, userState } from "../state/PostState";
+import { DidYouLogin, loginToggleState, modalState, userData, userState } from "../state/PostState";
 import {
     CreateButton,
     GoogleButton,
@@ -18,7 +18,6 @@ import {
 import { getAuth, GoogleAuthProvider, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { LoginOr, LoginSpan } from "../styled/LoginStyle";
 import { usePathname, useRouter } from "next/navigation";
-import SignUp from "./SignUp";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../DB/firebaseConfig";
 import { BeatLoader } from "react-spinners";
@@ -75,7 +74,6 @@ export default function LoginBox() {
 
     const [loginToggle, setLoginToggle] = useRecoilState<boolean>(loginToggleState)
     const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
-    const [signUpToggle, setSignUpToggle] = useRecoilState<boolean>(signUpState);
     const [modal, setModal] = useRecoilState<boolean>(modalState);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [loadingTag, setLoadingTag] = useState<string | null>(null);
@@ -391,7 +389,6 @@ export default function LoginBox() {
 
         return () => {
             setModal(false); // 모달이 닫힐 때 modal 상태 false로 설정
-            setSignUpToggle(false)
             setEmail('')
             setPassword('')
 
@@ -433,120 +430,112 @@ export default function LoginBox() {
                     {!hasLogin &&
                         <>
                             <div css={LoginBg}></div>
-                            {!signUpToggle ?
-                                <LoginModalWrap>
-                                    <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
-                                        <LoginInputWrap>
-                                            <div>
-                                                <p>이메일 또는 아이디</p>
-                                                <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
-                                            </div>
-                                            <div>
-                                                <p>패스워드</p>
-                                                <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
-                                            </div>
-                                        </LoginInputWrap>
-                                        <div className="login_error_wrap">
-                                            {
-                                                loginError &&
-                                                <p className="login_error">{loginError}</p>
-                                            }
-                                            {/* {
+                            <LoginModalWrap>
+                                <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
+                                    <LoginInputWrap>
+                                        <div>
+                                            <p>이메일 또는 아이디</p>
+                                            <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <p>패스워드</p>
+                                            <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
+                                        </div>
+                                    </LoginInputWrap>
+                                    <div className="login_error_wrap">
+                                        {
+                                            loginError &&
+                                            <p className="login_error">{loginError}</p>
+                                        }
+                                        {/* {
                                                 (loginError && verifyReSend) &&
                                                 <button
                                                     onClick={() => handleVerifyReSend(unverifedUser as User)}
                                                     disabled={!verifyReSend}
                                                 >인증 메일 재전송</button>
                                             } */}
-                                        </div>
-                                        {(loadingTag === 'Login' && isLoading) ?
-                                            <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> :
-                                            <EmotionLoginBtn
-                                                variants={btnVariants}
-                                                whileHover="loginHover"
-                                                whileTap="loginClick"
-                                                type="submit">로그인</EmotionLoginBtn>
-                                        }
-                                    </form>
-                                    <LoginSpan>처음 이신가요?</LoginSpan >
-                                    <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
-                                    <OtherLoginWrap>
-                                        <LoginOr>또는</LoginOr>
-                                        <div>
-                                            {(loadingTag === 'Google' && isLoading) ? <GoogleLoginBtn><BeatLoader color="#000" size={8} /></GoogleLoginBtn> : <GoogleLoginBtn
-                                                variants={btnVariants}
-                                                whileHover="otherHover"
-                                                whileTap="otherClick" onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleLoginBtn>}
-                                            {(loadingTag === 'Guest' && isLoading) ? <GuestLoginBtn><BeatLoader color="#000" size={8} /></GuestLoginBtn> : <GuestLoginBtn
-                                                variants={btnVariants}
-                                                whileHover="otherHover"
-                                                whileTap="otherClick" onClick={handleGuestLogin}>게스트 로그인</GuestLoginBtn>}
-                                        </div>
-                                    </OtherLoginWrap>
-                                </LoginModalWrap>
-                                :
-                                <SignUp />
-                            }
+                                    </div>
+                                    {(loadingTag === 'Login' && isLoading) ?
+                                        <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> :
+                                        <EmotionLoginBtn
+                                            variants={btnVariants}
+                                            whileHover="loginHover"
+                                            whileTap="loginClick"
+                                            type="submit">로그인</EmotionLoginBtn>
+                                    }
+                                </form>
+                                <LoginSpan>처음 이신가요?</LoginSpan >
+                                <CreateButton onClick={() => router.push('/home/login/signup')}>회원가입</CreateButton>
+                                <OtherLoginWrap>
+                                    <LoginOr>또는</LoginOr>
+                                    <div>
+                                        {(loadingTag === 'Google' && isLoading) ? <GoogleLoginBtn><BeatLoader color="#000" size={8} /></GoogleLoginBtn> : <GoogleLoginBtn
+                                            variants={btnVariants}
+                                            whileHover="otherHover"
+                                            whileTap="otherClick" onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleLoginBtn>}
+                                        {(loadingTag === 'Guest' && isLoading) ? <GuestLoginBtn><BeatLoader color="#000" size={8} /></GuestLoginBtn> : <GuestLoginBtn
+                                            variants={btnVariants}
+                                            whileHover="otherHover"
+                                            whileTap="otherClick" onClick={handleGuestLogin}>게스트 로그인</GuestLoginBtn>}
+                                    </div>
+                                </OtherLoginWrap>
+                            </LoginModalWrap>
                         </>
                     }
                 </div >
                 :
                 <div css={LoginWrap}>
                     <div className="logo_box" css={LogoBox}></div>
-                    {!signUpToggle ?
-                        <LoginButtonWrap>
-                            <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
-                                <LoginInputWrap>
-                                    <div>
-                                        <p>이메일 또는 아이디</p>
-                                        <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <p>패스워드</p>
-                                        <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
-                                    </div>
-                                </LoginInputWrap>
-                                <div className="login_error_wrap">
-                                    {
-                                        loginError &&
-                                        <p className="login_error">{loginError}</p>
-                                    }
-                                    {/* {
+                    <LoginButtonWrap>
+                        <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
+                            <LoginInputWrap>
+                                <div>
+                                    <p>이메일 또는 아이디</p>
+                                    <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
+                                </div>
+                                <div>
+                                    <p>패스워드</p>
+                                    <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
+                                </div>
+                            </LoginInputWrap>
+                            <div className="login_error_wrap">
+                                {
+                                    loginError &&
+                                    <p className="login_error">{loginError}</p>
+                                }
+                                {/* {
                                         (loginError && verifyReSend) &&
                                         <button
                                             onClick={() => handleVerifyReSend(unverifedUser as User)}
                                             disabled={!verifyReSend}
                                         >인증 메일 재전송</button>
                                     } */}
-                                </div>
-                                {(loadingTag === 'Login' && isLoading) ?
-                                    <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> :
-                                    <EmotionLoginBtn
-                                        variants={btnVariants}
-                                        whileHover="loginHover"
-                                        whileTap="loginClick"
-                                        type="submit">로그인</EmotionLoginBtn>
-                                }
-                            </form>
-                            <LoginSpan>처음 이신가요?</LoginSpan >
-                            <CreateButton onClick={() => setSignUpToggle(true)}>회원가입</CreateButton>
-                            <OtherLoginWrap>
-                                <LoginOr>또는</LoginOr>
-                                <div>
-                                    {(loadingTag === 'Google' && isLoading) ? <GoogleLoginBtn><BeatLoader color="#000" size={8} /></GoogleLoginBtn> : <GoogleLoginBtn
-                                        variants={btnVariants}
-                                        whileHover="otherHover"
-                                        whileTap="otherClick" onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleLoginBtn>}
-                                    {(loadingTag === 'Guest' && isLoading) ? <GuestLoginBtn><BeatLoader color="#000" size={8} /></GuestLoginBtn> : <GuestLoginBtn
-                                        variants={btnVariants}
-                                        whileHover="otherHover"
-                                        whileTap="otherClick" onClick={handleGuestLogin}>게스트 로그인</GuestLoginBtn>}
-                                </div>
-                            </OtherLoginWrap>
-                        </LoginButtonWrap>
-                        :
-                        <SignUp />
-                    }
+                            </div>
+                            {(loadingTag === 'Login' && isLoading) ?
+                                <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> :
+                                <EmotionLoginBtn
+                                    variants={btnVariants}
+                                    whileHover="loginHover"
+                                    whileTap="loginClick"
+                                    type="submit">로그인</EmotionLoginBtn>
+                            }
+                        </form>
+                        <LoginSpan>처음 이신가요?</LoginSpan >
+                        <CreateButton onClick={() => router.push('/home/login/signup')}>회원가입</CreateButton>
+                        <OtherLoginWrap>
+                            <LoginOr>또는</LoginOr>
+                            <div>
+                                {(loadingTag === 'Google' && isLoading) ? <GoogleLoginBtn><BeatLoader color="#000" size={8} /></GoogleLoginBtn> : <GoogleLoginBtn
+                                    variants={btnVariants}
+                                    whileHover="otherHover"
+                                    whileTap="otherClick" onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleLoginBtn>}
+                                {(loadingTag === 'Guest' && isLoading) ? <GuestLoginBtn><BeatLoader color="#000" size={8} /></GuestLoginBtn> : <GuestLoginBtn
+                                    variants={btnVariants}
+                                    whileHover="otherHover"
+                                    whileTap="otherClick" onClick={handleGuestLogin}>게스트 로그인</GuestLoginBtn>}
+                            </div>
+                        </OtherLoginWrap>
+                    </LoginButtonWrap>
                     <div className="copyright_box">
                         <p>본 사이트는 포트폴리오 사이트입니다.</p>
                         <p>로그인 및 회원가입 시 사이트 이용에 필요한 정보 외 사용되지 않습니다.</p>
