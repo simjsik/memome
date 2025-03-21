@@ -13,6 +13,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { motion } from "framer-motion";
 import LoadingWrap from "@/app/components/LoadingWrap";
 import { useHandleUsernameClick } from "@/app/utils/handleClick";
+import { btnVariants } from "@/app/styled/motionVariant";
 
 export default function ClientNotice() {
     const yourLogin = useRecoilValue(DidYouLogin)
@@ -263,7 +264,11 @@ export default function ClientNotice() {
                                 <div className='post_bottom_wrap'>
                                     <div className='post_comment'>
                                         <div className="post_comment_icon_wrap">
-                                            <div className='post_comment_icon' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449945/%EB%8C%93%EA%B8%80%EC%95%84%EC%9D%B4%EC%BD%98_xbunym.svg)`}></div>
+                                            <motion.div
+                                                variants={btnVariants}
+                                                whileHover="iconHover"
+                                                whileTap="iconClick" className='post_comment_icon' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449945/%EB%8C%93%EA%B8%80%EC%95%84%EC%9D%B4%EC%BD%98_xbunym.svg)`}>
+                                            </motion.div>
                                         </div>
                                         <p>{post.commentCount}</p>
                                     </div>

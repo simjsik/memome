@@ -20,6 +20,7 @@ import { fetchPosts } from '@/app/utils/fetchPostData';
 import { NewPostBtn, NoMorePost, PostWrap } from '@/app/styled/PostComponents';
 import LoadingWrap from '@/app/components/LoadingWrap';
 import { useHandleUsernameClick } from '@/app/utils/handleClick';
+import { btnVariants } from '@/app/styled/motionVariant';
 
 
 export default function MainHome() {
@@ -555,8 +556,11 @@ export default function MainHome() {
                 <div className='post_bottom_wrap'>
                   <div className='post_comment'>
                     <button className='post_comment_btn'>
-                      <div className='post_comment_icon'>
-                      </div>
+                      <motion.div
+                        variants={btnVariants}
+                        whileHover="iconHover"
+                        whileTap="iconClick" className='post_comment_icon'>
+                      </motion.div>
                     </button>
                     <p>{post.commentCount}</p>
                   </div>

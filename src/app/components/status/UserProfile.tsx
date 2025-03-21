@@ -154,7 +154,7 @@ margin-top : 20px;
                 display: block;
                 width: 120px;
                 height: 40px;
-                padding: 10px;
+                padding: 8px;
                 border: 1px solid #ededed;
                 border-radius: 8px;
                 background-color: #fff;

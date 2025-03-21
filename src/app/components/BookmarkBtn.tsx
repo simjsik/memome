@@ -9,6 +9,7 @@ import { BookmarkCache, bookMarkState, PostData, userBookMarkState, userState } 
 import { useQueryClient } from "@tanstack/react-query";
 import { FirebaseError } from "firebase/app";
 import { motion } from "framer-motion";
+import { btnVariants } from "../styled/motionVariant";
 
 const Bookmark = styled.button`
     width : 32px;
@@ -121,24 +122,9 @@ export default function BookmarkBtn({ postId }: PostId) {
     return (
         <MotionBookmark
             as={motion.button}
-            whileHover={{
-                scale: 1.05,
-                transition: {
-                    type: "spring",
-                    duration: 0.3,
-                    stiffness: 300,
-                    damping: 10
-                },
-            }}
-            whileTap={{
-                scale: 0.95,
-                transition: {
-                    type: "spring",
-                    duration: 0.3,
-                    stiffness: 300,
-                    damping: 10
-                },
-            }}
+            variants={btnVariants}
+            whileHover="iconHover"
+            whileTap="iconClick"
             onClick={(event) => { event.preventDefault(); event.stopPropagation(); addBookmark(postId); }}>
             <motion.svg width="28" height="28" viewBox="0 0 38 38">
                 <g>

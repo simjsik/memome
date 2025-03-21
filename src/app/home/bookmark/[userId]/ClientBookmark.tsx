@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 
 import LoadingWrap from "@/app/components/LoadingWrap";
 import { useHandleUsernameClick } from "@/app/utils/handleClick";
+import { btnVariants } from "@/app/styled/motionVariant";
 
 export default function Bookmark() {
     const currentBookmark = useRecoilValue<string[]>(bookMarkState)
@@ -171,7 +172,7 @@ export default function Bookmark() {
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
         router.push(`memo/${postId}`)
     }
-    
+
     const handleUsernameClick = useHandleUsernameClick();
     return (
         <>
@@ -237,8 +238,11 @@ export default function Bookmark() {
                                 <div className='post_bottom_wrap'>
                                     <div className='post_comment'>
                                         <button className='post_comment_btn'>
-                                            <div className='post_comment_icon'>
-                                            </div>
+                                            <motion.div
+                                                variants={btnVariants}
+                                                whileHover="iconHover"
+                                                whileTap="iconClick" className='post_comment_icon'>
+                                            </motion.div>
                                         </button>
                                         <p>{post.commentCount}</p>
                                     </div>

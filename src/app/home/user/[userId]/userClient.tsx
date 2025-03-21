@@ -15,6 +15,7 @@ import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
 import { fetchPostList } from "@/app/utils/fetchPostData";
 import LoadingWrap from "@/app/components/LoadingWrap";
+import { btnVariants } from "@/app/styled/motionVariant";
 
 
 interface ClientUserProps {
@@ -321,8 +322,11 @@ export default function UserClient({ user }: ClientUserProps) {
                                 <div className="user_post_bottom">
                                     <div className="user_post_comment">
                                         <button className='post_comment_btn'>
-                                            <div className="user_post_comment_icon">
-                                            </div>
+                                            <motion.div
+                                                variants={btnVariants}
+                                                whileHover="iconHover"
+                                                whileTap="iconClick" className="user_post_comment_icon">
+                                            </motion.div>
                                         </button>
                                         <p>
                                             {post.commentCount}
