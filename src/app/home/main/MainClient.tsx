@@ -556,13 +556,16 @@ export default function MainHome() {
                 {/* 포스트 댓글, 북마크 등 */}
                 <div className='post_bottom_wrap'>
                   <div className='post_comment'>
-                    <button className='post_comment_btn'>
+                    <motion.button
+                      variants={btnVariants}
+                      whileHover="iconWrapHover"
+                      whileTap="iconWrapClick" className='post_comment_btn'>
                       <motion.div
                         variants={btnVariants}
                         whileHover="iconHover"
                         whileTap="iconClick" className='post_comment_icon'>
                       </motion.div>
-                    </button>
+                    </motion.button>
                     <p>{post.commentCount}</p>
                   </div>
                   <BookmarkBtn postId={post.id}></BookmarkBtn>

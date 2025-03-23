@@ -161,21 +161,21 @@ border-right : 1px solid #ededed;
         border : none;
         border-radius : 4px;
         background : transparent;
+        padding: 6px;
         cursor : pointer
       }
 
       .post_comment_icon{
-        width: 20px;
-        height: 20px;
+        width: 100%;
+        height: 100%;
         background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449945/%EB%8C%93%EA%B8%80%EC%95%84%EC%9D%B4%EC%BD%98_xbunym.svg);
-        margin : 4px 8px 4px 4px;
       }
 
       .post_comment{
         font-family : var(--font-pretendard-medium);
         font-size : 16px;
         color: #191919;
-        margin-left : 0px;
+        margin-left : 2px;
         display : flex;
         line-height : 32px;
       }
@@ -516,7 +516,6 @@ text-decoration : underline;
 cursor:pointer;
 }
 .post_comment{
-color :red;
 font-size : 14px;
 }
 .post_user{

@@ -263,13 +263,16 @@ export default function ClientNotice() {
                                 {/* 포스트 댓글, 북마크 등 */}
                                 <div className='post_bottom_wrap'>
                                     <div className='post_comment'>
-                                        <div className="post_comment_icon_wrap">
+                                        <motion.button
+                                            variants={btnVariants}
+                                            whileHover="iconWrapHover"
+                                            whileTap="iconWrapClick" className='post_comment_btn'>
                                             <motion.div
                                                 variants={btnVariants}
                                                 whileHover="iconHover"
-                                                whileTap="iconClick" className='post_comment_icon' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449945/%EB%8C%93%EA%B8%80%EC%95%84%EC%9D%B4%EC%BD%98_xbunym.svg)`}>
+                                                whileTap="iconClick" className='post_comment_icon'>
                                             </motion.div>
-                                        </div>
+                                        </motion.button>
                                         <p>{post.commentCount}</p>
                                     </div>
                                 </div>

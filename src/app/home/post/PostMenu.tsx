@@ -121,6 +121,7 @@ margin : 0 auto;
             right: 10px;
             line-height: 49px;
             font-size: 14px;
+            color : #999;
         }
 
         .title_error{
@@ -138,6 +139,14 @@ margin : 0 auto;
             position: absolute;
             right: 10px;
             bottom: 10px;
+        }
+        p{
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        font-size: 14px;
+        color: #999999;
+        font-family : var(--font-pretendard-light);
         }
     }
 // 포스트 발행 버튼
@@ -190,7 +199,7 @@ margin : 0 auto;
     }
 
     // 에디터 snow 스타일
-    .ql-container.ql-snow{
+    .ql-container .ql-snow{
         margin-top: 20px;
         border: none;
     }
@@ -200,6 +209,8 @@ margin : 0 auto;
         width : 42px;
         height : 42px;
         margin-left : 3px;
+        background-color : #fff;
+        border-radius : 4px;
     }
 
     // 에디터 입력 칸
@@ -281,6 +292,7 @@ margin : 0 auto;
         height: 32px;
         background : #fff;
         border : none;
+        border-radius : 2px;
         font-family : var(--font-pretendard-medium);
         cursor : pointer;
     }
@@ -296,7 +308,7 @@ margin : 0 auto;
         padding : 6px;
 
         svg{
-            border: 1px solid;
+            border: 1px solid #e7e7e7;
             border-radius : 2px;
         }
     }
@@ -315,6 +327,7 @@ margin : 0 auto;
         background-color : #fff;
         margin-top : 4px;
         border : none;
+        border-radius : 2px;
         padding : 6px;
     }
 
@@ -1598,7 +1611,7 @@ export default function PostMenu() {
                         <ReactQuill ref={quillRef} formats={formats} value={posting} onChange={handlePostingEditor} modules={SetModules} />
                     </div>
                     <p>{postingText.length}/ 2500</p>
-                    <button className='post_btn' onClick={uploadThisPost}>발행</button>
+                    <motion.button variants={btnVariants} whileHover="loginHover" className='post_btn' onClick={uploadThisPost}>발행</motion.button>
                 </div >
             </QuillStyle >
             {

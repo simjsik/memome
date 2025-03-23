@@ -16,7 +16,7 @@ const Bookmark = styled.button`
     height : 32px;
     cursor : pointer;
     border : none;
-    background : none;
+    background : trasparent;
     padding : 2px;
 `;
 
@@ -123,8 +123,8 @@ export default function BookmarkBtn({ postId }: PostId) {
         <MotionBookmark
             as={motion.button}
             variants={btnVariants}
-            whileHover="iconHover"
-            whileTap="iconClick"
+            whileHover="iconWrapHover"
+            whileTap="iconWrapClick"
             onClick={(event) => { event.preventDefault(); event.stopPropagation(); addBookmark(postId); }}>
             <motion.svg width="28" height="28" viewBox="0 0 38 38">
                 <g>

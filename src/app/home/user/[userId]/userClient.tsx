@@ -321,13 +321,16 @@ export default function UserClient({ user }: ClientUserProps) {
                                 )}
                                 <div className="user_post_bottom">
                                     <div className="user_post_comment">
-                                        <button className='post_comment_btn'>
+                                        <motion.button
+                                            variants={btnVariants}
+                                            whileHover="iconWrapHover"
+                                            whileTap="iconWrapClick" className='post_comment_btn'>
                                             <motion.div
                                                 variants={btnVariants}
                                                 whileHover="iconHover"
-                                                whileTap="iconClick" className="user_post_comment_icon">
+                                                whileTap="iconClick" className='post_comment_icon'>
                                             </motion.div>
-                                        </button>
+                                        </motion.button>
                                         <p>
                                             {post.commentCount}
                                         </p>

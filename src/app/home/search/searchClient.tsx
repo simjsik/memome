@@ -16,6 +16,7 @@ import { searchClient } from "@/app/utils/algolia";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { motion } from "framer-motion";
 import { useHandleUsernameClick } from "@/app/utils/handleClick";
+import { btnVariants } from "@/app/styled/motionVariant";
 
 const formatDate = (createAt: Timestamp | Date | string | number) => {
     if ((createAt instanceof Timestamp)) {
@@ -170,10 +171,16 @@ function PostHit({ hit }: { hit: PostData }) {
                 </div>
                 <div className="ais_post_comment_wrap">
                     <div className='post_comment'>
-                        <button className='post_comment_btn'>
-                            <div className='post_comment_icon'>
-                            </div>
-                        </button>
+                        <motion.button
+                            variants={btnVariants}
+                            whileHover="iconWrapHover"
+                            whileTap="iconWrapClick" className='post_comment_btn'>
+                            <motion.div
+                                variants={btnVariants}
+                                whileHover="iconHover"
+                                whileTap="iconClick" className='post_comment_icon'>
+                            </motion.div>
+                        </motion.button>
                         <p>{hit.commentCount}</p>
                     </div>
                     <BookmarkBtn postId={hit.id}></BookmarkBtn>

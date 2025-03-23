@@ -8,6 +8,14 @@ export const btnVariants = {
         backgroundColor: "#f7f9fa",
         transition: { duration: 0.3 },
     },
+
+    iconWrapHover: {
+        background : '#ebebf5',
+        transition: {
+            duration: 0.1,
+        },
+    },
+
     iconHover: {
         scale: 1.05,
         transition: {
@@ -28,20 +36,8 @@ export const btnVariants = {
             damping: 10
         },
     },
-
     NtcOffHover: {
         backgroundColor: "#f7f9fa",
-        scale: 1.05,
-        transition: {
-            type: "spring",
-            duration: 0.1,
-            stiffness: 150,
-            damping: 10
-        },
-    },
-
-    toolHover: {
-        backgroundColor: "#007ce9",
         scale: 1.05,
         transition: {
             type: "spring",
@@ -59,6 +55,12 @@ export const btnVariants = {
     otherClick: {
         backgroundColor: "#f5f8fa",
         transition: { duration: 0.3 },
+    },
+    iconWrapClick: {
+        background : '#e1e1eb',
+        transition: {
+            duration: 0.1,
+        },
     },
     iconClick: {
         scale: 0.95,
@@ -83,17 +85,6 @@ export const btnVariants = {
     },
     NtcOffClick: {
         backgroundColor: "#f5f8fa",
-        scale: 0.95,
-        transition: {
-            type: "spring",
-            duration: 0.1,
-            stiffness: 150,
-            damping: 10
-        },
-    },
-
-    toolClick: {
-        backgroundColor: "#2b9cff",
         scale: 0.95,
         transition: {
             type: "spring",
