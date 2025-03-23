@@ -159,7 +159,7 @@ border-right : 1px solid #ededed;
         width: 32px;
         height: 32px;
         border : none;
-        border-radius : 4px;
+        border-radius : 50px;
         background : #ffffff00;
         padding: 6px;
         cursor : pointer
@@ -409,7 +409,7 @@ export const NoticeWrap = styled.div`
         width: 32px;
         height: 32px;
         border : none;
-        border-radius : 4px;
+        border-radius : 50px;
         background : #ffffff00;
         padding: 6px;
         cursor : pointer

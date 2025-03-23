@@ -11,9 +11,7 @@ export const btnVariants = {
 
     iconWrapHover: {
         background : '#ebebf5',
-        transition: {
-            duration: 0.1,
-        },
+        transition: { duration: 0.1, },
     },
 
     iconHover: {
@@ -58,9 +56,7 @@ export const btnVariants = {
     },
     iconWrapClick: {
         background : '#e1e1eb',
-        transition: {
-            duration: 0.1,
-        },
+        transition: { duration: 0.1, },
     },
     iconClick: {
         scale: 0.95,
