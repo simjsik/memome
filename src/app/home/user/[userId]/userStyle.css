@@ -5,6 +5,7 @@
     width: 650px;
     height: -moz-fit-content;
     height: fit-content;
+    min-height: 100vh;
     border: 1px solid #ededed;
     border-radius: 10px;
     background: #fff;
