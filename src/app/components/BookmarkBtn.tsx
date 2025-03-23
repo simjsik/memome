@@ -16,7 +16,7 @@ const Bookmark = styled.button`
     height : 32px;
     cursor : pointer;
     border : none;
-    background : trasparent;
+    background : #ffffff00;
     padding : 2px;
 `;
 
