@@ -174,6 +174,7 @@ margin : 0 auto;
         border-radius: 8px 0px 0px 8px;
 
         div{
+            background-color: #fff;
             width: 50px;
             height: 50px;
             border-radius: 4px;
@@ -311,6 +312,7 @@ margin : 0 auto;
     .ql_style_wrap button{
         min-width : 32px;
         height : 32px;
+        background-color : #fff;
         margin-top : 4px;
         border : none;
         padding : 6px;
