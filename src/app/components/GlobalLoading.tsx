@@ -24,9 +24,6 @@ export default function GlobalLoadingWrap() {
 
     return (
         <>
-            <LoadingWrap>
-                <MoonLoader color="#0087ff" />
-            </LoadingWrap >
             {loading &&
                 <LoadingWrap>
                     <MoonLoader color="#0087ff" />
