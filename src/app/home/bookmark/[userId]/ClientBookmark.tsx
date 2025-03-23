@@ -254,7 +254,7 @@ export default function Bookmark() {
                     ))
                     }
                     <div ref={observerLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }} />
-                    <LoadingWrap />
+                    {(!loading && dataLoading) && <LoadingWrap />}
                     {
                         (!dataLoading && !hasNextPage && userBookmarks.length > 0 && !loading) &&
                         <NoMorePost>

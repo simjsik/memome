@@ -13,10 +13,7 @@ const LoadingWrap = styled.div`
     bottom: 0;
     z-index: 10;
   >span{
-    position: absolute;
-    left: 50%;
-    top: 45%;
-    display: block;
+    margin : 0 auto;
   }
 `
 

@@ -7,11 +7,9 @@ export const LoadingBox = styled.div`
 position : relative;
 width : 100%;
 height : 60px;
+padding : 15px 0px;
   >span{
-    position: absolute;
-    left: 50%;
-    top: 25%;
-    display: block;
+    margin : 0 auto;
   }
 `
 
