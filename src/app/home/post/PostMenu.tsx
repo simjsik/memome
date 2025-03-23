@@ -17,6 +17,7 @@ import { StyleAttributor } from 'parchment';
 import { db } from '@/app/DB/firebaseConfig';
 import { saveUnsavedPost } from '@/app/utils/saveUnsavedPost';
 import { uploadContentImgCdn, uploadImgCdn } from '@/app/utils/uploadCdn';
+import { btnVariants } from '@/app/styled/motionVariant';
 
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
@@ -166,12 +167,16 @@ margin : 0 auto;
         left: -63px;
         width: 64px;
         height: 64px;
-        padding: 15px;
+        padding: 6px;
         border: 1px solid #ededed;
         border-right: #fff;
         background: #fff;
         border-radius: 8px 0px 0px 8px;
         cursor : pointer
+
+        svg{
+            border-radius: 6px;
+        }
     }
     // 에디터 박스
     .quill{
@@ -1216,17 +1221,23 @@ export default function PostMenu() {
         <>
             <QuillStyle notice={checkedNotice}>
                 <div className='quill_wrap'>
-                    <button className='go_main_btn' onClick={handleLeavePosting}>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22.18 22.18">
-                            <g id="Layer_2" data-name="Layer 2">
-                                <polyline points="8.55 8.72 3.37 14.49 8.55 19.68" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1} />
-                                <path d="M3.37,14.49h8.27a8.54,8.54,0,0,0,4.18-1,5.45,5.45,0,0,0,3-5,5.48,5.48,0,0,0-3-5,8.63,8.63,0,0,0-4.23-1H9.51" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1} />
+                    <button
+                        className='go_main_btn' onClick={handleLeavePosting}>
+                        <motion.svg
+                            variants={btnVariants}
+                            whileHover="otherHover"
+                            whileTap="otherClick"
+                            viewBox="-5 -5 32 32">
+                            <g>
+                                <polyline points="8.55 8.72 3.37 14.49 8.55 19.68" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1.5} />
+                                <path d="M3.37,14.49h8.27a8.54,8.54,0,0,0,4.18-1,5.45,5.45,0,0,0,3-5,5.48,5.48,0,0,0-3-5,8.63,8.63,0,0,0-4.23-1H9.51" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1.5} />
                                 <rect width="22.18" height="22.18" fill='none' />
                             </g>
-                        </svg>
+                        </motion.svg>
                     </button>
                     <div className='posting_top'>
                         <motion.button
+                            variants={btnVariants}
                             whileHover={checkedNotice ? "NtcHover" : "NtcOffHover"}
                             whileTap={checkedNotice ? "NtcClick" : "NtcOffClick"}
                             className='notice_btn' onClick={HandleCheckedNotice}>
