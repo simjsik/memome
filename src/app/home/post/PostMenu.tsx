@@ -4,6 +4,7 @@ import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { DidYouLogin, hasGuestState, ImageUrlsState, loadingState, loginToggleState, modalState, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
+import { motion } from "framer-motion";
 import { css } from '@emotion/react';
 import Delta from 'quill-delta';
 import QuillResizeImage from 'quill-resize-image';
@@ -1225,7 +1226,10 @@ export default function PostMenu() {
                         </svg>
                     </button>
                     <div className='posting_top'>
-                        <button className='notice_btn' onClick={HandleCheckedNotice}>
+                        <motion.button
+                            whileHover={checkedNotice ? "NtcHover" : "NtcOffHover"}
+                            whileTap={checkedNotice ? "NtcClick" : "NtcOffClick"}
+                            className='notice_btn' onClick={HandleCheckedNotice}>
                             {checkedNotice ?
                                 <>
                                     <svg width="32" height="32" viewBox="0 8 40 40">
@@ -1251,7 +1255,7 @@ export default function PostMenu() {
                                     <p>공지</p>
                                 </>
                             }
-                        </button>
+                        </motion.button>
                         {checkedNotice ?
                             <select ref={tagRef} className='tag_sel' defaultValue={'공지사항'}>
                                 <option value="공지사항">공지사항</option>

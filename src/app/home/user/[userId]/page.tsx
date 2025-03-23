@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
     const userData = userSnap.data();
 
     return {
-        title: `MEMOME :: ${userData?.displayName}(@${userId.slice(0, 8)})`,
+        title: `MEMOME :: ${userData?.displayName}(@${userId.slice(0, 8)}...)`,
         description: userId.slice(0, 8) + "...",
         openGraph: {
             title: userData?.displayName,
