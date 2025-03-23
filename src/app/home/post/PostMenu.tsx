@@ -174,8 +174,8 @@ margin : 0 auto;
         border-radius: 8px 0px 0px 8px;
         cursor : pointer
 
-        svg{
-            border-radius: 6px;
+        >div{
+            border-radius : 6px;
         }
     }
     // 에디터 박스
@@ -232,6 +232,10 @@ margin : 0 auto;
     .ql_submit_wrap{
         padding-bottom: 10px;
         border-bottom: 1px solid #ededed;
+
+        >button{
+            padding: 6px;
+        }
     }
 
     .ql_link_wrap{
@@ -1223,17 +1227,18 @@ export default function PostMenu() {
                 <div className='quill_wrap'>
                     <button
                         className='go_main_btn' onClick={handleLeavePosting}>
-                        <motion.svg
+                        <motion.div
                             variants={btnVariants}
                             whileHover="otherHover"
-                            whileTap="otherClick"
-                            viewBox="-5 -5 32 32">
-                            <g>
-                                <polyline points="8.55 8.72 3.37 14.49 8.55 19.68" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1.5} />
-                                <path d="M3.37,14.49h8.27a8.54,8.54,0,0,0,4.18-1,5.45,5.45,0,0,0,3-5,5.48,5.48,0,0,0-3-5,8.63,8.63,0,0,0-4.23-1H9.51" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1.5} />
-                                <rect width="22.18" height="22.18" fill='none' />
-                            </g>
-                        </motion.svg>
+                            whileTap="otherClick">
+                            <svg viewBox="-5 -5 32 32">
+                                <g>
+                                    <polyline points="8.55 8.72 3.37 14.49 8.55 19.68" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1.5} />
+                                    <path d="M3.37,14.49h8.27a8.54,8.54,0,0,0,4.18-1,5.45,5.45,0,0,0,3-5,5.48,5.48,0,0,0-3-5,8.63,8.63,0,0,0-4.23-1H9.51" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1.5} />
+                                    <rect width="22.18" height="22.18" fill='none' />
+                                </g>
+                            </svg>
+                        </motion.div>
                     </button>
                     <div className='posting_top'>
                         <motion.button
@@ -1298,43 +1303,47 @@ export default function PostMenu() {
                             {/* <!-- Links and Images --> */}
                             <div className='ql_submit_wrap'>
                                 <div className='ql_image_wrap'>
-                                    <button className="ql-image"></button>
+                                    <motion.button whileHover="otherHover" className="ql-image"></motion.button>
                                     <span>이미지</span>
                                 </div>
                                 <div className='ql_link_wrap'>
-                                    <button className="ql-link"></button>
+                                    <motion.button whileHover="otherHover" className="ql-link"></motion.button>
                                     <span>링크</span>
                                 </div>
                             </div>
                             {/* <!-- Indent --> */}
                             <div className='ql_style_wrap'>
-                                <button className="ql-indent" value="+1"></button>
-                                <button className="ql-indent" value="-1"></button>
+                                <motion.button whileHover="otherHover" className="ql-indent" value="+1"></motion.button>
+                                <motion.button whileHover="otherHover" className="ql-indent" value="-1"></motion.button>
 
                                 {/* <!-- Header -->  */}
-                                <button className="ql-header" value="1"></button>
+                                <motion.button whileHover="otherHover" className="ql-header" value="1"></motion.button>
 
                                 {/* <!-- Formatting --> */}
-                                <button className="ql-bold"></button>
-                                <button className="ql-italic"></button>
-                                <button className="ql-underline"></button>
-                                <button className="ql-strike"></button>
-                                <button className='ql-code-block'></button>
+                                <motion.button whileHover="otherHover" className="ql-bold"></motion.button>
+                                <motion.button whileHover="otherHover" className="ql-italic"></motion.button>
+                                <motion.button whileHover="otherHover" className="ql-underline"></motion.button>
+                                <motion.button whileHover="otherHover" className="ql-strike"></motion.button>
+                                <motion.button whileHover="otherHover" className='ql-code-block'></motion.button>
                                 {/* <!-- Subscript / Superscript --> */}
-                                <button className="ql-script" value="sub"></button>
-                                <button className="ql-script" value="super"></button>
+                                <motion.button whileHover="otherHover" className="ql-script" value="sub"></motion.button>
+                                <motion.button whileHover="otherHover" className="ql-script" value="super"></motion.button>
 
                                 {/* <!-- Clean --> */}
-                                <button className="ql-clean"></button>
+                                <motion.button whileHover="otherHover" className="ql-clean"></motion.button>
                             </div>
                         </div>
 
                         <div id='toolbar-bottom' ref={styleToolRef}>
                             {/* <!-- Font Size --> */}
                             <div className='ql_size_wrap'>
-                                <button className='ql_size_toggle' onClick={() => toolToggleHandle('fontsize')}>
+                                <motion.button
+                                    whileHover={{
+                                        color: '#0087ff'
+                                    }}
+                                    className='ql_size_toggle' onClick={() => toolToggleHandle('fontsize')}>
                                     {selectFontSize}
-                                </button>
+                                </motion.button>
                                 {toolToggle === 'fontsize' &&
                                     <ul className='ql_size_list'>
                                         {fontsize.map((size, ftIndex) => (
@@ -1355,7 +1364,8 @@ export default function PostMenu() {
 
                             {/* <!-- Line Height --> */}
                             <div className='ql_lineheight_wrap'>
-                                <button className='ql_lineheight_toggle' onClick={() => toolToggleHandle('lineheight')}>
+                                <motion.button
+                                    whileHover="otherHover" className='ql_lineheight_toggle' onClick={() => toolToggleHandle('lineheight')}>
                                     <svg viewBox="0 0 32 32">
                                         <g data-name="레이어 2">
                                             <rect width="32" height="32" fill='none' />
@@ -1366,7 +1376,7 @@ export default function PostMenu() {
                                             <polyline points="18.35 19.45 16.31 21.6 14.15 19.45" fill='none' stroke='#191919' strokeWidth={1.5} />
                                         </g>
                                     </svg>
-                                </button>
+                                </motion.button>
                                 {toolToggle === 'lineheight' &&
                                     <ul className='ql_lineheight_list'>
                                         {lineheight.map((height, lhIndex) => (
@@ -1387,7 +1397,7 @@ export default function PostMenu() {
 
                             {/* <!-- Font Color --> */}
                             <div className='ql-color' >
-                                <button className='ql_color_toggle' onClick={() => toolToggleHandle('color')}>
+                                <motion.button whileHover="otherHover" className='ql_color_toggle' onClick={() => toolToggleHandle('color')}>
                                     <svg viewBox="0 0 32 32">
                                         <g data-name="Layer 2">
                                             <rect width="32" height="32" fill='none' />
@@ -1395,7 +1405,7 @@ export default function PostMenu() {
                                             <rect x="19.74" y="19.43" width="4.5" height="4.5" rx="0.3" fill={selectColor} />
                                         </g>
                                     </svg>
-                                </button>
+                                </motion.button>
                                 {toolToggle === 'color' &&
                                     <ul className='ql_color_list'>
                                         {colorPallete.color.map((color, clIndex) => (
@@ -1419,7 +1429,7 @@ export default function PostMenu() {
 
                             {/* <!-- Background Color --> */}
                             <div className="ql-background">
-                                <button className='ql_background_toggle' onClick={() => toolToggleHandle('background')}>
+                                <motion.button whileHover="otherHover" className='ql_background_toggle' onClick={() => toolToggleHandle('background')}>
                                     <svg viewBox="0 0 32 32">
                                         <g data-name="레이어 2">
                                             <g id="Layer_2" data-name="Layer 2">
@@ -1428,7 +1438,7 @@ export default function PostMenu() {
                                             </g>
                                         </g>
                                     </svg>
-                                </button>
+                                </motion.button>
                                 {toolToggle === 'background' &&
                                     <ul className='ql_background_list'>
                                         {colorPallete.background.map((bgColor, bgIndex) => (
@@ -1453,7 +1463,7 @@ export default function PostMenu() {
 
                             {/* <!-- Text Align --> */}
                             <div className="ql-align">
-                                <button className='ql_align_toggle' onClick={() => toolToggleHandle('align')}>
+                                <motion.button className='ql_align_toggle' onClick={() => toolToggleHandle('align')}>
                                     {selectAlign === 'left' ?
                                         <svg viewBox="0 0 32 32">
                                             <g id="레이어_2" data-name="레이어 2">
@@ -1499,7 +1509,7 @@ export default function PostMenu() {
                                                     </g>
                                                 </svg>
                                     }
-                                </button>
+                                </motion.button>
                                 {toolToggle === 'align' &&
                                     <ul className='ql_align_list'>
                                         <li className='ql_align_item'>

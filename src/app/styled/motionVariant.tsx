@@ -19,7 +19,7 @@ export const btnVariants = {
     },
 
     NtcHover: {
-        backgroundColor: "#fff1f0",
+        backgroundColor: "#f7f9fa",
         scale: 1.05,
         transition: {
             type: "spring",
