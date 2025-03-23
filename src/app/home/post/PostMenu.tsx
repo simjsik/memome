@@ -172,10 +172,12 @@ margin : 0 auto;
         border-right: #fff;
         background: #fff;
         border-radius: 8px 0px 0px 8px;
-        cursor : pointer
 
-        >div{
-            border-radius : 6px;
+        div{
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            cursor : pointer;
         }
     }
     // 에디터 박스
@@ -1225,8 +1227,7 @@ export default function PostMenu() {
         <>
             <QuillStyle notice={checkedNotice}>
                 <div className='quill_wrap'>
-                    <button
-                        className='go_main_btn' onClick={handleLeavePosting}>
+                    <button className='go_main_btn' onClick={handleLeavePosting}>
                         <motion.div
                             variants={btnVariants}
                             whileHover="otherHover"
@@ -1303,34 +1304,34 @@ export default function PostMenu() {
                             {/* <!-- Links and Images --> */}
                             <div className='ql_submit_wrap'>
                                 <div className='ql_image_wrap'>
-                                    <motion.button whileHover="otherHover" className="ql-image"></motion.button>
+                                    <motion.button variants={btnVariants} whileHover="otherHover" className="ql-image"></motion.button>
                                     <span>이미지</span>
                                 </div>
                                 <div className='ql_link_wrap'>
-                                    <motion.button whileHover="otherHover" className="ql-link"></motion.button>
+                                    <motion.button variants={btnVariants} whileHover="otherHover" className="ql-link"></motion.button>
                                     <span>링크</span>
                                 </div>
                             </div>
                             {/* <!-- Indent --> */}
                             <div className='ql_style_wrap'>
-                                <motion.button whileHover="otherHover" className="ql-indent" value="+1"></motion.button>
-                                <motion.button whileHover="otherHover" className="ql-indent" value="-1"></motion.button>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className="ql-indent" value="+1"></motion.button>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className="ql-indent" value="-1"></motion.button>
 
                                 {/* <!-- Header -->  */}
-                                <motion.button whileHover="otherHover" className="ql-header" value="1"></motion.button>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className="ql-header" value="1"></motion.button>
 
                                 {/* <!-- Formatting --> */}
-                                <motion.button whileHover="otherHover" className="ql-bold"></motion.button>
-                                <motion.button whileHover="otherHover" className="ql-italic"></motion.button>
-                                <motion.button whileHover="otherHover" className="ql-underline"></motion.button>
-                                <motion.button whileHover="otherHover" className="ql-strike"></motion.button>
-                                <motion.button whileHover="otherHover" className='ql-code-block'></motion.button>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className="ql-bold"></motion.button>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className="ql-italic"></motion.button>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className="ql-underline"></motion.button>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className="ql-strike"></motion.button>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className='ql-code-block'></motion.button>
                                 {/* <!-- Subscript / Superscript --> */}
-                                <motion.button whileHover="otherHover" className="ql-script" value="sub"></motion.button>
-                                <motion.button whileHover="otherHover" className="ql-script" value="super"></motion.button>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className="ql-script" value="sub"></motion.button>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className="ql-script" value="super"></motion.button>
 
                                 {/* <!-- Clean --> */}
-                                <motion.button whileHover="otherHover" className="ql-clean"></motion.button>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className="ql-clean"></motion.button>
                             </div>
                         </div>
 
@@ -1338,6 +1339,7 @@ export default function PostMenu() {
                             {/* <!-- Font Size --> */}
                             <div className='ql_size_wrap'>
                                 <motion.button
+                                    variants={btnVariants}
                                     whileHover={{
                                         color: '#0087ff'
                                     }}
@@ -1365,6 +1367,7 @@ export default function PostMenu() {
                             {/* <!-- Line Height --> */}
                             <div className='ql_lineheight_wrap'>
                                 <motion.button
+                                    variants={btnVariants}
                                     whileHover="otherHover" className='ql_lineheight_toggle' onClick={() => toolToggleHandle('lineheight')}>
                                     <svg viewBox="0 0 32 32">
                                         <g data-name="레이어 2">
@@ -1397,7 +1400,7 @@ export default function PostMenu() {
 
                             {/* <!-- Font Color --> */}
                             <div className='ql-color' >
-                                <motion.button whileHover="otherHover" className='ql_color_toggle' onClick={() => toolToggleHandle('color')}>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className='ql_color_toggle' onClick={() => toolToggleHandle('color')}>
                                     <svg viewBox="0 0 32 32">
                                         <g data-name="Layer 2">
                                             <rect width="32" height="32" fill='none' />
@@ -1429,7 +1432,7 @@ export default function PostMenu() {
 
                             {/* <!-- Background Color --> */}
                             <div className="ql-background">
-                                <motion.button whileHover="otherHover" className='ql_background_toggle' onClick={() => toolToggleHandle('background')}>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className='ql_background_toggle' onClick={() => toolToggleHandle('background')}>
                                     <svg viewBox="0 0 32 32">
                                         <g data-name="레이어 2">
                                             <g id="Layer_2" data-name="Layer 2">
@@ -1463,7 +1466,7 @@ export default function PostMenu() {
 
                             {/* <!-- Text Align --> */}
                             <div className="ql-align">
-                                <motion.button className='ql_align_toggle' onClick={() => toolToggleHandle('align')}>
+                                <motion.button variants={btnVariants} whileHover="otherHover" className='ql_align_toggle' onClick={() => toolToggleHandle('align')}>
                                     {selectAlign === 'left' ?
                                         <svg viewBox="0 0 32 32">
                                             <g id="레이어_2" data-name="레이어 2">
@@ -1594,8 +1597,8 @@ export default function PostMenu() {
                     </div>
                     <p>{postingText.length}/ 2500</p>
                     <button className='post_btn' onClick={uploadThisPost}>발행</button>
-                </div>
-            </QuillStyle>
+                </div >
+            </QuillStyle >
             {
                 confirmed &&
                 <div css={LoadModal}>
