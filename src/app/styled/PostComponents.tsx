@@ -296,17 +296,6 @@ border-right : 1px solid #ededed;
           border-color: #ccc; /* 체크 시 테두리 색 */
           background-color: none; /* 체크 시 배경색 */
         }
-
-        /* 체크 아이콘 추가 */
-        input[type="checkbox"]:checked + span::before {
-          content: "✔"; /* 체크 아이콘 (Unicode) */
-          color: #ff0010;
-          font-size: 12px;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%); /* 중앙 정렬 */
-        }
           
         .hide_text{
             line-height: 48px;
@@ -331,6 +320,8 @@ export const NoticeWrap = styled.div`
         width: 100%;
         border-bottom: 1px solid #ededed;
         padding: 20px;
+        background: #fff;
+        cursor:pointer;
     }
 
     .post_profile{
