@@ -10,6 +10,8 @@ left : 500px;
 display : flex;
 flex-wrap : wrap;
 width:  600px;
+height: fit-content;
+min-height: 100%;
 padding : 0px;
 background : #fff;
 border-radius : 4px;

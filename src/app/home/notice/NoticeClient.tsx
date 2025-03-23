@@ -277,7 +277,7 @@ export default function ClientNotice() {
 
                         </motion.div>
                     ))}
-                    {!dataLoading && <div ref={observerLoadRef} style={{ height: '1px' }} />}
+                    <div ref={observerLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }} />
                     {(!loading && dataLoading) && <LoadingWrap />}
                     {(!dataLoading && !hasNextPage && !loading) &&
                         <NoMorePost>

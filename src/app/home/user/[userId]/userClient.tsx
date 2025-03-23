@@ -336,7 +336,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                 </div>
                             </motion.div>
                         ))}
-                        {postTab && < div className="postObserver" ref={observerLoadRef} style={{ height: '1px' }} />}
+                        {postTab && <div className="postObserver" ref={observerLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }} />}
                         {(!loading && dataLoading) && <LoadingWrap />}
                         {
                             (!hasNextPage && posts.length > 0 && !loading) &&
@@ -379,7 +379,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                 </motion.div>
                             ))}
                         </div>
-                        {!postTab && < div className="imageObserver" ref={observerImageLoadRef} style={{ height: '1px' }} />}
+                        {!postTab && <div className="imageObserver" ref={observerImageLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }} />}
                         {(!loading && dataLoading) && <LoadingWrap />}
                         {
                             (!hasNextPage && imagePost.length > 0 && !loading) &&

@@ -176,6 +176,7 @@ export default function Bookmark() {
     const handleUsernameClick = useHandleUsernameClick();
     return (
         <>
+            {!loading && <p className='all_post'>내 북마크</p>}
             {!usageLimit &&
                 <PostWrap>
                     {/* 무한 스크롤 구조 */}
@@ -252,8 +253,8 @@ export default function Bookmark() {
                         </motion.div >
                     ))
                     }
-                    {!dataLoading && <div ref={observerLoadRef} style={{ height: '1px' }} />}
-                    {(!loading && dataLoading) && <LoadingWrap />}
+                    <div ref={observerLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }} />
+                    <LoadingWrap />
                     {
                         (!dataLoading && !hasNextPage && userBookmarks.length > 0 && !loading) &&
                         <NoMorePost>
