@@ -305,9 +305,9 @@ margin : 0 auto;
         font-family : var(--font-pretendard-medium);
         cursor : pointer;
 
-        &line,
-        &polyline,
-        &path,{
+        line,
+        polyline,
+        path,{
             transition-duration : 0.1s;
         }
     }
@@ -317,6 +317,11 @@ margin : 0 auto;
     .ql_background_toggle,
     .ql_align_toggle{
         margin-top: 4px;
+    }
+
+    .ql_lineheight_toggle,
+    .ql_align_toggle{
+        margin-top: 4px;
 
         &:hover line,
         &:hover polyline,
@@ -324,6 +329,16 @@ margin : 0 auto;
             stroke : #0087ff;
         }
     }
+
+    .ql_color_toggle{
+        &:hover line,
+        &:hover polyline,
+        &:hover path{
+            stroke : #0087ff;
+            fill : #0087ff;
+        }
+    }
+
         
     .ql_background_toggle{
         padding : 6px;
@@ -472,6 +487,14 @@ margin : 0 auto;
         cursor:pointer
     }
 
+    .ql_align_btn
+        transition-duration : 0.1s;
+    {
+        &:hover line{
+          stroke: #0087ff;
+        }
+    }
+
     .ql_image_wrap,
     .ql_link_wrap{
         width: 48px;
@@ -515,6 +538,13 @@ margin : 0 auto;
         width: 100%;
         padding: 10px 0px 10px;
         border: none;
+
+        rect,
+        path,
+        line,
+        polyline{
+            transition-duration : .3s;
+        }
     }
 
 
