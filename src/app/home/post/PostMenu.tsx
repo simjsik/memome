@@ -296,6 +296,12 @@ margin : 0 auto;
         border-radius : 2px;
         font-family : var(--font-pretendard-medium);
         cursor : pointer;
+
+        
+        & svg:hover line,{
+        & svg:hover polyline,{
+            stroke : #0087ff;
+        }
     }
 
     .ql_lineheight_toggle,
@@ -1391,7 +1397,7 @@ export default function PostMenu() {
                                     variants={btnVariants}
                                     whileHover="otherHover" className='ql_lineheight_toggle' onClick={() => toolToggleHandle('lineheight')}>
                                     <svg viewBox="0 0 32 32">
-                                        <g data-name="레이어 2">
+                                        <g>
                                             <rect width="32" height="32" fill='none' />
                                             <line x1="8" y1="8" x2="24" y2="8" fill='none' stroke='#191919' strokeWidth={1.5} />
                                             <line x1="8" y1="24" x2="24" y2="24" fill='none' stroke='#191919' strokeWidth={1.5} />
@@ -1423,7 +1429,7 @@ export default function PostMenu() {
                             <div className='ql-color' >
                                 <motion.button variants={btnVariants} whileHover="otherHover" className='ql_color_toggle' onClick={() => toolToggleHandle('color')}>
                                     <svg viewBox="0 0 32 32">
-                                        <g data-name="Layer 2">
+                                        <g>
                                             <rect width="32" height="32" fill='none' />
                                             <path d="M20.73,9h-13a.24.24,0,0,0-.25.23v2.88h.69a2.43,2.43,0,0,1,.43-1.09H13a.24.24,0,0,1,.25.22V23.7a.24.24,0,0,0,.25.23H15a.24.24,0,0,0,.25-.23V11.28a.25.25,0,0,1,.26-.22h4a2.19,2.19,0,0,1,.8,1.46H21V9.27A.24.24,0,0,0,20.73,9Z" fill='#191919' />
                                             <rect x="19.74" y="19.43" width="4.5" height="4.5" rx="0.3" fill={selectColor} />
@@ -1455,11 +1461,9 @@ export default function PostMenu() {
                             <div className="ql-background">
                                 <motion.button variants={btnVariants} whileHover="otherHover" className='ql_background_toggle' onClick={() => toolToggleHandle('background')}>
                                     <svg viewBox="0 0 32 32">
-                                        <g data-name="레이어 2">
-                                            <g id="Layer_2" data-name="Layer 2">
-                                                <rect width="32" height="32" fill='none' />
-                                                <path d="M25.62,6H6.37A.35.35,0,0,0,6,6.31v3.86H7a3.2,3.2,0,0,1,.64-1.46h6.5a.34.34,0,0,1,.37.3V25.69a.35.35,0,0,0,.38.31h2.25a.35.35,0,0,0,.38-.31V9a.33.33,0,0,1,.37-.3h5.88a2.88,2.88,0,0,1,1.19,2h1V6.31A.35.35,0,0,0,25.62,6Z" fill={selectBgColor} />
-                                            </g>
+                                        <g>
+                                            <rect width="32" height="32" fill='none' />
+                                            <path d="M25.62,6H6.37A.35.35,0,0,0,6,6.31v3.86H7a3.2,3.2,0,0,1,.64-1.46h6.5a.34.34,0,0,1,.37.3V25.69a.35.35,0,0,0,.38.31h2.25a.35.35,0,0,0,.38-.31V9a.33.33,0,0,1,.37-.3h5.88a2.88,2.88,0,0,1,1.19,2h1V6.31A.35.35,0,0,0,25.62,6Z" fill={selectBgColor} />
                                         </g>
                                     </svg>
                                 </motion.button>
@@ -1490,7 +1494,7 @@ export default function PostMenu() {
                                 <motion.button variants={btnVariants} whileHover="otherHover" className='ql_align_toggle' onClick={() => toolToggleHandle('align')}>
                                     {selectAlign === 'left' ?
                                         <svg viewBox="0 0 32 32">
-                                            <g id="레이어_2" data-name="레이어 2">
+                                            <g>
                                                 <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1.5} />
                                                 <line x1="6" y1="11.25" x2="18" y2="11.25" stroke='#191919' strokeWidth={1.5} />
                                                 <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1.5} />
@@ -1501,7 +1505,7 @@ export default function PostMenu() {
                                         </svg>
                                         : selectAlign === 'center' ?
                                             <svg viewBox="0 0 32 32">
-                                                <g id="Layer_2" data-name="Layer 2">
+                                                <g>
                                                     <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
                                                     <line x1="10" y1="11.25" x2="22" y2="11.25" stroke='#191919' strokeWidth={1} />
                                                     <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
@@ -1512,7 +1516,7 @@ export default function PostMenu() {
                                             </svg>
                                             : selectAlign === 'right' ?
                                                 <svg viewBox="0 0 32 32">
-                                                    <g id="Layer_2" data-name="Layer 2">
+                                                    <g>
                                                         <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
                                                         <line x1="14" y1="11.25" x2="26" y2="11.25" stroke='#191919' strokeWidth={1} />
                                                         <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
@@ -1523,7 +1527,7 @@ export default function PostMenu() {
                                                 </svg>
                                                 :
                                                 <svg viewBox="0 0 32 32">
-                                                    <g id="Layer_2" data-name="Layer 2">
+                                                    <g>
                                                         <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
                                                         <line x1="6" y1="11.25" x2="26" y2="11.25" stroke='#191919' strokeWidth={1} />
                                                         <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
@@ -1543,7 +1547,7 @@ export default function PostMenu() {
                                                 onClick={() => { handleAlignChange('left') }}
                                             >
                                                 <svg viewBox="0 0 32 32">
-                                                    <g id="레이어_2" data-name="레이어 2">
+                                                    <g>
                                                         <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1.5} />
                                                         <line x1="6" y1="11.25" x2="18" y2="11.25" stroke='#191919' strokeWidth={1.5} />
                                                         <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1.5} />
@@ -1561,7 +1565,7 @@ export default function PostMenu() {
                                                 onClick={() => { handleAlignChange('center') }}
                                             >
                                                 <svg viewBox="0 0 32 32">
-                                                    <g id="Layer_2" data-name="Layer 2">
+                                                    <g>
                                                         <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
                                                         <line x1="10" y1="11.25" x2="22" y2="11.25" stroke='#191919' strokeWidth={1} />
                                                         <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
@@ -1579,7 +1583,7 @@ export default function PostMenu() {
                                                 onClick={() => { handleAlignChange('right') }}
                                             >
                                                 <svg viewBox="0 0 32 32">
-                                                    <g id="Layer_2" data-name="Layer 2">
+                                                    <g>
                                                         <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
                                                         <line x1="14" y1="11.25" x2="26" y2="11.25" stroke='#191919' strokeWidth={1} />
                                                         <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
@@ -1597,7 +1601,7 @@ export default function PostMenu() {
                                                 onClick={() => { handleAlignChange('justify') }}
                                             >
                                                 <svg viewBox="0 0 32 32">
-                                                    <g id="Layer_2" data-name="Layer 2">
+                                                    <g>
                                                         <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
                                                         <line x1="6" y1="11.25" x2="26" y2="11.25" stroke='#191919' strokeWidth={1} />
                                                         <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
