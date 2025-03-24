@@ -310,12 +310,6 @@ margin : 0 auto;
         &path,{
             transition-duration : 0.1s;
         }
-
-        &:hover line,
-        &:hover polyline,
-        &:hover path,{
-            stroke : #0087ff;
-        }
     }
 
     .ql_lineheight_toggle,
@@ -323,6 +317,12 @@ margin : 0 auto;
     .ql_background_toggle,
     .ql_align_toggle{
         margin-top: 4px;
+
+        &:hover line,
+        &:hover polyline,
+        &:hover path{
+            stroke : #0087ff;
+        }
     }
         
     .ql_background_toggle{
