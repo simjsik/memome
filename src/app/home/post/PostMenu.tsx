@@ -189,6 +189,16 @@ margin : 0 auto;
             border-radius: 4px;
             cursor : pointer;
         }
+        
+        &>path,
+        &>polyline{
+            transition : 0.1s
+        }
+        
+        &:hover path,
+        &:hover polyline{
+            stroke : #0087ff;
+        }
     }
     // 에디터 박스
     .quill{
@@ -626,6 +636,7 @@ export default function PostMenu() {
     const [confirmed, setConfirmed] = useState<boolean>(false);
     const [checkedNotice, setCheckedNotice] = useState<boolean>(false);
     const setLoading = useSetRecoilState<boolean>(loadingState);
+    const [uploadLoading, setUploadLoading] = useState<boolean>(false);
     //  State
 
     const [toolToggle, setToolToggle] = useState<string>('');
@@ -849,6 +860,10 @@ export default function PostMenu() {
 
     // 포스팅 업로드
     const uploadThisPost = async () => {
+        if (uploadLoading) {
+            return;
+        }
+
         // 사용자 인증 확인
         if (!yourLogin || usageLimit) {
             if (usageLimit) {
@@ -865,6 +880,7 @@ export default function PostMenu() {
         if (postTitle && posting && currentUser) {
             const uid = currentUser.uid
             try {
+                setUploadLoading(true);
                 const validateResponse = await fetch('/api/validate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -925,9 +941,11 @@ export default function PostMenu() {
                 alert('포스팅 완료');
                 setPostingComplete(true);
                 localStorage.removeItem('unsavedPost');
-                router.push('/home/main')
+                router.push('/home/main');
             } catch (error) {
                 alert('포스팅에 실패하였습니다: ' + error);
+            } finally {
+                setUploadLoading(false)
             }
         } else if (postTitle === '') {
             alert('제목을 입력해주세요.');
