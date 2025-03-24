@@ -35,6 +35,15 @@ margin : 0 auto;
         border-bottom : none;
         border-radius : 8px 8px 0px 0px;
         font-family : var(--font-pretendard-medium);
+
+        $>p{
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 14px;
+            color: rgb(153, 153, 153);
+            font-family: var(--font-pretendard-light);
+        }
     }
 
     // 포스트 탑 태그, 제목
@@ -140,14 +149,6 @@ margin : 0 auto;
             right: 10px;
             bottom: 10px;
         }
-        p{
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        font-size: 14px;
-        color: #999999;
-        font-family : var(--font-pretendard-light);
-        }
     }
 // 포스트 발행 버튼
     .post_btn{
@@ -192,7 +193,7 @@ margin : 0 auto;
         
         &>path,
         &>polyline{
-            transition : 0.1s
+            transition-delay : 0.1s
         }
         
         &:hover path,
