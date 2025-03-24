@@ -36,7 +36,7 @@ margin : 0 auto;
         border-radius : 8px 8px 0px 0px;
         font-family : var(--font-pretendard-medium);
 
-        $>p{
+        &>p{
             position: absolute;
             bottom: 10px;
             right: 10px;
@@ -191,9 +191,9 @@ margin : 0 auto;
             cursor : pointer;
         }
         
-        &>path,
-        &>polyline{
-            transition-delay : 0.1s
+        path,
+        polyline{
+            transition-delay : 0.3s
         }
         
         &:hover path,
@@ -207,12 +207,6 @@ margin : 0 auto;
         margin: 0 auto;
         padding-bottom: 39px;
         border-bottom: 1px solid #ededed;
-    }
-
-    // 에디터 snow 스타일
-    .ql-container .ql-snow{
-        margin-top: 20px;
-        border: none;
     }
 
     .ql-snow .ql-image,

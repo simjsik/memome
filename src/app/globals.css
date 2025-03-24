@@ -48,6 +48,11 @@ ul {
   list-style: none;
 }
 
+.ql-container .ql-snow{
+    margin-top: 20px;
+    border: none;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
