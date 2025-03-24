@@ -148,8 +148,6 @@ margin : 0 auto;
             right: 10px;
             bottom: 10px;
         }
-
-        .
     }
 // 포스트 발행 버튼
     .post_btn{
@@ -209,7 +207,7 @@ margin : 0 auto;
         padding-bottom: 39px;
         border-bottom: 1px solid #ededed;
 
-        .ql-container .ql-snow{
+        .ql-container{
             margin-top: 20px;
             border: none;
         }
