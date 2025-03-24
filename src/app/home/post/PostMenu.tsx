@@ -8,7 +8,6 @@ import { motion } from "framer-motion";
 import { css } from '@emotion/react';
 import Delta from 'quill-delta';
 import QuillResizeImage from 'quill-resize-image';
-// import 'quill/dist/quill.snow.css';
 import ReactQuill, { Quill } from 'react-quill-new';
 import styled from '@emotion/styled';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
@@ -149,6 +148,8 @@ margin : 0 auto;
             right: 10px;
             bottom: 10px;
         }
+
+        .
     }
 // 포스트 발행 버튼
     .post_btn{
@@ -193,7 +194,7 @@ margin : 0 auto;
         
         path,
         polyline{
-            transition-delay : 0.3s
+            transition-duration : 0.3s
         }
         
         &:hover path,
@@ -207,6 +208,11 @@ margin : 0 auto;
         margin: 0 auto;
         padding-bottom: 39px;
         border-bottom: 1px solid #ededed;
+
+        .ql-container .ql-snow{
+            margin-top: 20px;
+            border: none;
+        }
     }
 
     .ql-snow .ql-image,
