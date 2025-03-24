@@ -305,6 +305,7 @@ margin : 0 auto;
         font-family : var(--font-pretendard-medium);
         cursor : pointer;
 
+        rect,
         line,
         polyline,
         path,{
@@ -334,7 +335,6 @@ margin : 0 auto;
         &:hover line,
         &:hover polyline,
         &:hover path{
-            stroke : #0087ff;
             fill : #0087ff;
         }
     }
@@ -487,13 +487,7 @@ margin : 0 auto;
         cursor:pointer
     }
 
-    .ql_align_btn
-        transition-duration : 0.1s;
-    {
-        &:hover line{
-          stroke: #0087ff;
-        }
-    }
+
 
     .ql_image_wrap,
     .ql_link_wrap{
@@ -526,7 +520,11 @@ margin : 0 auto;
         height : 32px;
         border: none;
         background: #fff;
-        padding: 4px;
+        transition-duration : 0.1s;
+
+        &:hover line{
+          stroke: #0087ff;
+        }
     }
 
     .setAlign line{
@@ -1588,7 +1586,10 @@ export default function PostMenu() {
                                 {toolToggle === 'align' &&
                                     <ul className='ql_align_list'>
                                         <li className='ql_align_item'>
-                                            <button
+                                            <motion.button
+                                                variants={btnVariants}
+                                                whileHover="otherHover"
+                                                whileTap="otherClick"
                                                 className={selectAlign === 'left' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
                                                 data-align-value='left'
                                                 onClick={() => { handleAlignChange('left') }}
@@ -1603,7 +1604,7 @@ export default function PostMenu() {
                                                         <rect width="32" height="32" fill='none' />
                                                     </g>
                                                 </svg>
-                                            </button>
+                                            </motion.button>
                                         </li>
                                         <li className='ql_align_item'>
                                             <button
