@@ -1607,7 +1607,10 @@ export default function PostMenu() {
                                             </motion.button>
                                         </li>
                                         <li className='ql_align_item'>
-                                            <button
+                                            <motion.button
+                                                variants={btnVariants}
+                                                whileHover="otherHover"
+                                                whileTap="otherClick"
                                                 className={selectAlign === 'center' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
                                                 data-align-value='center'
                                                 onClick={() => { handleAlignChange('center') }}
@@ -1622,10 +1625,13 @@ export default function PostMenu() {
                                                         <rect width="32" height="32" fill='none' />
                                                     </g>
                                                 </svg>
-                                            </button>
+                                            </motion.button>
                                         </li>
                                         <li className='ql_align_item'>
-                                            <button
+                                            <motion.button
+                                                variants={btnVariants}
+                                                whileHover="otherHover"
+                                                whileTap="otherClick"
                                                 className={selectAlign === 'right' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
                                                 data-align-value='right'
                                                 onClick={() => { handleAlignChange('right') }}
@@ -1640,10 +1646,13 @@ export default function PostMenu() {
                                                         <rect width="32" height="32" fill='none' />
                                                     </g>
                                                 </svg>
-                                            </button>
+                                            </motion.button>
                                         </li>
                                         <li className='ql_align_item'>
-                                            <button
+                                            <motion.button
+                                                variants={btnVariants}
+                                                whileHover="otherHover"
+                                                whileTap="otherClick"
                                                 className={selectAlign === 'justify' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
                                                 data-align-value='justify'
                                                 onClick={() => { handleAlignChange('justify') }}
@@ -1658,7 +1667,7 @@ export default function PostMenu() {
                                                         <rect width="32" height="32" fill='none' />
                                                     </g>
                                                 </svg>
-                                            </button>
+                                            </motion.button>
                                         </li>
                                     </ul>
                                 }
