@@ -298,8 +298,8 @@ margin : 0 auto;
         cursor : pointer;
 
         
-        & svg:hover line,{
-        & svg:hover polyline,{
+        &:hover svg line,{
+        &:hover svg polyline,{
             stroke : #0087ff;
         }
     }
