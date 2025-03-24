@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
-import { DidYouLogin, hasGuestState, ImageUrlsState, loadingState, loginToggleState, modalState, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
+import { DidYouLogin, hasGuestState, ImageUrlsState, loadingState, loginToggleState, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
@@ -35,6 +35,15 @@ margin : 0 auto;
         border-bottom : none;
         border-radius : 8px 8px 0px 0px;
         font-family : var(--font-pretendard-medium);
+
+        & >p{
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        font-size: 14px;
+        color: #999999;
+        font-family : var(--font-pretendard-light);
+        }
     }
 
     // 포스트 탑 태그, 제목
@@ -139,14 +148,6 @@ margin : 0 auto;
             position: absolute;
             right: 10px;
             bottom: 10px;
-        }
-        p{
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        font-size: 14px;
-        color: #999999;
-        font-family : var(--font-pretendard-light);
         }
     }
 // 포스트 발행 버튼
@@ -609,7 +610,6 @@ export default function PostMenu() {
     const styleToolRef = useRef<HTMLDivElement>(null); // Quill 인스턴스 접근을 위한 ref 설정
     const yourLogin = useRecoilValue(DidYouLogin)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
-    const setModal = useSetRecoilState<boolean>(modalState);
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const currentUser = useRecoilValue(userState)
@@ -626,6 +626,7 @@ export default function PostMenu() {
     const [confirmed, setConfirmed] = useState<boolean>(false);
     const [checkedNotice, setCheckedNotice] = useState<boolean>(false);
     const setLoading = useSetRecoilState<boolean>(loadingState);
+    const [uploadLoading, setUploadLoading] = useState<boolean>(false);
     //  State
 
     const [toolToggle, setToolToggle] = useState<string>('');
@@ -849,15 +850,17 @@ export default function PostMenu() {
 
     // 포스팅 업로드
     const uploadThisPost = async () => {
+        if (uploadLoading) {
+            return;
+        }
+
         // 사용자 인증 확인
         if (!yourLogin || usageLimit) {
             if (usageLimit) {
                 setLimitToggle(true);
-                setModal(true);
             }
             if (!yourLogin) {
                 setLoginToggle(true);
-                setModal(true);
             }
             return;
         }
@@ -865,6 +868,7 @@ export default function PostMenu() {
         if (postTitle && posting && currentUser) {
             const uid = currentUser.uid
             try {
+                setUploadLoading(true);
                 const validateResponse = await fetch('/api/validate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -928,6 +932,8 @@ export default function PostMenu() {
                 router.push('/home/main')
             } catch (error) {
                 alert('포스팅에 실패하였습니다: ' + error);
+            } finally {
+                setUploadLoading(false);
             }
         } else if (postTitle === '') {
             alert('제목을 입력해주세요.');
