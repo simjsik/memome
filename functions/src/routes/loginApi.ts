@@ -28,7 +28,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
             const guestDocRef = adminDb.doc(`guests/${guestUid}`);
             const guestDoc = await guestDocRef.get();
-            const guestData = guestDoc.data();
+            let guestData;
 
             if (!guestDoc.exists) {
                 const saveUserResponse = await fetch(`${API_URL}/saveUser`, {
@@ -45,6 +45,10 @@ router.post('/login', async (req: Request, res: Response) => {
                         message: `유저 저장 실패 : ${errorData.error}`,
                     });
                 }
+                const updatedGuestDoc =
+                await adminDb.doc(`guests/${uid}`).get();
+
+                guestData = updatedGuestDoc.data();
             } else {
                 decodedToken = await adminAuth.verifyIdToken(idToken);
                 if (!decodedToken) {
@@ -54,6 +58,11 @@ router.post('/login', async (req: Request, res: Response) => {
                 }
 
                 uid = decodedToken.uid;
+
+                const updatedGuestDoc =
+                await adminDb.doc(`guests/${uid}`).get();
+
+                guestData = updatedGuestDoc.data();
             }
 
             userSession = {

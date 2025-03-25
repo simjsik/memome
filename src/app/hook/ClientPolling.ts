@@ -3,15 +3,17 @@ import { useState, useEffect } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../DB/firebaseConfig";
 import { useRecoilValue } from "recoil";
-import { userState } from "../state/PostState";
+import { hasGuestState, userState } from "../state/PostState";
 
 const useUpdateChecker = (statusPath: string) => {
     const [hasUpdate, setHasUpdate] = useState(false);
     const currentUser = useRecoilValue(userState)
+    const hasGuest = useRecoilValue(hasGuestState)
     useEffect(() => {
         const fetchUpdateStatus = async () => {
             try {
-                const docRef = doc(db, `users/${currentUser?.uid}/${statusPath}`);
+
+                const docRef = hasGuest ? doc(db, `users/${currentUser?.uid}/${statusPath}`) : doc(db, `guests/${currentUser?.uid}/${statusPath}`);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     setHasUpdate(docSnap.data().hasUpdate || false);
@@ -51,7 +53,7 @@ const useUpdateChecker = (statusPath: string) => {
                     throw new Error(`새 포스트 업데이트 실패 : ${errorDetails.message}`);
                 }
 
-                const docRef = doc(db, `users/${userId}/${statusPath}`);
+                const docRef = hasGuest ? doc(db, `users/${userId}/${statusPath}`) : doc(db, `guests/${userId}/${statusPath}`);
                 await updateDoc(docRef, { hasUpdate: false });
 
                 setHasUpdate(false);
