@@ -356,7 +356,7 @@ export default function UserProfile() {
                 return;
             } catch (error) {
                 alert('프로필 사진 업로드에 실패' + error)
-            } finally{
+            } finally {
                 setLoading(false);
             }
         }
@@ -513,6 +513,9 @@ export default function UserProfile() {
         }
     }, [updateToggle])
 
+    useEffect(() => {
+        handleResetPhoto();
+    }, [currentUser])
     return (
         <ProfileWrap>
             {/* 프로필 상단 */}

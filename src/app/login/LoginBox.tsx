@@ -282,7 +282,7 @@ export default function LoginBox() {
             const handleGuestResponse = async (idToken: string, guestUid?: string) => {
                 return await fetch("/api/login", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "application/json", 'Project-Host' : window.location.origin },
                     credentials: "include",
                     body: JSON.stringify({ idToken, role: 1, hasGuest: true, guestUid }),
                 });

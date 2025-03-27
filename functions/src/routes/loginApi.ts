@@ -116,14 +116,21 @@ router.post('/login', async (req: Request, res: Response) => {
         const csrfToken = randomBytes(32).toString("hex");
         console.log(csrfToken, 'csrf 토큰 ( login API )');
 
-        res.cookie("csrfToken", csrfToken, {
-            domain: "memome-delta.vercel.app",
+        const clientOrigin = req.headers["Project-Host"] || req.headers.origin;
+        const isProduction = clientOrigin?.includes("memome-delta.vercel.app");
+
+        const cookieOptions = {
+            domain: isProduction ? "memome-delta.vercel.app" : undefined,
             httpOnly: true,
-            secure: true,
-            sameSite: "lax",
+            secure: isProduction,
+            sameSite: "lax" as const,
             path: "/",
             maxAge: 3600 * 1000,
-        });
+        };
+
+        console.log(isProduction, cookieOptions, '개발 환경 확인');
+
+        res.cookie("csrfToken", csrfToken, cookieOptions);
 
         res.cookie("authToken", idToken, {
             domain: "memome-delta.vercel.app",

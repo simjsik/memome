@@ -201,8 +201,7 @@ const corsOptions = {
   [
     'Content-Type',
     'Authorization',
-    'x-user-uid',
-    'x-project-host',
+    'Project-Host',
   ], // 커스텀 헤더 추가
   methods: ['GET', 'POST'], // 허용 메서드
 };
