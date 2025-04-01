@@ -66,11 +66,6 @@ export default function MainHome() {
     // 설정 해주지 않으면 popstate 이벤트가 실행 안됨.
     window.history.pushState(null, "", window.location.pathname);
 
-    if (!yourLogin) {
-      router.push('/login');
-      setLoginToggle(true);
-    }
-
     // socket 객체를 초기화
     socketRef.current = socket; // socket은 외부에서 가져온 웹소켓 인스턴스
 
@@ -518,8 +513,12 @@ export default function MainHome() {
                     · {formatDate(post.createAt)}
                   </p>
                 </div>
-                <button
+                <motion.button
+                  variants={btnVariants}
+                  whileHover="iconWrapHover"
+                  whileTap="iconWrapClick"
                   className='post_drop_menu_btn'
+                  aria-label='포스트 옵션 더보기'
                   css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
                   onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
                 >
@@ -532,7 +531,7 @@ export default function MainHome() {
                       </ul>
                     </div>
                   }
-                </button>
+                </motion.button>
               </div>
               {/* 포스트 내용 */}
               <div className='post_content_wrap' onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}>

@@ -114,7 +114,6 @@ router.post('/login', async (req: Request, res: Response) => {
         const userToken = jwt.sign({uid, role}, secret, {expiresIn: "1h"});
 
         const csrfToken = randomBytes(32).toString("hex");
-        console.log(csrfToken, 'csrf 토큰 ( login API )');
 
         const clientOrigin = req.headers["Project-Host"] || req.headers.origin;
         const isProduction = clientOrigin?.includes("memome-delta.vercel.app");
@@ -128,41 +127,19 @@ router.post('/login', async (req: Request, res: Response) => {
             maxAge: 3600 * 1000,
         };
 
-        console.log(isProduction, cookieOptions, '개발 환경 확인');
-
         res.cookie("csrfToken", csrfToken, cookieOptions);
 
-        res.cookie("authToken", idToken, {
-            domain: "memome-delta.vercel.app",
-            httpOnly: true,
-            secure: true,
-            sameSite: "lax",
-            path: "/",
-            maxAge: 3600 * 1000,
-        });
+        res.cookie("authToken", idToken, cookieOptions);
 
-        res.cookie("userToken", userToken, {
-            domain: "memome-delta.vercel.app",
-            httpOnly: true,
-            secure: true,
-            sameSite: "lax",
-            path: "/",
-            maxAge: 3600 * 1000,
-        });
+        res.cookie("userToken", userToken, cookieOptions);
 
-        res.cookie("hasGuest", hasGuest, {
-            domain: "memome-delta.vercel.app",
-            httpOnly: true,
-            secure: true,
-            sameSite: "lax",
-            path: "/",
-            maxAge: 3600 * 1000,
-        });
+        res.cookie("hasGuest", hasGuest, cookieOptions);
 
         return res.status(200).json({
             message: "로그인 성공.",
             uid,
             user: userSession,
+            guestName: randomName,
         });
     } catch (error) {
         console.error("Login error:", error);

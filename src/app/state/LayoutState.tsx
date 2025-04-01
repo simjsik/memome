@@ -2,5 +2,5 @@ import { atom } from 'recoil';
 
 export const selectedMenuState = atom<number>({
     key: 'selectedMenuState',
-    default: 2
+    default: 0
 })

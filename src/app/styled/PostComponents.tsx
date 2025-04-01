@@ -40,7 +40,8 @@ border-right : 1px solid #ededed;
             width: 36px;
             height: 36px;
             border: none;
-            background-color: transparent;
+            border-radius : 50px;
+            background-color: #ffffff00;
             cursor: pointer;
 
             div{

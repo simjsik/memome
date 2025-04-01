@@ -53,9 +53,7 @@ export default function Logout() {
             if (confirmed && user) {
                 const response = await fetch(`/api/logout`, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
                     credentials: 'include',
                 });
 

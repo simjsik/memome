@@ -2,23 +2,23 @@ export const btnVariants = {
     //--- Hover
     loginHover: {
         backgroundColor: "#007ce9",
-        transition: { duration: 0.3 },
+        transition: { duration: 0.2 },
     },
     otherHover: {
         backgroundColor: "#f7f9fa",
-        transition: { duration: 0.3 },
+        transition: { duration: 0.2 },
     },
 
     iconWrapHover: {
-        background : '#ebebf5',
-        transition: { duration: 0.1, },
+        backgroundColor : '#ebebf5',
+        transition: { duration: 0.2, },
     },
 
     iconHover: {
         scale: 1.05,
         transition: {
             type: "spring",
-            duration: 0.1,
+            duration: 0.2,
             stiffness: 150,
             damping: 10
         },
@@ -29,7 +29,7 @@ export const btnVariants = {
         scale: 1.05,
         transition: {
             type: "spring",
-            duration: 0.1,
+            duration: 0.2,
             stiffness: 150,
             damping: 10
         },
@@ -39,7 +39,7 @@ export const btnVariants = {
         scale: 1.05,
         transition: {
             type: "spring",
-            duration: 0.1,
+            duration: 0.2,
             stiffness: 150,
             damping: 10
         },
@@ -48,22 +48,22 @@ export const btnVariants = {
     //--- Click
     loginClick: {
         backgroundColor: "#2b9cff",
-        transition: { duration: 0.3 },
+        transition: { duration: 0.2 },
     },
     otherClick: {
         backgroundColor: "#f5f8fa",
-        transition: { duration: 0.3 },
+        transition: { duration: 0.2 },
     },
     iconWrapClick: {
-        background : '#e1e1eb',
-        transition: { duration: 0.1, },
+        backgroundColor : '#e1e1eb',
+        transition: { duration: 0.2, },
     },
     iconClick: {
         scale: 0.95,
         opacity: 0.7,
         transition: {
             type: "spring",
-            duration: 0.1,
+            duration: 0.2,
             stiffness: 150,
             damping: 10
         },
@@ -74,7 +74,7 @@ export const btnVariants = {
         scale: 0.95,
         transition: {
             type: "spring",
-            duration: 0.1,
+            duration: 0.2,
             stiffness: 150,
             damping: 10
         },
@@ -84,7 +84,7 @@ export const btnVariants = {
         scale: 0.95,
         transition: {
             type: "spring",
-            duration: 0.1,
+            duration: 0.2,
             stiffness: 150,
             damping: 10
         },

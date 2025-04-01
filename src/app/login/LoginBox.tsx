@@ -15,7 +15,7 @@ import {
     LoginModalWrap,
     OtherLoginWrap
 } from "../styled/LoginComponents";
-import { getAuth, GoogleAuthProvider, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, signInWithPopup, updateProfile } from "firebase/auth";
 import { LoginOr, LoginSpan } from "../styled/LoginStyle";
 import { usePathname, useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
@@ -153,9 +153,7 @@ export default function LoginBox() {
             // 서버로 ID 토큰 전송
             const loginResponse = await fetch(`/api/login`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
                 credentials: "include",
                 body: JSON.stringify({ idToken, role, hasGuest: false }),
             });
@@ -222,7 +220,7 @@ export default function LoginBox() {
             // 서버로 ID 토큰 전송
             const googleResponse = await fetch("/api/login", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
                 credentials: "include",
                 body: JSON.stringify({ idToken: googleToken, role, hasGuest: false }),
             });
@@ -273,16 +271,18 @@ export default function LoginBox() {
             setLoadingTag('Guest');
 
             let guestUid = localStorage.getItem("guestUid");
+            let idToken;
+            let signUser;
+            let data;
             let guestResponse;
             let customTokenResponse;
-
             console.log(guestUid, '게스트 UID')
 
             // 공통 게스트 로그인 로직
             const handleGuestResponse = async (idToken: string, guestUid?: string) => {
                 return await fetch("/api/login", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json", 'Project-Host' : window.location.origin },
+                    headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
                     credentials: "include",
                     body: JSON.stringify({ idToken, role: 1, hasGuest: true, guestUid }),
                 });
@@ -302,41 +302,56 @@ export default function LoginBox() {
                 const guestDocRef = doc(db, 'guests', guestUid);
                 const guestsDoc = await getDoc(guestDocRef);
                 if (!guestsDoc.exists()) { // 🔥 존재하지 않는 UID 차단
+                    await auth.signOut(); // 🔥 세션 무효화
+                    localStorage.removeItem("guestUid"); // 🔥 잘못된 UID 삭제
                     return setLoginError('게스트 로그인에 실패했습니다. 다시 시도 해주세요.')
                 }
 
                 customTokenResponse = await handleCustomTokenResponse(guestUid);
-                const data = await customTokenResponse.json();
-                const { customToken } = data;
+                const tokenData = await customTokenResponse.json();
+                const { customToken } = tokenData;
 
                 const userCredential = await signInWithCustomToken(auth, customToken);
-                const idToken = await userCredential.user.getIdToken();
+                idToken = await userCredential.user.getIdToken();
 
                 guestResponse = await handleGuestResponse(idToken, guestUid)
+                if (!guestResponse.ok) {
+                    const errorData = await guestResponse.json();
+                    const errorMessage = guestResponse.status === 403
+                        ? '로그인 시도 실패. 다시 시도 해주세요.'
+                        : '게스트 로그인에 실패했습니다. 다시 시도 해주세요.';
+                    setLoginError(errorMessage);
+                    throw new Error(`서버 요청 에러 ${guestResponse.status}: ${errorData.message}`);
+                }
+
+                data = await guestResponse.json();
             } else {
                 console.log('게스트 로그인 이력 무 : 로직 실행')
 
                 const userCredential = await signInAnonymously(auth);
-                const signUser = userCredential.user
-                const idToken = await signUser.getIdToken();
+                signUser = userCredential.user
+
+                idToken = await signUser.getIdToken();
                 guestUid = signUser.uid
 
                 guestResponse = await handleGuestResponse(idToken, guestUid)
-            }
-            // 서버로 ID 토큰 전송
+                if (!guestResponse.ok) {
+                    const errorData = await guestResponse.json();
+                    const errorMessage = guestResponse.status === 403
+                        ? '로그인 시도 실패. 다시 시도 해주세요.'
+                        : '게스트 로그인에 실패했습니다. 다시 시도 해주세요.';
+                    setLoginError(errorMessage);
+                    throw new Error(`서버 요청 에러 ${guestResponse.status}: ${errorData.message}`);
+                }
 
-            if (!guestResponse.ok) {
-                const errorData = await guestResponse.json();
-                const errorMessage = guestResponse.status === 403
-                    ? '로그인 시도 실패. 다시 시도 해주세요.'
-                    : '게스트 로그인에 실패했습니다. 다시 시도 해주세요.';
-                setLoginError(errorMessage);
-                throw new Error(`서버 요청 에러 ${guestResponse.status}: ${errorData.message}`);
+                data = await guestResponse.json();
+                const { guestName } = data;
+                await updateProfile(signUser, {
+                    displayName: guestName
+                });
             }
 
-            const data = await guestResponse.json();
             const { uid, user } = data;
-
             localStorage.setItem('guestUid', uid);
             setUser({
                 name: user.name,
@@ -387,7 +402,6 @@ export default function LoginBox() {
             document.addEventListener('keydown', handleKeyDown);
             document.addEventListener('mousedown', handleBackgroundClick);
         }
-
         return () => {
             setModal(false); // 모달이 닫힐 때 modal 상태 false로 설정
             setEmail('')

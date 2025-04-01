@@ -113,7 +113,6 @@ export const SelectTagState = atom<string>({
     default: '기타'
 })
 
-
 // firebase에 저장된 포스트 데이터
 export const PostState = atom<PostData[]>({
     key: 'PostState',

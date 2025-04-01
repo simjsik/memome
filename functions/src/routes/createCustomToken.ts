@@ -13,7 +13,8 @@ router.post('/customToken', async (req: Request, res: Response) => {
             return res.status(403).json({message: "게스트 유저 정보가 유효하지 않습니다."});
         }
 
-        const customToken = await adminAuth.createCustomToken(guestUid);
+        const customToken =
+        await adminAuth.createCustomToken(guestUid, {isGuest: true});
 
         return res.status(200).json({
             message: "토큰 발급 성공",

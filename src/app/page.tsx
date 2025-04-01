@@ -1,8 +1,5 @@
-export default async function defaultPage() {
+import { redirect } from "next/navigation";
 
-  // 비동기 데이터 처리
-  return (
-    <>
-    </>
-  );
+export default async function defaultPage() {
+  redirect("/home/main");
 }
