@@ -247,6 +247,7 @@ export default function UserProfile() {
     const [updateUserPhotoError, setUpdateUserPhotoError] = useState<string | null>(null)
     const [updateUserPhotoPreview, setUpdateUserPhotoPreview] = useState<string | null>(currentUser.photo)
     const [loading, setLoading] = useState(false);
+    const [alarmLoading, setAlarmLoading] = useState(false);
     // state
     const updatePhotoRef = useRef<HTMLInputElement | null>(null)
     // ref
@@ -440,8 +441,12 @@ export default function UserProfile() {
     }
 
     const noticeConfirm = async (noticeId: string) => {
+        if (alarmLoading) {
+            return;
+        }
         if (currentUser) {
             try {
+                setAlarmLoading(true);
                 const uid = currentUser.uid
 
                 // 유저 검증
@@ -477,6 +482,8 @@ export default function UserProfile() {
             } catch (error) {
                 console.error('게시글 삭제 중 오류가 발생했습니다.' + error)
                 alert('게시글 삭제 중 오류가 발생했습니다.')
+            } finally {
+                setAlarmLoading(false);
             }
         } else {
             console.log('유저 확인 실패')
@@ -620,8 +627,8 @@ export default function UserProfile() {
                             </div>
                             <MyAlarmWrap className="my_alarm_wrap">
                                 <Swiper
-                                    spaceBetween={16} // 슬라이드 간격
-                                    slidesPerView={3} // 화면에 보이는 슬라이드 개수
+                                    spaceBetween={100} // 슬라이드 간격
+                                    slidesPerView={3.5} // 화면에 보이는 슬라이드 개수
                                     freeMode={true}
                                     pagination={{
                                         clickable: true,
@@ -636,10 +643,15 @@ export default function UserProfile() {
                                                     <p>{notice.noticeType}</p>
                                                 </div>
                                                 <p className="alram_date">{formatDate(notice.noticeAt)}</p>
-                                                <motion.button
-                                                    variants={btnVariants}
-                                                    whileHover="loginHover"
-                                                    whileTap="loginClick" onClick={() => noticeConfirm(notice.noticeId)}>알림 확인</motion.button>
+                                                {alarmLoading ?
+                                                    <button><BeatLoader color="#000" size={8} /></button>
+                                                    :
+                                                    <motion.button
+                                                        variants={btnVariants}
+                                                        whileHover="loginHover"
+                                                        whileTap="loginClick" onClick={() => noticeConfirm(notice.noticeId)}>알림 확인</motion.button>
+                                                }
+
                                             </div>
                                         </SwiperSlide>
                                     ))}

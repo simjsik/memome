@@ -248,14 +248,7 @@ export default function ClientNotice() {
                                             <div className='post_pr_img'
                                                 key={index}
                                                 css={
-                                                    css`background-image : url(${imageUrl});
-                                                        height : 
-                                                            ${(post.images && post.images?.length === 1) ? '400px'
-                                                            :
-                                                            (post.images && post.images?.length === 2) ? '300px'
-                                                                :
-                                                                '140px'
-                                                        };`}>
+                                                    css`background-image : url(${imageUrl});`}>
                                             </div>
                                         ))}
                                     </div>

@@ -17,6 +17,7 @@ import { db } from '@/app/DB/firebaseConfig';
 import { saveUnsavedPost } from '@/app/utils/saveUnsavedPost';
 import { uploadContentImgCdn, uploadImgCdn } from '@/app/utils/uploadCdn';
 import { btnVariants } from '@/app/styled/motionVariant';
+import { MoonLoader } from 'react-spinners';
 
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
@@ -902,7 +903,6 @@ export default function PostMenu() {
         if (uploadLoading) {
             return;
         }
-
         // 사용자 인증 확인
         if (!yourLogin || usageLimit) {
             if (usageLimit) {
@@ -916,10 +916,11 @@ export default function PostMenu() {
             return;
         }
 
+        setUploadLoading(true);
+
         if (postTitle && posting && currentUser) {
             const uid = currentUser.uid
             try {
-                setUploadLoading(true);
                 const validateResponse = await fetch('/api/validate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1678,7 +1679,8 @@ export default function PostMenu() {
                         <ReactQuill ref={quillRef} formats={formats} value={posting} onChange={handlePostingEditor} modules={SetModules} />
                     </div>
                     <p>{postingText.length}/ 2500</p>
-                    <motion.button variants={btnVariants} whileHover="loginHover" className='post_btn' onClick={uploadThisPost}>발행</motion.button>
+
+                    {uploadLoading ? <button className='post_btn'><MoonLoader color="#0087ff" size={8} /></button> : <motion.button variants={btnVariants} whileHover="loginHover" className='post_btn' onClick={uploadThisPost}>발행</motion.button>}
                 </div >
             </QuillStyle >
             {

@@ -214,12 +214,13 @@ border-right : 1px solid #ededed;
       .post_pr_img_wrap{
         display: flex;
         height: 180px;
-        justify-content: space-between;
+        justify-content: flex-start;
       }
 
       .post_pr_img{
-        width: 120px;
+        width: calc(100% * 1/4 - 4px);
         height: 100%;
+        margin-right : 4px;
         border-radius : 8px;
         background-size: cover;
         background-repeat: no-repeat;
@@ -227,8 +228,7 @@ border-right : 1px solid #ededed;
       }
 
       .post_pr_img:last-child{
-
-      margin-right : 0;
+        margin-right : 0;
       }
 
       // 포스트 Swiper Style
@@ -397,12 +397,30 @@ export const NoticeWrap = styled.div`
             height: 80px;
             overflow: hidden;
             margin-top: 10px;
+
+            img{
+              display : none;
+            }
         }
 
         .post_pr_img_wrap{
             width: 100%;
             display: flex;
             height: 180px;
+            
+            .post_pr_img{
+              width: calc(100% * 1/4 - 4px);
+              height: 100%;
+              margin-right : 4px;
+              border-radius : 8px;
+              background-size: cover;
+              background-repeat: no-repeat;
+              border : 1px solid #ededed;
+            }
+
+            .post_pr_img:last-child{
+              margin-right : 0;
+            }
         }
     }
 
@@ -719,8 +737,11 @@ export const NewPostBtn = styled.button`
 `
 export const MyAlarmWrap = styled.div`
     margin-top: 32px;
-
+    .swiper-wrapper{
+      display : flex;
+    }
     .my_alarm{
+      width: 120px;
       padding: 10px;
       border: 1px solid #ededed;
       border-radius: 8px;

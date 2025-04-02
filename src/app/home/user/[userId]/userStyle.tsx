@@ -17,6 +17,7 @@ export const UserPostWrap = styled.div`
     .user_post_list_wrap{
         border-bottom: 1px solid #ededed;
         padding: 20px;
+        background-color: #ffffff00;
     }
     // user_post_list_wrap
 
@@ -25,12 +26,11 @@ export const UserPostWrap = styled.div`
         flex-wrap: wrap;
 
         .user_image_wrap{
-            position:relative;
-            flex : 1 0 30%;
-            aspect-ratio : 1 / 1;
+            position: relative;
+            flex: 0 0 calc(100% / 3);
+            aspect-ratio: 1 / 1.3;
             background-size: cover;
             background-repeat: no-repeat;
-            margin-right: 4px;
 
             .image_post_img{
                 background-size: cover;
@@ -123,6 +123,7 @@ export const UserPostWrap = styled.div`
             width: 36px;
             height: 36px;
             border: none;
+            border-radius : 50%;
             background-color: #fff;
             cursor: pointer;
 
@@ -245,7 +246,7 @@ export const UserPostWrap = styled.div`
             width: 32px;
             height: 32px;
             border : none;
-            border-radius : 4px;
+            border-radius : 50%;
             background : #fff;
             cursor : pointer
         }

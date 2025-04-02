@@ -17,16 +17,13 @@ export const useAuthSync = () => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
                 if (user) {
-                    console.log(user, 'Firebase 세션 유저 정보')
-
                     const uid = user.uid
                     const idTokenResult = await user.getIdTokenResult();
-                    const isGuest = idTokenResult.claims
+                    const isGuest = idTokenResult.claims.isGuest
                     const idToken = await user.getIdToken();
 
                     const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || [];
                     const role = ADMIN_EMAILS.includes(user.email ?? '') ? 3 : 2;
-                    console.log(isGuest, idToken, '커스텀 유저 확인')
                     // 서버로 ID 토큰 전송
                     const loginResponse = await fetch(`/api/login`, {
                         method: "POST",

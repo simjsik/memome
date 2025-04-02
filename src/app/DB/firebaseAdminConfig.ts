@@ -10,8 +10,6 @@ if (!admin.apps.length) {
         }),
     });
 }
-const privateKey = process.env.FIREBASE_PRIVATE_KEY?.split(String.raw`\n`).join('\n');
-console.log("Private Key Preview:", privateKey?.slice(0, 50) + "..."); // 처음 50자만 출력
 // Admin SDK 인스턴스 내보내기
 export const adminAuth = admin.auth(); // Admin Auth 인스턴스
 export const adminDb = admin.firestore(); // Admin Firestore 인스턴스

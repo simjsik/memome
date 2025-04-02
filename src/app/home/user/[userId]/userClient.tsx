@@ -267,140 +267,152 @@ export default function UserClient({ user }: ClientUserProps) {
         <>
             <UserPostWrap>
                 <div className="user_tab_wrap">
-                    <button className="memo_tab" onClick={() => setPostTab(true)}>메모</button>
-                    <button className="image_tab" onClick={() => setPostTab(false)}>이미지</button>
-                </div>
-                {postTab ?
-                    <>
-                        {!loading && posts.map((post) => (
-                            <motion.div key={post.id} className="user_post_list_wrap"
-                                whileHover={{
-                                    backgroundColor: "#fafbfc",
-                                    transition: { duration: 0.1 },
-                                }}
-                            >
-                                <div className="user_post_top">
-                                    <div className="user_post_photo"
-                                        css={css`background-image : url(${user.photo})`}
-                                    ></div>
-                                    <div className="user_post_name">
-                                        <p>{user.name}</p>
-                                        <span>@{user.uid.slice(0, 6)}... · {formatDate(post.createAt)}</span>
-                                    </div>
-                                    <div className="post_more">
-                                        <button
-                                            className='post_drop_menu_btn'
-                                            css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
-                                            onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
-                                        >
-                                            {dropToggle === post.id &&
-                                                <div ref={dropdownRef}>
-                                                    <ul>
-                                                        <li className='post_drop_menu'>
-                                                            <button onClick={(event) => { event.preventDefault(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</button>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            }
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="user_post_title_wrap">
-                                    <span className="user_post_tag">[{post.tag}]</span>
-                                    <p className="user_post_title" onClick={() => handleClickPost(post.id)}>{post.title}</p>
-                                </div>
-                                <div className="user_post_content" dangerouslySetInnerHTML={{ __html: post.content }}></div>
-                                {(post.images && post.images.length > 0) && (
-                                    <div className="user_post_img">
-                                        {post.images.map((imageUrl, index) => (
-                                            <div key={index} css={css`
+                    <motion.button
+                        variants={btnVariants}
+                        whileHover={{
+                            borderBottom: '1px solid #191919',
+                            cursor: 'pointer',
+                        }} className="memo_tab" onClick={() => setPostTab(true)}>메모</motion.button>
+                    <motion.button
+                        variants={btnVariants}
+                        whileHover={{
+                            borderBottom: '1px solid #191919',
+                            cursor: 'pointer',
+                        }} className="image_tab" onClick={() => setPostTab(false)}>이미지</motion.button>
+                </div >
+                {
+                    postTab ?
+                        <>
+                            {
+                                !loading && posts.map((post) => (
+                                    <motion.div key={post.id} className="user_post_list_wrap"
+                                        whileHover={{
+                                            backgroundColor: "#fafbfc",
+                                            transition: { duration: 0.1 },
+                                        }}
+                                    >
+                                        <div className="user_post_top">
+                                            <div className="user_post_photo"
+                                                css={css`background-image : url(${user.photo})`}
+                                            ></div>
+                                            <div className="user_post_name">
+                                                <p>{user.name}</p>
+                                                <span>@{user.uid.slice(0, 6)}... · {formatDate(post.createAt)}</span>
+                                            </div>
+                                            <div className="post_more">
+                                                <motion.button
+                                                    variants={btnVariants}
+                                                    whileHover="iconWrapHover"
+                                                    whileTap="iconWrapClick"
+                                                    className='post_drop_menu_btn'
+                                                    css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
+                                                    onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
+                                                >
+                                                    {dropToggle === post.id &&
+                                                        <div ref={dropdownRef}>
+                                                            <ul>
+                                                                <li className='post_drop_menu'>
+                                                                    <button onClick={(event) => { event.preventDefault(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</button>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    }
+                                                </motion.button>
+                                            </div>
+                                        </div>
+                                        <div className="user_post_title_wrap">
+                                            <span className="user_post_tag">[{post.tag}]</span>
+                                            <p className="user_post_title" onClick={() => handleClickPost(post.id)}>{post.title}</p>
+                                        </div>
+                                        <div className="user_post_content" dangerouslySetInnerHTML={{ __html: post.content }}></div>
+                                        {(post.images && post.images.length > 0) && (
+                                            <div className="user_post_img">
+                                                {post.images.map((imageUrl, index) => (
+                                                    <div key={index} css={css`
                                         background-image : url(${imageUrl})
                                         `}></div>
-                                        ))}
-                                    </div>
-                                )}
-                                <div className="user_post_bottom">
-                                    <div className="user_post_comment">
-                                        <motion.button
-                                            variants={btnVariants}
-                                            whileHover="iconWrapHover"
-                                            whileTap="iconWrapClick" className='post_comment_btn'>
-                                            <motion.div
-                                                variants={btnVariants}
-                                                whileHover="iconHover"
-                                                whileTap="iconClick" className='post_comment_icon'>
-                                            </motion.div>
-                                        </motion.button>
-                                        <p>
-                                            {post.commentCount}
-                                        </p>
-                                    </div>
-                                    <BookmarkBtn postId={post.id}></BookmarkBtn>
-                                </div>
-                            </motion.div>
-                        ))}
-                        {postTab && <div className="postObserver" ref={observerLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }} />}
-                        {(!loading && dataLoading) && <LoadingWrap />}
-                        {
-                            (!hasNextPage && posts.length > 0 && !loading) &&
-                            <NoMorePost>
-                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
-                                <p>모두 확인했습니다.</p>
-                                <span>전체 메모를 전부 확인했습니다.</span>
-                            </NoMorePost>
-                        }
-                        {
-                            (posts.length === 0 && !loading) &&
-                            < NoMorePost >
-                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
-                                <p>메모가 없습니다.</p>
-                                <span>새 메모를 작성 해보세요.</span>
-                            </NoMorePost>
-                        }
-                    </>
-                    :
-                    <>
-                        <div className="user_image_post_wrap">
-                            {!loading && imagePost.map((post) => (
-                                post.images &&
-                                <motion.div key={post.id} className="user_image_wrap"
-                                    whileHover={{
-                                        backgroundColor: "#f5f5f5",
-                                    }}
-                                >
-                                    {post.images.length > 0 && (
-                                        <>
-                                            {post.images.map((imageUrl, index) => (
-                                                <div key={index} className="image_post_img" css={css`
+                                                ))}
+                                            </div>
+                                        )}
+                                        <div className="user_post_bottom">
+                                            <div className="user_post_comment">
+                                                <motion.button
+                                                    variants={btnVariants}
+                                                    whileHover="iconWrapHover"
+                                                    whileTap="iconWrapClick" className='post_comment_btn'>
+                                                    <motion.div
+                                                        variants={btnVariants}
+                                                        whileHover="iconHover"
+                                                        whileTap="iconClick" className='post_comment_icon'>
+                                                    </motion.div>
+                                                </motion.button>
+                                                <p>
+                                                    {post.commentCount}
+                                                </p>
+                                            </div>
+                                            <BookmarkBtn postId={post.id}></BookmarkBtn>
+                                        </div>
+                                    </motion.div>
+                                ))
+                            }
+                            {postTab && <div className="postObserver" ref={observerLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }} />}
+                            {(!loading && dataLoading) && <LoadingWrap />}
+                            {
+                                (!hasNextPage && posts.length > 0 && !loading) &&
+                                <NoMorePost>
+                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+                                    <p>모두 확인했습니다.</p>
+                                    <span>전체 메모를 전부 확인했습니다.</span>
+                                </NoMorePost>
+                            }
+                            {
+                                (posts.length === 0 && !loading) &&
+                                < NoMorePost >
+                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+                                    <p>메모가 없습니다.</p>
+                                    <span>새 메모를 작성 해보세요.</span>
+                                </NoMorePost>
+                            }
+                        </>
+                        :
+                        <>
+                            <div className="user_image_post_wrap">
+                                {!loading && imagePost.map((post) => (
+                                    post.images &&
+                                    <div key={post.id} className="user_image_wrap">
+                                        {post.images.length > 0 && (
+                                            <>
+                                                {post.images.map((imageUrl, index) => (
+                                                    <div key={index} className="image_post_img" css={css`
                                             background-image : url(${imageUrl})
                                             `}>
-                                                </div>
-                                            ))}
-                                            < div className="image_list_icon"></div>
-                                        </>
-                                    )}
-                                </motion.div>
-                            ))}
-                        </div>
-                        {!postTab && <div className="imageObserver" ref={observerImageLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }} />}
-                        {(!loading && dataLoading) && <LoadingWrap />}
-                        {
-                            (!hasNextPage && imagePost.length > 0 && !loading) &&
-                            <NoMorePost>
-                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
-                                <p>모두 확인했습니다.</p>
-                                <span>이미지가 포함된 메모를 전부 확인했습니다.</span>
-                            </NoMorePost>
-                        }
-                        {
-                            (imagePost.length === 0 && !loading) &&
-                            <NoMorePost>
-                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
-                                <p>메모가 없습니다.</p>
-                                <span>메모 작성 시 이미지를 추가 해보세요.</span>
-                            </NoMorePost>
-                        }
-                    </>
+                                                    </div>
+                                                ))}
+                                                < div className="image_list_icon"></div>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                            {!postTab && <div className="imageObserver" ref={observerImageLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }} />}
+                            {(!loading && dataLoading) && <LoadingWrap />}
+                            {
+                                (!hasNextPage && imagePost.length > 0 && !loading) &&
+                                <NoMorePost>
+                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+                                    <p>모두 확인했습니다.</p>
+                                    <span>이미지가 포함된 메모를 전부 확인했습니다.</span>
+                                </NoMorePost>
+                            }
+                            {
+                                (imagePost.length === 0 && !loading) &&
+                                <NoMorePost>
+                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+                                    <p>메모가 없습니다.</p>
+                                    <span>메모 작성 시 이미지를 추가 해보세요.</span>
+                                </NoMorePost>
+                            }
+                        </>
                 }
             </UserPostWrap >
         </>

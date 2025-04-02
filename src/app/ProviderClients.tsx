@@ -9,13 +9,17 @@ import useAuthSync from "./hook/AuthSyncHook";
 import { bookMarkState, userState } from "./state/PostState";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./DB/firebaseConfig";
+import { usePostUpdateChecker } from "./hook/ClientPolling";
+import { usePathname } from "next/navigation";
 
 const queryClient = new QueryClient();
 
 function InitializeLoginComponent({ children }: { children: ReactNode }) {
+    const { clearUpdate } = usePostUpdateChecker();
+
     const currentUser = useRecoilValue(userState);
     const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState)
-
+    const pathName = usePathname();
     const loadBookmarks = async (uid: string) => {
         try {
             console.log('북마크 데이터 요청')
@@ -32,12 +36,17 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
             setCurrentBookmark([]);
         }
     }
-    
+
     useAuthSync();
 
     useEffect(() => {
         loadBookmarks(currentUser.uid);
     }, [])
+
+    useEffect(() => {
+        console.log(currentUser.uid)
+        clearUpdate();
+    }, [currentUser, pathName])
     return <>{children}</>; // 반드시 children을 렌더링
 }
 
