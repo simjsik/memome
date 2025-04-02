@@ -4,6 +4,7 @@ import { MoonLoader } from "react-spinners";
 import { loadingState } from "../state/PostState";
 import { useRecoilValue } from "recoil";
 import styled from "@emotion/styled";
+import { usePathname } from "next/navigation";
 
 const LoadingWrap = styled.div`
     position: absolute;
@@ -21,10 +22,10 @@ const LoadingWrap = styled.div`
 
 export default function GlobalLoadingWrap() {
     const loading = useRecoilValue(loadingState);
-
+    const pathName = usePathname();
     return (
         <>
-            {loading &&
+            {loading && !pathName.startsWith("/home/memo") &&
                 <LoadingWrap>
                     <MoonLoader color="#0087ff" />
                 </LoadingWrap >

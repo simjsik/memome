@@ -76,7 +76,16 @@ export default async function MemoPage({ params }: MemoPageProps) {
     const postSnap = await postRef.get();
 
     if (!postSnap.exists) {
-        return { title: "페이지를 찾을 수 없음" };
+        return <PostDetailWrap>
+            <div>
+                <div className="post_title_wrap">
+                    <p className="post_title">
+                        페이지를 찾을 수 없습니다.
+                    </p>
+                </div>
+            </div>
+            <div className="post_content_wrap">존재하지 않거나 삭제된 게시글 입니다.</div>
+        </PostDetailWrap>
     }
 
     const post = postSnap.data();

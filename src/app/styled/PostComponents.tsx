@@ -48,7 +48,6 @@ border-right : 1px solid #ededed;
               position: absolute;
               top: 36px;
               width: 100px;
-              box-shadow : 0px 0px 10px rgba(0,0,0,0.1);
             }
 
             li{

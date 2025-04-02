@@ -14,10 +14,10 @@ padding : 15px 0px;
 `
 
 export default function LoadingWrap() {
-    return (
-        <LoadingBox>
-            <MoonLoader color="#0087ff" size={24} />
-        </LoadingBox>
-    )
+  return (
+    <>
+      <LoadingBox><MoonLoader color="#0087ff" size={24} /></LoadingBox>
+    </>
+  )
 }
 

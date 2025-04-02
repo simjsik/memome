@@ -92,7 +92,7 @@ export const UsageLimitToggle = atom<boolean>({
 // 관리자 아이디
 export const ADMIN_ID = atom<string>({
     key: 'ADMIN_USER_ID',
-    default: '8KGNsQPu22Mod8QrXh6On0A8R5E2'
+    default: 'tTCS62tlKARTaRwGv8wsBEo7bbY2'
 })
 
 // 저장안된 포스트 작성 내용

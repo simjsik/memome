@@ -6,6 +6,8 @@ export const PostDetailWrap = styled.div`
 position : absolute;
 left : 420px;
 width : 860px;
+height : fit-content;
+min-height : 100vh;
 padding : 40px;
 background : #fff;
 border-left : 1px solid #dedede;

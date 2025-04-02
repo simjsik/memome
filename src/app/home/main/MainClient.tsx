@@ -526,7 +526,10 @@ export default function MainHome() {
                     <div ref={dropdownRef}>
                       <ul>
                         <li className='post_drop_menu'>
-                          <button onClick={(event) => { event.preventDefault(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</button>
+                          <motion.button
+                            variants={btnVariants}
+                            whileHover="otherHover"
+                            onClick={(event) => { event.preventDefault(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</motion.button>
                         </li>
                       </ul>
                     </div>
