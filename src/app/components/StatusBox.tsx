@@ -7,11 +7,26 @@ import MemoStatus from './status/MemoStatus';
 import { useParams, usePathname, } from 'next/navigation';
 import UserProfile from './status/UserProfile';
 import SearchComponent from './SearchComponent';
+import { useMediaQuery } from "react-responsive";
+import { statusState } from '../state/PostState';
+import { css } from '@emotion/react';
+import { useRecoilState } from 'recoil';
+import { motion } from "framer-motion";
+import { btnVariants } from '../styled/motionVariant';
+import { useRef } from 'react';
+import useOutsideClick from '../hook/OutsideClickHook';
 
 const PostListWrap = styled.div`
+  @media (max-width: 768px) {
+    position: absolute;
+    z-index: 10;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
 position : fixed;
 top: 40px;
-right : 160px;
+right: clamp(0px, calc((100vw - 1200px) * 0.5), 380px);
 width : 400px;
 height: calc(100vh - 80px);
 padding : 0px 20px;
@@ -42,23 +57,74 @@ export default function StatusBox() {
     const path = usePathname();
     const params = useParams<{ postId: string }>();
     const postId = params?.postId || ''
-
+    const isMobile = useMediaQuery({ maxWidth: 1200 });
+    const [mobileStatus, setMobileStatus] = useRecoilState<boolean>(statusState);
     // Function
+    const statusRef = useRef<HTMLDivElement>(null);
+
+    // 768 상태 창 핸들러
+    const statusHandle = () => {
+        setMobileStatus((prev) => !prev);
+    }
+
+    // 외부 클릭 시 드롭다운 닫기
+    useOutsideClick(statusRef, () => {
+        if (mobileStatus) {
+            setMobileStatus(false);
+        }
+    });
     return (
         <>
+
             {path !== '/home/post' &&
-                <PostListWrap >
-                    <SearchComponent></SearchComponent>
-                    {
-                        path !== `/home/memo/${params?.postId}` && <UserProfile></UserProfile >
+                <>
+                    {(isMobile && mobileStatus) &&
+                        <div css={css`position : fixed; left: 0; top: 0; bottom : 0; right : 0; z-index : 1; background:rgba(0,0,0,0.7);`}>
+                            <PostListWrap ref={statusRef} >
+                                <SearchComponent></SearchComponent>
+                                {
+                                    path !== `/home/memo/${params?.postId}` && <UserProfile></UserProfile >
+                                }
+                                <div className='list_top'>
+                                    {
+                                        path === `/home/memo/${params?.postId}` && <MemoStatus post={postId} />
+                                    }
+                                </div>
+                                <Logout></Logout>
+                                <motion.button css={
+                                    css`position : absolute;
+                                            bottom: 20px;
+                                            width : calc(100% - 40px);
+                                            height : 52px;
+                                            background : #fff;
+                                            color : #191919;
+                                            border : 1px solid #ededed;
+                                            border-radius : 4px;
+                                            font-size : 16px;
+                                            font-family : var(--font-pretendard-medium);
+                                            cursor : pointer;`
+                                }
+                                    variants={btnVariants}
+                                    whileHover="otherHover"
+                                    whileTap="otherClick"
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); statusHandle(); }}>취소</motion.button>
+                            </PostListWrap>
+                        </div>
                     }
-                    <div className='list_top'>
+                    {!isMobile && <PostListWrap>
+                        <SearchComponent></SearchComponent>
                         {
-                            path === `/home/memo/${params?.postId}` && <MemoStatus post={postId} />
+                            path !== `/home/memo/${params?.postId}` && <UserProfile></UserProfile >
                         }
-                    </div>
-                    <Logout></Logout>
-                </PostListWrap >
+                        <div className='list_top'>
+                            {
+                                path === `/home/memo/${params?.postId}` && <MemoStatus post={postId} />
+                            }
+                        </div>
+                        <Logout></Logout>
+                    </PostListWrap>
+                    }
+                </>
             }
         </>
     )

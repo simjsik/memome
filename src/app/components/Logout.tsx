@@ -10,16 +10,19 @@ import { motion } from "framer-motion";
 import { btnVariants } from "../styled/motionVariant";
 
 const LogoutButton = css`
+    @media (max-width: 768px) {
+    bottom: 80px;
+    }
     position : absolute;
     bottom: 20px;
     width : calc(100% - 40px);
     height : 52px;
     background : #fff;
-    color : #191919;
+    color :rgb(255, 30, 0);
     border : 1px solid #ededed;
     border-radius : 4px;
     font-size : 16px;
-    font-family : var(--font-pretendard-medium)
+    font-family : var(--font-pretendard-medium);
     cursor : pointer;
 `
 const LogInButton = css`

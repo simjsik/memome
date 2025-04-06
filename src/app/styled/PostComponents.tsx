@@ -4,9 +4,26 @@
 import styled from "@emotion/styled";
 
 export const PostWrap = styled.div`
+  @media (max-width: 768px) {
+    position: absolute;
+    left: 80px;
+    display: flex;
+    flex-wrap: wrap;
+    width: calc(100% - 80px);
+    max-width: 600px;
+    height: fit-content;
+    min-height: 100%;
+    padding: 0px;
+    background: #fff;
+    border-radius: 4px;
+    border: none;
+    border-left: 1px solid #ededed;
+    border-right: 1px solid #ededed;
+  }
+
 // 포스트 리스트 스타일 별 우측이 간소화
 position : absolute;
-left : 500px;
+left : clamp(80px, calc(80px + (100vw - 768px) * 0.5), 25%);
 display : flex;
 flex-wrap : wrap;
 width:  600px;
@@ -217,7 +234,6 @@ border-right : 1px solid #ededed;
       }
 
       .post_pr_img{
-        width: calc(100% * 1/4 - 4px);
         height: 100%;
         margin-right : 4px;
         border-radius : 8px;

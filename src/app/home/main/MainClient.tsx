@@ -21,6 +21,7 @@ import { NewPostBtn, NoMorePost, PostWrap } from '@/app/styled/PostComponents';
 import LoadingWrap from '@/app/components/LoadingWrap';
 import { useHandleUsernameClick } from '@/app/utils/handleClick';
 import { btnVariants } from '@/app/styled/motionVariant';
+import useOutsideClick from '@/app/hook/OutsideClickHook';
 
 
 export default function MainHome() {
@@ -459,20 +460,12 @@ export default function MainHome() {
     };
   }, [pathName]);
 
-  // 외부 클릭 감지 로직
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) // 클릭된 위치가 드롭다운 내부가 아닌 경우
-      ) {
-        setDropToggle(''); // 드롭다운 닫기
-      }
-    };
-
-    document.addEventListener('mousedown', handleOutsideClick); // 이벤트 리스너 추가
-    return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
-  }, []);
+  // 외부 클릭 시 드롭다운 닫기
+  useOutsideClick(dropdownRef, () => {
+    if (dropToggle) {
+      setDropToggle('');
+    }
+  });
 
   const { hasUpdate, clearUpdate } = usePostUpdateChecker();
   const handleUsernameClick = useHandleUsernameClick();
@@ -513,28 +506,30 @@ export default function MainHome() {
                     · {formatDate(post.createAt)}
                   </p>
                 </div>
-                <motion.button
-                  variants={btnVariants}
-                  whileHover="iconWrapHover"
-                  whileTap="iconWrapClick"
-                  className='post_drop_menu_btn'
-                  aria-label='포스트 옵션 더보기'
-                  css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
-                  onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
-                >
-                  {dropToggle === post.id &&
-                    <div ref={dropdownRef}>
-                      <ul>
-                        <li className='post_drop_menu'>
-                          <motion.button
-                            variants={btnVariants}
-                            whileHover="otherHover"
-                            onClick={(event) => { event.preventDefault(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</motion.button>
-                        </li>
-                      </ul>
-                    </div>
-                  }
-                </motion.button>
+                <div ref={dropdownRef}>
+                  <motion.button
+                    variants={btnVariants}
+                    whileHover="iconWrapHover"
+                    whileTap="iconWrapClick"
+                    className='post_drop_menu_btn'
+                    aria-label='포스트 옵션 더보기'
+                    css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
+                    onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
+                  >
+                    {dropToggle === post.id &&
+                      <div>
+                        <ul>
+                          <li className='post_drop_menu'>
+                            <motion.button
+                              variants={btnVariants}
+                              whileHover="otherHover"
+                              onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</motion.button>
+                          </li>
+                        </ul>
+                      </div>
+                    }
+                  </motion.button>
+                </div>
               </div>
               {/* 포스트 내용 */}
               <div className='post_content_wrap' onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}>
@@ -549,7 +544,11 @@ export default function MainHome() {
                   <div className='post_pr_img_wrap'>
                     {post.images.map((imageUrl, index) => (
                       <div className='post_pr_img' key={index}
-                        css={css`background-image : url(${imageUrl})`}
+                        css={css
+                          `
+                          background-image : url(${imageUrl});
+                          width: calc((100% / ${Array.isArray(post.images) && post.images.length}) - 4px);
+                          `}
                       ></div>
                     ))}
                   </div>

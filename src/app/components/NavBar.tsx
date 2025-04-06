@@ -4,10 +4,11 @@ import styled from '@emotion/styled';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
-import { DidYouLogin, hasGuestState, ImageUrlsState, loginToggleState, newNoticeState, PostingState, PostTitleState, SelectTagState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
+import { DidYouLogin, hasGuestState, ImageUrlsState, loginToggleState, newNoticeState, PostingState, PostTitleState, SelectTagState, statusState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css } from '@emotion/react';
 import { saveUnsavedPost } from '../utils/saveUnsavedPost';
+import { useMediaQuery } from 'react-responsive';
 
 const NavBarWrap = styled.div`
 position: fixed;
@@ -81,6 +82,9 @@ export default function NavBar() {
     const posting = useRecoilValue<string>(PostingState);
     const imageUrls = useRecoilValue<string[]>(ImageUrlsState);
     const selectTag = useRecoilValue<string>(SelectTagState);
+    const setMobileStatus = useSetRecoilState<boolean>(statusState);
+
+    const isMobile = useMediaQuery({ maxWidth: 1200 });
     // State
     const router = useRouter();
     const path = usePathname();
@@ -145,6 +149,11 @@ export default function NavBar() {
         setSelectedMenu(NavTitle);
     }
 
+    // 768 상태 창 핸들러
+    const statusHandle = () => {
+        setMobileStatus((prev) => !prev);
+    }
+
     useEffect(() => {
         if (typeof hasGuest === 'string') {
             if (hasGuest === 'false') {
@@ -156,6 +165,8 @@ export default function NavBar() {
         }
     }, [hasGuest])
     // Function
+
+
     return (
         <>
             <NavBarWrap>
@@ -187,7 +198,6 @@ export default function NavBar() {
 
                         </div>
                     </NavMenu>
-
                     {/* 메인 / 전체 포스트 */}
                     <NavMenu isActive={2 === selectedMenu} onClick={() => handleNavClick(2)}>
                         <div className='post_alarm'></div>
@@ -208,7 +218,6 @@ export default function NavBar() {
                                 </svg>}
                         </div>
                     </NavMenu>
-
                     {/* 북마크 */}
                     {hasGuest ?
                         < NavMenu isActive={false}>
@@ -283,8 +292,6 @@ export default function NavBar() {
                             </div>
                         </NavMenu>
                     }
-
-
                     {/* 포스팅 */}
                     {hasGuest ?
                         <NavMenu isActive={false}>
@@ -329,8 +336,17 @@ export default function NavBar() {
                             </div>
                         </NavMenu>
                     }
-
                 </div>
+                {isMobile && <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); statusHandle(); }} css={css`
+                        background-image : url(${currentUser?.photo});
+                        background-size : cover;
+                        background-position : center;
+                        width : 42px;
+                        height : 42px;
+                        margin : 0 auto;
+                        border : 1px solid #333;
+                        border-radius : 50%;
+                    `}></div>}
             </NavBarWrap >
         </>
     );

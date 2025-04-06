@@ -37,6 +37,7 @@
     "react-instantsearch": "^7.13.9",
     "react-instantsearch-router-nextjs": "^7.13.9",
     "react-quill-new": "^3.3.3",
+    "react-responsive": "^10.0.1",
     "react-spinners": "^0.15.0",
     "recoil": "^0.7.7",
     "redis": "^4.7.0",
