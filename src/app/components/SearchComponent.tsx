@@ -16,7 +16,7 @@ position: relative;
     // 메모 검색
     h2{
     flex: 1 0 100%;
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: normal;
     font-family: var(--font-pretendard-bold);
     }
@@ -84,7 +84,7 @@ position: relative;
         line-height: 42px;
         border: 1px solid #ededed;
         border-radius: 8px;
-        font-size : 16px;
+        font-size : 1rem;
 
             &:focus {
             outline : 1px solid #272D2D;
@@ -146,7 +146,7 @@ position: relative;
             button {
             flex: 1 0 100%;
             height: 42px;
-            font-size: 14px;
+            font-size: 0.875rem;
             border: 1px solid #ededed;
             background: #fff;
             cursor:pointer;
@@ -155,7 +155,7 @@ position: relative;
             button{
             flex: 1 0 100%;
             height: 42px;
-            font-size: 14px;
+            font-size: 0.875rem;
             border-top : none;
             background: #fff;
             }
@@ -168,7 +168,7 @@ position: relative;
         .search_option_toggle_btn{
         width: 100px;
         height: 42px;
-        font-size: 14px;
+        font-size: 0.875rem;
         border: 1px solid #ededed;
         background: #fff;
         cursor:pointer;
@@ -213,7 +213,7 @@ position: relative;
                 }
 
                 .result_tag{
-                font-size : 14px;
+                font-size : 0.875rem;
                 line-height: 26px;
                 color : #333;
                 margin-right : 4px;
@@ -222,7 +222,7 @@ position: relative;
                 .result_title{
                 max-width : 60%;
                 margin-right: 4px;
-                font-size: 14px;
+                font-size: 0.875rem;
                 text-overflow: ellipsis;
                 overflow: hidden;
                 white-space: nowrap;
@@ -231,7 +231,7 @@ position: relative;
 
                 .result_comment{
                 color: #f12014;
-                font-size: 14px;
+                font-size: 0.875rem;
                 font-family: var(--font-pretendard-bold);
                 line-height: 26px;
                 }
@@ -240,7 +240,7 @@ position: relative;
             // 유저
             .result_user{
             flex: 0 0 20%;
-            font-size: 14px;
+            font-size: 0.875rem;
             margin-right: 4px;
             text-overflow: ellipsis;
             overflow: hidden;
@@ -251,7 +251,7 @@ position: relative;
             // 작성일
             .result_date{
             flex: 0 0 20%;
-            font-size: 14px;
+            font-size: 0.875rem;
             line-height: 26px;
             }
         }
@@ -262,7 +262,7 @@ position: relative;
     margin-top: 10px;
 
         >p{
-            font-size: 14px;
+            font-size: 0.875rem;
         }
 
         .swiper {
@@ -299,7 +299,7 @@ position: relative;
         }
         
         .result_name{
-            font-size: 16px;
+            font-size: 1rem;
             flex: 1 0 100%;
             margin-top: 8px;
             text-align: center;

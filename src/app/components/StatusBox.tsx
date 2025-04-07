@@ -17,18 +17,11 @@ import { useRef } from 'react';
 import useOutsideClick from '../hook/OutsideClickHook';
 
 const PostListWrap = styled.div`
-  @media (max-width: 768px) {
-    position: absolute;
-    z-index: 10;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-  }
 position : fixed;
 top: 40px;
-right: clamp(0px, calc((100vw - 1200px) * 0.5), 380px);
+right: clamp(0px, calc((100vw - 1200px) * 0.5), 320px);
 width : 400px;
-height: calc(100vh - 80px);
+height: 65%;
 padding : 0px 20px;
 border : 1px solid #ededed;
 border-radius : 8px;
@@ -51,6 +44,34 @@ background : gray;
 border-radius : 4px;
 cursor : pointer;
 }
+
+  @media (max-width: 768px) {
+    position: absolute;
+    z-index: 10;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  @media (min-width: 1920px) {
+    width: 500px;
+    right: clamp(320px, calc(320px + (100vw - 1920px) * 0.4375), 600px);
+  }
+
+  @media (min-width: 2560px) {
+    width: 600px;
+    right: clamp(500px, calc(500px + (100vw - 2560px) * 0.3125), 900px);
+  }
+
+  @media (min-width: 3840px) {
+    width: 680px;
+    right: clamp(920px, calc(920px + (100vw - 3840px) * 0.3125), 1320px);
+  }
+    
+  @media (min-width: 5120px) {
+    width: 760px;
+    right: clamp(1420px, calc(1420px + (100vw - 5120px) * 0.3125), 100vw);
+  }
 `
 
 export default function StatusBox() {
@@ -100,7 +121,7 @@ export default function StatusBox() {
                                             color : #191919;
                                             border : 1px solid #ededed;
                                             border-radius : 4px;
-                                            font-size : 16px;
+                                            font-size : 1rem;
                                             font-family : var(--font-pretendard-medium);
                                             cursor : pointer;`
                                 }

@@ -34,11 +34,12 @@ height : 100%;
 }
 
 .user_name{
-    font-size: 24px;
+    font-size: 1.25rem;
     font-family: var(--font-pretendard-bold);
 }
 
 .user_uid{
+    font-size : 0.875rem;
     color: #555;
     font-family: var(--font-pretendard-medium);
 }
@@ -74,7 +75,7 @@ height : 100%;
 
     p{
     line-height : 32px;
-    font-size : 14px;
+    font-size : 0.875rem;
     }
 }
 
@@ -110,7 +111,7 @@ margin-top : 20px;
         
         >label{
         flex: 1 0 100%;
-        font-size: 14px;
+        font-size: 0.875rem;
         }
 
         input{
@@ -123,7 +124,7 @@ margin-top : 20px;
         }
 
         p{
-        font-size: 12px;
+        font-size: 0.75rem;
         margin-top: 36px;
         color: #777;
         }
@@ -134,7 +135,7 @@ margin-top : 20px;
     .user_photo_change_wrap{
     display: flex;
     margin-top: 16px;
-    font-size: 14px;
+    font-size: 0.875rem;
     flex-wrap: wrap;
 
         >label{
@@ -202,7 +203,7 @@ margin-top : 20px;
     text-align : right;
         
         >p{
-            font-size: 14px;
+            font-size: 0.875rem;
         }
 
         .reset_update_btn{

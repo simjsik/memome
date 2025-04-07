@@ -23,7 +23,7 @@ export const PostWrap = styled.div`
 
 // 포스트 리스트 스타일 별 우측이 간소화
 position : absolute;
-left : clamp(80px, calc(80px + (100vw - 768px) * 0.5), 25%);
+left : clamp(80px, calc(80px + (100vw - 1200px) * 0.5), 25%);
 display : flex;
 flex-wrap : wrap;
 width:  600px;
@@ -123,14 +123,14 @@ border-right : 1px solid #ededed;
       .post_tag{
         width: 100%;
         margin-right: 4px;
-        font-size: 14px;
+        font-size: 0.875rem;
         line-height: 24px;
         color: #555;
       }
     
       // 포스트 제목
       .post_title{
-        font-size: 16px;
+        font-size: 1rem;
         border-bottom: none;
         margin-top: 8px;
       }
@@ -145,7 +145,7 @@ border-right : 1px solid #ededed;
       .user_uid,
       .post_date,
       .post_comment {
-      font-size : 14px;
+      font-size : 0.875rem;
       line-height : 36px;
       }
 
@@ -190,7 +190,7 @@ border-right : 1px solid #ededed;
 
       .post_comment{
         font-family : var(--font-pretendard-medium);
-        font-size : 16px;
+        font-size : 1rem;
         color: #191919;
         margin-left : 2px;
         display : flex;
@@ -318,6 +318,41 @@ border-right : 1px solid #ededed;
         }
       }
 //----------------------------------------------------
+  @media (min-width: 1920px) {
+    width: clamp(600px, calc(600px + (100vw - 1920px) * 0.3125), 800px);
+    
+    .post_pr_img_wrap{
+      height: clamp(180px, calc(180px + (100vw - 1920px) * 0.3125), 380px);
+    }
+
+    .post_text{
+      height: 100px;
+    }
+  }
+
+  @media (min-width: 2560px) {
+    width: clamp(800px, calc(800px + (100vw - 2560px) * 0.3125), 1200px);
+    
+    .post_pr_img_wrap{
+      height: clamp(380px, calc(380px + (100vw - 2560px) * 0.3125), 780px);
+    }
+    
+    .post_text{
+      height: 120px;
+    }
+  }
+
+  @media (min-width: 3840px) {
+    width: clamp(1200px, calc(1200px + (100vw - 3840px) * 0.3125), 1600px);
+    
+    .post_pr_img_wrap{
+      height: clamp(780px, calc(780px + (100vw - 3840px) * 0.3125), 1000px);
+    }
+    
+    .post_text{
+      height: 140px;
+    }
+  }
 `
 export const NoticeWrap = styled.div`
     position: absolute;
@@ -357,7 +392,7 @@ export const NoticeWrap = styled.div`
     .user_name,
     .user_uid,
     .post_date{
-        font-size : 14px;
+        font-size : 0.875rem;
     }
     
     .user_name,
@@ -387,13 +422,13 @@ export const NoticeWrap = styled.div`
         border: 1px solid #ffc6c9;
         background-color: #ffe3e4;
         color: #ff4e59;
-        font-size: 14px;
+        font-size: 0.875rem;
         font-family: '__PretendardBold_73a78b';
         border-radius: 4px;
     }
 
     .post_title{
-        font-size: 16px;
+        font-size: 1rem;
         margin-top: 8px;
         font-family: '__PretendardMedium_979b24';
         color: red;
@@ -457,7 +492,7 @@ export const NoticeWrap = styled.div`
 
       .post_comment{
         font-family : var(--font-pretendard-medium);
-        font-size : 16px;
+        font-size : 1rem;
         color: #191919;
         margin-left : 2px;
         display : flex;
@@ -477,7 +512,7 @@ background: #fff;
     margin-left : 10px;
     flex: 1 0 100%;
     line-height : 48px;
-    font-size: 20px;
+    font-size: 1.25rem;
     font-family: var(--font-pretendard-bold);
     }
 
@@ -486,7 +521,7 @@ background: #fff;
     margin-left : 10px;
     flex: 1 0 80%;
     line-height : 48px;
-    font-size: 20px;
+    font-size: 1.25rem;
     font-family: var(--font-pretendard-bold);
     }
 
@@ -502,7 +537,7 @@ background: #fff;
     .h_user,
     .h_date{
     font-family: var(--font-pretendard-bold);
-    font-size : 14px;
+    font-size : 0.875rem;
     }
 
     .h_title{
@@ -535,19 +570,19 @@ margin: 13px 12px 0px 6px;
 .post_tag{
 color : #8e8e8e;
 margin-right : 4px;
-font-size: 14px;
+font-size: 0.875rem;
 font-family : var(--font-pretendard-light);
 }
 .post_title {
 margin-right : 4px;
-font-size : 14px;
+font-size : 0.875rem;
 }
 & .post_title:hover{
 text-decoration : underline;
 cursor:pointer;
 }
 .post_comment{
-font-size : 14px;
+font-size : 0.875rem;
 }
 .post_user{
 flex: 0 0 20%;
@@ -557,11 +592,11 @@ overflow : hidden;
 white-space : nowrap;
 color : #828282;
 font-family : var(--font-pretendard-light);
-font-size : 14px;
+font-size : 0.875rem;
 }
 .post_date{
 flex: 0 0 16%;
-font-size : 14px;
+font-size : 0.875rem;
 }
 
 .bookmark_delete_btn{
@@ -617,7 +652,7 @@ background-color: #c8fffd;
 }
 
 .memo_comment_date{
-font-size: 14px;
+font-size: 0.875rem;
 color: #777;
 margin-top: 10px;
 }
@@ -672,7 +707,7 @@ background-size : cover;
 
 // 로그인 유저 아이디
 .login_user_id{
-font-size : 14px;
+font-size : 0.875rem;
 line-height : 24px;
 }
 
@@ -727,13 +762,13 @@ export const NoMorePost = styled.div`
     }
 
     p{
-      font-size: 20px;
+      font-size: 1.25rem;
     }
 
     span{
       display : block;
       color: #999;
-      font-size: 14px;
+      font-size: 0.875rem;
       margin-top : 4px;
     }
 `
@@ -763,7 +798,7 @@ export const MyAlarmWrap = styled.div`
     }
 
     h2{
-      font-size: 14px;
+      font-size: 0.875rem;
     }
 
     .alarm_title{
@@ -772,7 +807,7 @@ export const MyAlarmWrap = styled.div`
 
     .alram_date{
       margin-top: 4px;
-      font-size: 14px;
+      font-size: 0.875rem;
     }
 
     button{
