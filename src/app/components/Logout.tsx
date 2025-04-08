@@ -2,7 +2,7 @@
 "use client";
 
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { bookMarkState, DidYouLogin, loginToggleState, modalState, PostData, userBookMarkState, userData, userState } from "../state/PostState";
+import { bookMarkState, DidYouLogin, loginToggleState, modalState, PostData, UsageLimitToggle, userBookMarkState, userData, userState } from "../state/PostState";
 import { css } from "@emotion/react";
 import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
@@ -45,6 +45,7 @@ export default function Logout() {
     const setModal = useSetRecoilState<boolean>(modalState);
     const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState)
     const setUserCurrentBookmark = useSetRecoilState<PostData[]>(userBookMarkState)
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     // State
 
 
@@ -76,6 +77,7 @@ export default function Logout() {
                 setCurrentBookmark([])
                 setUserCurrentBookmark([])
                 setHasLogin(false)
+                setLimitToggle(false)
             }
         } catch (error) {
             console.error("로그아웃 에러:", error);
