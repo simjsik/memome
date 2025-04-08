@@ -60,6 +60,7 @@ height : 100%;
     background: #fff;
     margin-top: 20px;
     cursor: pointer;
+    font-size : 0.875rem;
 }
 
 // 프로필 하단
@@ -98,6 +99,7 @@ height : 100%;
     border: 1px solid #ededed;
     background: #fff;
     cursor :pointer;
+    font-size : 0.75rem;
 }
 
 // 프로필 업데이트
@@ -231,6 +233,21 @@ margin-top : 20px;
 }
 
 
+    @media (min-width: 1921px) {
+        padding-top: 30px;
+    }
+
+      @media (min-width: 2560px) {
+        padding-top: 40px;
+    }
+
+    @media (min-width: 3840px) {
+        padding-top: 50px;
+    }
+        
+    @media (min-width: 5120px) {
+        padding-top: 60px;
+    }
 `
 
 export default function UserProfile() {

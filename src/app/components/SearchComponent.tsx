@@ -64,7 +64,7 @@ position: relative;
     // 검색 창
     .search_input_wrap{
     width : 100%;
-    height : 42px;
+    height: fit-content;
 
         .search_img{
         position: absolute;
@@ -84,7 +84,7 @@ position: relative;
         line-height: 42px;
         border: 1px solid #ededed;
         border-radius: 8px;
-        font-size : 1rem;
+        font-size : 0.875rem;
 
             &:focus {
             outline : 1px solid #272D2D;
@@ -322,6 +322,90 @@ position: relative;
             }
         }
     // ---------------------------------------------------
+
+    
+    @media (min-width: 1921px) {
+        .user_result {
+            margin-top: 20px;
+        }
+        .search_input_wrap{
+            .ais-SearchBox-input{
+                height: 56px;
+                padding: 0px 10px 0px 52px;
+                line-height: 56px;
+                border: 2px solid #ededed;
+            }
+
+            .ais-SearchBox-submit svg {
+                width: 28px;
+                height: 20px;
+            }
+
+            .ais-SearchBox-submit {
+                width: 56px;
+                height: 56px;
+            }
+
+            .ais-SearchBox-reset {
+                top: 14px;
+            }
+        }
+    }
+    @media (min-width: 2560px) {
+        .user_result {
+            margin-top: 30px;
+        }
+        .search_input_wrap{
+            .ais-SearchBox-input{
+                height: 64px;
+                padding: 0px 10px 0px 62px;
+                line-height: 64px;
+                border: 2px solid #ededed;
+            }
+
+            .ais-SearchBox-submit svg {
+                width: 32px;
+                height: 24px;
+            }
+
+            .ais-SearchBox-submit {
+                width: 64px;
+                height: 64px;
+            }
+
+            .ais-SearchBox-reset {
+                top: 14px;
+            }
+        }
+    }
+
+        @media (min-width: 3840px) {
+        .user_result {
+            margin-top: 42px;
+        }
+        .search_input_wrap{
+            .ais-SearchBox-input{
+                height: 76px;
+                padding: 0px 10px 0px 72px;
+                line-height: 76px;
+                border: 2px solid #ededed;
+            }
+
+            .ais-SearchBox-submit svg {
+                width: 36px;
+                height: 28px;
+            }
+
+            .ais-SearchBox-submit {
+                width: 76px;
+                height: 76px;
+            }
+
+            .ais-SearchBox-reset {
+                top: 14px;
+            }
+        }
+    }
 `
 interface hit {
     displayName: string;

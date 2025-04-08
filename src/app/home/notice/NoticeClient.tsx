@@ -240,7 +240,7 @@ export default function ClientNotice() {
                                     <span className='post_tag'>{post.tag}</span>
                                     <p className='post_title' >{post.title}</p>
                                 </div>
-                                <div className="post_content" dangerouslySetInnerHTML={{ __html: post.content }}></div>
+                                <div className="post_text" dangerouslySetInnerHTML={{ __html: post.content }}></div>
                                 {/* 이미지 */}
                                 {(post.images && post.images.length > 0) &&
                                     <div className='post_pr_img_wrap'>
@@ -248,7 +248,10 @@ export default function ClientNotice() {
                                             <div className='post_pr_img'
                                                 key={index}
                                                 css={
-                                                    css`background-image : url(${imageUrl});`}>
+                                                    css`
+                                                    background-image : url(${imageUrl});
+                                                    width: calc((100% / ${Array.isArray(post.images) && post.images.length}) - 4px);
+                                                    `}>
                                             </div>
                                         ))}
                                     </div>

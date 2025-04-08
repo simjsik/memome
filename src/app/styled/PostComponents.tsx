@@ -4,26 +4,9 @@
 import styled from "@emotion/styled";
 
 export const PostWrap = styled.div`
-  @media (max-width: 768px) {
-    position: absolute;
-    left: 80px;
-    display: flex;
-    flex-wrap: wrap;
-    width: calc(100% - 80px);
-    max-width: 600px;
-    height: fit-content;
-    min-height: 100%;
-    padding: 0px;
-    background: #fff;
-    border-radius: 4px;
-    border: none;
-    border-left: 1px solid #ededed;
-    border-right: 1px solid #ededed;
-  }
-
 // 포스트 리스트 스타일 별 우측이 간소화
 position : absolute;
-left : clamp(80px, calc(80px + (100vw - 1200px) * 0.5), 25%);
+left : clamp(80px, calc(80px + (100vw - 768px) * 0.5), 25%);
 display : flex;
 flex-wrap : wrap;
 width:  600px;
@@ -318,16 +301,47 @@ border-right : 1px solid #ededed;
         }
       }
 //----------------------------------------------------
-  @media (min-width: 1920px) {
+  @media (max-width: 768px) {
+    left: 80px;
+    width: calc(100% - 80px);
+    max-width: 600px;
+  }
+
+  @media (min-width: 1200px) and (max-width : 1920px) {
+    left : clamp(80px, calc(80px + (100vw - 1200px) * 0.53), 50vw);
+  }
+
+  @media (min-width: 1921px) {
+    border-right : 2px solid #ededed;
+    border-left : 2px solid #ededed;
     width: clamp(600px, calc(600px + (100vw - 1920px) * 0.3125), 800px);
     
     .post_pr_img_wrap{
       height: clamp(180px, calc(180px + (100vw - 1920px) * 0.3125), 380px);
     }
 
+    .post_tag{
+      line-height: 36px;
+    }
+  
     .post_text{
       height: 100px;
     }
+
+              .user_photo {
+            width: 42px;
+            height: 42px;
+          }
+
+          .user_name,
+          .user_uid,
+          .post_date{
+            line-height : 42px;
+          }
+
+          .post_content_wrap{
+              padding: 0px 0px 10px 50px;
+          }
   }
 
   @media (min-width: 2560px) {
@@ -337,35 +351,77 @@ border-right : 1px solid #ededed;
       height: clamp(380px, calc(380px + (100vw - 2560px) * 0.3125), 780px);
     }
     
+    .post_tag{
+      line-height: 52px;
+    }
+
     .post_text{
       height: 120px;
     }
+
+              .user_photo {
+            width: 52px;
+            height: 52px;
+          }
+
+          .user_name,
+          .user_uid,
+          .post_date{
+            line-height : 52px;
+          }
+
+          .post_content_wrap{
+            padding: 0px 0px 10px 62px;
+          }
   }
 
   @media (min-width: 3840px) {
+    border-right : 3px solid #ededed;
+    border-left : 3px solid #ededed;
     width: clamp(1200px, calc(1200px + (100vw - 3840px) * 0.3125), 1600px);
     
     .post_pr_img_wrap{
       height: clamp(780px, calc(780px + (100vw - 3840px) * 0.3125), 1000px);
     }
     
+    .post_tag{
+      line-height: 64px;
+    }
+
     .post_text{
       height: 140px;
+    }
+
+    .user_photo {
+      width: 68px;
+      height: 68px;
+    }
+
+    .user_name,
+    .user_uid,
+    .post_date{
+     line-height : 68px;
+    }
+
+    .post_content_wrap{
+      padding: 0px 0px 10px 80px;
     }
   }
 `
 export const NoticeWrap = styled.div`
-    position: absolute;
-    left: 500px;
-    display: flex;
-    flex-wrap: wrap;
-    width: 600px;
-    padding: 0px;
-    background: #fff;
-    border-radius: 4px;
-    border: none;
-    border-left: 1px solid #ededed;
-    border-right: 1px solid #ededed;
+    position : absolute;
+    left : clamp(80px, calc(80px + (100vw - 768px) * 0.5), 25%);
+    display : flex;
+    flex-wrap : wrap;
+    width:  600px;
+    height: fit-content;
+    min-height: 100%;
+    padding : 0px;
+    background : #fff;
+    border-radius : 4px;
+    border : none;
+    border-left : 1px solid #ededed;
+    border-right : 1px solid #ededed;
 
     .post_box{
         width: 100%;
@@ -443,7 +499,7 @@ export const NoticeWrap = styled.div`
     .post_content_wrap{
         padding: 0px 0px 10px 44px;
 
-        .post_content{
+        .post_text{
             height: 80px;
             overflow: hidden;
             margin-top: 10px;
@@ -459,7 +515,6 @@ export const NoticeWrap = styled.div`
             height: 180px;
             
             .post_pr_img{
-              width: calc(100% * 1/4 - 4px);
               height: 100%;
               margin-right : 4px;
               border-radius : 8px;
@@ -498,6 +553,116 @@ export const NoticeWrap = styled.div`
         display : flex;
         line-height : 32px;
       }
+
+      //-------------------------------------------------------
+        @media (max-width: 768px) {
+          left: 80px;
+          width: calc(100% - 80px);
+          max-width: 600px;
+        }
+
+        @media (min-width: 1200px) and (max-width : 1920px) {
+          left : clamp(80px, calc(80px + (100vw - 1200px) * 0.53), 50vw);
+        }
+
+        @media (min-width: 1921px) {
+          border-left: 2px solid #ededed;
+          border-right: 2px solid #ededed;
+          width: clamp(600px, calc(600px + (100vw - 1920px) * 0.3125), 800px);
+
+          .post_content_wrap{
+            .post_pr_img_wrap{
+              height: clamp(180px, calc(180px + (100vw - 1920px) * 0.3125), 380px);
+            }
+          }
+
+          .post_title{
+            margin-top : 16px;
+          }
+
+          .post_text{
+            height: 100px;
+          }
+
+          .user_profile {
+            width: 42px;
+            height: 42px;
+          }
+
+          .user_name,
+          .user_uid,
+          .post_date{
+            line-height : 42px;
+          }
+
+          .post_content_wrap{
+              padding: 0px 0px 10px 50px;
+          }
+        }
+
+        @media (min-width: 2560px) {
+          width: clamp(800px, calc(800px + (100vw - 2560px) * 0.3125), 1200px);
+          .post_content_wrap{
+            .post_pr_img_wrap{
+              height: clamp(380px, calc(380px + (100vw - 2560px) * 0.3125), 780px);
+            }
+          }
+          .post_text{
+            height: 120px;
+          }
+
+          .post_title{
+            margin-top : 24px;
+          }
+          .user_profile {
+            width: 52px;
+            height: 52px;
+          }
+
+          .user_name,
+          .user_uid,
+          .post_date{
+            line-height : 52px;
+          }
+
+          .post_content_wrap{
+            padding: 0px 0px 10px 62px;
+          }
+        }
+
+        @media (min-width: 3840px) {
+          border-left: 3px solid #ededed;
+          border-right: 3px solid #ededed;
+
+          width: clamp(1200px, calc(1200px + (100vw - 3840px) * 0.3125), 1600px);
+          .post_content_wrap{
+            .post_pr_img_wrap{
+              height: clamp(780px, calc(780px + (100vw - 3840px) * 0.3125), 1000px);
+            }
+          }
+
+          .post_text{
+            height: 140px;
+          }
+
+          .post_title{
+            margin-top : 32px;
+          }
+          .user_profile {
+            width: 68px;
+            height: 68px;
+          }
+
+          .user_name,
+          .user_uid,
+          .post_date{
+            line-height : 68px;
+          }
+
+          .post_content_wrap{
+            padding: 0px 0px 10px 80px;
+          }
+        }
 `
 export const TitleHeader = styled.div`
 width: 100%;

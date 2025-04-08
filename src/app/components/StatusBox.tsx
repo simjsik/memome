@@ -19,9 +19,9 @@ import useOutsideClick from '../hook/OutsideClickHook';
 const PostListWrap = styled.div`
 position : fixed;
 top: 40px;
-right: clamp(0px, calc((100vw - 1200px) * 0.5), 320px);
+right: clamp(80px, calc((100vw - 1200px) * 0.6), 420px);
 width : 400px;
-height: 65%;
+height: 80%;
 padding : 0px 20px;
 border : 1px solid #ededed;
 border-radius : 8px;
@@ -53,8 +53,11 @@ cursor : pointer;
     transform: translate(-50%, -50%);
   }
 
-  @media (min-width: 1920px) {
+  @media (min-width: 1921px) {
+    border-left: 2px solid #ededed;
+    border-right: 2px solid #ededed;
     width: 500px;
+    max-height : 2000px;
     right: clamp(320px, calc(320px + (100vw - 1920px) * 0.4375), 600px);
   }
 
@@ -64,6 +67,8 @@ cursor : pointer;
   }
 
   @media (min-width: 3840px) {
+    border-left: 3px solid #ededed;
+    border-right: 3px solid #ededed;
     width: 680px;
     right: clamp(920px, calc(920px + (100vw - 3840px) * 0.3125), 1320px);
   }
