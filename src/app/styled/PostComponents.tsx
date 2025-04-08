@@ -18,6 +18,7 @@ border-radius : 4px;
 border : none;
 border-left : 1px solid #ededed;
 border-right : 1px solid #ededed;
+align-content: flex-start;
 
     // 포스트 박스
     .post_box{
@@ -300,6 +301,14 @@ border-right : 1px solid #ededed;
             line-height: 48px;
         }
       }
+
+    .all_post{
+        width : 100%;
+        height: 60px;
+        padding: 16px;
+        border-bottom: 1px solid #ededed;
+        text-align: center;
+    }
 //----------------------------------------------------
   @media (max-width: 768px) {
     left: 80px;
@@ -328,20 +337,26 @@ border-right : 1px solid #ededed;
       height: 100px;
     }
 
-              .user_photo {
-            width: 42px;
-            height: 42px;
-          }
+    .user_photo {
+      width: 42px;
+      height: 42px;
+    }
 
-          .user_name,
-          .user_uid,
-          .post_date{
-            line-height : 42px;
-          }
+    .user_name,
+    .user_uid,
+    .post_date{
+       line-height : 42px;
+    }
 
-          .post_content_wrap{
-              padding: 0px 0px 10px 50px;
-          }
+    .post_content_wrap{
+        padding: 0px 0px 10px 50px;
+    }
+
+    .all_post{
+        height: 68px;
+        padding: 20px;
+        border-bottom: 2px solid #ededed;
+    }
   }
 
   @media (min-width: 2560px) {
@@ -359,20 +374,25 @@ border-right : 1px solid #ededed;
       height: 120px;
     }
 
-              .user_photo {
-            width: 52px;
-            height: 52px;
-          }
+    .user_photo {
+      width: 52px;
+      height: 52px;
+    }
 
-          .user_name,
-          .user_uid,
-          .post_date{
-            line-height : 52px;
-          }
+    .user_name,
+    .user_uid,
+    .post_date{
+      line-height : 52px;
+    }
 
-          .post_content_wrap{
-            padding: 0px 0px 10px 62px;
-          }
+    .post_content_wrap{
+      padding: 0px 0px 10px 62px;
+    }
+
+    .all_post{
+        height: 84px;
+        padding: 24px;
+    }
   }
 
   @media (min-width: 3840px) {
@@ -405,6 +425,11 @@ border-right : 1px solid #ededed;
 
     .post_content_wrap{
       padding: 0px 0px 10px 80px;
+    }
+
+    .all_post{
+      height: 100px;
+      padding: 28px;
     }
   }
 `
@@ -905,12 +930,6 @@ export const BookmarkWrap = styled.div`
     border-left: 1px solid #dedede;
     border-right: 1px solid #dedede;
     background: #fff;
-
-    .all_post{
-        padding: 16px;
-        border-bottom: 1px solid #ededed;
-        text-align: center;
-    }
 `
 export const NoMorePost = styled.div`
     width: 100%;

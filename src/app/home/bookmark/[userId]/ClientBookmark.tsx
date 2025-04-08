@@ -176,9 +176,9 @@ export default function Bookmark() {
     const handleUsernameClick = useHandleUsernameClick();
     return (
         <>
-            {!loading && <p className='all_post'>내 북마크</p>}
             {!usageLimit &&
                 <PostWrap>
+                    {!loading && <p className='all_post'>내 북마크</p>}
                     {/* 무한 스크롤 구조 */}
                     {!loading && userBookmarks.map((post) => (
                         <motion.div
@@ -229,7 +229,11 @@ export default function Bookmark() {
                                     <div className='post_pr_img_wrap'>
                                         {post.images.map((imageUrl, index) => (
                                             <div className='post_pr_img' key={index}
-                                                css={css`background-image : url(${imageUrl})`}
+                                                css={css
+                                                    `
+                                                    background-image : url(${imageUrl});
+                                                    width: calc((100% / ${Array.isArray(post.images) && post.images.length}) - 4px);
+                                                    `}
                                             ></div>
                                         ))}
                                     </div>
@@ -237,16 +241,19 @@ export default function Bookmark() {
 
                                 {/* 포스트 댓글, 북마크 등 */}
                                 <div className='post_bottom_wrap'>
-                                    <motion.button
-                                        variants={btnVariants}
-                                        whileHover="iconWrapHover"
-                                        whileTap="iconWrapClick" className='post_comment_btn'>
-                                        <motion.div
+                                    <div className='post_comment'>
+                                        <motion.button
                                             variants={btnVariants}
-                                            whileHover="iconHover"
-                                            whileTap="iconClick" className='post_comment_icon'>
-                                        </motion.div>
-                                    </motion.button>
+                                            whileHover="iconWrapHover"
+                                            whileTap="iconWrapClick" className='post_comment_btn'>
+                                            <motion.div
+                                                variants={btnVariants}
+                                                whileHover="iconHover"
+                                                whileTap="iconClick" className='post_comment_icon'>
+                                            </motion.div>
+                                        </motion.button>
+                                        <p>{post.commentCount}</p>
+                                    </div>
                                     <BookmarkBtn postId={post.id}></BookmarkBtn>
                                 </div>
                             </div>
