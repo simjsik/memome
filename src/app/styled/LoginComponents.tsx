@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 "use client";
 import styled from "@emotion/styled";
+import { motion } from 'framer-motion';
 
 export const LoginButtonWrap = styled.div`
     margin: 0 auto;
@@ -45,7 +46,41 @@ export const LoginButtonWrap = styled.div`
         cursor: pointer;
     }
 
-    
+    .login_option_wrap{
+      display: flex;
+      margin-top: 6px;
+      justify-content: space-between;
+
+      .auto_login_btn{
+        display: flex;
+
+        .auto_off,
+        .auto_on{
+          width: 20px;
+          height: 20px;
+          margin-right: 4px;
+          border: 1px solid #e6e6ea;
+          border-radius: 4px;
+          background: #ffffff00;
+          cursor: pointer;
+        }
+
+        .auto_on{
+          border: 2px solid #0087ff;
+        }
+
+        p{
+          line-height: 20px;
+          font-size: 0.875rem;
+        }
+      }
+
+      .register_wrap{
+        display: flex;
+        line-height: 20px;
+      }
+    }
+
 `
 export const LoginModalWrap = styled.div`
   position: absolute;
@@ -93,7 +128,40 @@ export const LoginModalWrap = styled.div`
         cursor: pointer;
     }
 
-    
+    .login_option_wrap{
+      display: flex;
+      margin-top: 6px;
+      justify-content: space-between;
+
+      .auto_login_btn{
+        display: flex;
+
+        .auto_off,
+        .auto_on{
+          width: 20px;
+          height: 20px;
+          margin-right: 4px;
+          border: 1px solid #e6e6ea;
+          border-radius: 4px;
+          background: #ffffff00;
+          cursor: pointer;
+        }
+
+        .auto_on{
+          border: 2px solid #0087ff;
+        }
+
+        p{
+          line-height: 20px;
+          font-size: 0.875rem;
+        }
+      }
+
+      .register_wrap{
+        display: flex;
+        line-height: 20px;
+      }
+    }
 `
 export const LoginInputWrap = styled.div`
     margin-top: 10px;
@@ -151,7 +219,7 @@ margin-top : 60px;
 border-top : 1px solid #e6e6ea;
 padding-top : 10px;
 `
-export const CreateButton = styled.button`
+export const CreateButton = styled.a`
     background: none;
     border: none;
     color : #5688FF;
@@ -161,7 +229,8 @@ export const CreateButton = styled.button`
     border-bottom: 1px solid #5688FF;
     cursor: pointer;
 `
-export const LoginButton = styled.button`
+
+export const LoginButton = styled(motion.button)`
     width: 100%;
     height : 52px;
     margin: 20px 0px 4px 0px;
@@ -173,6 +242,7 @@ export const LoginButton = styled.button`
     font-family : var(--font-pretendard-medium);
     cursor: pointer;
 `
+
 export const GoogleButton = styled.button`
     width: 100%;
     height : 48px;

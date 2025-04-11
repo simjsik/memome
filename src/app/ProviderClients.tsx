@@ -11,9 +11,10 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "./DB/firebaseConfig";
 import { usePostUpdateChecker } from "./hook/ClientPolling";
 import { usePathname } from "next/navigation";
+import { CacheProvider } from "@emotion/react";
+import createCache from "@emotion/cache";
 
 const queryClient = new QueryClient();
-
 function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const { clearUpdate } = usePostUpdateChecker();
 
@@ -40,8 +41,8 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     useAuthSync();
 
     useEffect(() => {
-        loadBookmarks(currentUser.uid);
-    }, [])
+        loadBookmarks(currentUser.uid as string);
+    }, [currentUser])
 
     useEffect(() => {
         console.log(currentUser.uid)
@@ -50,15 +51,19 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     return <>{children}</>; // 반드시 children을 렌더링
 }
 
-export default function ProviderClient({ children }: { children: ReactNode }) {
+export default function ProviderClient({ children, nonce }: { children: ReactNode, nonce: string }) {
+    const cache = createCache({ key: 'custom', nonce });
+
     return (
         <div className={`${PretendardLight.variable} ${PretendardMedium.variable} ${PretendardBold.variable}`}>
             <QueryClientProvider client={queryClient}>
                 <RecoilRoot>
                     <InitializeLoginComponent>
-                        <>
-                            {children}
-                        </>
+                        <CacheProvider value={cache}>
+                            <>
+                                {children}
+                            </>
+                        </CacheProvider>
                     </InitializeLoginComponent>
                 </RecoilRoot>
             </QueryClientProvider>

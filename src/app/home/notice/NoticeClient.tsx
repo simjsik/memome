@@ -88,7 +88,7 @@ export default function ClientNotice() {
                     throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
                 }
 
-                return fetchNoticePosts(uid, pageParam);
+                return fetchNoticePosts(uid as string, pageParam);
             } catch (error) {
                 if (error instanceof Error) {
                     console.error("일반 오류 발생:", error.message);

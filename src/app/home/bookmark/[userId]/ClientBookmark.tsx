@@ -56,7 +56,7 @@ export default function Bookmark() {
                 }
 
                 return fetchBookmarks(
-                    currentUser.uid,
+                    currentUser.uid as string,
                     currentBookmark, // 전역 상태를 바로 사용
                     pageParam, // 시작 인덱스
                     4, // 한 번 요청할 데이터 수

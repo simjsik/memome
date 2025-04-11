@@ -59,7 +59,7 @@ export default function UserClient({ user }: ClientUserProps) {
         Timestamp | undefined // TPageParam
     >({
         retry: false,
-        queryKey: ['postList', uid],
+        queryKey: ['postList', uid as string],
         queryFn: async ({ pageParam }) => {
             try {
                 setDataLoading(true)
@@ -75,7 +75,7 @@ export default function UserClient({ user }: ClientUserProps) {
                     throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
                 }
 
-                return fetchPostList(uid, pageParam, 4);
+                return fetchPostList(uid as string, pageParam, 4);
             } catch (error) {
                 if (error instanceof Error) {
                     console.error("일반 오류 발생:", error.message);
@@ -297,7 +297,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                             ></div>
                                             <div className="user_post_name">
                                                 <p>{user.name}</p>
-                                                <span>@{user.uid.slice(0, 6)}... · {formatDate(post.createAt)}</span>
+                                                <span>@{user.uid?.slice(0, 6)}... · {formatDate(post.createAt)}</span>
                                             </div>
                                             <div className="post_more">
                                                 <motion.button

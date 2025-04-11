@@ -3,12 +3,12 @@
 import styled from "@emotion/styled";
 
 export const LoginTitle = styled.h2` 
-    font-size: 24px;
+    font-size: 1.5rem;
     font-family: var(--font-pretendard-bold);
     font-weight: 700;
 `
 export const LoginOr = styled.span`
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #c7c7c7;
     font-family: var(--font-pretendard-light);
     font-weight: 500;
@@ -20,7 +20,8 @@ export const LoginBlack = styled.div`
     backdrop-filter: brightness(30%);
 `
 export const LoginSpan = styled.span`
-    font-size: 14px;
+    display: block;
+    font-size: 0.875rem;
     margin-right: 4px;
     font-family: var(--font-pretendard-medium);
     font-weight: 500;
@@ -31,7 +32,7 @@ export const LoginInput = styled.input`
     padding: 16px 8px;
     border-radius: 4px;
     border : 1px solid #ededed;
-    font-size: 16px;
+    font-size: 1rem;
     font-family: var(--font-pretendard-medium);
     font-weight: 500;
 

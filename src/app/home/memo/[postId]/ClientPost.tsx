@@ -27,7 +27,7 @@ export default function Memo({ comment }: ClientPostProps) {
         if (currentUser) {
             const checkLimit = async () => {
                 try {
-                    await checkUsageLimit(currentUser.uid);
+                    await checkUsageLimit(currentUser.uid as string);
                 } catch (err: unknown) {
                     if (err instanceof Error) {
                         if (err.message.includes('사용량 제한')) {

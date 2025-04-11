@@ -78,6 +78,7 @@ export default function Logout() {
                 setUserCurrentBookmark([])
                 setHasLogin(false)
                 setLimitToggle(false)
+                localStorage.removeItem("hasAutoLogin");
             }
         } catch (error) {
             console.error("로그아웃 에러:", error);

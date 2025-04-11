@@ -16,8 +16,10 @@ export const useAuthSync = () => {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
+                console.log(user, '유저 동기화 유저 정보')
                 if (user) {
                     const uid = user.uid
+                    console.log(uid, '유저 동기화 유저 UID')
                     const idTokenResult = await user.getIdTokenResult();
                     const isGuest = idTokenResult.claims.isGuest
                     const idToken = await user.getIdToken();
@@ -55,7 +57,7 @@ export const useAuthSync = () => {
                         name: null,
                         email: null,
                         photo: null,
-                        uid: '', // uid는 빈 문자열로 초기화
+                        uid: null, // uid는 빈 문자열로 초기화
                     }); // 로그아웃 상태 처리
                     setHasLogin(false);
                     setHasGuest(false);
@@ -64,6 +66,14 @@ export const useAuthSync = () => {
                     throw error;
                 } else {
                     console.error("알 수 없는 에러 유형:", error);
+                    setUser({
+                        name: null,
+                        email: null,
+                        photo: null,
+                        uid: null, // uid는 빈 문자열로 초기화
+                    }); // 로그아웃 상태 처리
+                    setHasLogin(false);
+                    setHasGuest(false);
                     await auth.signOut();
                     router.push('/login');
                     throw new Error("알 수 없는 에러가 발생했습니다.");

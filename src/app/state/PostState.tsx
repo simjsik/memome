@@ -33,7 +33,7 @@ export interface userData {
     name: string | null;
     email: string | null;
     photo: string | null;
-    uid: string;
+    uid: string | null;
 }
 
 export interface Comment {

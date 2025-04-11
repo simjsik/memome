@@ -15,13 +15,14 @@ import {
     LoginModalWrap,
     OtherLoginWrap
 } from "../styled/LoginComponents";
-import { getAuth, GoogleAuthProvider, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, signInWithPopup, updateProfile } from "firebase/auth";
+import { browserLocalPersistence, browserSessionPersistence, getAuth, GoogleAuthProvider, setPersistence, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, signInWithPopup, updateProfile } from "firebase/auth";
 import { LoginOr, LoginSpan } from "../styled/LoginStyle";
 import { usePathname, useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../DB/firebaseConfig";
 import { BeatLoader } from "react-spinners";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 interface FirebaseError extends Error {
     code: string;
@@ -77,6 +78,7 @@ export default function LoginBox() {
     const [modal, setModal] = useRecoilState<boolean>(modalState);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [loadingTag, setLoadingTag] = useState<string | null>(null);
+    const [hasAutoLogin, setHasAutoLogin] = useState<boolean>(false);
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -139,6 +141,8 @@ export default function LoginBox() {
             setIsLoading(true);
             setLoadingTag('Login');
 
+            await setPersistence(auth, hasAutoLogin ? browserLocalPersistence : browserSessionPersistence);
+            localStorage.setItem('hasAutoLogin', `${hasAutoLogin}`);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const signUser = userCredential.user
             const idToken = await signUser.getIdToken();
@@ -149,7 +153,6 @@ export default function LoginBox() {
             if (!signUser.emailVerified) {
                 return setLoginError('인증되지 않은 계정입니다. 이메일을 확인해주세요.');
             }
-
             // 서버로 ID 토큰 전송
             const loginResponse = await fetch(`/api/login`, {
                 method: "POST",
@@ -182,15 +185,15 @@ export default function LoginBox() {
         } catch (error: unknown) {
             // Firebase 에러 타입 보존
             if (isFirebaseError(error)) {
-                console.error("Firebase 오류 발생:", error.code, error.message);
-                setLoginError(firebaseErrorMessages[error.code] ?? "알 수 없는 오류가 발생했습니다.");
-
-                if (error instanceof Error) {
-                    console.error("일반 오류 발생:", error.message);
-                    setLoginError(error.message);
+                if (isFirebaseError(error)) {
+                    console.error("Firebase 오류:", error.code, error.message);
+                    setLoginError(firebaseErrorMessages[error.code] ?? "Firebase 오류 발생");
+                } else if (error) {
+                    console.error("일반 오류:", error);
+                    setLoginError(error);
                 } else {
-                    console.error("알 수 없는 에러 유형:", error);
-                    setLoginError("알 수 없는 오류가 발생했습니다.");
+                    console.error("알 수 없는 오류 유형:", error);
+                    setLoginError("알 수 없는 오류");
                 }
             }
         } finally {
@@ -208,6 +211,8 @@ export default function LoginBox() {
             setLoadingTag('Google');
 
             // Google 로그인 팝업
+            await setPersistence(auth, hasAutoLogin ? browserLocalPersistence : browserSessionPersistence);
+            localStorage.setItem('hasAutoLogin', `${hasAutoLogin}`);
             const provider = new GoogleAuthProvider();
             const userCredential = await signInWithPopup(auths, provider);
             const googleToken = await userCredential.user.getIdToken();
@@ -270,6 +275,8 @@ export default function LoginBox() {
             setIsLoading(true);
             setLoadingTag('Guest');
 
+            await setPersistence(auth, hasAutoLogin ? browserLocalPersistence : browserSessionPersistence);
+            localStorage.setItem('hasAutoLogin', `${hasAutoLogin}`);
             let guestUid = localStorage.getItem("guestUid");
             let idToken;
             let signUser;
@@ -414,8 +421,6 @@ export default function LoginBox() {
     }, [hasLogin]);
 
     // Function
-
-    const EmotionLoginBtn = motion(LoginButton);
     const GoogleLoginBtn = motion(GoogleButton);
     const GuestLoginBtn = motion(GuestButton);
 
@@ -437,6 +442,7 @@ export default function LoginBox() {
             transition: { duration: 0.3 },
         },
     };
+
     return (
         <>
             {path !== '/login' ?
@@ -472,15 +478,30 @@ export default function LoginBox() {
                                     </div>
                                     {(loadingTag === 'Login' && isLoading) ?
                                         <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> :
-                                        <EmotionLoginBtn
+                                        <LoginButton
                                             variants={btnVariants}
                                             whileHover="loginHover"
                                             whileTap="loginClick"
-                                            type="submit">로그인</EmotionLoginBtn>
+                                            type="submit">로그인</LoginButton>
                                     }
                                 </form>
-                                <LoginSpan>처음 이신가요?</LoginSpan >
-                                <CreateButton onClick={() => router.push('/login/signup')}>회원가입</CreateButton>
+                                <div className="login_option_wrap">
+                                    <div className="auto_login_btn">
+                                        {
+                                            hasAutoLogin ?
+                                                <button className="auto_on" onClick={() => setHasAutoLogin((prev) => !prev)}></button>
+                                                :
+                                                <button className="auto_off" onClick={() => setHasAutoLogin((prev) => !prev)}></button>
+                                        }
+                                        <p>로그인 상태 저장</p>
+                                    </div>
+                                    <div className="register_wrap">
+                                        <LoginSpan>처음 이신가요?</LoginSpan >
+                                        <Link href={'/login/signup'}>
+                                            <CreateButton>회원가입</CreateButton>
+                                        </Link>
+                                    </div>
+                                </div>
                                 <OtherLoginWrap>
                                     <LoginOr>또는</LoginOr>
                                     <div>
@@ -528,15 +549,30 @@ export default function LoginBox() {
                             </div>
                             {(loadingTag === 'Login' && isLoading) ?
                                 <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> :
-                                <EmotionLoginBtn
+                                <LoginButton
                                     variants={btnVariants}
                                     whileHover="loginHover"
                                     whileTap="loginClick"
-                                    type="submit">로그인</EmotionLoginBtn>
+                                    type="submit">로그인</LoginButton>
                             }
                         </form>
-                        <LoginSpan>처음 이신가요?</LoginSpan >
-                        <CreateButton onClick={() => router.push('/login/signup')}>회원가입</CreateButton>
+                        <div className="login_option_wrap">
+                            <div className="auto_login_btn">
+                                {
+                                    hasAutoLogin ?
+                                        <button className="auto_on" onClick={() => setHasAutoLogin((prev) => !prev)}></button>
+                                        :
+                                        <button className="auto_off" onClick={() => setHasAutoLogin((prev) => !prev)}></button>
+                                }
+                                <p>로그인 상태 저장</p>
+                            </div>
+                            <div className="register_wrap">
+                                <LoginSpan>처음 이신가요?</LoginSpan >
+                                <Link href={'/login/signup'}>
+                                    <CreateButton>회원가입</CreateButton>
+                                </Link>
+                            </div>
+                        </div>
                         <OtherLoginWrap>
                             <LoginOr>또는</LoginOr>
                             <div>
@@ -550,7 +586,7 @@ export default function LoginBox() {
                                     whileTap="otherClick" onClick={handleGuestLogin}>게스트 로그인</GuestLoginBtn>}
                             </div>
                         </OtherLoginWrap>
-                    </LoginButtonWrap>
+                    </LoginButtonWrap >
                     <div className="copyright_box">
                         <p>본 사이트는 포트폴리오 사이트입니다.</p>
                         <p>로그인 및 회원가입 시 사이트 이용에 필요한 정보 외 사용되지 않습니다.</p>

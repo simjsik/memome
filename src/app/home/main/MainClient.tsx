@@ -160,7 +160,7 @@ export default function MainHome() {
     queryKey: ['posts'],
     queryFn: async ({ pageParam }) => {
       try {
-        console.log('일반 포스트 요청')
+        console.log(uid, '일반 포스트 요청')
         setDataLoading(true);
         const validateResponse = await fetch(`/api/validate`, {
           method: "POST",
@@ -173,7 +173,7 @@ export default function MainHome() {
           throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
         }
 
-        return await fetchPosts(uid, pageParam, 4);
+        return await fetchPosts(uid as string, pageParam, 4);
       } catch (error: unknown) {
         if (error instanceof Error) {
           console.error("일반 오류 발생:", error.message);
@@ -250,6 +250,11 @@ export default function MainHome() {
     };
   }, [hasNextPage, fetchNextPage, yourLogin])
 
+  useEffect(() => {
+    if (DidYouLogin) {
+      fetchNextPage();
+    }
+  }, [DidYouLogin])
   // 에러 시 사용 제한
   useEffect(() => {
     if (isError) {
@@ -575,7 +580,8 @@ export default function MainHome() {
             </motion.div >
           ))
           }
-          <div ref={observerLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }} />
+          <div ref={observerLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }}
+          />
           {(!loading && dataLoading) && <LoadingWrap />}
           {
             (!hasNextPage && !dataLoading && !loading) &&
