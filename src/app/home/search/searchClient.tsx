@@ -50,7 +50,7 @@ function CustomInfiniteHits() {
     // 검색어가 없을 때
     if (!query.trim()) {
         return <NoMorePost>
-            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009341/%EB%8B%A4%EB%B4%A4%EC%9D%8COK_lldsfs.svg)`}></div>
             <p>검색어를 입력 해주세요.</p>
             <span>사용자나 아이디 또는 메모 제목을 검색 해보세요.</span>
         </NoMorePost>;
@@ -59,7 +59,7 @@ function CustomInfiniteHits() {
     // 검색 결과가 없을 때
     if (items.length === 0) {
         return <NoMorePost>
-            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449439/%ED%8F%AC%EC%8A%A4%ED%8A%B8%EB%8B%A4%EB%B4%A4%EB%8B%B9_td0cvj.svg)`}></div>
+            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009341/%EB%8B%A4%EB%B4%A4%EC%9D%8COK_lldsfs.svg)`}></div>
             <p>&apos;{query}&apos;에 대한 검색결과 없음.</p>
             <span className="no_result_span">다른 용어를 검색해 보거나 검색어가 정확한지 확인해 보세요.</span>
         </NoMorePost>;
