@@ -235,18 +235,117 @@ margin-top : 20px;
 
     @media (min-width: 1921px) {
         padding-top: 30px;
+
+        .menu_profile{
+            width: 40px;
+            height: 40px;
+        }
+
+        .memo_box p {
+            line-height: 40px;
+        }
+
+        .memo_btn {
+            padding: 8px 16px;
+        }
     }
 
       @media (min-width: 2560px) {
         padding-top: 40px;
+
+        .menu_profile{
+            width: 46px;
+            height: 46px;
+            margin-right: 12px;
+        }
+
+        .memo_box p {
+            line-height: 46px;
+        }
+
+        .memo_btn {
+            padding: 9px 18px;
+        }
+
+        .user_photo{
+            width : 96px;
+            height : 96px;
+        }
+
+        .profile_menu_wrap {
+            margin-top: 36px;
+            padding: 32px 0px;
+        }
+
+        .update_toggle_btn{
+            padding: 10px;
+        }
     }
 
     @media (min-width: 3840px) {
         padding-top: 50px;
+
+        .menu_profile{
+            width: 52px;
+            height: 52px;
+            margin-right: 12px;
+        }
+
+        .user_photo{
+            width : 120px;
+            height : 120px;
+        }
+
+        .profile_menu_wrap {
+            margin-top: 42px;
+            padding: 32px 0px;
+        }
+
+        .memo_box p {
+            line-height: 54px;
+            font-size: 0.875rem;
+        }
+
+        .memo_btn {
+            padding: 6px 16px;
+            border: 3px solid #ededed;
+        }
+
+        .update_toggle_btn{
+            padding: 12px;
+            border: 3px solid #ededed;
+        }
     }
         
     @media (min-width: 5120px) {
         padding-top: 60px;
+
+        .menu_profile{
+            width: 64px;
+            height: 64px;
+            margin-right: 16px;
+        }
+        .user_photo{
+            width : 138px;
+            height : 138px;
+        }
+        .profile_menu_wrap {
+            margin-top: 40px;
+            padding: 40px 0px;
+        }
+
+        .memo_box p {
+            line-height: 64px;
+        }
+
+        .memo_btn {
+            padding: 8px 20px;
+            border: 3px solid #ededed;
+        }
+
+        .update_toggle_btn{
+            padding: 16px;
+        }
     }
 `
 
@@ -548,7 +647,7 @@ export default function UserProfile() {
                 <div className="profile_id">
                     <p className="user_name">{currentUser?.name}</p>
                     <span className="user_uid">
-                        @{currentUser?.uid.slice(0, 8)}...
+                        @{currentUser?.uid?.slice(0, 8)}...
                     </span>
                 </div>
                 <div className="user_photo" css={css`

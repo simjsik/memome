@@ -70,6 +70,9 @@ align-content: flex-start;
             }
         }
       }
+      .post_dropdown_wrap{
+        height : 36px;
+      }
 
       .user_profile{
         display:flex;
@@ -332,7 +335,17 @@ align-content: flex-start;
     .post_tag{
       line-height: 36px;
     }
-  
+
+    .post_dropdown_wrap{
+      width : 42px;
+      height : 42px;
+    }
+
+    .post_profile_wrap .post_drop_menu_btn{
+      width : 42px;
+      height : 42px;
+    }
+
     .post_text{
       height: 100px;
     }
@@ -351,6 +364,15 @@ align-content: flex-start;
     .post_content_wrap{
         padding: 0px 0px 10px 50px;
     }
+    
+    .post_comment{
+        line-height: clamp(32px, calc(32px + (100vw - 1921px) * 0.0125195618153365), 40px);
+    }
+  
+    .post_comment_btn{
+        width: clamp(32px, calc(32px + (100vw - 1921px) * 0.0125195618153365), 40px);
+        height: clamp(32px, calc(32px + (100vw - 1921px) * 0.0125195618153365), 40px);
+    }
 
     .all_post{
         height: 68px;
@@ -362,12 +384,26 @@ align-content: flex-start;
   @media (min-width: 2560px) {
     width: clamp(800px, calc(800px + (100vw - 2560px) * 0.3125), 1200px);
     
+    .post_box{
+      padding: 24px;
+    }
+
     .post_pr_img_wrap{
       height: clamp(380px, calc(380px + (100vw - 2560px) * 0.3125), 780px);
     }
     
     .post_tag{
       line-height: 52px;
+    }
+
+    .post_dropdown_wrap{
+      width : 52px;
+      height : 52px;
+    }
+
+    .post_profile_wrap .post_drop_menu_btn{
+      width : 52px;
+      height : 52px;
     }
 
     .post_text{
@@ -377,6 +413,7 @@ align-content: flex-start;
     .user_photo {
       width: 52px;
       height: 52px;
+      margin-right: 12px;
     }
 
     .user_name,
@@ -385,8 +422,22 @@ align-content: flex-start;
       line-height : 52px;
     }
 
+    .user_name,
+    .user_uid{
+      margin-right: 6px;
+    }
+
     .post_content_wrap{
-      padding: 0px 0px 10px 62px;
+      padding: 0px 0px 12px 62px;
+    }
+
+    .post_comment{
+      line-height: clamp(40px, calc(40px + (100vw - 2560px) * 0.0125), 56px);
+    }
+  
+    .post_comment_btn{
+      width: clamp(40px, calc(40px + (100vw - 2560px) * 0.0125), 56px);
+      height: clamp(40px, calc(40px + (100vw - 2560px) * 0.0125), 56px);
     }
 
     .all_post{
@@ -399,7 +450,11 @@ align-content: flex-start;
     border-right : 3px solid #ededed;
     border-left : 3px solid #ededed;
     width: clamp(1200px, calc(1200px + (100vw - 3840px) * 0.3125), 1600px);
-    
+
+    .post_box{
+      padding: 32px;
+      border-bottom: 3px solid #ededed;
+    }
     .post_pr_img_wrap{
       height: clamp(780px, calc(780px + (100vw - 3840px) * 0.3125), 1000px);
     }
@@ -408,13 +463,24 @@ align-content: flex-start;
       line-height: 64px;
     }
 
+    .post_dropdown_wrap{
+      width : 68px;
+      height : 68px;
+    }
+
+    .post_profile_wrap .post_drop_menu_btn{
+      width : 68px;
+      height : 68px;
+    }
+
     .post_text{
-      height: 140px;
+      height: 160px;
     }
 
     .user_photo {
       width: 68px;
       height: 68px;
+      margin-right: 16px;
     }
 
     .user_name,
@@ -423,13 +489,77 @@ align-content: flex-start;
      line-height : 68px;
     }
 
+    .user_name,
+    .user_uid{
+      margin-right: 8px;
+    }
+
     .post_content_wrap{
-      padding: 0px 0px 10px 80px;
+      padding: 0px 0px 16px 80px;
+    }
+
+    .post_comment{
+      line-height: clamp(56px, calc(56px + (100vw - 3840px) * 0.0125), 72px);
+    }
+  
+    .post_comment_btn{
+      width: clamp(56px, calc(56px + (100vw - 3840px) * 0.0125), 72px);
+      height: clamp(56px, calc(56px + (100vw - 3840px) * 0.0125), 72px);
     }
 
     .all_post{
       height: 100px;
       padding: 28px;
+    }
+  }
+
+  @media (min-width: 5120px) {
+    post_box{
+      padding: 40px;
+    }
+
+    .user_photo {
+      width: 84px;
+      height: 84px;
+      margin-right: 20px;
+    }
+
+    .post_dropdown_wrap{
+      width : 84px;
+      height : 84px;
+    }
+
+    .post_profile_wrap .post_drop_menu_btn{
+      width : 84px;
+      height : 84px;
+    }
+
+    .user_name,
+    .user_uid,
+    .post_date{
+      line-height : 84px;
+    }
+
+    .user_name,
+    .user_uid{
+      margin-right: 10px;
+    }
+
+    .post_content_wrap{
+      padding: 0px 0px 20px 106px;
+    }
+
+    .post_text{
+      height: 220px;
+    }
+
+    .post_comment{
+      line-height: clamp(72px, calc(72px + (100vw - 5120px) * 0.0125), 88px);
+    }
+  
+    .post_comment_btn{
+      width: clamp(72px, calc(72px + (100vw - 5120px) * 0.0125), 88px);
+      height: clamp(72px, calc(72px + (100vw - 5120px) * 0.0125), 88px);
     }
   }
 `

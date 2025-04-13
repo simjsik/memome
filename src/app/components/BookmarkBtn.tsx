@@ -19,6 +19,28 @@ const Bookmark = styled.button`
     border-radius: 50px;
     background : #ffffff00;
     padding : 2px;
+
+    @media (min-width: 1921px) {
+        width: clamp(32px, calc(32px + (100vw - 1921px) * 0.0125195618153365), 40px);
+        height: clamp(32px, calc(32px + (100vw - 1921px) * 0.0125195618153365), 40px);
+
+        svg{
+            width: 100%;
+            height: 100%;
+        }
+    }
+    @media (min-width: 2560px) {
+        width: clamp(40px, calc(40px + (100vw - 2560px) * 0.0125), 56px);
+        height: clamp(40px, calc(40px + (100vw - 2560px) * 0.0125), 56px);
+    }
+    @media (min-width: 3840px) {
+        width: clamp(56px, calc(32px + (100vw - 3840px) * 0.0125), 72px);
+        height: clamp(56px, calc(32px + (100vw - 3840px) * 0.0125), 72px);
+    }
+    @media (min-width: 5120px) {
+        width: clamp(72px, calc(72px + (100vw - 5120px) * 0.0125), 88px);
+        height: clamp(72px, calc(72px + (100vw - 5120px) * 0.0125), 88px);
+    }
 `;
 
 interface PostId {

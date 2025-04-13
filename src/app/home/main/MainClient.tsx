@@ -511,7 +511,7 @@ export default function MainHome() {
                     · {formatDate(post.createAt)}
                   </p>
                 </div>
-                <div ref={dropdownRef}>
+                <div className='post_dropdown_wrap' ref={dropdownRef}>
                   <motion.button
                     variants={btnVariants}
                     whileHover="iconWrapHover"

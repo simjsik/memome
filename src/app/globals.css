@@ -30,6 +30,7 @@ a{
   font-family: var(--font-pretendard-medium);
 }
 
+
 @media (min-width: 1921px) {
   html {
     font-size: 20px;

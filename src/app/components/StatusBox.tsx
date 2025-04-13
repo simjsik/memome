@@ -22,7 +22,7 @@ top: 40px;
 right: clamp(80px, calc((100vw - 1200px) * 0.6), 420px);
 width : 400px;
 height: 80%;
-padding : 0px 20px;
+padding : 20px;
 border : 1px solid #ededed;
 border-radius : 8px;
 background : #fff;
@@ -63,6 +63,7 @@ cursor : pointer;
 
   @media (min-width: 2560px) {
     width: 600px;
+    padding : 28px;
     right: clamp(500px, calc(500px + (100vw - 2560px) * 0.3125), 900px);
   }
 
@@ -70,11 +71,13 @@ cursor : pointer;
     border-left: 3px solid #ededed;
     border-right: 3px solid #ededed;
     width: 680px;
+    padding : 32px;
     right: clamp(920px, calc(920px + (100vw - 3840px) * 0.3125), 1320px);
   }
     
   @media (min-width: 5120px) {
     width: 760px;
+    padding : 36px;
     right: clamp(1420px, calc(1420px + (100vw - 5120px) * 0.3125), 100vw);
   }
 `
