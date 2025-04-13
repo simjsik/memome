@@ -72,9 +72,11 @@ position: relative;
         margin: 5px 10px;
         z-index : 1;
         }
+
         .ais-SearchBox-form{
         position : relative;
         }
+
         .ais-SearchBox-input{
         width: 100%;
         height: 42px;
@@ -85,8 +87,9 @@ position: relative;
         font-size : 0.875rem;
 
             &:focus {
-            outline : 1px solid #272D2D;
+            outline : 1px solid #0087ff;
             }
+
         }
 
         .ais-SearchBox-input::-webkit-search-decoration,
