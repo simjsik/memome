@@ -66,7 +66,7 @@ export default async function UserHome({ params }: UserPageProps) {
                         <p className="user_name">
                             {userData?.name}
                         </p>
-                        <span className="user_uid">@{userData?.uid.slice(0, 8)}...</span>
+                        <span className="user_uid">@{userData?.uid?.slice(0, 8)}...</span>
                     </div>
                 </div>
                 {userData && <UserClient user={userData} />}

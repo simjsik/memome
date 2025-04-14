@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useRecoilValue, useSetRecoilState } from "recoil";
 import "./globals.css";
 import useAuthSync from "./hook/AuthSyncHook";
-import { bookMarkState, userState } from "./state/PostState";
+import { bookMarkState, nonceState, userState } from "./state/PostState";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./DB/firebaseConfig";
 import { usePostUpdateChecker } from "./hook/ClientPolling";
@@ -15,11 +15,12 @@ import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 
 const queryClient = new QueryClient();
-function InitializeLoginComponent({ children }: { children: ReactNode }) {
+function InitializeLoginComponent({ children, nonce }: { children: ReactNode, nonce: string }) {
     const { clearUpdate } = usePostUpdateChecker();
 
     const currentUser = useRecoilValue(userState);
-    const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState)
+    const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState);
+    const setNonce = useSetRecoilState<string>(nonceState);
     const pathName = usePathname();
     const loadBookmarks = async (uid: string) => {
         try {
@@ -47,6 +48,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     useEffect(() => {
         console.log(currentUser.uid)
         clearUpdate();
+        setNonce(nonce);
     }, [currentUser, pathName])
     return <>{children}</>; // 반드시 children을 렌더링
 }
@@ -58,7 +60,7 @@ export default function ProviderClient({ children, nonce }: { children: ReactNod
         <div className={`${PretendardLight.variable} ${PretendardMedium.variable} ${PretendardBold.variable}`}>
             <QueryClientProvider client={queryClient}>
                 <RecoilRoot>
-                    <InitializeLoginComponent>
+                    <InitializeLoginComponent nonce={nonce}>
                         <CacheProvider value={cache}>
                             <>
                                 {children}

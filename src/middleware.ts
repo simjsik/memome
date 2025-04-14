@@ -25,7 +25,16 @@ export async function middleware(req: NextRequest) {
 
     response.headers.set(
         'Content-Security-Policy',
-        `style-src 'self' 'nonce-${nonce}' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=';`
+        `style-src 'self' 'nonce-${nonce}' 'unsafe-hashes' \
+        'sha256-otva1f6wkDzV9WurEmTw97pTGspFB6xN+csaPY1e4zI=' \
+        'sha256-57GCXobV9ZrfnnzAWcz//WfzeGNfevTKdsoxtI25AZQ=' \
+        'sha256-eXQbyB8YxZkWD5epgriI5Aoh333fjv618WjVSFU6Fbg=' \
+        'sha256-/njX6B78PGTBraXQ6mH1bYCXVi3WJKlCGN17JPEK4Q8=' \
+        'sha256-eNIPPaOamV/ib5wgfSPY7JyaVMnJjKTIIGo9yu04dns=' \
+        'sha256-uynp81lkWe3ENuo5JQDvzP2HBVZtV7rDFse1S5KMKYU=' \
+        'sha256-Z48SLN7BDrnlrkV3Ayto4e9RdtFuhJriqid0a0SU1gQ=' \
+        'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' \
+        ;`
     );
 
     response.headers.set('x-csp-nonce', nonce);
@@ -43,7 +52,7 @@ export async function middleware(req: NextRequest) {
     }
 
     if (pathname.startsWith('/home/') || pathname.startsWith('/post')) {
-        console.log(authToken, authToken?.value, '미들웨어 토큰 확인');
+        console.log(authToken, authToken?.value.slice(0, 2), '미들웨어 토큰 확인');
         if (!authToken || authToken.value === "") {
             // authToken이 없다면 /login으로 리다이렉트
             const url = req.nextUrl.clone();
@@ -57,5 +66,5 @@ export async function middleware(req: NextRequest) {
 
 // 이 미들웨어는 /login 경로에만 적용됩니다.
 export const config = {
-    matcher: ['/login', '/home/:path*', '/post/:path*']
+    matcher: ['/login/:path*', '/home/:path*', '/post/:path*']
 };

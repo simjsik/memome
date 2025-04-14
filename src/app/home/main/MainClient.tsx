@@ -580,7 +580,7 @@ export default function MainHome() {
             </motion.div >
           ))
           }
-          <div ref={observerLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }}
+          <div ref={observerLoadRef} css={css`height: 1px; visibility: ${dataLoading ? "hidden" : "visible"};`}
           />
           {(!loading && dataLoading) && <LoadingWrap />}
           {
