@@ -8,6 +8,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
 import { motion } from "framer-motion";
 import { btnVariants } from "../styled/motionVariant";
+import { useRouter } from "next/navigation";
 
 const LogoutButton = css`
     position : absolute;
@@ -67,7 +68,7 @@ export default function Logout() {
     const setUserCurrentBookmark = useSetRecoilState<PostData[]>(userBookMarkState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     // State
-
+    const router = useRouter();
 
     // hook
 
@@ -99,6 +100,8 @@ export default function Logout() {
                 setHasLogin(false)
                 setLimitToggle(false)
                 localStorage.removeItem("hasAutoLogin");
+
+                router.push('/login');
             }
         } catch (error) {
             console.error("로그아웃 에러:", error);

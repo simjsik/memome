@@ -53,7 +53,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
 export default function ProviderClient({ children, nonce }: { children: ReactNode, nonce: string }) {
     const cache = createCache({ key: 'custom', nonce });
-
+    console.log(nonce, '클라이언트 측 난수값')
     return (
         <div className={`${PretendardLight.variable} ${PretendardMedium.variable} ${PretendardBold.variable}`}>
             <QueryClientProvider client={queryClient}>

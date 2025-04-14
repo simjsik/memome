@@ -497,7 +497,7 @@ export default function LoginBox() {
                                     </div>
                                     <div className="register_wrap">
                                         <LoginSpan>처음 이신가요?</LoginSpan >
-                                        <Link href={'/login/signup'}>
+                                        <Link href={'/login/signup'} legacyBehavior>
                                             <CreateButton>회원가입</CreateButton>
                                         </Link>
                                     </div>
@@ -568,7 +568,7 @@ export default function LoginBox() {
                             </div>
                             <div className="register_wrap">
                                 <LoginSpan>처음 이신가요?</LoginSpan >
-                                <Link href={'/login/signup'}>
+                                <Link href={'/login/signup'} legacyBehavior>
                                     <CreateButton>회원가입</CreateButton>
                                 </Link>
                             </div>

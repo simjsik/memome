@@ -15,7 +15,6 @@ router.post('/logout', async (req: Request, res: Response) => {
         secure: isProduction,
         sameSite: "lax" as const,
         path: "/",
-        maxAge: 3600 * 1000,
     };
 
     try {

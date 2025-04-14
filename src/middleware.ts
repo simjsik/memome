@@ -16,12 +16,25 @@ function generateNonce(): string {
 export async function middleware(req: NextRequest) {
     const response = NextResponse.next();
     const pathname = req.nextUrl.pathname;
+    const authToken = req.cookies.get('authToken');
+
+    console.log(pathname, '미들웨어 실행 위치')
+
+    const nonce = generateNonce();
+    console.log(pathname, nonce, '미들웨어 CSP 설정 위치')
+
+    response.headers.set(
+        'Content-Security-Policy',
+        `style-src 'self' 'nonce-${nonce}' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=';`
+    );
+
+    response.headers.set('x-csp-nonce', nonce);
+    // 예를 들어 다른 쿠키나 헤더도 설정 가능
 
     // 현재 요청 경로가 /login 인지 확인
     if (pathname === '/login') {
         // HTTP Only 쿠키 authToken을 확인
-        const authToken = req.cookies.get('authToken');
-        if (authToken) {
+        if ((authToken && authToken.value !== '')) {
             // authToken이 있다면 /home/main으로 리다이렉트
             const url = req.nextUrl.clone();
             url.pathname = '/home/main';
@@ -29,22 +42,20 @@ export async function middleware(req: NextRequest) {
         }
     }
 
-    if (pathname.startsWith('/home/') || pathname === '/login') {
-        const nonce = generateNonce();
-
-        // 전체 페이지에 적용할 B 기능
-        response.headers.set(
-            'Content-Security-Policy',
-            `style-src 'self' 'nonce-${nonce}' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=';`
-        );
-
-        response.headers.set('x-csp-nonce', nonce);
-        // 예를 들어 다른 쿠키나 헤더도 설정 가능
+    if (pathname.startsWith('/home/') || pathname.startsWith('/post')) {
+        console.log(authToken, authToken?.value, '미들웨어 토큰 확인');
+        if (!authToken || authToken.value === "") {
+            // authToken이 없다면 /login으로 리다이렉트
+            const url = req.nextUrl.clone();
+            url.pathname = '/login';
+            return NextResponse.redirect(url);
+        }
     }
+
     return response;
 }
 
 // 이 미들웨어는 /login 경로에만 적용됩니다.
 export const config = {
-    matcher: ['/:path*']
+    matcher: ['/login', '/home/:path*', '/post/:path*']
 };
