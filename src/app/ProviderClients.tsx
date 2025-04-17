@@ -43,6 +43,7 @@ function InitializeLoginComponent({ children, nonce }: { children: ReactNode, no
 
     useEffect(() => {
         loadBookmarks(currentUser.uid as string);
+        console.log(currentUser, '현재 유저')
     }, [currentUser])
 
     useEffect(() => {

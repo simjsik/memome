@@ -18,10 +18,7 @@ export async function middleware(req: NextRequest) {
     const pathname = req.nextUrl.pathname;
     const authToken = req.cookies.get('authToken');
 
-    console.log(pathname, '미들웨어 실행 위치')
-
     const nonce = generateNonce();
-    console.log(pathname, nonce, '미들웨어 CSP 설정 위치')
 
     response.headers.set(
         'Content-Security-Policy',
@@ -34,6 +31,7 @@ export async function middleware(req: NextRequest) {
         'sha256-uynp81lkWe3ENuo5JQDvzP2HBVZtV7rDFse1S5KMKYU=' \
         'sha256-Z48SLN7BDrnlrkV3Ayto4e9RdtFuhJriqid0a0SU1gQ=' \
         'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' \
+        'sha256-N6tSydZ64AHCaOWfwKbUhxXx2fRFDxHOaL3e3CO7GPI=' \
         ;`
     );
 
@@ -51,8 +49,7 @@ export async function middleware(req: NextRequest) {
         }
     }
 
-    if (pathname.startsWith('/home/') || pathname.startsWith('/post')) {
-        console.log(authToken, authToken?.value.slice(0, 2), '미들웨어 토큰 확인');
+    if (pathname.startsWith('/home/')) {
         if (!authToken || authToken.value === "") {
             // authToken이 없다면 /login으로 리다이렉트
             const url = req.nextUrl.clone();
@@ -66,5 +63,5 @@ export async function middleware(req: NextRequest) {
 
 // 이 미들웨어는 /login 경로에만 적용됩니다.
 export const config = {
-    matcher: ['/login/:path*', '/home/:path*', '/post/:path*']
+    matcher: ['/login/:path*', '/home/:path*']
 };

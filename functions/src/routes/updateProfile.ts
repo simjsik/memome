@@ -14,6 +14,7 @@ router.post('/updateProfile', async (req: Request, res: Response) => {
         const userSnapshot = await docRef.get();
         const userData = userSnapshot.data();
 
+
         if (!userData) {
             return res.status(403).json({message: "유저 정보가 존재하지 않습니다."});
         }
@@ -21,14 +22,14 @@ router.post('/updateProfile', async (req: Request, res: Response) => {
         // Firebase Authentication의 프로필 업데이트
         await adminAuth.updateUser(uid, {
             displayName: name,
-            photoURL: image || userData.photo,
+            photoURL: image || userData.photoURL,
         });
 
         // 업데이트한 프로필 Firestore에 저장
         await docRef.update(
             {
                 displayName: name,
-                photoURL: image || userData.photo,
+                photoURL: image || userData.photoURL,
             },
         );
 

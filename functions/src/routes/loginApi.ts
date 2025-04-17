@@ -13,9 +13,10 @@ const secret = process.env.JWT_SECRET;
 router.post('/login', async (req: Request, res: Response) => {
     try {
         const {idToken, role, hasGuest, guestUid} = await req.body;
+
         const randomName =
          `Guest-${Math.random().toString(36).substring(2, 6)}`;
-        console.log(idToken.slice(0, 8), '유저 아이디 토큰 ( Login API )');
+
         let decodedToken;
         let uid;
         let userSession;
@@ -111,6 +112,7 @@ router.post('/login', async (req: Request, res: Response) => {
             console.error("JWT 비밀 키 확인 불가");
             return res.status(403).json({message: "JWT 비밀 키 확인 불가."});
         }
+
         const userToken = jwt.sign({uid, role}, secret, {expiresIn: "1h"});
 
         const csrfToken = randomBytes(32).toString("hex");
@@ -127,15 +129,13 @@ router.post('/login', async (req: Request, res: Response) => {
             maxAge: 3600 * 1000,
         };
 
-        res.cookie("csrfToken", csrfToken, cookieOptions);
-
-        res.cookie("authToken", idToken, cookieOptions);
-
-        res.cookie("userToken", userToken, cookieOptions);
-
-        res.cookie("hasGuest", hasGuest, cookieOptions);
-
-        return res.status(200).json({
+        return res
+        .cookie("csrfToken", csrfToken, cookieOptions)
+        .cookie("authToken", idToken, cookieOptions)
+        .cookie("userToken", userToken, cookieOptions)
+        .cookie("hasGuest", hasGuest, cookieOptions)
+        .status(200)
+        .json({
             message: "로그인 성공.",
             uid,
             user: userSession,

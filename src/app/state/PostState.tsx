@@ -161,7 +161,7 @@ export const userState = atom<userData>({
         name: null,
         email: null,
         photo: null,
-        uid: '', // uid는 빈 문자열로 초기화
+        uid: null,
     },
 })
 

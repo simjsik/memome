@@ -386,10 +386,10 @@ export default function UserProfile() {
             try {
                 setLoading(true);
 
-                let profileImageUrl = null
+                let profileImageUrl = currentUser.photo
                 let userProfileDate
                 const uid = currentUser.uid
-
+                console.log(image?.slice(0, 8), '클라이언트 측 유저 이미지 업데이트')
                 if (image) {
                     // 받아온 image인자가 File 타입이기 때문에 Cloudinary에 저장을 위해 base64로 변경
                     const base64Image = await fileToBase64(image);
@@ -416,10 +416,7 @@ export default function UserProfile() {
                             const profileImg = cdnImg.imgUrl
                             profileImageUrl = profileImg;
                         }
-                    } else {
-                        profileImageUrl = currentUser.photo;
                     }
-
                     const UpdateResponse = await fetch(`/api/updateProfile`, {
                         method: 'POST',
                         headers: {
@@ -502,7 +499,7 @@ export default function UserProfile() {
     }
 
     const handleResetPhoto = () => {
-        setUpdateUserPhotoPreview('baseImage'); // 기본 이미지 URL 적용
+        setUpdateUserPhotoPreview('https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744861940/%ED%94%84%EB%A1%9C%ED%95%84%EC%9A%A9_grt1en.png'); // 기본 이미지 URL 적용
         setUpdateUserPhoto(null);  // 선택된 파일 초기화
     };
 
@@ -638,7 +635,7 @@ export default function UserProfile() {
     }, [updateToggle])
 
     useEffect(() => {
-        handleResetPhoto();
+        handleProfileReset();
     }, [currentUser])
     return (
         <ProfileWrap>
@@ -707,7 +704,7 @@ export default function UserProfile() {
                                             되돌리기
                                         </button>
                                         {loading ?
-                                            <motion.button className="update_btn" onClick={(e) => { e.preventDefault(); updateToProfile(updateUserPhoto, updateUserName); }}>
+                                            <motion.button className="update_btn">
                                                 <BeatLoader color="#fff" size={8} />
                                             </motion.button>
                                             : <motion.button

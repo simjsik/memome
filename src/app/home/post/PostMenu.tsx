@@ -582,6 +582,60 @@ margin : 0 auto;
         content: "40px";
     }
 
+
+    @media (max-width: 1200px) {
+        position: relative;
+        left: 80px;
+        width: calc(100% - 80px);
+        padding: 0;
+        margin: 0;
+
+        .quill_wrap{
+            width: calc(100% - 84px);
+            height: 100%;
+            padding: 10px;
+        }
+
+        .posting_top {
+            position: relative;
+            width: 100%;
+            height: fit-content;
+            flex-direction: row;
+            flex-wrap: wrap;
+
+            .tag_sel {
+                height: 49px;
+                flex: 1 0 100%;
+                max-width: calc(100% - 60px);
+                padding: 0px 12px;
+                margin-right: 0px;
+            }
+
+            .title_input_wrap {
+                position: relative;
+                flex: 1 0 100%;
+                margin-top: 10px;
+                height: fit-content;
+                
+                .title_input{
+                    height : 49px;
+                }
+            }
+
+            .title_error {
+                margin-bottom: 10px;
+            }
+        }
+
+        .quill_wrap>p {
+            bottom: 10px;
+            right: 96px;
+        }
+
+        .post_btn {
+            right: 20px;
+        }
+    }
 `
 const LoadModal = css`
 position:fixed;
@@ -678,7 +732,6 @@ export default function PostMenu() {
     const setLoading = useSetRecoilState<boolean>(loadingState);
     const [uploadLoading, setUploadLoading] = useState<boolean>(false);
     //  State
-
     const [toolToggle, setToolToggle] = useState<string>('');
     const [selectFontSize, setSelectedFontSize] = useState<string>('14px');
     const [selectColor, setSelectedColor] = useState<string>('#191919');

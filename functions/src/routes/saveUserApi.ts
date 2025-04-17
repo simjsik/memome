@@ -25,18 +25,16 @@ router.post('/saveUser', async (req: Request, res: Response) => {
          `user-${Math.random().toString(36).substring(2, 10)}`;
 
         const userSnapshot = await userRef.get();
-        console.log(randomName, '유저 정보 저장 API');
+
         if (!userSnapshot.exists) {
             const userData: newUser = {
                 displayName: displayName || randomName,
-                photoURL: photoURL || "",
+                photoURL: photoURL || "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744861940/%ED%94%84%EB%A1%9C%ED%95%84%EC%9A%A9_grt1en.png",
                 userId: uid,
             };
 
             await userRef.set(userData);
-            console.log(`New Firebase user created: ${uid}`);
         }
-        console.log(userSnapshot.exists, '유저 정보 저장 API');
 
         return res.status(200).json({message: "유저 정보 저장"});
     } catch (error) {

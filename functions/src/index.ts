@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import {getFirestore, Timestamp} from "firebase-admin/firestore";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
+import * as functions from 'firebase-functions/v1';
 import {initializeApp} from "firebase-admin/app";
 initializeApp();
 import express, {Request, Response} from "express";
@@ -18,6 +19,9 @@ import limitRouter from "./routes/firebaseLimit";
 import updateProfileRouter from "./routes/updateProfile";
 import uploadCdnImageRouter from "./routes/uploadCdnImage";
 import createCustomTokenRouter from "./routes/createCustomToken";
+import {adminDb} from "./DB/firebaseAdminConfig";
+import {UserRecord} from "firebase-admin/auth";
+
 
 export interface PostData {
     tag: string;
@@ -193,6 +197,24 @@ export const setHasUpdateFlag = onDocumentCreated(
     }
   }
 );
+
+export const setGoogleUser = functions.auth
+.user()
+.onCreate(async (user: UserRecord) => {
+  const {uid, displayName, email, photoURL} = user;
+  const userRef = adminDb.collection('users').doc(uid);
+  const userSnap = await userRef.get();
+
+  // 필드가 이미 있으면 덮어쓰지 않고, 없으면 생성이 아닌 없을 때만 생성
+  if (!userSnap.exists) {
+    await userRef.set({
+      displayName: displayName || '',
+      email: email || '',
+      photoURL: photoURL || '',
+      uid: uid,
+    });
+  }
+});
 
 const corsOptions = {
   origin: ["https://memome-delta.vercel.app", "http://localhost:3000"], // 명시적 출처 지정 (개발용)

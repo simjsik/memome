@@ -2,11 +2,12 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { DidYouLogin, modalState, UsageLimitState, UsageLimitToggle, userData, userState } from "../state/PostState";
+import { bookMarkState, DidYouLogin, modalState, PostData, UsageLimitState, UsageLimitToggle, userBookMarkState, userData, userState } from "../state/PostState";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export const UsageWrap = styled.div<{ Limit: boolean }>`
     display : ${(props) => (props.Limit ? 'block' : 'none')};
@@ -59,7 +60,7 @@ export const UsageWrap = styled.div<{ Limit: boolean }>`
         flex: 0 0 40%;
         height: 42px;
         border: none;
-        background: #4cc9bf;
+        background: #0087ff;
         color: #fff;
         font-family: var(--font-pretendard-medium);
         font-size: 14px;
@@ -70,10 +71,14 @@ export const UsageWrap = styled.div<{ Limit: boolean }>`
 
 export default function UsageLimit() {
     const setHasLogin = useSetRecoilState<boolean>(DidYouLogin)
-    const setUser = useSetRecoilState<userData>(userState)
+    const [user, setUser] = useRecoilState<userData>(userState)
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const [limitToggle, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
     const setModal = useSetRecoilState<boolean>(modalState);
+    const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState)
+    const setUserCurrentBookmark = useSetRecoilState<PostData[]>(userBookMarkState)
+
+    const router = useRouter();
 
     useEffect(() => {
         if (usageLimit) {
@@ -89,27 +94,37 @@ export default function UsageLimit() {
     const handleLogout = async () => {
         try {
             const confirmed = confirm('로그아웃 하시겠습니까?')
-            if (confirmed) {
-                await signOut(auth);
-                const response = await fetch("/api/utils/logoutDeleteToken", {
+            if (confirmed && user) {
+                const response = await fetch(`/api/logout`, {
                     method: "POST",
+                    headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+                    credentials: 'include',
                 });
 
-                if (response.ok) {
-                    setUser({
-                        name: null,
-                        email: null,
-                        photo: null,
-                        uid: '', // uid는 빈 문자열로 초기화
-                    }); // 로그아웃 상태로 초기화
-                    setHasLogin(false)
-                } else {
-                    alert("Failed to logout.");
+                if (!response.ok) {
+                    const errorData = await response.json()
+                    console.log('로그아웃 실패 :', errorData.message)
                 }
+
+                await signOut(auth);
+
+                setUser({
+                    name: null,
+                    email: null,
+                    photo: null,
+                    uid: '', // uid는 빈 문자열로 초기화
+                }); // 로그아웃 상태로 초기화
+                setCurrentBookmark([])
+                setUserCurrentBookmark([])
+                setHasLogin(false)
+                setLimitToggle(false)
+                localStorage.removeItem("hasAutoLogin");
+
+                router.push('/login');
             }
         } catch (error) {
-            console.error("Error during logout:", error);
-            alert("An error occurred during logout.");
+            console.error("로그아웃 에러:", error);
+            alert("로그아웃 시도 중 에러가 발생했습니다..");
         }
     }
 
