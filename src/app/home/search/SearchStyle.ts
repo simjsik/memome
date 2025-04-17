@@ -5,12 +5,8 @@ import styled from "@emotion/styled";
 
 export const SearchBoxWrap = styled.div` 
     position: relative;
-    width: 650px;
+    width: 100%;
     min-height: 100vh;
-    margin-left: 500px;
-    border-left: 1px solid #ededed;
-    border-right: 1px solid #ededed;
-    background: #fff;
 
     .ais-SearchBox{
         padding: 20px;
@@ -139,21 +135,21 @@ export const SearchBoxWrap = styled.div`
         line-height: 36px;
         justify-content: space-between;
 
-        .post_comment_btn{
-            width: 32px;
-            height: 32px;
-            border : none;
-            border-radius : 4px;
-            background : #fff;
-            cursor : pointer
-        }
+      .post_comment_btn{
+        width: 32px;
+        height: 32px;
+        border : none;
+        border-radius : 50%;
+        background : #ffffff00;
+        padding: 6px;
+        cursor : pointer;
+    }
         
-        .post_comment_icon{
-            width: 20px;
-            height: 20px;
-            background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449945/%EB%8C%93%EA%B8%80%EC%95%84%EC%9D%B4%EC%BD%98_xbunym.svg);
-            margin : 4px 8px 4px 4px;
-        }
+      .post_comment_icon{
+        width: 100%;
+        height: 100%;
+        background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449945/%EB%8C%93%EA%B8%80%EC%95%84%EC%9D%B4%EC%BD%98_xbunym.svg);
+      }
 
         .post_comment{
             font-family : var(--font-pretendard-medium);

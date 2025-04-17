@@ -12,7 +12,7 @@ export interface PostData {
     commentCount: number,
     notice: boolean,
     displayName: string,
-    PhotoURL: string | null,
+    photoURL: string | null,
     objectID?: string,
 }
 

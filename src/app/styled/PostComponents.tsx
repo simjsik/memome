@@ -9,7 +9,7 @@ position : absolute;
 left : clamp(80px, calc(80px + (100vw - 768px) * 0.5), 25%);
 display : flex;
 flex-wrap : wrap;
-width:  600px;
+width: 600px;
 height: fit-content;
 min-height: 100%;
 padding : 0px;
@@ -163,7 +163,7 @@ align-content: flex-start;
         width: 32px;
         height: 32px;
         border : none;
-        border-radius : 50px;
+        border-radius : 50%;
         background : #ffffff00;
         padding: 6px;
         cursor : pointer

@@ -219,7 +219,7 @@ export default function ClientNotice() {
                             {/* 작성자 프로필 */}
                             <div className='post_profile'>
                                 <div className='user_profile'
-                                    css={css`background-image : url(${post.PhotoURL})`}
+                                    css={css`background-image : url(${post.photoURL})`}
                                 ></div>
                                 <p className='user_name'
                                     onClick={(e) => { e.preventDefault(); handleUsernameClick(post.userId); }}

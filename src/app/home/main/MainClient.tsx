@@ -22,6 +22,7 @@ import LoadingWrap from '@/app/components/LoadingWrap';
 import { useHandleUsernameClick } from '@/app/utils/handleClick';
 import { btnVariants } from '@/app/styled/motionVariant';
 import useOutsideClick from '@/app/hook/OutsideClickHook';
+import { cleanHtml } from '@/app/utils/CleanHtml';
 
 
 export default function MainHome() {
@@ -256,6 +257,7 @@ export default function MainHome() {
     }
   }, [DidYouLogin])
   // 에러 시 사용 제한
+
   useEffect(() => {
     if (isError) {
       console.log('사용 제한!', error.message)
@@ -394,7 +396,7 @@ export default function MainHome() {
           // 매핑된 유저 정보 추가
           const userData = userCache.get(postData.userId) || { nickname: "Unknown", photo: null };
           postData.displayName = userData.nickname;
-          postData.PhotoURL = userData.photo;
+          postData.photoURL = userData.photo;
 
           return postData;
         })
@@ -430,7 +432,6 @@ export default function MainHome() {
   const handleUpdateClick = () => {
     fetchNewPosts();
   };
-
 
   // 페이지 이동 시 스크롤 위치 저장
   useEffect(() => {
@@ -496,7 +497,7 @@ export default function MainHome() {
               <div className='post_profile_wrap'>
                 <div className='user_profile'>
                   <div className='user_photo'
-                    css={css`background-image : url(${post.PhotoURL})`}
+                    css={css`background-image : url(${post.photoURL})`}
                   >
                   </div>
                   <p className='user_name'
@@ -543,7 +544,7 @@ export default function MainHome() {
                   <span className='post_tag'>[{post.tag}]</span>
                   <h2 className='post_title'>{post.title}</h2>
                 </div>
-                <div className='post_text' dangerouslySetInnerHTML={{ __html: (post.content) }}></div>
+                <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml(post.content) }}></div>
                 {/* 이미지 */}
                 {(post.images && post.images.length > 0) && (
                   <div className='post_pr_img_wrap'>

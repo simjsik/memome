@@ -5,18 +5,20 @@ import { useSearchParams } from "next/navigation";
 import { InstantSearch, SearchBox, useInfiniteHits, useSearchBox } from "react-instantsearch";
 import { SearchBoxWrap } from "./SearchStyle";
 import { css } from "@emotion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { collection, doc, getDoc, Timestamp } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/app/DB/firebaseConfig";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
-import { NoMorePost } from "@/app/styled/PostComponents";
-import { DidYouLogin, loadingState, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle } from "@/app/state/PostState";
+import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
+import { ADMIN_ID, DidYouLogin, loadingState, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import { searchClient } from "@/app/utils/algolia";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { motion } from "framer-motion";
 import { useHandleUsernameClick } from "@/app/utils/handleClick";
 import { btnVariants } from "@/app/styled/motionVariant";
+import { cleanHtml } from "@/app/utils/CleanHtml";
+import LoadingWrap from "@/app/components/LoadingWrap";
 
 const formatDate = (createAt: Timestamp | Date | string | number) => {
     if ((createAt instanceof Timestamp)) {
@@ -67,11 +69,9 @@ function CustomInfiniteHits() {
 
     return (
         <div className="ais_infinite_result_wrap">
-            <ul>
-                {items.map((hit) => (
-                    <PostHit key={hit.objectID} hit={hit} />
-                ))}
-            </ul>
+            {items.map((hit) => (
+                <PostHit key={hit.objectID} hit={hit} />
+            ))}
             {!isLastPage && (
                 <button onClick={showMore}>더 보기</button>
             )}
@@ -84,17 +84,19 @@ function CustomInfiniteHits() {
 
 function PostHit({ hit }: { hit: PostData }) {
     const [userData, setUserData] = useState<{ displayName: string; photoURL: string | null } | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [loading, setIsLoading] = useState<boolean>(true);
     const setLoading = useSetRecoilState<boolean>(loadingState);
-
-    const yourLogin = useRecoilValue(DidYouLogin)
-    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const currentUser = useRecoilValue(userState);
+    const ADMIN = useRecoilValue(ADMIN_ID);
+    const yourLogin = useRecoilValue(DidYouLogin);
+    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState);
     const setModal = useSetRecoilState<boolean>(modalState);
-    const usageLimit = useRecoilValue<boolean>(UsageLimitState)
-    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
+    const usageLimit = useRecoilValue<boolean>(UsageLimitState);
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle);
+    const [dropToggle, setDropToggle] = useState<string>('');
 
     const router = useRouter();
-
+    const dropdownRef = useRef<HTMLDivElement>(null);
     // 포스트 보기
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
         console.log(postId, '검색 페이지 이동 포스트 ID');
@@ -132,8 +134,45 @@ function PostHit({ hit }: { hit: PostData }) {
 
     const handleUsernameClick = useHandleUsernameClick();
 
-    if (isLoading) {
-        return <p>Loading...</p>;
+    // 포스트 삭제
+    const deletePost = async (postId: string) => {
+        if (!yourLogin || usageLimit) {
+            if (usageLimit) {
+                return setLimitToggle(true);
+            }
+            if (!yourLogin) {
+                setLoginToggle(true);
+                setModal(true);
+                return;
+            }
+        }
+
+        const currentUserId = currentUser?.uid;
+
+        try {
+            // 게시글 존재 확인
+            const postDoc = await getDoc(doc(db, 'posts', postId));
+            if (!postDoc.exists()) {
+                alert('해당 게시글을 찾을 수 없습니다.')
+                return;
+            }
+
+            const postOwnerId = postDoc.data()?.userId;
+
+            // 삭제 권한 확인
+            if (currentUserId === postOwnerId || currentUserId === ADMIN) {
+                const confirmed = confirm('게시글을 삭제 하시겠습니까?')
+                if (!confirmed) return;
+
+                await deleteDoc(doc(db, 'posts', postId));
+                alert('게시글이 삭제 되었습니다.');
+            } else {
+                alert('게시글 삭제 권한이 없습니다.');
+            }
+        } catch (error) {
+            console.error('게시글 삭제 중 오류가 발생했습니다.' + error)
+            alert('게시글 삭제 중 오류가 발생했습니다.')
+        }
     }
 
     if (!userData) {
@@ -141,52 +180,153 @@ function PostHit({ hit }: { hit: PostData }) {
     }
 
     return (
-        <li className="ais_result_wrap">
-            <motion.div className="ais_profile_wrap"
-                whileHover={{
-                    backgroundColor: "#fafbfc",
-                    transition: { duration: 0.1 },
-                }}
-            >
-                <div
-                    className="ais_user_photo"
-                    style={{ backgroundImage: `url(${userData.photoURL})` }}
-                ></div>
-                <p className="ais_user_name"
-                    onClick={(e) => { e.preventDefault(); handleUsernameClick(hit.userId); }}>{userData.displayName}</p>
-                <span className="ais_user_uid">@{hit.userId.slice(0, 6)}... · {formatDate(hit.createAt)}</span>
-            </motion.div>
-            <div className="ais_post_content_wrap" onClick={(event) => { event.preventDefault(); handlePostClick(hit.objectID as string); }}>
-                <h2 className="ais_post_title">{hit.title}</h2>
-                <div className="ais_post_content" dangerouslySetInnerHTML={{ __html: hit.content }}></div>
-                <div className="ais_post_image_wrap">
-                    {Array.isArray(hit.images) &&
-                        hit.images.map((image, index) => (
-                            <div
-                                className="ais_post_images"
-                                key={index}
-                                style={{ backgroundImage: `url(${image})` }}
-                            ></div>
-                        ))}
-                </div>
-                <div className="ais_post_comment_wrap">
-                    <div className='post_comment'>
-                        <motion.button
-                            variants={btnVariants}
-                            whileHover="iconWrapHover"
-                            whileTap="iconWrapClick" className='post_comment_btn'>
-                            <motion.div
-                                variants={btnVariants}
-                                whileHover="iconHover"
-                                whileTap="iconClick" className='post_comment_icon'>
-                            </motion.div>
-                        </motion.button>
-                        <p>{hit.commentCount}</p>
+        <>
+            {/* <li className="ais_result_wrap">
+                <motion.div className="ais_profile_wrap"
+                    whileHover={{
+                        backgroundColor: "#fafbfc",
+                        transition: { duration: 0.1 },
+                    }}
+                >
+                    <div
+                        className="ais_user_photo"
+                        style={{ backgroundImage: `url(${userData.photoURL})` }}
+                    ></div>
+                    <p className="ais_user_name"
+                        onClick={(e) => { e.preventDefault(); handleUsernameClick(hit.userId); }}>{userData.displayName}</p>
+                    <span className="ais_user_uid">@{hit.userId.slice(0, 6)}... · {formatDate(hit.createAt)}</span>
+                </motion.div>
+                <div className="ais_post_content_wrap" onClick={(event) => { event.preventDefault(); handlePostClick(hit.objectID as string); }}>
+                    <h2 className="ais_post_tag">[{hit.tag}]</h2>
+                    <h2 className="ais_post_title">{hit.title}</h2>
+                    <div className="ais_post_content" dangerouslySetInnerHTML={{ __html: cleanHtml(hit.content) }}></div>
+                    <div className="ais_post_image_wrap">
+                        {Array.isArray(hit.images) &&
+                            hit.images.map((image, index) => (
+                                <div
+                                    className="ais_post_images"
+                                    key={index}
+                                    style={{ backgroundImage: `url(${image})` }}
+                                ></div>
+                            ))}
                     </div>
-                    <BookmarkBtn postId={hit.id}></BookmarkBtn>
+                    <div className="ais_post_comment_wrap">
+                        <div className='post_comment'>
+                            <motion.button
+                                variants={btnVariants}
+                                whileHover="iconWrapHover"
+                                whileTap="iconWrapClick" className='post_comment_btn'>
+                                <motion.div
+                                    variants={btnVariants}
+                                    whileHover="iconHover"
+                                    whileTap="iconClick" className='post_comment_icon'>
+                                </motion.div>
+                            </motion.button>
+                            <p>{hit.commentCount}</p>
+                        </div>
+                        <BookmarkBtn postId={hit.id}></BookmarkBtn>
+                    </div>
                 </div>
-            </div>
-        </li >
+            </li > */}
+            {/* 무한 스크롤 구조 */}
+            {!loading &&
+                <motion.div
+                    whileHover={{
+                        backgroundColor: "#fafbfc",
+                        transition: { duration: 0.1 },
+                    }}
+                    key={hit.id}
+                    className='post_box'
+                >
+                    {/* 작성자 프로필 */}
+                    <div className='post_profile_wrap'>
+                        <div className='user_profile'>
+                            <div className='user_photo'
+                                css={css`background-image : url(${hit.photoURL})`}
+                            >
+                            </div>
+                            <p className='user_name'
+                                onClick={(e) => { e.preventDefault(); handleUsernameClick(hit.userId); }}
+                            >
+                                {hit.displayName}
+                            </p>
+                            <span className='user_uid'>
+                                @{hit.userId.slice(0, 6)}...
+                            </span>
+                            <p className='post_date'>
+                                · {formatDate(hit.createAt)}
+                            </p>
+                        </div>
+                        <div className='post_dropdown_wrap' ref={dropdownRef}>
+                            <motion.button
+                                variants={btnVariants}
+                                whileHover="iconWrapHover"
+                                whileTap="iconWrapClick"
+                                className='post_drop_menu_btn'
+                                aria-label='포스트 옵션 더보기'
+                                css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
+                                onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === hit.id ? '' : hit.id)); }}
+                            >
+                                {dropToggle === hit.id &&
+                                    <div>
+                                        <ul>
+                                            <li className='post_drop_menu'>
+                                                <motion.button
+                                                    variants={btnVariants}
+                                                    whileHover="otherHover"
+                                                    onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(hit.id); }} className='post_dlt_btn'>게시글 삭제</motion.button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                }
+                            </motion.button>
+                        </div>
+                    </div>
+                    {/* 포스트 내용 */}
+                    <div className='post_content_wrap' onClick={(event) => { event.preventDefault(); handlePostClick(hit.id); }}>
+                        {/* 포스트 제목 */}
+                        < div className='post_title_wrap' >
+                            <span className='post_tag'>[{hit.tag}]</span>
+                            <h2 className='post_title'>{hit.title}</h2>
+                        </div>
+                        <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml(hit.content) }}></div>
+                        {/* 이미지 */}
+                        {(hit.images && hit.images.length > 0) && (
+                            <div className='post_pr_img_wrap'>
+                                {hit.images.map((imageUrl, index) => (
+                                    <div className='post_pr_img' key={index}
+                                        css={css
+                                            `
+                                  background-image : url(${imageUrl});
+                                  width: calc((100% / ${Array.isArray(hit.images) && hit.images.length}) - 4px);
+                                  `}
+                                    ></div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* 포스트 댓글, 북마크 등 */}
+                        <div className='post_bottom_wrap'>
+                            <div className='post_comment'>
+                                <motion.button
+                                    variants={btnVariants}
+                                    whileHover="iconWrapHover"
+                                    whileTap="iconWrapClick" className='post_comment_btn'>
+                                    <motion.div
+                                        variants={btnVariants}
+                                        whileHover="iconHover"
+                                        whileTap="iconClick" className='post_comment_icon'>
+                                    </motion.div>
+                                </motion.button>
+                                <p>{hit.commentCount}</p>
+                            </div>
+                            <BookmarkBtn postId={hit.id}></BookmarkBtn>
+                        </div>
+                    </div>
+                </motion.div >
+            }
+            {loading && <LoadingWrap />}
+        </>
     );
 }
 
@@ -239,16 +379,18 @@ export default function SearchClient() {
     }, [])
     return (
         <InstantSearch searchClient={searchClient} indexName="post_index">
-            <SearchBoxWrap>
-                <div className="search_bar">
-                    <div className="search_input_wrap">
-                        <CustomSearch></CustomSearch>
-                        <CustomInfiniteHits />
+            <PostWrap>
+                <SearchBoxWrap>
+                    <div className="search_bar">
+                        <div className="search_input_wrap">
+                            <CustomSearch></CustomSearch>
+                            <CustomInfiniteHits />
+                        </div>
                     </div>
-                </div>
-                <div className="post_result">
-                </div>
-            </SearchBoxWrap>
+                    <div className="post_result">
+                    </div>
+                </SearchBoxWrap>
+            </PostWrap>
         </InstantSearch>
     )
 }
