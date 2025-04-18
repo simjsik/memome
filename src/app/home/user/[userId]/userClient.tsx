@@ -360,7 +360,7 @@ export default function UserClient({ user }: ClientUserProps) {
                             {
                                 (!hasNextPage && posts.length > 0 && !loading) &&
                                 <NoMorePost>
-                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009341/%EB%8B%A4%EB%B4%A4%EC%9D%8COK_lldsfs.svg)`}></div>
+                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965258/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_oxgwfn.svg)`}></div>
                                     <p>모두 확인했습니다.</p>
                                     <span>전체 메모를 전부 확인했습니다.</span>
                                 </NoMorePost>
@@ -368,7 +368,7 @@ export default function UserClient({ user }: ClientUserProps) {
                             {
                                 (posts.length === 0 && !loading) &&
                                 < NoMorePost >
-                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009341/%EB%8B%A4%EB%B4%A4%EC%9D%8COK_lldsfs.svg)`}></div>
+                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965897/%EB%A9%94%EB%AA%A8%EC%97%86%EC%96%B4_b2v6zy.svg)`}></div>
                                     <p>메모가 없습니다.</p>
                                     <span>새 메모를 작성 해보세요.</span>
                                 </NoMorePost>
@@ -399,7 +399,7 @@ export default function UserClient({ user }: ClientUserProps) {
                             {
                                 (!hasNextPage && imagePost.length > 0 && !loading) &&
                                 <NoMorePost>
-                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009341/%EB%8B%A4%EB%B4%A4%EC%9D%8COK_lldsfs.svg)`}></div>
+                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965258/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_oxgwfn.svg)`}></div>
                                     <p>모두 확인했습니다.</p>
                                     <span>이미지가 포함된 메모를 전부 확인했습니다.</span>
                                 </NoMorePost>
@@ -407,7 +407,7 @@ export default function UserClient({ user }: ClientUserProps) {
                             {
                                 (imagePost.length === 0 && !loading) &&
                                 <NoMorePost>
-                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009341/%EB%8B%A4%EB%B4%A4%EC%9D%8COK_lldsfs.svg)`}></div>
+                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965897/%EB%A9%94%EB%AA%A8%EC%97%86%EC%96%B4_b2v6zy.svg)`}></div>
                                     <p>메모가 없습니다.</p>
                                     <span>메모 작성 시 이미지를 추가 해보세요.</span>
                                 </NoMorePost>

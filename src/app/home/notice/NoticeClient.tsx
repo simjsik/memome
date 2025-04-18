@@ -279,11 +279,23 @@ export default function ClientNotice() {
                     <div ref={observerLoadRef} css={css`height: 1px; visibility: ${dataLoading ? "hidden" : "visible"};`} />
                     {(!loading && dataLoading) && <LoadingWrap />}
                     {(!dataLoading && !hasNextPage && !loading) &&
-                        <NoMorePost>
-                            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009341/%EB%8B%A4%EB%B4%A4%EC%9D%8COK_lldsfs.svg)`}></div>
-                            <p>모두 확인했습니다.</p>
-                            <span>전체 공지사항을 전부 확인했습니다.</span>
-                        </NoMorePost>
+                        <>
+                            {
+
+                                notices.length > 0 ?
+                                    <NoMorePost>
+                                        <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966540/%EA%B3%B5%EC%A7%80%EB%8B%A4%EB%B4%A4%EC%96%B4_lbmtbv.svg)`}></div>
+                                        <p>모두 확인했습니다.</p>
+                                        <span>전체 공지사항을 전부 확인했습니다.</span>
+                                    </NoMorePost>
+                                    :
+                                    <NoMorePost>
+                                        <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966540/%EA%B3%B5%EC%A7%80%EC%97%86%EC%96%B4_xkphgs.svg)`}></div>
+                                        <p>모두 확인했습니다.</p>
+                                        <span>공지사항이 없습니다.</span>
+                                    </NoMorePost>
+                            }
+                        </>
                     }
                 </>
             </NoticeWrap>

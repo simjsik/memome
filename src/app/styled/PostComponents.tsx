@@ -1068,7 +1068,7 @@ export const NoMorePost = styled.div`
     text-align: center;
 
     .no_more_icon{
-      width: 108px;
+      width: 160px;
       height: 108px;
       background-size: cover;
       background-repeat: no-repeat;

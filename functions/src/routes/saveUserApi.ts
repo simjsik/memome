@@ -8,12 +8,12 @@ app.use(cookieParser());
 
 export interface newUser {
     displayName: string | null;
-    photoURL: string | null;
+    photoURL: string;
     userId: string;
 }
 
 router.post('/saveUser', async (req: Request, res: Response) => {
-    const {uid, displayName, photoURL, hasGuest} = req.body;
+    const {uid, displayName, hasGuest} = req.body;
 
     try {
         const userRef = hasGuest ?
@@ -29,7 +29,7 @@ router.post('/saveUser', async (req: Request, res: Response) => {
         if (!userSnapshot.exists) {
             const userData: newUser = {
                 displayName: displayName || randomName,
-                photoURL: photoURL || "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744861940/%ED%94%84%EB%A1%9C%ED%95%84%EC%9A%A9_grt1en.png",
+                photoURL: "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744861940/%ED%94%84%EB%A1%9C%ED%95%84%EC%9A%A9_grt1en.png",
                 userId: uid,
             };
 

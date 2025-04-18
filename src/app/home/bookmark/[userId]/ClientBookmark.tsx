@@ -265,7 +265,7 @@ export default function Bookmark() {
                     {
                         (!dataLoading && !hasNextPage && userBookmarks.length > 0 && !loading) &&
                         <NoMorePost>
-                            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009341/%EB%8B%A4%EB%B4%A4%EC%9D%8COK_lldsfs.svg)`}></div>
+                            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965256/%EB%B6%81%EB%A7%88%ED%81%AC%EB%8B%A4%EB%B4%A4%EC%96%B4_vvrw2f.svg)`}></div>
                             <p>모두 확인했습니다.</p>
                             <span>북마크된 메모를 전부 확인했습니다.</span>
                         </NoMorePost>
@@ -273,7 +273,7 @@ export default function Bookmark() {
                     {
                         (!dataLoading && userBookmarks.length === 0 && !loading) &&
                         <NoMorePost>
-                            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009341/%EB%8B%A4%EB%B4%A4%EC%9D%8COK_lldsfs.svg)`}></div>
+                            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965256/%EB%B6%81%EB%A7%88%ED%81%AC%EC%97%86%EC%96%B4_fkhi4n.svg)`}></div>
                             <p>북마크된 메모가 없습니다.</p>
                             <span>페이지를 탐색 후 원하는 메모를 북마크 해보세요.</span>
                         </NoMorePost>

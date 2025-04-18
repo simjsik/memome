@@ -210,7 +210,7 @@ export default function SignUp() {
             // Firebase Authentication의 프로필 업데이트
             await updateProfile(user, {
                 displayName: formData.displayName || randomName,
-                photoURL: '',
+                photoURL: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744861940/%ED%94%84%EB%A1%9C%ED%95%84%EC%9A%A9_grt1en.png',
             })
 
             // 이메일 인증 메일 전송
@@ -265,7 +265,7 @@ export default function SignUp() {
                                     <p>회원가입이</p>
                                     <p>완료되었습니다.</p>
                                 </div>
-                                <div className="sign_up_img" css={css`background : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009340/%EA%B0%80%EC%9E%85OK_tj25fs.svg);`}></div>
+                                <div className="sign_up_img" css={css`background : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744961861/MEMON_ddyqiy.svg);`}></div>
                                 <span>로그인 후 다양한 이야기를 메모 해주세요!</span>
                                 <EmotionLoginBtn
                                     variants={btnVariants}

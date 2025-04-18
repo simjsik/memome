@@ -52,7 +52,7 @@ function CustomInfiniteHits() {
     // 검색어가 없을 때
     if (!query.trim()) {
         return <NoMorePost>
-            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009341/%EB%8B%A4%EB%B4%A4%EC%9D%8COK_lldsfs.svg)`}></div>
+            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966539/%EA%B2%80%EC%83%89%ED%95%B4%EC%A4%98_r6cgmi.svg)`}></div>
             <p>검색어를 입력 해주세요.</p>
             <span>사용자나 아이디 또는 메모 제목을 검색 해보세요.</span>
         </NoMorePost>;
@@ -61,7 +61,7 @@ function CustomInfiniteHits() {
     // 검색 결과가 없을 때
     if (items.length === 0) {
         return <NoMorePost>
-            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737009341/%EB%8B%A4%EB%B4%A4%EC%9D%8COK_lldsfs.svg)`}></div>
+            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966539/%EA%B2%80%EC%83%89%EC%97%86%EC%96%B4_w1msj0.svg)`}></div>
             <p>&apos;{query}&apos;에 대한 검색결과 없음.</p>
             <span className="no_result_span">다른 용어를 검색해 보거나 검색어가 정확한지 확인해 보세요.</span>
         </NoMorePost>;
@@ -181,54 +181,6 @@ function PostHit({ hit }: { hit: PostData }) {
 
     return (
         <>
-            {/* <li className="ais_result_wrap">
-                <motion.div className="ais_profile_wrap"
-                    whileHover={{
-                        backgroundColor: "#fafbfc",
-                        transition: { duration: 0.1 },
-                    }}
-                >
-                    <div
-                        className="ais_user_photo"
-                        style={{ backgroundImage: `url(${userData.photoURL})` }}
-                    ></div>
-                    <p className="ais_user_name"
-                        onClick={(e) => { e.preventDefault(); handleUsernameClick(hit.userId); }}>{userData.displayName}</p>
-                    <span className="ais_user_uid">@{hit.userId.slice(0, 6)}... · {formatDate(hit.createAt)}</span>
-                </motion.div>
-                <div className="ais_post_content_wrap" onClick={(event) => { event.preventDefault(); handlePostClick(hit.objectID as string); }}>
-                    <h2 className="ais_post_tag">[{hit.tag}]</h2>
-                    <h2 className="ais_post_title">{hit.title}</h2>
-                    <div className="ais_post_content" dangerouslySetInnerHTML={{ __html: cleanHtml(hit.content) }}></div>
-                    <div className="ais_post_image_wrap">
-                        {Array.isArray(hit.images) &&
-                            hit.images.map((image, index) => (
-                                <div
-                                    className="ais_post_images"
-                                    key={index}
-                                    style={{ backgroundImage: `url(${image})` }}
-                                ></div>
-                            ))}
-                    </div>
-                    <div className="ais_post_comment_wrap">
-                        <div className='post_comment'>
-                            <motion.button
-                                variants={btnVariants}
-                                whileHover="iconWrapHover"
-                                whileTap="iconWrapClick" className='post_comment_btn'>
-                                <motion.div
-                                    variants={btnVariants}
-                                    whileHover="iconHover"
-                                    whileTap="iconClick" className='post_comment_icon'>
-                                </motion.div>
-                            </motion.button>
-                            <p>{hit.commentCount}</p>
-                        </div>
-                        <BookmarkBtn postId={hit.id}></BookmarkBtn>
-                    </div>
-                </div>
-            </li > */}
-            {/* 무한 스크롤 구조 */}
             {!loading &&
                 <motion.div
                     whileHover={{
