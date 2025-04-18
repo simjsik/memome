@@ -1,5 +1,5 @@
+export const dynamic = "force-dynamic";
 import LoginBox from './LoginBox';
-export const dynamic = "force-static"; // 정적 렌더링 설정
 
 export const metadata = {
   title: "MEMOME :: 로그인",

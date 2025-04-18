@@ -15,6 +15,7 @@ import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 
 const queryClient = new QueryClient();
+
 function InitializeLoginComponent({ children, nonce }: { children: ReactNode, nonce: string }) {
     const { clearUpdate } = usePostUpdateChecker();
 
@@ -61,13 +62,13 @@ export default function ProviderClient({ children, nonce }: { children: ReactNod
         <div className={`${PretendardLight.variable} ${PretendardMedium.variable} ${PretendardBold.variable}`}>
             <QueryClientProvider client={queryClient}>
                 <RecoilRoot>
-                    <InitializeLoginComponent nonce={nonce}>
-                        <CacheProvider value={cache}>
+                    <CacheProvider value={cache}>
+                        <InitializeLoginComponent nonce={nonce}>
                             <>
                                 {children}
                             </>
-                        </CacheProvider>
-                    </InitializeLoginComponent>
+                        </InitializeLoginComponent>
+                    </CacheProvider>
                 </RecoilRoot>
             </QueryClientProvider>
         </div>

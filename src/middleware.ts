@@ -25,6 +25,8 @@ export async function middleware(req: NextRequest) {
         request: { headers: requestHeaders },       // 수정된 요청 헤더 사용
     });
 
+    response.headers.set('x-csp-nonce', nonce); // 응답헤더에도 난수값 추가
+
     response.headers.set(
         'Content-Security-Policy',
         `style-src 'self' 'nonce-${nonce}' 'unsafe-hashes' \
@@ -39,12 +41,6 @@ export async function middleware(req: NextRequest) {
         'sha256-N6tSydZ64AHCaOWfwKbUhxXx2fRFDxHOaL3e3CO7GPI=' \
         ;`
     );
-
-
-    response.headers.set('x-csp-nonce', nonce); // 응답헤더에 난수값 추가
-
-
-    // 예를 들어 다른 쿠키나 헤더도 설정 가능
 
     // 현재 요청 경로가 /login 인지 확인
     if (pathname === '/login') {
@@ -69,7 +65,6 @@ export async function middleware(req: NextRequest) {
     return response;
 }
 
-// 이 미들웨어는 /login 경로에만 적용됩니다.
 export const config = {
     matcher: ['/login/:path*', '/home/:path*']
 };
