@@ -14,11 +14,16 @@ function generateNonce(): string {
 
 // 미들웨어 함수 정의
 export async function middleware(req: NextRequest) {
-    const response = NextResponse.next();
+    const requestHeaders = new Headers(req.headers);
     const pathname = req.nextUrl.pathname;
     const authToken = req.cookies.get('authToken');
 
     const nonce = generateNonce();
+
+    requestHeaders.set('x-csp-nonce', nonce); // 요청헤더 
+    const response = NextResponse.next({
+        request: { headers: requestHeaders },       // 수정된 요청 헤더 사용
+    });
 
     response.headers.set(
         'Content-Security-Policy',
@@ -35,7 +40,10 @@ export async function middleware(req: NextRequest) {
         ;`
     );
 
-    response.headers.set('x-csp-nonce', nonce);
+
+    response.headers.set('x-csp-nonce', nonce); // 응답헤더에 난수값 추가
+
+
     // 예를 들어 다른 쿠키나 헤더도 설정 가능
 
     // 현재 요청 경로가 /login 인지 확인

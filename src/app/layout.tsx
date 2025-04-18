@@ -1,9 +1,11 @@
+
+export const dynamic = "force-dynamic";
+
 import { ReactNode } from 'react';
 import "./globals.css";
 import ProviderClient from './ProviderClients';
 import { headers } from 'next/headers';
 
-export const dynamic = "force-dynamic";
 
 type LayoutProps = {
   children: ReactNode;
