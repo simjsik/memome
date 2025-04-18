@@ -194,7 +194,7 @@ export default function Bookmark() {
                             <div className='post_profile_wrap'>
                                 <div className='user_profile'>
                                     <div className='user_photo'
-                                        css={css`background-image : url(${post.PhotoURL})`}
+                                        css={css`background-image : url(${post.photoURL})`}
                                     >
                                     </div>
                                     <p className='user_name'
