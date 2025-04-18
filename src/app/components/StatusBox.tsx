@@ -16,7 +16,7 @@ import { btnVariants } from '../styled/motionVariant';
 import { useRef } from 'react';
 import useOutsideClick from '../hook/OutsideClickHook';
 
-const PostListWrap = styled.div`
+const PostListWrap = styled.div<{ $isMemoPage?: boolean }>`
 position : fixed;
 top: 40px;
 right: clamp(80px, calc((100vw - 1200px) * 0.6), 420px);
@@ -59,12 +59,39 @@ cursor : pointer;
     width: 500px;
     max-height : 2000px;
     right: clamp(320px, calc(320px + (100vw - 1920px) * 0.4375), 600px);
+
+      ${({ $isMemoPage }) =>
+        $isMemoPage &&
+        `
+    position : fixed;
+    top: 0;
+    right: 0;
+    width : 460px;
+    height: 100%;
+    padding : 20px;
+    border : 1px solid #ededed;
+    border-radius : 8px;
+    background : #fff;
+    `}
   }
 
   @media (min-width: 2560px) {
     width: 600px;
     padding : 28px;
     right: clamp(500px, calc(500px + (100vw - 2560px) * 0.3125), 900px);
+
+    ${({ $isMemoPage }) =>
+        $isMemoPage &&
+        `
+        position : fixed;
+        top: 0;
+        right: 0;
+        height: 100%;
+        padding : 20px;
+        border : 1px solid #ededed;
+        border-radius : 8px;
+        background : #fff;
+    `}
   }
 
   @media (min-width: 3840px) {
@@ -73,13 +100,53 @@ cursor : pointer;
     width: 680px;
     padding : 32px;
     right: clamp(920px, calc(920px + (100vw - 3840px) * 0.3125), 1320px);
+
+    ${({ $isMemoPage }) =>
+        $isMemoPage &&
+        `
+        position : fixed;
+        top: 0;
+        right: 0;
+        height: 100%;
+        padding : 20px;
+        border : 1px solid #ededed;
+        border-radius : 8px;
+        background : #fff;
+    `}
   }
     
   @media (min-width: 5120px) {
     width: 760px;
     padding : 36px;
     right: clamp(1420px, calc(1420px + (100vw - 5120px) * 0.3125), 100vw);
+
+    ${({ $isMemoPage }) =>
+        $isMemoPage &&
+        `
+        position : fixed;
+        top: 0;
+        right: 0;
+        height: 100%;
+        padding : 20px;
+        border : 1px solid #ededed;
+        border-radius : 8px;
+        background : #fff;
+    `}
   }
+
+  ${({ $isMemoPage }) =>
+        $isMemoPage &&
+        `
+    position : fixed;
+    top: 0;
+    right: 0;
+    width : 460px;
+    height: 100%;
+    padding : 20px;
+    border : 1px solid #ededed;
+    border-radius : 8px;
+    background : #fff;
+`}
 `
 
 export default function StatusBox() {
@@ -88,8 +155,10 @@ export default function StatusBox() {
     const postId = params?.postId || ''
     const isMobile = useMediaQuery({ maxWidth: 1200 });
     const [mobileStatus, setMobileStatus] = useRecoilState<boolean>(statusState);
+
     // Function
     const statusRef = useRef<HTMLDivElement>(null);
+    const isMemoPage = location.pathname === `/home/memo/${params?.postId}`;
 
     // 768 상태 창 핸들러
     const statusHandle = () => {
@@ -119,7 +188,7 @@ export default function StatusBox() {
                                         path === `/home/memo/${params?.postId}` && <MemoStatus post={postId} />
                                     }
                                 </div>
-                                <Logout></Logout>
+                                {path !== '/home/memo' && <Logout></Logout>}
                                 <motion.button css={
                                     css`position : absolute;
                                             bottom: 20px;
@@ -140,18 +209,36 @@ export default function StatusBox() {
                             </PostListWrap>
                         </div>
                     }
-                    {!isMobile && <PostListWrap>
-                        <SearchComponent></SearchComponent>
-                        {
-                            path !== `/home/memo/${params?.postId}` && <UserProfile></UserProfile >
-                        }
-                        <div className='list_top'>
-                            {
-                                path === `/home/memo/${params?.postId}` && <MemoStatus post={postId} />
+                    {!isMobile &&
+                        <>
+                            {path !== `/home/memo/${params?.postId}` ?
+                                <PostListWrap>
+                                    <SearchComponent></SearchComponent>
+                                    {
+                                        path !== `/home/memo/${params?.postId}` && <UserProfile></UserProfile >
+                                    }
+                                    <div className='list_top'>
+                                        {
+                                            path === `/home/memo/${params?.postId}` && <MemoStatus post={postId} />
+                                        }
+                                    </div>
+                                    {path !== `/home/memo/${params?.postId}` && <Logout></Logout>}
+                                </PostListWrap>
+                                :
+                                <PostListWrap $isMemoPage={isMemoPage}>
+                                    <SearchComponent></SearchComponent>
+                                    {
+                                        path !== `/home/memo/${params?.postId}` && <UserProfile></UserProfile >
+                                    }
+                                    <div className='list_top'>
+                                        {
+                                            path === `/home/memo/${params?.postId}` && <MemoStatus post={postId} />
+                                        }
+                                    </div>
+                                    {path !== `/home/memo/${params?.postId}` && <Logout></Logout>}
+                                </PostListWrap>
                             }
-                        </div>
-                        <Logout></Logout>
-                    </PostListWrap>
+                        </>
                     }
                 </>
             }

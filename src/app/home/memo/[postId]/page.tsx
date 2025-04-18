@@ -6,8 +6,6 @@ import { adminDb } from "@/app/DB/firebaseAdminConfig";
 import { Timestamp } from 'firebase/firestore';
 import { cleanHtml } from '@/app/utils/CleanHtml';
 
-export const revalidate = 600;
-
 interface MemoPageProps {
     params: {
         postId: string;

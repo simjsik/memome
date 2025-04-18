@@ -25,10 +25,10 @@ overflow: hidden;
 display : flex;
 justify-content: space-between;
 }
+
 .user_profile_wrap .user_profile{
 width : 52px;
 height : 52px;
-background : red;
 border-radius : 50%;
 }
 
@@ -41,6 +41,7 @@ margin-top : 8px;
 font-size : 18px;
 font-family : var(--font-pretendard-bold);
 }
+
 .user_id span{
 display: block;
 width : 70%;
@@ -50,8 +51,8 @@ text-overflow :ellipsis;
 font-size : 14px;
 font-family : var(--font-pretendard-light);
 }
-// 프로필
 
+// 프로필
 .memo_btn_wrap{
 display : flex;
 width : 100%;
@@ -94,16 +95,19 @@ line-height : 18px;
 & .status_wrap>div:hover {
 background : #fdfdfd;
 }
+
 & .memo_title:hover{
 text-decoration : underline;
 cursor:pointer;
 }
+
 .memo_img_tag {
 width : 18px;
 height :18px;
 margin-right : 4px;
-background : red;
+background : #0087ff;
 }
+
 .memo_img_void{
 width : 18px;
 min-width : 18px;
@@ -111,6 +115,7 @@ height : 18px;
 margin-right : 4px;
 background : none;
 }
+
 .memo_title_wrap{
 display : flex;
 flex : 0 0 65%;
@@ -122,6 +127,7 @@ font-size: 14px;
     color: #777;
     margin-right : 2px;
 }
+
 .memo_title{
 display: block;
 width: 60%;
@@ -136,6 +142,7 @@ font-family : var(--font-pretendard-bold);
 flex : 0 0 30%;
 text-align: left;
 }
+
 .memo_date span{
 font-size : 14px;
 }
@@ -149,6 +156,10 @@ font-size : 14px;
     width: 100%;
     background-color: #fff;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+
+    .post_menu_wrap{
+        margin-top: 10px;
+    }
 }
 `
 export default function MemoStatus({ post }: ClientPostProps) {
@@ -395,7 +406,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                     left: 50%;
                     transform: translateX(-50%);
                     z-index: 1;
-                    background: red;
+                    background: #0087ff;
                     color: #fff;
                     border: none;
                     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);

@@ -69,7 +69,6 @@ export default function Logout() {
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     // State
     const router = useRouter();
-
     // hook
 
     const handleLogout = async () => {
@@ -117,14 +116,12 @@ export default function Logout() {
     // Function
     return (
         <>
-            {(hasLogin) ?
-                <div>
-                    <motion.button
-                        variants={btnVariants}
-                        whileHover="otherHover"
-                        whileTap="otherClick"
-                        onClick={handleLogout} css={LogoutButton}>로그아웃</motion.button>
-                </div>
+            {hasLogin ?
+                <motion.button
+                    variants={btnVariants}
+                    whileHover="otherHover"
+                    whileTap="otherClick"
+                    onClick={handleLogout} css={LogoutButton}>로그아웃</motion.button >
                 :
                 <motion.button
                     variants={btnVariants}

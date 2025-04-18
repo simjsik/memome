@@ -3,8 +3,6 @@
 
 import { checkUsageLimit } from "@/app/utils/checkUsageLimit";
 import { Comment, loadingState, memoCommentCount, memoCommentState, UsageLimitState, userData, userState } from "@/app/state/PostState";
-import { HomeBtn } from "@/app/styled/RouterComponents";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 
@@ -13,7 +11,6 @@ interface ClientPostProps {
 }
 
 export default function Memo({ comment }: ClientPostProps) {
-    const router = useRouter();
     const setCommentList = useSetRecoilState<Comment[]>(memoCommentState)
     const setCommentCount = useSetRecoilState<number>(memoCommentCount)
     const currentUser = useRecoilValue<userData | null>(userState)
@@ -54,15 +51,10 @@ export default function Memo({ comment }: ClientPostProps) {
         setLoading(false); // 초기 로딩 해제
     }, [comment]);
 
-    const handleHomeBtn = () => {
-        router.push('/home/main')
-    }
-
     // Function
 
     return (
         <>
-            <HomeBtn onClick={handleHomeBtn} />
         </>
     );
 }
