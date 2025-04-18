@@ -65,7 +65,7 @@ export const fetchPosts = async (
                 postData.commentCount = commentSnapshot.size;
                 const userData = userDoc.data() || { displayName: '', photoURL: '' }
                 postData.displayName = userData.displayName;
-                postData.PhotoURL = userData.photoURL;
+                postData.photoURL = userData.photoURL;
 
                 return postData;
             })
@@ -146,7 +146,7 @@ export const fetchNoticePosts = async (
                 const userData = userDoc.data() || { displayName: '', photoURL: '' }
 
                 postData.displayName = userData.displayName;
-                postData.PhotoURL = userData.photoURL;
+                postData.photoURL = userData.photoURL;
 
                 return postData;
             })
@@ -217,7 +217,7 @@ export const fetchBookmarks = async (
 
                         const userData = userDoc.exists()
                             ? userDoc.data()
-                            : { displayName: 'unknown', PhotoURL: null }
+                            : { displayName: 'unknown', photoURL: null }
 
                         userCache.set(postsData.userId, {
                             nickname: userData.displayName,
@@ -226,7 +226,7 @@ export const fetchBookmarks = async (
                     }
                     const userData = userCache.get(postsData.userId) || { nickname: 'Unknown', photo: null }
                     postsData.displayName = userData.nickname;
-                    postsData.PhotoURL = userData.photo;
+                    postsData.photoURL = userData.photo;
 
                     return postsData as PostData;
                 })
@@ -315,7 +315,7 @@ export const fetchComments = async (userId: string, postId: string) => {
                     replies: data.replies || [],
                     parentId: data.parentId || null,
                     displayName: userData.displayName,
-                    PhotoURL: userData.photoURL,
+                    photoURL: userData.photoURL,
                 } as Comment;
             })
         );

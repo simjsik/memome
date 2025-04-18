@@ -45,7 +45,7 @@ export interface Comment {
     replies: Comment[];
     parentId: string | null;
     displayName: string,
-    PhotoURL: string | null,
+    photoURL: string | null,
 }
 
 export interface memoList {

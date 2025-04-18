@@ -236,7 +236,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
 
                 setCommentList((prev) => [
                     ...prev,
-                    { ...commentData, id: newCommentId, createAt: commentData.createAt, displayName: user.name, PhotoURL: user.photo } as Comment
+                    { ...commentData, id: newCommentId, createAt: commentData.createAt, displayName: user.name, photoURL: user.photo } as Comment
                 ]);
 
                 setCommentText('');
@@ -417,7 +417,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                     <div className="user_profile">
                                         <div className="user_photo"
                                             css={css`
-                                                background-image : url(${comment.PhotoURL})
+                                                background-image : url(${comment.photoURL})
                                                 `}
                                         ></div>
                                         <p className="memo_comment_id">{comment.displayName}</p>
@@ -450,7 +450,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                                 <div className="user_profile">
                                                     <div className="user_photo"
                                                         css={css`
-                                                            background-image : url(${reply.PhotoURL})
+                                                            background-image : url(${reply.photoURL})
                                                             `}
                                                     ></div>
                                                     <p className="memo_comment_id">{reply.displayName}</p>
