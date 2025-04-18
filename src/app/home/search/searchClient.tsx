@@ -181,7 +181,7 @@ function PostHit({ hit }: { hit: PostData }) {
 
     return (
         <>
-            {/* <li className="ais_result_wrap">
+            <li className="ais_result_wrap">
                 <motion.div className="ais_profile_wrap"
                     whileHover={{
                         backgroundColor: "#fafbfc",
@@ -227,7 +227,7 @@ function PostHit({ hit }: { hit: PostData }) {
                         <BookmarkBtn postId={hit.id}></BookmarkBtn>
                     </div>
                 </div>
-            </li > */}
+            </li >
             {/* 무한 스크롤 구조 */}
             {!loading &&
                 <motion.div
@@ -242,13 +242,13 @@ function PostHit({ hit }: { hit: PostData }) {
                     <div className='post_profile_wrap'>
                         <div className='user_profile'>
                             <div className='user_photo'
-                                css={css`background-image : url(${hit.photoURL})`}
+                                css={css`background-image : url(${userData.photoURL})`}
                             >
                             </div>
                             <p className='user_name'
                                 onClick={(e) => { e.preventDefault(); handleUsernameClick(hit.userId); }}
                             >
-                                {hit.displayName}
+                                {userData.displayName}
                             </p>
                             <span className='user_uid'>
                                 @{hit.userId.slice(0, 6)}...
