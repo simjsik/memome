@@ -181,7 +181,7 @@ function PostHit({ hit }: { hit: PostData }) {
 
     return (
         <>
-            <li className="ais_result_wrap">
+            {/* <li className="ais_result_wrap">
                 <motion.div className="ais_profile_wrap"
                     whileHover={{
                         backgroundColor: "#fafbfc",
@@ -227,7 +227,7 @@ function PostHit({ hit }: { hit: PostData }) {
                         <BookmarkBtn postId={hit.id}></BookmarkBtn>
                     </div>
                 </div>
-            </li >
+            </li > */}
             {/* 무한 스크롤 구조 */}
             {!loading &&
                 <motion.div
