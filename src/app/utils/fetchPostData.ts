@@ -287,7 +287,7 @@ export const fetchComments = async (userId: string, postId: string) => {
             commentSnap.docs.map(async (docSnapshot) => {
                 const data = docSnapshot.data();
 
-                const userId: string = data.user;
+                const userId: string = data.uid;
 
                 // 캐시에 작성자 정보가 없으면 먼저 users 컬렉션에서 조회
                 let userData = userCache.get(userId);
@@ -309,7 +309,7 @@ export const fetchComments = async (userId: string, postId: string) => {
                 return {
                     id: docSnapshot.id,
                     replyId: data.replyId,
-                    user: userId,
+                    uid: userId,
                     commentText: data.commentText,
                     createAt: data.createAt,  // 필요하면 Timestamp 처리
                     replies: data.replies || [],

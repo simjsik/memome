@@ -11,6 +11,8 @@ import BookmarkBtn from "../BookmarkBtn";
 import { PostCommentInputStyle, PostCommentStyle } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { useCommentUpdateChecker } from "@/app/hook/ClientPolling";
+import { motion } from "framer-motion";
+import { btnVariants } from "@/app/styled/motionVariant";
 
 interface ClientPostProps {
     post: string;
@@ -229,7 +231,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
 
                 const commentData = {
                     replyId: commentId,
-                    user: uid,
+                    uid: uid,
                     commentText: text,
                     createAt: Timestamp.now(),
                     parentId,
@@ -349,21 +351,48 @@ export default function MemoStatus({ post }: ClientPostProps) {
                     )
                 )
                 : query(commentRef, orderBy("createAt", "asc"));
+
             const snapshot = await getDocs(commentQuery);
 
+            // 새로운 댓글이 없는 경우: lastFetchedAt는 그대로 유지
             if (snapshot.empty) {
-                // 새로운 댓글이 없는 경우: lastFetchedAt는 그대로 유지
                 clearUpdate();
                 console.error("새로운 댓글이 없습니다.");
                 return;
             }
 
-            // 댓글 데이터 생성
-            const newComments = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            })) as Comment[];
+            const userCache = new Map<string, { nickname: string; photo: string | null }>();
 
+            // 댓글 데이터 생성
+            const newComments = await Promise.all(
+                snapshot.docs.map(async (docs) => {
+                    const commentData = docs.data() as Comment;
+
+                    // 유저 정보 조회
+                    if (!userCache.has(commentData.uid)) {
+                        const userDocRef = doc(db, "users", commentData.uid);
+                        const userDoc = await getDoc(userDocRef);
+
+                        userCache.set(commentData.uid, {
+                            nickname: userDoc.exists()
+                                ? (userDoc.data()?.displayName || "Unknown")
+                                : "Unknown",
+                            photo: userDoc.exists()
+                                ? userDoc.data()?.photoURL || null
+                                : null
+                        });
+                    }
+
+                    const userInfo = userCache.get(commentData.uid)!;
+
+                    return {
+                        ...commentData,
+                        id: docs.id,
+                        displayName: userInfo.nickname,
+                        photoURL: userInfo.photo,
+                    } as Comment;
+                })
+            );
             // `lastFetchedAt` 업데이트
             const lastDoc = snapshot.docs[snapshot.docs.length - 1];
             console.log("Last document data:", lastDoc.data());
@@ -398,22 +427,27 @@ export default function MemoStatus({ post }: ClientPostProps) {
     return (
         <MemoBox btnStatus>
             {hasUpdate &&
-                <button css={
+                <motion.button css={
                     css`
                     padding: 8px;
                     position: absolute;
-                    top: 20px;
+                    top: 50px;
                     left: 50%;
                     transform: translateX(-50%);
                     z-index: 1;
+                    cursor: pointer;
+                    padding: 12px 10px;
+                    border-radius: 8px;
+                    border: none;
                     background: #0087ff;
                     color: #fff;
-                    border: none;
-                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-                    cursor: pointer;
+                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
                     `}
+                    variants={btnVariants}
+                    whileHover="loginHover"
+                    whileTap="loginClick"
                     onClick={handleUpdateClick}>새로운 업데이트 확인
-                </button>
+                </motion.button>
             }
             <div className="memo_btn_wrap">
                 <div className="comment_wrap">댓글 {commentCount}</div>
@@ -431,7 +465,8 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                                 background-image : url(${comment.photoURL})
                                                 `}
                                         ></div>
-                                        <p className="memo_comment_id">{comment.displayName}</p>
+                                        <p className="memo_comment_user">{comment.displayName}</p>
+                                        <p className="memo_comment_uid">@{comment.uid.slice(0, 8)}...</p>
                                         <button className="comment_delete_btn" onClick={() => deleteComment(comment.id)}></button>
                                     </div>
                                     <p className="memo_comment">{comment.commentText}</p>
@@ -464,10 +499,12 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                                             background-image : url(${reply.photoURL})
                                                             `}
                                                     ></div>
-                                                    <p className="memo_comment_id">{reply.displayName}</p>
+                                                    <p className="memo_comment_user">{reply.displayName}</p>
+                                                    <p className="memo_comment_uid">@{reply.uid.slice(0, 8)}...</p>
                                                     <button className="comment_delete_btn" onClick={() => deleteComment(reply.id)}></button>
                                                 </div>
-                                                <span className="memo_reply_id">@{reply.displayName}</span>
+                                                <span className="memo_reply_user">@{reply.displayName}</span>
+                                                <span className="memo_reply_uid">@{reply.uid.slice(0, 8)}...</span>
                                                 <p className="memo_reply">{reply.commentText}</p>
                                                 <p className="memo_comment_date">{formatDate(reply.createAt)}</p>
                                                 <button className="comment_reply_btn" onClick={() => toggleReply(reply.id)}>답글</button>

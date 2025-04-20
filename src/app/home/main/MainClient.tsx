@@ -478,7 +478,10 @@ export default function MainHome() {
   return (
     <>
       {hasUpdate &&
-        <NewPostBtn className='new_post_btn' onClick={handleUpdateClick}>새로운 업데이트 확인</NewPostBtn>
+        <NewPostBtn className='new_post_btn' onClick={handleUpdateClick}
+          variants={btnVariants}
+          whileHover="loginHover"
+          whileTap="loginClick">새로운 업데이트 확인</NewPostBtn>
       }
       {/* 공지사항 제외 전체 포스트 */}
       <PostWrap>

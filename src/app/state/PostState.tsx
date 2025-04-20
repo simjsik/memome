@@ -39,7 +39,7 @@ export interface userData {
 export interface Comment {
     id: string
     replyId: string;
-    user: string;
+    uid: string;
     commentText: string;
     createAt: Timestamp;
     replies: Comment[];

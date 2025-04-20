@@ -22,6 +22,7 @@ import { auth, db } from "../DB/firebaseConfig";
 import { BeatLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { btnVariants } from "../styled/motionVariant";
 
 interface FirebaseError extends Error {
     code: string;
@@ -422,25 +423,6 @@ export default function LoginBox() {
     // Function
     const GoogleLoginBtn = motion(GoogleButton);
     const GuestLoginBtn = motion(GuestButton);
-
-    const btnVariants = {
-        loginHover: {
-            backgroundColor: "#007ce9",
-            transition: { duration: 0.3 },
-        },
-        otherHover: {
-            backgroundColor: "#f7f9fa",
-            transition: { duration: 0.3 },
-        },
-        loginClick: {
-            backgroundColor: "#2b9cff",
-            transition: { duration: 0.3 },
-        },
-        otherClick: {
-            backgroundColor: "#f5f8fa",
-            transition: { duration: 0.3 },
-        },
-    };
 
     return (
         <>

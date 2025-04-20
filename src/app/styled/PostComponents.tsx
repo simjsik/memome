@@ -2,6 +2,7 @@
 'use client';
 
 import styled from "@emotion/styled";
+import { motion } from "framer-motion";
 
 export const PostWrap = styled.div`
 // 포스트 리스트 스타일 별 우측이 간소화
@@ -1086,7 +1087,7 @@ export const NoMorePost = styled.div`
       margin-top : 4px;
     }
 `
-export const NewPostBtn = styled.button`
+export const NewPostBtn = styled(motion.button)`
     position: fixed;
     left: 730px;
     top: 20px;
@@ -1096,8 +1097,8 @@ export const NewPostBtn = styled.button`
     border: none;
     background: #0087ff;
     color: #fff;
-    font-family: '__PretendardBold_73a78b';
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
 `
 export const MyAlarmWrap = styled.div`
     margin-top: 32px;
