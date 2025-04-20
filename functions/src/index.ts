@@ -71,30 +71,36 @@ async function sendNotice(postId: string, postData: PostData) {
 
 export const setHasUpdateCommentFlag = onDocumentCreated(
   "posts/{postId}/comments/{commentId}",
-  async () => {
+  async (event) => {
+    const commentData = event.data?.data();
+    const commentAuthorId = commentData?.userId; // 댓글 작성자 ID
     const db = getFirestore();
     try {
       const userSnap = await db.collection("users").get();
       const userPromises = userSnap.docs.map(async (userDoc) => {
-        const upRef = db.doc(`users/${userDoc.id}/status/commentUpdates`);
-        await upRef.set(
-          {
-            hasUpdate: true,
-            updatedAt: new Date(),
-          },
-          {merge: true}
-        );
+        if (userDoc.id !== commentAuthorId) {
+          const upRef = db.doc(`users/${userDoc.id}/status/commentUpdates`);
+          await upRef.set(
+            {
+              hasUpdate: true,
+              updatedAt: new Date(),
+            },
+            {merge: true}
+          );
+        }
       });
       const guestSnap = await db.collection("guests").get();
       const guestPromises = guestSnap.docs.map(async (userDoc) => {
-        const upRef = db.doc(`guests/${userDoc.id}/status/commentUpdates`);
-        await upRef.set(
-          {
-            hasUpdate: true,
-            updatedAt: new Date(),
-          },
-          {merge: true}
-        );
+        if (userDoc.id !== commentAuthorId) {
+          const upRef = db.doc(`guests/${userDoc.id}/status/commentUpdates`);
+          await upRef.set(
+            {
+              hasUpdate: true,
+              updatedAt: new Date(),
+            },
+            {merge: true}
+          );
+        }
       });
       // 모든 업데이트 작업이 완료될 때까지 기다림
       await Promise.all([...userPromises, ...guestPromises]);
@@ -108,16 +114,12 @@ export const setHasUpdateCommentFlag = onDocumentCreated(
 export const setHasUpdateFlag = onDocumentCreated(
   "posts/{postId}",
   async (event) => {
-    console.log("onDocumentCreated 트리거 호출됨");
-
     const db = getFirestore();
     const newPost = event.data;
     if (!newPost) {
       console.log("새 포스트가 없음");
       return;
     }
-
-    console.log("onDocumentCreated 실행 중");
 
     const postId = event.params.postId;
     if (!postId) {
@@ -128,7 +130,6 @@ export const setHasUpdateFlag = onDocumentCreated(
     const postData = newPost.data();
     const authorUser = postData.userId;
 
-    console.log("새 포스트 데이터:", postData);
     if (postData.notice) {
       await sendNotice(postId, postData as PostData);
       try {

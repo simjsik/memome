@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { useRecoilState } from 'recoil';
 import { motion } from "framer-motion";
 import { btnVariants } from '../styled/motionVariant';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useOutsideClick from '../hook/OutsideClickHook';
 
 const PostListWrap = styled.div<{ $isMemoPage?: boolean }>`
@@ -27,6 +27,19 @@ border : 1px solid #ededed;
 border-radius : 8px;
 background : #fff;
 
+  ${({ $isMemoPage }) =>
+        $isMemoPage &&
+        `
+    position : fixed;
+    top: 0;
+    right: 0;
+    width : 460px;
+    height: 100%;
+    padding : 20px;
+    border : 1px solid #ededed;
+    border-radius : 8px;
+    background : #fff;
+`}
 .list_top{
 position: relative;
 display : flex;
@@ -133,20 +146,6 @@ cursor : pointer;
         background : #fff;
     `}
   }
-
-  ${({ $isMemoPage }) =>
-        $isMemoPage &&
-        `
-    position : fixed;
-    top: 0;
-    right: 0;
-    width : 460px;
-    height: 100%;
-    padding : 20px;
-    border : 1px solid #ededed;
-    border-radius : 8px;
-    background : #fff;
-`}
 `
 
 export default function StatusBox() {
@@ -155,11 +154,18 @@ export default function StatusBox() {
     const postId = params?.postId || ''
     const isMobile = useMediaQuery({ maxWidth: 1200 });
     const [mobileStatus, setMobileStatus] = useRecoilState<boolean>(statusState);
+    const [isMemoPage, setIsMemoPage] = useState<boolean>(false);
 
     // Function
     const statusRef = useRef<HTMLDivElement>(null);
-    const isMemoPage = location.pathname === `/home/memo/${params?.postId}`;
 
+    useEffect(() => {
+        if(location.pathname.startsWith(`/home/memo/`)){
+            setIsMemoPage(true);
+        } else{
+            setIsMemoPage(false);
+        }
+    }, [path])
     // 768 상태 창 핸들러
     const statusHandle = () => {
         setMobileStatus((prev) => !prev);
