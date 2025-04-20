@@ -126,6 +126,8 @@ export const setHasUpdateFlag = onDocumentCreated(
     }
 
     const postData = newPost.data();
+    const authorUser = postData.userId;
+
     console.log("새 포스트 데이터:", postData);
     if (postData.notice) {
       await sendNotice(postId, postData as PostData);
@@ -133,29 +135,34 @@ export const setHasUpdateFlag = onDocumentCreated(
         const batch = db.batch();
         const userSnap = await db.collection("users").get();
         userSnap.docs.forEach((userDoc) => {
-          const upRef = db.collection(`users/${userDoc.id}/noticeList`).doc();
-          batch.set(
-            upRef,
-            {
-              noticeType: "새 공지사항",
-              noticeText: postData.title,
-              updatedAt: postData.createAt,
-            },
-            {merge: true}
-          );
+         if (userDoc.id !== authorUser) {
+            const upRef = db.collection(`users/${userDoc.id}/noticeList`).doc();
+            batch.set(
+              upRef,
+              {
+                noticeType: "새 공지사항",
+                noticeText: postData.title,
+                updatedAt: postData.createAt,
+              },
+              {merge: true}
+            );
+          }
         });
         const guestSnap = await db.collection("guests").get();
         guestSnap.docs.forEach((userDoc) => {
-          const upRef = db.collection(`guests/${userDoc.id}/noticeList`).doc();
-          batch.set(
-            upRef,
-            {
-              noticeType: "새 공지사항",
-              noticeText: postData.title,
-              updatedAt: postData.createAt,
-            },
-            {merge: true}
-          );
+          if (userDoc.id !== authorUser) {
+            const upRef =
+            db.collection(`guests/${userDoc.id}/noticeList`).doc();
+            batch.set(
+              upRef,
+              {
+                noticeType: "새 공지사항",
+                noticeText: postData.title,
+                updatedAt: postData.createAt,
+              },
+              {merge: true}
+            );
+          }
         });
         await batch.commit();
         console.log("모든 유저의 알림이 업데이트되었습니다.");
@@ -167,27 +174,31 @@ export const setHasUpdateFlag = onDocumentCreated(
         const batch = db.batch();
         const userSnap = await db.collection("users").get();
         userSnap.docs.forEach((userDoc) => {
-          const upRef = db.doc(`users/${userDoc.id}/status/postUpdates`);
-          batch.set(
-            upRef,
-            {
-              hasUpdate: true,
-              updatedAt: new Date(),
-            },
-            {merge: true}
-          );
+          if (userDoc.id !== authorUser) {
+            const upRef = db.doc(`users/${userDoc.id}/status/postUpdates`);
+            batch.set(
+              upRef,
+              {
+                hasUpdate: true,
+                updatedAt: new Date(),
+              },
+              {merge: true}
+            );
+          }
         });
         const guestSnap = await db.collection("guests").get();
         guestSnap.docs.forEach((userDoc) => {
-          const upRef = db.doc(`guests/${userDoc.id}/status/postUpdates`);
-          batch.set(
-            upRef,
-            {
-              hasUpdate: true,
-              updatedAt: new Date(),
-            },
-            {merge: true}
-          );
+          if (userDoc.id !== authorUser) {
+            const upRef = db.doc(`guests/${userDoc.id}/status/postUpdates`);
+            batch.set(
+              upRef,
+              {
+                hasUpdate: true,
+                updatedAt: new Date(),
+              },
+              {merge: true}
+            );
+          }
         });
         await batch.commit();
         console.log("모든 유저의 문서가 업데이트되었습니다.");

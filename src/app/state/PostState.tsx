@@ -7,7 +7,7 @@ export interface PostData {
     id: string;
     userId: string;
     content: string;
-    images?: string[] | false;
+    images?: string[] | undefined;
     createAt: Timestamp;
     commentCount: number,
     notice: boolean,

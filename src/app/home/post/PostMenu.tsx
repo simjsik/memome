@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
-import { DidYouLogin, hasGuestState, ImageUrlsState, loadingState, loginToggleState, modalState, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
+import { DidYouLogin, hasGuestState, ImageUrlsState, loadingState, loginToggleState, modalState, PostData, PostingState, PostState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
@@ -715,6 +715,7 @@ export default function PostMenu() {
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setModal = useSetRecoilState<boolean>(modalState);
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
+    const setNewPosts = useSetRecoilState<PostData[]>(PostState);
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const currentUser = useRecoilValue(userState)
     const hasGuest = useRecoilValue<boolean>(hasGuestState);
@@ -1019,21 +1020,32 @@ export default function PostMenu() {
                 const optContentUrls = await uploadContentImgCdn(posting, uploadedImageUrls);
 
                 // Firestore에 데이터 추가 (Admin SDK 사용)
-
-                await addDoc(collection(db, "posts"), {
+                const newPost = {
                     tag: selectTag,
                     title: postTitle,
-                    userId: uid, // uid로 사용자 ID 사용
+                    userId: uid as string, // uid로 사용자 ID 사용
+                    displayName: currentUser.name as string,
+                    photoURL: currentUser.photo as string,
                     content: optContentUrls,
-                    images: optImageUrls.length > 0 ? optImageUrls : false,
+                    images: optImageUrls.length > 0 ? optImageUrls : undefined,
                     createAt: Timestamp.now(),
                     commentCount: 0,
                     notice: checkedNotice,
-                });
+                }
 
-                alert('포스팅 완료');
+                const postRef = await addDoc(collection(db, "posts"), newPost);
+
+                setNewPosts((prev) => [
+                    {
+                        ...newPost,
+                        id: postRef.id,
+                        images: newPost.images || undefined
+                    }
+                    , ...prev])
+                    
                 setPostingComplete(true);
                 localStorage.removeItem('unsavedPost');
+                alert('포스팅 완료');
                 router.push('/home/main');
             } catch (error) {
                 alert('포스팅에 실패하였습니다: ' + error);
