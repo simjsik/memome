@@ -1,5 +1,4 @@
 import ClientPost from './ClientPost';
-import { fetchComments } from "@/app/utils/fetchPostData";
 import { PostDetailWrap } from "./memoStyle";
 import { Metadata } from "next";
 import { adminDb } from "@/app/DB/firebaseAdminConfig";
@@ -69,9 +68,6 @@ export default async function MemoPage({ params }: MemoPageProps) {
     const userData = userDoc.exists ? userDoc.data() : { displayName: "unknown", photoURL: null } // .data() 호출 필요
 
     // // 포스트 댓글 가져오기
-    const CommentResponse = await fetchComments(userId, postId)
-    const comments = CommentResponse.comments
-
     const formatDate = (timestamp: Timestamp) => {
         return timestamp.toDate().toLocaleString('ko-KR', {
             year: 'numeric',
@@ -85,7 +81,7 @@ export default async function MemoPage({ params }: MemoPageProps) {
     // Function
     return (
         <>
-            <ClientPost comment={comments} />
+            <ClientPost />
             <PostDetailWrap>
                 <div>
                     <span className="post_category">{post?.tag}</span>

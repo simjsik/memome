@@ -249,13 +249,13 @@ export const fetchBookmarks = async (
 }
 
 // 포스트의 댓글
-export const fetchComments = async (userId: string, postId: string) => {
+export const fetchComments = async (userId: string, postId: string, pageParam: Timestamp | undefined,) => {
     try {
         console.log(postId)
 
         if (!postId || postId === "undefined") {
             console.error('존재하지 않는 포스트입니다.')
-            return { comments: [] };
+            return { data: [], nextPage: undefined };
         }
 
         const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
@@ -269,15 +269,36 @@ export const fetchComments = async (userId: string, postId: string) => {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
 
+        const startAfterParam = pageParam
+            ?
+            new Timestamp(pageParam.seconds, pageParam.nanoseconds) // 변환
+            : null;
 
+        console.log(startAfterParam instanceof Timestamp, 'PageParam 타입 확인');
+
+        const queryBase =
+            query(
+                collection(db, 'posts', postId, 'comments'),
+                orderBy('createAt', 'asc'),
+                limit(4) // 필요한 수 만큼 데이터 가져오기
+            )
+
+        console.log(pageParam, '= 페이지 시간', '= 페이지 사이즈', '받은 인자')
+
+        const commentQuery = startAfterParam
+            ?
+            query(
+                queryBase,
+                startAfter(startAfterParam),
+            )
+            :
+            queryBase
         // 2. 댓글 가져오기
-        const commentRef = collection(db, 'posts', postId, 'comments');
-        const commentQuery = query(commentRef, orderBy('createAt', 'asc'));
         const commentSnap = await getDocs(commentQuery);
 
         if (commentSnap.empty) {
             console.error('댓글이 없습니다.')
-            return { comments: [] };
+            return { data: [], nextPage: undefined };
         }
 
         const userCache = new Map<string, { displayName: string; photoURL: string | null }>();
@@ -285,7 +306,7 @@ export const fetchComments = async (userId: string, postId: string) => {
         // 3. 각 댓글에 대해 작성자 정보 가져오기 (비동기 작업을 Promise.all으로 처리)
         const comments: Comment[] = await Promise.all(
             commentSnap.docs.map(async (docSnapshot) => {
-                const data = docSnapshot.data();
+                const data = docSnapshot.data() as Comment;
 
                 const userId: string = data.uid;
 
@@ -320,8 +341,15 @@ export const fetchComments = async (userId: string, postId: string) => {
             })
         );
 
-        console.error(comments)
-        return { comments: comments };
+        const lastVisible = commentSnap.docs.at(-1); // 마지막 문서
+        console.log(lastVisible?.data(), lastVisible?.data().createAt, '보내는 인자')
+
+        return {
+            data: comments,
+            nextPage: lastVisible
+                ? lastVisible.data().createAt as Timestamp
+                : undefined,
+        };
     } catch (error: unknown) {
         if (error instanceof Error) {
             console.error('댓글 데이터 반환 실패:', error.message);

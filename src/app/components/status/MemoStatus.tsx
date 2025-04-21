@@ -2,17 +2,20 @@
 "use client";
 
 import { db } from "@/app/DB/firebaseConfig";
-import { ADMIN_ID, Comment, DidYouLogin, memoCommentCount, memoCommentState, userState } from "@/app/state/PostState";
+import { ADMIN_ID, Comment, DidYouLogin, loadingState, memoCommentCount, memoCommentState, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, increment, orderBy, query, startAfter, Timestamp, updateDoc, where } from "firebase/firestore";
-import { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useEffect, useRef, useState } from "react";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import BookmarkBtn from "../BookmarkBtn";
 import { PostCommentInputStyle, PostCommentStyle } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { useCommentUpdateChecker } from "@/app/hook/ClientPolling";
 import { motion } from "framer-motion";
 import { btnVariants } from "@/app/styled/motionVariant";
+import { fetchComments } from "@/app/utils/fetchPostData";
+import LoadingWrap from "../LoadingWrap";
+import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 
 interface ClientPostProps {
     post: string;
@@ -174,7 +177,138 @@ export default function MemoStatus({ post }: ClientPostProps) {
     const user = useRecoilValue(userState)
     const hasLogin = useRecoilValue(DidYouLogin)
     const ADMIN = useRecoilValue(ADMIN_ID)
+
+    const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
+    const [dataLoading, setDataLoading] = useState<boolean>(false);
+    const newComments: Comment[] = []
+    const observerLoadRef = useRef(null);
+    const containerRef = useRef(null);
+    const [loading, setLoading] = useRecoilState(loadingState);
     // state
+
+    // 무한 스크롤 로직----------------------------------------------------------------------------
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isLoading,
+        isError,
+        error,
+    } = useInfiniteQuery<
+        { data: Comment[]; nextPage: Timestamp | undefined }, // TQueryFnData
+        Error, // TError
+        InfiniteData<{ data: Comment[]; nextPage: Timestamp | undefined }>,
+        string[], // TQueryKey
+        Timestamp | undefined // TPageParam
+    >({
+        retry: false, // 재시도 방지
+        queryKey: ['comments', post],
+        queryFn: async ({ pageParam }) => {
+            try {
+                console.log(user.uid, '일반 포스트 요청')
+                setDataLoading(true);
+                const validateResponse = await fetch(`/api/validate`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ uid: user.uid }),
+                });
+                if (!validateResponse.ok) {
+                    const errorDetails = await validateResponse.json();
+                    throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+                }
+
+                return await fetchComments(user.uid as string, post, pageParam);
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    console.error("일반 오류 발생:", error.message);
+                    throw error;
+                } else {
+                    console.error("알 수 없는 에러 유형:", error);
+                    throw new Error("알 수 없는 에러가 발생했습니다.");
+                }
+            } finally {
+                setDataLoading(false);
+            }
+        },
+        getNextPageParam: (lastPage) => lastPage.nextPage,
+        staleTime: 5 * 60 * 1000,
+        initialPageParam: undefined,
+    });
+
+    useEffect(() => {
+        if (isError) {
+            console.log('사용 제한!', error.message)
+            if (error.message === '사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.') {
+                setUsageLimit(true);
+            }
+        }
+    }, [isError])
+
+    // 무한 스크롤 로직의 data가 변할때 마다 comments 배열 업데이트
+    useEffect(() => {
+        if (usageLimit) return;
+
+        // 빈 배열이거나 데이터가 없으면 기존 데이터를 유지
+        const fetchedComments = data?.pages?.flatMap((page) => page?.data || []) || [];
+        if (fetchedComments.length === 0 && newComments.length === 0) return;
+
+        const newPost = data?.pages
+            ?.flatMap((page) => page?.data || [])
+            .filter((comment): comment is Comment => !!comment) || [];
+
+        const uniquePosts = Array.from(
+            new Map(
+                [
+                    ...commentList, // fetchNewPosts로 가져온 최신 데이터
+                    ...newPost,
+                ].map((comment) => [comment.id, comment]) // 중복 제거를 위해 Map으로 변환
+            ).values()
+        );
+
+        // posts 배열이 업데이트될 때만 상태 변경
+        if (JSON.stringify(uniquePosts) !== JSON.stringify(commentList)) {
+            setCommentList(uniquePosts);
+        }
+    }, [commentList, setCommentList, newComments, data?.pages, usageLimit]);
+
+    // // 스크롤 끝나면 포스트 요청
+    useEffect(() => {
+        if (usageLimit) {
+            if (usageLimit) {
+                setLimitToggle(true);
+            }
+            return;
+        }
+        const obsever = new IntersectionObserver(
+            (entries) => {
+                console.log('intersecting?', entries[0].isIntersecting, hasNextPage);
+                if (entries[0].isIntersecting && hasNextPage && !dataLoading) {
+                    fetchNextPage();
+                }
+            },
+            {
+                root: containerRef.current,              // ⬅ 스크롤 컨테이너를 root로 지정
+                threshold: 0.1,
+            }
+        );
+
+        if (observerLoadRef.current) {
+            obsever.observe(observerLoadRef.current);
+        }
+
+        return () => {
+            if (observerLoadRef.current) obsever.unobserve(observerLoadRef.current);
+        };
+    }, [hasNextPage, fetchNextPage, containerRef.current, observerLoadRef.current])
+
+    // 초기 데이터 로딩
+    useEffect(() => {
+        if (!isLoading) {
+            setLoading(false); // 초기 로딩 해제
+        }
+    }, [isLoading, setLoading])
 
     const formatDate = (createAt: Timestamp | Date | string | number) => {
         if ((createAt instanceof Timestamp)) {
@@ -452,7 +586,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
             <div className="memo_btn_wrap">
                 <div className="comment_wrap">댓글 {commentCount}</div>
             </div>
-            <div className="status_wrap">
+            <div className="status_wrap" ref={containerRef}>
                 <PostCommentStyle>
                     {commentCount > 0 ?
                         // parentId가 없는 댓글(최상위 댓글)만 필터링
@@ -530,13 +664,14 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                         ))}
                                 </div>
                             ))}
+                            <div ref={observerLoadRef} css={css`height: 1px; visibility: ${dataLoading ? "hidden" : "visible"};`} />
                         </>
                         :
                         <div>
                             <p>안녕하세요 댓글이 엄서요 첫 댓글을 달아보세용</p>
                         </div>
                     }
-                    < div className="post_bottom">
+                    <div className="post_bottom">
                         <div className="post_menu_wrap">
                             <BookmarkBtn postId={post} />
                         </div>
@@ -555,6 +690,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                     </div>
                 </PostCommentStyle>
             </div>
+            {(!loading && dataLoading) && <LoadingWrap />}
         </MemoBox >
     )
 }

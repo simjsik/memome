@@ -2,17 +2,11 @@
 "use client";
 
 import { checkUsageLimit } from "@/app/utils/checkUsageLimit";
-import { Comment, loadingState, memoCommentCount, memoCommentState, UsageLimitState, userData, userState } from "@/app/state/PostState";
+import { loadingState, UsageLimitState, userData, userState } from "@/app/state/PostState";
 import { useEffect } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 
-interface ClientPostProps {
-    comment: Comment[];
-}
-
-export default function Memo({ comment }: ClientPostProps) {
-    const setCommentList = useSetRecoilState<Comment[]>(memoCommentState)
-    const setCommentCount = useSetRecoilState<number>(memoCommentCount)
+export default function Memo() {
     const currentUser = useRecoilValue<userData | null>(userState)
     const setUsageLimit = useSetRecoilState<boolean>(UsageLimitState)
     const setLoading = useSetRecoilState<boolean>(loadingState);
@@ -42,14 +36,6 @@ export default function Memo({ comment }: ClientPostProps) {
 
         setLoading(false)
     }, [])
-
-    useEffect(() => {
-        if (comment) {
-            setCommentList(comment);
-            setCommentCount(comment.length);
-        }
-        setLoading(false); // 초기 로딩 해제
-    }, [comment]);
 
     // Function
 
