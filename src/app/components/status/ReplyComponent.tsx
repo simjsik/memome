@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { Reply, useAddReply, useDelComment } from "@/app/hook/CommentMutate";
+import { Reply, useAddReply, useDelReply } from "@/app/hook/CommentMutate";
 import { repliesToggleState, UsageLimitState, userState } from "@/app/state/PostState";
 import { formatDate } from "@/app/utils/formatDate";
 import { css } from "@emotion/react";
@@ -32,6 +32,7 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
         fetchNextPage,
         hasNextPage,
         isLoading,
+        isFetchingNextPage,
         isError,  // 에러 상태
         error,    // 에러 메시지
     } = useInfiniteQuery<
@@ -75,10 +76,9 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
             } finally {
                 setDataLoading(false);
             }
-
         },
         enabled: repliesToggle,
-        getNextPageParam: (lastPage) => lastPage?.nextPage, // 다음 페이지 인덱스 반환
+        getNextPageParam: (lastPage) => { return lastPage.data.length > 4 ? undefined : lastPage?.nextPage }, // 다음 페이지 인덱스 반환
         staleTime: 5 * 60 * 1000, // 5분 동안 데이터 캐싱 유지
         initialPageParam: undefined, // 초기 페이지 파라미터 설정
     });
@@ -136,14 +136,14 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
         }
     }
 
-    const { mutate: delComment } = useDelComment(postId);
+    const { mutate: delReply } = useDelReply(postId, commentId);
 
-    const handleDelComment = async (commentId: string) => {
+    const handleDelReply = async (commentId: string) => {
         if (user) {
             const confirmed = confirm('댓글을 삭제 하시겠습니까?')
             if (confirmed) {
                 try {
-                    delComment(commentId);
+                    delReply(commentId);
                 } catch (error) {
                     console.error('댓글 삭제 중 오류 발생:', error);
                     alert('댓글 삭제 중 오류가 발생했습니다.');
@@ -157,12 +157,12 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
     } // 답글 입력 인풋 토글
 
     const handleMoreReply = () => {
-        if (hasNextPage && isLoading && !usageLimit) {
+        console.log(hasNextPage, '다음 페이지')
+        if (!isLoading && !usageLimit) {
             fetchNextPage();
         }
     }
     return (
-
         <>
             <button className="reply_toggle_btn" onClick={() => setReplieToggle(prev => !prev)}>답글 보기</button >
             {repliesToggle &&
@@ -180,7 +180,7 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                                     />
                                     <p className="memo_comment_user">{reply.displayName}</p>
                                     <p className="memo_comment_uid">@{reply.uid.slice(0, 8)}...</p>
-                                    <button className="comment_delete_btn" onClick={() => handleDelComment(reply.id)}></button>
+                                    <button className="comment_delete_btn" onClick={() => handleDelReply(reply.id)}></button>
                                 </div>
                                 <span className="memo_reply_uid">@{reply.displayName}-{reply.uid.slice(0, 3)}...</span>
                                 <p className="memo_reply">{reply.commentText}</p>
@@ -204,14 +204,13 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                                     </div>
                                 )}
                             </div>
-                            {dataLoading && <LoadingWrap />}
                         </>
-                    ))
-                    }
+                    ))}
                 </>
             }
-            {(hasNextPage && !isLoading && !dataLoading) && repliesToggle &&
-                <button className="reply_more_btn" onClick={handleMoreReply}>더 보기</button>
+            {dataLoading && <LoadingWrap />}
+            {(hasNextPage && !isLoading && !isFetchingNextPage && repliesToggle) &&
+                <>{dataLoading ? <LoadingWrap /> : <button className="reply_more_btn" onClick={handleMoreReply}>더 보기</button>}</>
             }
         </>
     )

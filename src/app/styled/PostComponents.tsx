@@ -983,7 +983,7 @@ width: 100%;
     border: none;
     background: none;
 }
-    
+
 .reply_toggle_btn{
     font-size: 0.875rem;
     margin-left: 12px;
@@ -1049,8 +1049,32 @@ width: 100%;
 
 .comment_input{
   outline: none;
-  border: 1px solid #ededed;
+  border: none;
   padding: 10px;
+  font-family: var(--font-pretendard-medium);
+}
+  .reply_input_wrap{
+  position: relative;
+
+  .comment_upload_btn{
+    width : 68px;
+    height : 48px;
+    border  : 1px solid #ededed;
+    background : none;
+    cursor : pointer;
+  }
+
+  .comment_input{
+    width: calc(100% - 20px);
+    max-width: calc(100% - 20px);
+    min-width : calc(100% - 20px);
+    max-height : 220px;
+    min-height : 56px;
+    outline: none;
+    border: 1px solid #ededed;
+    padding: 10px;
+    font-family: var(--font-pretendard-medium);
+  }
 }
 `
 export const PostCommentInputStyle = styled.div`
