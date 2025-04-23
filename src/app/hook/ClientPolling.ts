@@ -5,7 +5,7 @@ import { db } from "../DB/firebaseConfig";
 import { useRecoilValue } from "recoil";
 import { hasGuestState, userState } from "../state/PostState";
 
-const useUpdateChecker = (statusPath: string) => {
+const useUpdateChecker = () => {
     const [hasUpdate, setHasUpdate] = useState(false);
     const currentUser = useRecoilValue(userState)
     const hasGuest = useRecoilValue(hasGuestState)
@@ -13,7 +13,7 @@ const useUpdateChecker = (statusPath: string) => {
     useEffect(() => {
         const fetchUpdateStatus = async () => {
             try {
-                const docRef = hasGuest ? doc(db, `guests/${currentUser?.uid}/${statusPath}`) : doc(db, `users/${currentUser?.uid}/${statusPath}`);
+                const docRef = hasGuest ? doc(db, `guests/${currentUser?.uid}/status/postUpdates`) : doc(db, `users/${currentUser?.uid}/status/postUpdates`);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     setHasUpdate(docSnap.data().hasUpdate || false);
@@ -31,7 +31,7 @@ const useUpdateChecker = (statusPath: string) => {
         fetchUpdateStatus(); // 컴포넌트 마운트 시 즉시 상태 확인
 
         return () => clearInterval(interval); // 컴포넌트 언마운트 시 인터벌 제거
-    }, [statusPath, currentUser]);
+    }, [currentUser]);
 
     const clearUpdate = async () => {
         try {
@@ -53,7 +53,7 @@ const useUpdateChecker = (statusPath: string) => {
                     throw new Error(`새 포스트 업데이트 실패 : ${errorDetails.message}`);
                 }
 
-                const docRef = hasGuest ? doc(db, `guests/${userId}/${statusPath}`) : doc(db, `users/${userId}/${statusPath}`);
+                const docRef = hasGuest ? doc(db, `guests/${userId}/status/postUpdates`) : doc(db, `users/${userId}/status/postUpdates`);
                 await updateDoc(docRef, { hasUpdate: false });
 
                 setHasUpdate(false);
@@ -67,5 +67,4 @@ const useUpdateChecker = (statusPath: string) => {
     return { hasUpdate, clearUpdate };
 };
 
-export const useCommentUpdateChecker = () => useUpdateChecker("status/commentUpdates");
-export const usePostUpdateChecker = () => useUpdateChecker("status/postUpdates");
+export const usePostUpdateChecker = () => useUpdateChecker();

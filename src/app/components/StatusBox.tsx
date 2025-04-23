@@ -160,9 +160,9 @@ export default function StatusBox() {
     const statusRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if(location.pathname.startsWith(`/home/memo/`)){
+        if (location.pathname.startsWith(`/home/memo/`)) {
             setIsMemoPage(true);
-        } else{
+        } else {
             setIsMemoPage(false);
         }
     }, [path])
@@ -232,7 +232,6 @@ export default function StatusBox() {
                                 </PostListWrap>
                                 :
                                 <PostListWrap $isMemoPage={isMemoPage}>
-                                    <SearchComponent></SearchComponent>
                                     {
                                         path !== `/home/memo/${params?.postId}` && <UserProfile></UserProfile >
                                     }

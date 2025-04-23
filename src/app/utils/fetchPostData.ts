@@ -1,6 +1,7 @@
 import { collection, doc, getDoc, getDocs, limit, orderBy, query, startAfter, Timestamp, where } from "firebase/firestore";
 import { db } from "@/app/DB/firebaseConfig";
 import { Comment, ImagePostData, PostData } from "@/app/state/PostState";
+import { Reply } from "../hook/CommentMutate";
 
 // 일반 포스트 무한 스크롤 로직
 export const fetchPosts = async (
@@ -249,7 +250,7 @@ export const fetchBookmarks = async (
 }
 
 // 포스트의 댓글
-export const fetchComments = async (userId: string, postId: string, pageParam: Timestamp | undefined,) => {
+export const fetchComments = async (userId: string, postId: string, pageParam: Timestamp | undefined) => {
     try {
         console.log(postId)
 
@@ -333,11 +334,119 @@ export const fetchComments = async (userId: string, postId: string, pageParam: T
                     uid: userId,
                     commentText: data.commentText,
                     createAt: data.createAt,  // 필요하면 Timestamp 처리
-                    replies: data.replies || [],
                     parentId: data.parentId || null,
+                    replyCount: data.replyCount,
                     displayName: userData.displayName,
                     photoURL: userData.photoURL,
                 } as Comment;
+            })
+        );
+
+        const lastVisible = commentSnap.docs.at(-1); // 마지막 문서
+        console.log(lastVisible?.data(), lastVisible?.data().createAt, '보내는 인자')
+
+        return {
+            data: comments,
+            nextPage: lastVisible
+                ? lastVisible.data().createAt as Timestamp
+                : undefined,
+        };
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error('댓글 데이터 반환 실패:', error.message);
+        } else {
+            console.error('Unexpected error:', error);
+        }
+        throw error;
+    }
+};
+
+export const fetchReplies = async (userId: string, postId: string, commentId: string, pageParam: Timestamp | undefined) => {
+    try {
+        if (!postId || postId === "undefined") {
+            console.error('존재하지 않는 포스트입니다.')
+            return { data: [], nextPage: undefined };
+        }
+
+        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId }),
+        });
+        if (LimitResponse.status === 403) {
+            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+        }
+
+        const startAfterParam = pageParam
+            ?
+            new Timestamp(pageParam.seconds, pageParam.nanoseconds) // 변환
+            : null;
+
+        console.log(startAfterParam instanceof Timestamp, 'PageParam 타입 확인');
+
+        const queryBase =
+            query(
+                collection(db, 'posts', postId, 'comments', commentId, 'reply'),
+                orderBy('createAt', 'asc'),
+                limit(4) // 필요한 수 만큼 데이터 가져오기
+            )
+
+        console.log(pageParam, '= 페이지 시간', '받은 인자')
+
+        const commentQuery = startAfterParam
+            ?
+            query(
+                queryBase,
+                startAfter(startAfterParam),
+            )
+            :
+            queryBase
+        // 2. 댓글 가져오기
+        const commentSnap = await getDocs(commentQuery);
+
+        if (commentSnap.empty) {
+            console.error('댓글이 없습니다.')
+            return { data: [], nextPage: undefined };
+        }
+
+        const userCache = new Map<string, { displayName: string; photoURL: string | null }>();
+
+        // 3. 각 댓글에 대해 작성자 정보 가져오기 (비동기 작업을 Promise.all으로 처리)
+        const comments: Reply[] = await Promise.all(
+            commentSnap.docs.map(async (docSnapshot) => {
+                const data = docSnapshot.data() as Reply;
+
+                const userId: string = data.uid;
+
+                // 캐시에 작성자 정보가 없으면 먼저 users 컬렉션에서 조회
+                let userData = userCache.get(userId);
+
+                if (!userData) {
+                    let userDoc = await getDoc(doc(db, 'users', userId));
+                    // 만약 users 컬렉션에 문서가 없으면 guests 컬렉션에서 조회
+                    if (!userDoc.exists()) {
+                        userDoc = await getDoc(doc(db, 'guests', userId));
+                    }
+                    if (userDoc.exists()) {
+                        userData = userDoc.data() as { displayName: string; photoURL: string | null };
+                    } else {
+                        userData = { displayName: 'Unknown', photoURL: null };
+                    }
+                    userCache.set(userId, userData);
+                }
+
+                return {
+                    id: docSnapshot.id,
+                    replyId: data.replyId,
+                    uid: userId,
+                    commentText: data.commentText,
+                    createAt: data.createAt,  // 필요하면 Timestamp 처리
+                    parentId: data.parentId || null,
+                    displayName: userData.displayName,
+                    photoURL: userData.photoURL,
+                } as Reply;
             })
         );
 

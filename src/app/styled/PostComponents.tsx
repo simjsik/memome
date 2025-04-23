@@ -932,76 +932,126 @@ export const PostCommentStyle = styled.div`
 width: 100%;
 
 .memo_comment_wrap{
-border-bottom : 1px solid #ededed;
-margin-top: 10px;
-padding-bottom : 20px;
+  border-bottom : 1px solid #ededed;
+  margin-top: 10px;
+  padding: 0px 0px 20px 40px;
 }
 .user_profile{
-position: relative;
-display: flex;
+  position: relative;
+  left: -40px;
+  display: flex;
 }
+
 .user_profile p{
-line-height : 32px;
-font-family : var(--font-pretendard-bold);
+  line-height : 32px;
 }
-.user_photo{
-width : 32px;
-height: 32px;
-margin-right : 8px;
-background-size : cover;
-background-repeat : no-repeat;
-border-radius : 50%;
+
+.memo_comment_user{
+  font-family : var(--font-pretendard-bold);
+}
+
+.memo_comment_uid {
+  font-family: var(--font-pretendard-light);
+  font-size: 0.875rem;
+  margin-left: 4px;
+}
+
+.user_photo,
+.reply_user_photo{
+  width : 32px;
+  height: 32px;
+  margin-right : 8px;
+  background-size : cover;
+  background-repeat : no-repeat;
+  border-radius : 50%;
+}
+
+.reply_user_photo{
+  width : 24px;
+  height: 24px;
 }
 
 // 댓글
 .memo_comment{
-margin-top : 8px;
+  margin-top : 8px;
 }
-.reply_wrap{
-margin-top : 8px;
+.reply_toggle_btn,
+.reply_more_btn{
+    font-family: var(--font-pretendard-medium);
+    color: #0087ff;
+    cursor : pointer;
+    border: none;
+    background: none;
 }
-.memo_reply{
-margin-top : 4px;
+    
+.reply_toggle_btn{
+    font-size: 0.875rem;
+    margin-left: 12px;
 }
 
-.memo_reply_id{
-display: block;
-width: fit-content;
-margin-top: 8px;
-color: #0087ff;
-background-color: #c8fffd;
+.reply_more_btn{
+    width: calc(100% - 16px);
+    height: 42px;
+    font-size: 1rem;
+}
+.reply_wrap{
+  margin-top : 8px;
+  padding-left : 32px;
+  
+  .user_profile{
+    left : -32px;
+  }
+
+  .memo_comment_user,
+  .memo_comment_uid{
+    line-height: 24px;
+  }
+}
+
+.memo_reply{
+  margin-top : 4px;
+
+}
+
+.memo_reply_uid{
+  display: block;
+  width: fit-content;
+  margin-top: 8px;
+  color: #0087ff;
+  background-color: #c8fffd;
 }
 
 .memo_comment_date{
-font-size: 0.875rem;
-color: #777;
-margin-top: 10px;
+  font-size: 0.875rem;
+  color: #777;
+  margin-top: 10px;
 }
 
 .comment_reply_btn{
-width: 60px;
-height: 32px;
-border: 1px solid #ededed;
-background: #fff;
-margin: 8px 0px;
-cursor : pointer;
+  width: 60px;
+  height: 32px;
+  border: 1px solid #ededed;
+  background: #fff;
+  margin: 8px 0px;
+  cursor : pointer;
 }
+
 .comment_delete_btn{
-position: absolute;
-right: 0;
-width: 32px;
-height: 32px;
-background: #fff;
-border: 1px solid #ededed;
-border-radius: 4px;
-cursor : pointer;
+  position: absolute;
+  right: -20px;
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border: 1px solid #ededed;
+  border-radius: 4px;
+  cursor : pointer;
 }
 
 .comment_input{
-outline: none;
-    border: 1px solid #ededed;
-    padding: 10px;
-    }
+  outline: none;
+  border: 1px solid #ededed;
+  padding: 10px;
+}
 `
 export const PostCommentInputStyle = styled.div`
 position : relative;

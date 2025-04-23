@@ -1,5 +1,5 @@
 import { Timestamp } from "firebase/firestore";
-import { atom } from "recoil"
+import { atom, atomFamily } from "recoil"
 
 export interface PostData {
     tag: string;
@@ -37,15 +37,15 @@ export interface userData {
 }
 
 export interface Comment {
-    id: string
+    id: string;
     replyId: string;
     uid: string;
     commentText: string;
     createAt: Timestamp;
-    replies: Comment[];
     parentId: string | null;
-    displayName: string,
-    photoURL: string | null,
+    replyCount: number;
+    displayName: string;
+    photoURL: string | null;
 }
 
 export interface memoList {
@@ -200,18 +200,21 @@ export const memoState = atom<memoList>({
     },
 })
 
-// 포스트 댓글
-export const memoCommentState = atom<Comment[]>({
-    key: 'memoCommentState',
-    default: [],
-})
-
 // 포스트 댓글 수
 export const memoCommentCount = atom<number>({
     key: 'memoCommentCount',
     default: 0,
 })
 
+export const memoCommentState = atom<Comment[]>({
+    key: 'memoCommentState',
+    default: [],
+})
+
+export const repliesToggleState = atomFamily<boolean, string>({
+    key: 'repliesToggleState',
+    default: false,
+})
 // 새 공지사항 알림 토글
 export const newNoticeState = atom<boolean>({
     key: 'newNoticeState',

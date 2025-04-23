@@ -2,16 +2,21 @@
 "use client";
 
 import { checkUsageLimit } from "@/app/utils/checkUsageLimit";
-import { loadingState, UsageLimitState, userData, userState } from "@/app/state/PostState";
+import { loadingState, memoCommentCount, UsageLimitState, userData, userState } from "@/app/state/PostState";
 import { useEffect } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 
-export default function Memo() {
+export default function Memo({ commentLength }: { commentLength: number }) {
     const currentUser = useRecoilValue<userData | null>(userState)
+    const setCommentLength = useSetRecoilState<number>(memoCommentCount)
     const setUsageLimit = useSetRecoilState<boolean>(UsageLimitState)
     const setLoading = useSetRecoilState<boolean>(loadingState);
 
     // state
+
+    useEffect(() => {
+        setCommentLength(commentLength);
+    }, [commentLength])
 
     // 사용량 확인
     useEffect(() => {

@@ -69,47 +69,47 @@ async function sendNotice(postId: string, postData: PostData) {
   }
 }
 
-export const setHasUpdateCommentFlag = onDocumentCreated(
-  "posts/{postId}/comments/{commentId}",
-  async (event) => {
-    const commentData = event.data?.data();
-    const commentAuthorId = commentData?.userId; // 댓글 작성자 ID
-    const db = getFirestore();
-    try {
-      const userSnap = await db.collection("users").get();
-      const userPromises = userSnap.docs.map(async (userDoc) => {
-        if (userDoc.id !== commentAuthorId) {
-          const upRef = db.doc(`users/${userDoc.id}/status/commentUpdates`);
-          await upRef.set(
-            {
-              hasUpdate: true,
-              updatedAt: new Date(),
-            },
-            {merge: true}
-          );
-        }
-      });
-      const guestSnap = await db.collection("guests").get();
-      const guestPromises = guestSnap.docs.map(async (userDoc) => {
-        if (userDoc.id !== commentAuthorId) {
-          const upRef = db.doc(`guests/${userDoc.id}/status/commentUpdates`);
-          await upRef.set(
-            {
-              hasUpdate: true,
-              updatedAt: new Date(),
-            },
-            {merge: true}
-          );
-        }
-      });
-      // 모든 업데이트 작업이 완료될 때까지 기다림
-      await Promise.all([...userPromises, ...guestPromises]);
-      console.log("모든 유저의 문서가 업데이트되었습니다.");
-    } catch (error) {
-      console.error("업데이트 중 오류 발생:", error);
-    }
-  }
-);
+// export const setHasUpdateCommentFlag = onDocumentCreated(
+//   "posts/{postId}/comments/{commentId}",
+//   async (event) => {
+//     const commentData = event.data?.data();
+//     const commentAuthorId = commentData?.userId; // 댓글 작성자 ID
+//     const db = getFirestore();
+//     try {
+//       const userSnap = await db.collection("users").get();
+//       const userPromises = userSnap.docs.map(async (userDoc) => {
+//         if (userDoc.id !== commentAuthorId) {
+//           const upRef = db.doc(`users/${userDoc.id}/status/commentUpdates`);
+//           await upRef.set(
+//             {
+//               hasUpdate: true,
+//               updatedAt: new Date(),
+//             },
+//             {merge: true}
+//           );
+//         }
+//       });
+//       const guestSnap = await db.collection("guests").get();
+//       const guestPromises = guestSnap.docs.map(async (userDoc) => {
+//         if (userDoc.id !== commentAuthorId) {
+//           const upRef = db.doc(`guests/${userDoc.id}/status/commentUpdates`);
+//           await upRef.set(
+//             {
+//               hasUpdate: true,
+//               updatedAt: new Date(),
+//             },
+//             {merge: true}
+//           );
+//         }
+//       });
+//       // 모든 업데이트 작업이 완료될 때까지 기다림
+//       await Promise.all([...userPromises, ...guestPromises]);
+//       console.log("모든 유저의 문서가 업데이트되었습니다.");
+//     } catch (error) {
+//       console.error("업데이트 중 오류 발생:", error);
+//     }
+//   }
+// );
 
 export const setHasUpdateFlag = onDocumentCreated(
   "posts/{postId}",

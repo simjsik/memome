@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import ClientPost from './ClientPost';
 import { PostDetailWrap } from "./memoStyle";
 import { Metadata } from "next";
@@ -60,6 +62,7 @@ export default async function MemoPage({ params }: MemoPageProps) {
 
     const post = postSnap.data();
     const userId = post?.userId;
+    const commentLength = post?.commentCount as number;
 
     // 포스트 데이터에 유저 이름 매핑하기
     const userDocRef = adminDb.collection("users").doc(userId); // DocumentReference 생성
@@ -81,7 +84,7 @@ export default async function MemoPage({ params }: MemoPageProps) {
     // Function
     return (
         <>
-            <ClientPost />
+            <ClientPost commentLength={commentLength} />
             <PostDetailWrap>
                 <div>
                     <span className="post_category">{post?.tag}</span>
