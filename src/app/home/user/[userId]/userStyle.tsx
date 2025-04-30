@@ -18,6 +18,7 @@ export const UserPostWrap = styled.div`
         border-bottom: 1px solid #ededed;
         padding: 20px;
         background-color: #ffffff00;
+        cursor:pointer;
     }
     // user_post_list_wrap
 
@@ -37,16 +38,14 @@ export const UserPostWrap = styled.div`
                 background-repeat: no-repeat;
                 width: 100%;
                 height : 100%;
+            }
 
-                .image_list_icon{
-                    position: absolute;
-                    bottom: 6px;
-                    right: 6px;
-                    background: red;
-                    width: 28px;
-                    height: 28px;
-                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-                }
+            .image_list_icon{
+                position: absolute;
+                top: 6px;
+                right: 6px;
+                width: 28px;
+                height: 28px;
             }
 
             .image_post_img:nth-of-type(n+2){
@@ -223,13 +222,13 @@ export const UserPostWrap = styled.div`
         padding: 0px 0px 0px 52px;
 
         div{
-            width: 120px;
+            width: calc((100% / 4) - 4px);
             height: 100%;
+            margin-right : 4px;
+            border-radius : 8px;
             background-size: cover;
             background-repeat: no-repeat;
-            border-radius: 8px;
-            border: 1px solid #ededed;
-            margin-right: 12px;
+            border : 1px solid #ededed;
         }
     }
     // user_post_img
@@ -242,6 +241,7 @@ export const UserPostWrap = styled.div`
         .user_post_comment{
             display: flex;
         }
+
         .post_comment_btn{
             width: 32px;
             height: 32px;
@@ -250,7 +250,8 @@ export const UserPostWrap = styled.div`
             background : #fff;
             cursor : pointer
         }
-        .user_post_comment_icon{
+
+        .post_comment_icon{
             width: 20px;
             height: 20px;
             background-size : cover;

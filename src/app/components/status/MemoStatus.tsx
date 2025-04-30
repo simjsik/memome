@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { Comment, loadingState, memoCommentCount, memoCommentState, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
+import { Comment, loadingState, memoCommentCount, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
 import { Timestamp } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
@@ -15,6 +15,8 @@ import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { Reply, useAddComment, useAddReply, useDelComment } from "@/app/hook/CommentMutate";
 import ReplyComponent from "./ReplyComponent";
 import { formatDate } from "@/app/utils/formatDate";
+import { motion } from "framer-motion";
+import { btnVariants } from "@/app/styled/motionVariant";
 
 interface ClientPostProps {
     post: string;
@@ -167,7 +169,6 @@ font-size : 14px;
 }
 `
 export default function MemoStatus({ post }: ClientPostProps) {
-    const [commentList, setCommentList] = useRecoilState<Comment[]>(memoCommentState);
     const commentCount = useRecoilValue<number>(memoCommentCount);
     const [commentText, setCommentText] = useState<string>('');
     const [replyText, setReplyText] = useState<string>('');
@@ -230,6 +231,8 @@ export default function MemoStatus({ post }: ClientPostProps) {
         initialPageParam: undefined,
     });
 
+    const commentList = data?.pages.flatMap(page => page.data) || []
+
     useEffect(() => {
         if (isError) {
             console.log('사용 제한!', error.message)
@@ -238,16 +241,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
             }
         }
     }, [isError])
-
-    // 댓글 무한 스크롤 로직의 data가 변할때 마다 comments 배열 업데이트
-    useEffect(() => {
-        if (usageLimit) return;
-        if (!data) return;
-
-        // 서버에서 받은 최신 페이지(flatMap) 그대로 리스트로
-        const freshComments = data.pages.flatMap((p) => p.data);
-        setCommentList(freshComments);
-    }, [data?.pages, usageLimit]);
 
     // // 스크롤 끝나면 포스트 요청
     useEffect(() => {
@@ -396,11 +389,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
         setActiveReply((prev) => (prev === commentId ? null : commentId));
     } // 답글 입력 인풋 토글
 
-    useEffect(() => {
-        setCommentList([]);
-    }, [post])
-
-
     return (
         <MemoBox btnStatus>
             <div className="memo_btn_wrap">
@@ -421,11 +409,19 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                         ></div>
                                         <p className="memo_comment_user">{comment.displayName}</p>
                                         <p className="memo_comment_uid">@{comment.uid.slice(0, 8)}...</p>
-                                        <button className="comment_delete_btn" onClick={() => handleDelComment(comment.id)}></button>
+                                        <button className="comment_delete_btn"
+                                            onClick={() => handleDelComment(comment.id)}>
+                                            <div className="comment_delete_icon"
+                                                css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746003900/%EC%A7%80%EC%9B%8C%EB%B2%84%EB%A6%AC%EA%B8%B0_uiox61.svg)`}
+                                            ></div>
+                                        </button>
                                     </div>
                                     <p className="memo_comment">{comment.commentText}</p>
                                     <p className="memo_comment_date">{formatDate(comment.createAt)}</p>
-                                    <button className="comment_reply_btn" onClick={() => toggleReply(comment.id)}>답글</button>
+                                    <motion.button variants={btnVariants}
+                                        whileHover="otherHover"
+                                        whileTap="otherClick"
+                                        className="comment_reply_btn" onClick={() => toggleReply(comment.id)}>답글</motion.button>
                                     {activeReply === comment.id && (
                                         <div className="reply_input_wrap">
                                             <textarea
@@ -434,12 +430,15 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                                 value={replyText}
                                                 onChange={(e) => setReplyText(e.target.value)}
                                             />
-                                            <button
+                                            <motion.button
+                                                variants={btnVariants}
+                                                whileHover="otherHover"
+                                                whileTap="otherClick"
                                                 className="comment_upload_btn"
                                                 onClick={() => handleAddReply(comment.id, comment.id)}
                                             >
                                                 등록
-                                            </button>
+                                            </motion.button>
                                         </div>
                                     )}
                                     {comment.replyCount > 0 &&
@@ -470,7 +469,10 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                 <p className="login_user_id">{user?.name}</p>
                             </div>
                             <textarea className="comment_input" placeholder="댓글 입력" value={commentText} onChange={(e) => setCommentText(e.target.value)} />
-                            <button className="comment_upload_btn" onClick={() => handleAddComment(null, 'comment')}>등록</button>
+                            <motion.button variants={btnVariants}
+                                whileHover="otherHover"
+                                whileTap="otherClick"
+                                className="comment_upload_btn" onClick={() => handleAddComment(null, 'comment')}>등록</motion.button>
                         </PostCommentInputStyle>
                     </div>
                 </PostCommentStyle>

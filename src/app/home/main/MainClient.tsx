@@ -3,10 +3,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { ADMIN_ID, DidYouLogin, loadingState, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, PostState, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
+import { ADMIN_ID, DidYouLogin, loadingState, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
 import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
-import { collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, where } from 'firebase/firestore';
+import { deleteDoc, doc, getDoc, Timestamp, } from 'firebase/firestore';
 import { db } from '../../DB/firebaseConfig';
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 import { motion } from "framer-motion";
@@ -23,6 +23,8 @@ import { useHandleUsernameClick } from '@/app/utils/handleClick';
 import { btnVariants } from '@/app/styled/motionVariant';
 import useOutsideClick from '@/app/hook/OutsideClickHook';
 import { cleanHtml } from '@/app/utils/CleanHtml';
+import { formatDate } from '@/app/utils/formatDate';
+import { useAddUpdatePost } from './hook/usePostMutation';
 
 
 export default function MainHome() {
@@ -32,12 +34,7 @@ export default function MainHome() {
   const [loading, setLoading] = useRecoilState(loadingState);
 
   // 포스트 스테이트
-  const [posts, setPosts] = useRecoilState<PostData[]>(PostState)
-  const newPosts: PostData[] = []
   const [dropToggle, setDropToggle] = useState<string>('')
-
-  // 불러온 마지막 데이터
-  const [lastFetchedAt, setLastFetchedAt] = useState<Timestamp | null>(null); // 마지막으로 문서 가져온 시간
 
   // 공지사항 스테이트
   const setNewNotice = useSetRecoilState<boolean>(newNoticeState);
@@ -144,7 +141,7 @@ export default function MainHome() {
 
   // 무한 스크롤 로직----------------------------------------------------------------------------
   const {
-    data,
+    data: posts,
     fetchNextPage,
     hasNextPage,
     isLoading,
@@ -153,7 +150,7 @@ export default function MainHome() {
   } = useInfiniteQuery<
     { data: PostData[]; nextPage: Timestamp | undefined }, // TQueryFnData
     Error, // TError
-    InfiniteData<{ data: PostData[]; nextPage: Timestamp | undefined }>,
+    InfiniteData<{ data: PostData[]; nextPage: Timestamp | undefined }>,// TData
     string[], // TQueryKey
     Timestamp | undefined // TPageParam
   >({
@@ -192,32 +189,7 @@ export default function MainHome() {
     initialPageParam: undefined,
   });
 
-  // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
-  useEffect(() => {
-    if (usageLimit) return;
-
-    // 빈 배열이거나 데이터가 없으면 기존 데이터를 유지
-    const fetchedPosts = data?.pages?.flatMap((page) => page?.data || []) || [];
-    if (fetchedPosts.length === 0 && newPosts.length === 0) return;
-
-    const newPost = data?.pages
-      ?.flatMap((page) => page?.data || [])
-      .filter((post): post is PostData => !!post) || [];
-
-    const uniquePosts = Array.from(
-      new Map(
-        [
-          ...posts, // fetchNewPosts로 가져온 최신 데이터
-          ...newPost,
-        ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
-      ).values()
-    );
-
-    // posts 배열이 업데이트될 때만 상태 변경
-    if (JSON.stringify(uniquePosts) !== JSON.stringify(posts)) {
-      setPosts(uniquePosts);
-    }
-  }, [posts, setPosts, newPosts, data?.pages, usageLimit]);
+  const postList = posts?.pages.flatMap(page => page.data) || [];
 
   // 스크롤 끝나면 포스트 요청
   useEffect(() => {
@@ -330,107 +302,11 @@ export default function MainHome() {
     router.push(`memo/${postId}`)
   }
 
-  const formatDate = (createAt: Timestamp | Date | string | number) => {
-    if ((createAt instanceof Timestamp)) {
-      return createAt.toDate().toLocaleString('ko-KR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      }).replace(/\. /g, '.');
-    } else {
-      const date = new Date(createAt);
-
-      const format = date.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-      return format;
-    }
-  }
-
-  // 새 문서 가져오기
-  const fetchNewPosts = async () => {
-    try {
-      const postsRef = collection(db, "posts");
-
-      const postsQuery = query(
-        postsRef,
-        where('notice', '==', false),
-        orderBy('createAt', 'asc'),
-        startAfter(lastFetchedAt) // 마지막 시간 이후
-      );
-
-      console.log(lastFetchedAt, '마지막 포스트 시간')
-      const querySnapshot = await getDocs(postsQuery);
-
-      const userCache = new Map<string, { nickname: string; photo: string | null }>();
-
-      const newPostlist = await Promise.all(
-        querySnapshot.docs.map(async (docs) => {
-          const postData = { id: docs.id, ...docs.data() } as PostData;
-
-          // 유저 정보 캐싱 및 가져오기
-          if (!userCache.has(postData.userId)) {
-            const userDocRef = doc(db, "users", postData.userId);
-            const userDoc = await getDoc(userDocRef);
-
-            if (userDoc.exists()) {
-              const userData = userDoc.data() as { displayName: string; photoURL: string | null };
-              userCache.set(postData.userId, {
-                nickname: userData.displayName,
-                photo: userData.photoURL || null,
-              });
-            } else {
-              userCache.set(postData.userId, {
-                nickname: "Unknown",
-                photo: null,
-              });
-            }
-          }
-
-          // 매핑된 유저 정보 추가
-          const userData = userCache.get(postData.userId) || { nickname: "Unknown", photo: null };
-          postData.displayName = userData.nickname;
-          postData.photoURL = userData.photo;
-
-          return postData;
-        })
-      );
-
-      if (newPostlist.length > 0) {
-        const updatedPosts = [...newPostlist].sort((a, b) => {
-          const dateA = a.createAt.toMillis(); // Timestamp에서 밀리초로 변환
-          const dateB = b.createAt.toMillis(); // Timestamp에서 밀리초로 변환
-          return dateB - dateA; // 최신순으로 정렬
-        });
-        setPosts([...updatedPosts, ...posts]);
-      }
-
-      // 업데이트 플래그 초기화
-      clearUpdate();
-    } catch (error) {
-      console.error("Error fetching new posts:", error);
-    }
-  };
-
-  // 새 문서 업데이트를 위한 마지막 포스트 데이터 추출
-  useEffect(() => {
-    if (posts) {
-      let lastPost = null
-
-      lastPost = posts[0]?.createAt
-      setLastFetchedAt(lastPost)
-    }
-  }, [posts])
+  const { mutate: fetchUpdatePost, isPending: isAddUpdatePost } = useAddUpdatePost();
 
   // 버튼 클릭 시 새 데이터 로드
   const handleUpdateClick = () => {
-    fetchNewPosts();
+    fetchUpdatePost();
   };
 
   // 페이지 이동 시 스크롤 위치 저장
@@ -473,7 +349,8 @@ export default function MainHome() {
     }
   });
 
-  const { hasUpdate, clearUpdate } = usePostUpdateChecker();
+  const { hasUpdate } = usePostUpdateChecker();
+
   const handleUsernameClick = useHandleUsernameClick();
   return (
     <>
@@ -486,8 +363,9 @@ export default function MainHome() {
       {/* 공지사항 제외 전체 포스트 */}
       <PostWrap>
         <>
+          {(!loading && isAddUpdatePost) && <LoadingWrap />}
           {/* 무한 스크롤 구조 */}
-          {!loading && posts.map((post) => (
+          {!loading && postList.map(post => (
             <motion.div
               whileHover={{
                 backgroundColor: "#fafbfc",
@@ -556,7 +434,6 @@ export default function MainHome() {
                         css={css
                           `
                           background-image : url(${imageUrl});
-                          width: calc((100% / ${Array.isArray(post.images) && post.images.length}) - 4px);
                           `}
                       ></div>
                     ))}
@@ -590,7 +467,7 @@ export default function MainHome() {
           {
             (!hasNextPage && !dataLoading && !loading) &&
             <>
-              {posts.length > 0 ?
+              {postList.length > 0 ?
                 <NoMorePost>
                   <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966548/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_fahwir.svg)`}></div>
                   <p>모두 확인했습니다.</p>
@@ -604,7 +481,6 @@ export default function MainHome() {
                 </NoMorePost>
               }
             </>
-
           }
         </>
       </PostWrap >

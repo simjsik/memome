@@ -472,7 +472,6 @@ export const fetchReplies = async (userId: string, postId: string, commentId: st
 export const fetchPostList = async (
     userId: string,
     pageParam: Timestamp | undefined,
-    pageSize: number,
 ) => {
     try {
         const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
@@ -498,7 +497,7 @@ export const fetchPostList = async (
             postlistRef,
             where('userId', '==', userId),
             orderBy('createAt', 'desc'),
-            limit(pageSize)
+            limit(6)
         );
         // console.log(pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
         const postQuery = startAfterParam
@@ -545,6 +544,79 @@ export const fetchPostList = async (
         return {
             imageData: imageData,
             data: postWithComment,
+            nextPage: lastVisible
+                ? lastVisible.data().createAt as Timestamp
+                : undefined,
+        };
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        throw error;
+    };
+};
+
+export const fetchImageList = async (
+    userId: string,
+    pageParam: Timestamp | undefined,
+) => {
+    try {
+        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId }),
+        });
+        if (LimitResponse.status === 403) {
+            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+        }
+
+        const startAfterParam = pageParam
+            ?
+            new Timestamp(pageParam.seconds, pageParam.nanoseconds)// 변환
+            : null;
+
+        // 현재 포스트 작성자의 모든 글 가져오기
+        const postlistRef = collection(db, 'posts');
+
+        const queryBase = query(
+            postlistRef,
+            where('userId', '==', userId),
+            where('images', '!=', false),
+            orderBy('createAt', 'desc'),
+            limit(10)
+        );
+
+        console.log(pageParam, '= 페이지 시간', '= 페이지 사이즈', '받은 인자')
+
+        const postQuery = startAfterParam
+            ?
+            query(
+                queryBase,
+                startAfter(startAfterParam),
+            )
+            :
+            queryBase
+
+        const postlistSnapshot = await getDocs(postQuery);
+
+        const imageData: ImagePostData[] = postlistSnapshot.docs.map((document) => {
+            const imageData = document.data();
+
+            const mappedImages: string[] | false = (imageData.images === false)
+                ? false
+                : (Array.isArray(imageData.images) ? imageData.images : []); // 만약 다른 타입이면 빈 배열로 처리
+
+            return {
+                id: document.id,
+                images: mappedImages
+            };
+        });
+
+        const lastVisible = postlistSnapshot.docs.at(-1); // 마지막 문서
+        console.log(imageData, lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
+
+        return {
+            data: imageData,
             nextPage: lastVisible
                 ? lastVisible.data().createAt as Timestamp
                 : undefined,

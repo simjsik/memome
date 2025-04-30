@@ -13,10 +13,10 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
-import { fetchPostList } from "@/app/utils/fetchPostData";
+import { fetchImageList, fetchPostList } from "@/app/utils/fetchPostData";
 import LoadingWrap from "@/app/components/LoadingWrap";
 import { btnVariants } from "@/app/styled/motionVariant";
-
+import { formatDate } from "@/app/utils/formatDate";
 
 interface ClientUserProps {
     user: userData,
@@ -24,15 +24,17 @@ interface ClientUserProps {
 
 interface FetchPostListResponse {
     data: PostData[];
-    imageData: ImagePostData[];
     nextPage: Timestamp | undefined;
 }
+interface FetchImageListResponse {
+    data: ImagePostData[];
+    nextPage: Timestamp | undefined;
+}
+
 export default function UserClient({ user }: ClientUserProps) {
-    const [imagePost, setImagePost] = useState<ImagePostData[]>([])
     const ADMIN = useRecoilValue(ADMIN_ID);
     const router = useRouter();
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
-    const [posts, setPosts] = useState<PostData[]>([])
     const [postTab, setPostTab] = useState<boolean>(true)
     const [dropToggle, setDropToggle] = useState<string>('')
     const [loading, setLoading] = useRecoilState(loadingState);
@@ -47,14 +49,14 @@ export default function UserClient({ user }: ClientUserProps) {
 
     // 무한 스크롤 로직
     const {
-        data,
+        data: userPosts,
         fetchNextPage,
         hasNextPage,
         isLoading,
     } = useInfiniteQuery<
         FetchPostListResponse,
         Error,
-        InfiniteData<{ data: PostData[]; imageData: ImagePostData[]; nextPage: Timestamp | undefined }>,
+        InfiniteData<{ data: PostData[]; nextPage: Timestamp | undefined }>,
         string[], // TQueryKey
         Timestamp | undefined // TPageParam
     >({
@@ -75,7 +77,7 @@ export default function UserClient({ user }: ClientUserProps) {
                     throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
                 }
 
-                return fetchPostList(uid as string, pageParam, 4);
+                return fetchPostList(uid as string, pageParam);
             } catch (error) {
                 if (error instanceof Error) {
                     console.error("일반 오류 발생:", error.message);
@@ -93,31 +95,56 @@ export default function UserClient({ user }: ClientUserProps) {
         initialPageParam: undefined,
     });
 
-    // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
-    useEffect(() => {
-        const uniquePosts = Array.from(
-            new Map(
-                [
-                    ...(data?.pages
-                        ?.flatMap((page) => page?.data || [])
-                        .filter((post): post is PostData => !!post) || []),
-                ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
-            ).values()
-        );
+    // 무한 스크롤 로직
+    const {
+        data: ImagePosts,
+        fetchNextPage: fetchNextImgPage,
+        hasNextPage: hasImagePage,
+        isLoading: isImagePostLoading,
+    } = useInfiniteQuery<
+        FetchImageListResponse,
+        Error,
+        InfiniteData<{ data: ImagePostData[]; nextPage: Timestamp | undefined }>,
+        string[], // TQueryKey
+        Timestamp | undefined // TPageParam
+    >({
+        retry: false,
+        queryKey: ['ImagePostList', uid as string],
+        queryFn: async ({ pageParam }) => {
+            try {
+                setDataLoading(true)
 
-        const uniqueImagePosts = Array.from(
-            new Map(
-                [
-                    ...(data?.pages
-                        ?.flatMap((page) => page?.imageData || [])
-                        .filter((post): post is ImagePostData => !!post) || []),
-                ].map((post) => [post.id, post])
-            ).values()
-        );
+                const validateResponse = await fetch(`/api/validate`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ uid }),
+                });
+                if (!validateResponse.ok) {
+                    const errorDetails = await validateResponse.json();
+                    throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+                }
 
-        setImagePost(uniqueImagePosts);
-        setPosts(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
-    }, [data?.pages]);
+                return fetchImageList(uid as string, pageParam);
+            } catch (error) {
+                if (error instanceof Error) {
+                    console.error("일반 오류 발생:", error.message);
+                    throw error;
+                } else {
+                    console.error("알 수 없는 에러 유형:", error);
+                    throw new Error("알 수 없는 에러가 발생했습니다.");
+                }
+            } finally {
+                setDataLoading(false)
+            }
+        },
+        getNextPageParam: (lastPage) => lastPage.nextPage,
+        staleTime: 5 * 60 * 1000,
+        initialPageParam: undefined,
+    });
+
+    const userPostList = userPosts?.pages.flatMap(page => page.data) || [];
+    const userImageList = ImagePosts?.pages.flatMap(page => page.data) || [];
 
     // 스크롤 끝나면 포스트 요청
     const isFirstLoad = useRef(true); // 최초 실행 여부 확인
@@ -178,37 +205,14 @@ export default function UserClient({ user }: ClientUserProps) {
             }
             observer.disconnect(); // 강제 해제
         };
-    }, [hasNextPage, fetchNextPage, usageLimit, postTab]);
+    }, [hasImagePage, fetchNextImgPage, usageLimit, postTab]);
 
     // 초기 데이터 로딩
     useEffect(() => {
-        if (!isLoading) {
+        if ((!isLoading || !isImagePostLoading)) {
             setLoading(false); // 초기 로딩 해제
         }
-    }, [isLoading, setLoading])
-
-    const formatDate = (createAt: Timestamp | Date | string | number) => {
-        if ((createAt instanceof Timestamp)) {
-            return createAt.toDate().toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).replace(/\. /g, '.');
-        } else {
-            const date = new Date(createAt);
-
-            const format = date.toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            })
-            return format;
-        }
-    }
+    }, [isLoading, isImagePostLoading, setLoading])
 
     // 포스트 삭제
     const deletePost = async (postId: string) => {
@@ -284,7 +288,7 @@ export default function UserClient({ user }: ClientUserProps) {
                     postTab ?
                         <>
                             {
-                                !loading && posts.map((post) => (
+                                !loading && userPostList.map((post) => (
                                     <motion.div key={post.id} className="user_post_list_wrap"
                                         whileHover={{
                                             backgroundColor: "#fafbfc",
@@ -326,13 +330,15 @@ export default function UserClient({ user }: ClientUserProps) {
                                         </div>
                                         <div className="user_post_content" dangerouslySetInnerHTML={{ __html: post.content }}></div>
                                         {(post.images && post.images.length > 0) && (
-                                            <div className="user_post_img">
-                                                {post.images.map((imageUrl, index) => (
-                                                    <div key={index} css={css`
-                                        background-image : url(${imageUrl})
-                                        `}></div>
-                                                ))}
-                                            </div>
+                                            <>
+                                                <div className="user_post_img">
+                                                    {post.images.map((imageUrl, index) => (
+                                                        <div key={index} css={css`
+                                                        background-image : url(${imageUrl})
+                                                    `}></div>
+                                                    ))}
+                                                </div>
+                                            </>
                                         )}
                                         <div className="user_post_bottom">
                                             <div className="user_post_comment">
@@ -358,7 +364,7 @@ export default function UserClient({ user }: ClientUserProps) {
                             {postTab && <div className="postObserver" ref={observerLoadRef} css={css`height: 1px; visibility: ${dataLoading ? "hidden" : "visible"};`} />}
                             {(!loading && dataLoading) && <LoadingWrap />}
                             {
-                                (!hasNextPage && posts.length > 0 && !loading) &&
+                                (!hasNextPage && userPostList.length > 0 && !loading) &&
                                 <NoMorePost>
                                     <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966548/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_fahwir.svg)`}></div>
                                     <p>모두 확인했습니다.</p>
@@ -366,7 +372,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                 </NoMorePost>
                             }
                             {
-                                (posts.length === 0 && !loading) &&
+                                (userPostList.length === 0 && !loading) &&
                                 < NoMorePost >
                                     <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966543/%EB%A9%94%EB%AA%A8%EC%97%86%EC%96%B4_d0sm6q.svg)`}></div>
                                     <p>메모가 없습니다.</p>
@@ -377,18 +383,20 @@ export default function UserClient({ user }: ClientUserProps) {
                         :
                         <>
                             <div className="user_image_post_wrap">
-                                {!loading && imagePost.map((post) => (
+                                {!loading && userImageList.map((post) => (
                                     post.images &&
                                     <div key={post.id} className="user_image_wrap">
                                         {post.images.length > 0 && (
                                             <>
                                                 {post.images.map((imageUrl, index) => (
                                                     <div key={index} className="image_post_img" css={css`
-                                            background-image : url(${imageUrl})
-                                            `}>
+                                                            background-image : url(${imageUrl})
+                                                        `}>
                                                     </div>
                                                 ))}
-                                                < div className="image_list_icon"></div>
+                                                {post.images.length > 1 &&
+                                                    <div className="image_list_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
+                                                }
                                             </>
                                         )}
                                     </div>
@@ -397,7 +405,7 @@ export default function UserClient({ user }: ClientUserProps) {
                             {!postTab && <div className="imageObserver" ref={observerImageLoadRef} css={css`height: 1px; visibility: ${dataLoading ? "hidden" : "visible"};`} />}
                             {(!loading && dataLoading) && <LoadingWrap />}
                             {
-                                (!hasNextPage && imagePost.length > 0 && !loading) &&
+                                (!hasNextPage && userImageList.length > 0 && !loading) &&
                                 <NoMorePost>
                                     <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966548/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_fahwir.svg)`}></div>
                                     <p>모두 확인했습니다.</p>
@@ -405,7 +413,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                 </NoMorePost>
                             }
                             {
-                                (imagePost.length === 0 && !loading) &&
+                                (userImageList.length === 0 && !loading) &&
                                 <NoMorePost>
                                     <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966543/%EB%A9%94%EB%AA%A8%EC%97%86%EC%96%B4_d0sm6q.svg)`}></div>
                                     <p>메모가 없습니다.</p>

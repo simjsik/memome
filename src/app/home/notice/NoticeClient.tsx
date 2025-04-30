@@ -2,7 +2,7 @@
 "use client";
 
 import { fetchNoticePosts } from "@/app/utils/fetchPostData";
-import { DidYouLogin, loadingState, loginToggleState, modalState, noticeState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
+import { DidYouLogin, loadingState, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import { NoMorePost, NoticeWrap, } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import LoadingWrap from "@/app/components/LoadingWrap";
 import { useHandleUsernameClick } from "@/app/utils/handleClick";
 import { btnVariants } from "@/app/styled/motionVariant";
+import { formatDate } from "@/app/utils/formatDate";
 
 export default function ClientNotice() {
     const yourLogin = useRecoilValue(DidYouLogin)
@@ -25,7 +26,6 @@ export default function ClientNotice() {
     const [loading, setLoading] = useRecoilState(loadingState);
 
     // 포스트 스테이트
-    const [notices, setNotices] = useRecoilState<PostData[]>(noticeState)
 
     // 현재 로그인 한 유저
     const currentUser = useRecoilValue(userState)
@@ -34,32 +34,9 @@ export default function ClientNotice() {
     const observerLoadRef = useRef(null);
     const uid = currentUser.uid
 
-    const formatDate = (createAt: Timestamp | Date | string | number) => {
-        if ((createAt instanceof Timestamp)) {
-            return createAt.toDate().toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).replace(/\. /g, '.');
-        } else {
-            const date = new Date(createAt);
-
-            const format = date.toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            })
-            return format;
-        }
-    }
-
     // 무한 스크롤 로직
     const {
-        data,
+        data: notices,
         fetchNextPage,
         hasNextPage,
         isLoading,
@@ -106,25 +83,8 @@ export default function ClientNotice() {
         initialPageParam: undefined,
     });
 
-    // 무한 스크롤 로직의 data가 변할때 마다 posts 배열 업데이트
-    useEffect(() => {
-        if (usageLimit) return;
+    const noticeList = notices?.pages.flatMap(page => page.data) || [];
 
-        const newPosts = data?.pages
-            ?.flatMap((page) => page?.data || [])
-            .filter((post): post is PostData => !!post) || [];
-
-        const uniqueNotices = Array.from(
-            new Map(
-                [
-                    ...notices,
-                    ...newPosts,
-                ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
-            ).values()
-        );
-
-        setNotices(uniqueNotices); // 중복 제거된 포스트 배열을 posts에 저장
-    }, [data?.pages])
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
@@ -208,7 +168,7 @@ export default function ClientNotice() {
             <NoticeWrap>
                 <>
                     {/* 무한 스크롤 구조 */}
-                    {!loading && notices.map((post) => (
+                    {!loading && noticeList.map((post) => (
                         <motion.div
                             key={post.id} className='post_box'
                             whileHover={{
@@ -281,8 +241,7 @@ export default function ClientNotice() {
                     {(!dataLoading && !hasNextPage && !loading) &&
                         <>
                             {
-
-                                notices.length > 0 ?
+                                noticeList.length > 0 ?
                                     <NoMorePost>
                                         <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966540/%EA%B3%B5%EC%A7%80%EB%8B%A4%EB%B4%A4%EC%96%B4_lbmtbv.svg)`}></div>
                                         <p>모두 확인했습니다.</p>

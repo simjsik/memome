@@ -2,7 +2,7 @@
 "use client";
 import { fetchBookmarks } from "@/app/utils/fetchPostData";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
-import { bookMarkState, loadingState, PostData, UsageLimitState, userBookMarkState, userData, userState } from "@/app/state/PostState";
+import { bookMarkState, loadingState, UsageLimitState, userData, userState } from "@/app/state/PostState";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -15,10 +15,10 @@ import { motion } from "framer-motion";
 import LoadingWrap from "@/app/components/LoadingWrap";
 import { useHandleUsernameClick } from "@/app/utils/handleClick";
 import { btnVariants } from "@/app/styled/motionVariant";
+import { cleanHtml } from "@/app/utils/CleanHtml";
 
 export default function Bookmark() {
     const currentBookmark = useRecoilValue<string[]>(bookMarkState)
-    const [userBookmarks, setUserBookmarks] = useRecoilState<PostData[]>(userBookMarkState)
     const currentUser = useRecoilValue<userData>(userState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [dataLoading, setDataLoading] = useState<boolean>(false);
@@ -30,7 +30,7 @@ export default function Bookmark() {
     const uid = currentUser.uid
 
     const {
-        data: bookmarkPages,
+        data: bookmarks,
         fetchNextPage,
         hasNextPage,
         refetch,
@@ -79,32 +79,19 @@ export default function Bookmark() {
         initialPageParam: 0, // 초기 페이지 파라미터 설정
     });
 
+    const bookmarkList = bookmarks?.pages.flatMap(page => page?.data) || [];
+
     useEffect(() => {
         if (isError) {
             setUsageLimit(true);
         }
     }, [isError])
 
-    useEffect(() => {
-        const uniquePosts = Array.from(
-            new Map(
-                [
-                    ...userBookmarks, // fetchNewPosts로 가져온 최신 데이터
-                    ...(bookmarkPages?.pages
-                        ?.flatMap((page) => page?.data || [])
-                        .filter((post): post is PostData => !!post) || []),
-                ].map((post) => [post.id, post]) // 중복 제거를 위해 Map으로 변환
-            ).values()
-        );
-
-        setUserBookmarks(uniquePosts); // 중복 제거된 포스트 배열을 posts에 저장
-    }, [bookmarkPages?.pages])
-
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
         if (usageLimit) return console.log('함수 요청 안함.');
 
-        if (currentBookmark.length > 0 || (bookmarkPages && bookmarkPages.pages.length > 0)) {
+        if (currentBookmark.length > 0 || (bookmarks && bookmarks.pages.length > 0)) {
             const observer = new IntersectionObserver(
                 (entries) => {
                     if (entries[0].isIntersecting && hasNextPage) {
@@ -124,10 +111,10 @@ export default function Bookmark() {
             };
         }
 
-    }, [hasNextPage, fetchNextPage, currentBookmark, bookmarkPages]);
+    }, [hasNextPage, fetchNextPage, currentBookmark, bookmarks]);
 
     useEffect(() => {
-        if (bookmarkPages && bookmarkPages.pages.length > 0) {
+        if (bookmarks && bookmarkList.length > 0) {
             fetchNextPage();
         }
     }, [])
@@ -180,11 +167,11 @@ export default function Bookmark() {
                 <PostWrap>
                     {!loading && <p className='all_post'>내 북마크</p>}
                     {/* 무한 스크롤 구조 */}
-                    {!loading && userBookmarks.map((post) => (
+                    {!loading && bookmarkList.map((post) => (
                         <motion.div
-                            key={post.id}
+                            key={post?.id}
                             className='post_box'
-                            onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}
+                            onClick={(event) => { event.preventDefault(); handlePostClick(post?.id as string); }}
                             whileHover={{
                                 backgroundColor: "#fafbfc",
                                 transition: { duration: 0.1 },
@@ -194,19 +181,19 @@ export default function Bookmark() {
                             <div className='post_profile_wrap'>
                                 <div className='user_profile'>
                                     <div className='user_photo'
-                                        css={css`background-image : url(${post.photoURL})`}
+                                        css={css`background-image : url(${post?.photoURL})`}
                                     >
                                     </div>
                                     <p className='user_name'
-                                        onClick={(e) => { e.preventDefault(); handleUsernameClick(post.userId); }}
+                                        onClick={(e) => { e.preventDefault(); handleUsernameClick(post?.userId as string); }}
                                     >
-                                        {post.displayName}
+                                        {post?.displayName}
                                     </p>
                                     <span className='user_uid'>
-                                        @{post.userId.slice(0, 6)}...
+                                        @{post?.userId.slice(0, 6)}...
                                     </span>
                                     <p className='post_date'>
-                                        · {formatDate(post.createAt)}
+                                        · {formatDate(post?.createAt as Timestamp)}
                                     </p>
                                 </div>
                                 <button
@@ -220,12 +207,12 @@ export default function Bookmark() {
                             < div className='post_content_wrap' >
                                 {/* 포스트 제목 */}
                                 < div className='post_title_wrap' >
-                                    <span className='post_tag'>[{post.tag}]</span>
-                                    <h2 className='post_title'>{post.title}</h2>
+                                    <span className='post_tag'>[{post?.tag}]</span>
+                                    <h2 className='post_title'>{post?.title}</h2>
                                 </div>
-                                <div className='post_text' dangerouslySetInnerHTML={{ __html: post.content }}></div>
+                                <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml(post?.content as string) }}></div>
                                 {/* 이미지 */}
-                                {(post.images && post.images.length > 0) && (
+                                {(post?.images && post.images.length > 0) && (
                                     <div className='post_pr_img_wrap'>
                                         {post.images.map((imageUrl, index) => (
                                             <div className='post_pr_img' key={index}
@@ -252,9 +239,9 @@ export default function Bookmark() {
                                                 whileTap="iconClick" className='post_comment_icon'>
                                             </motion.div>
                                         </motion.button>
-                                        <p>{post.commentCount}</p>
+                                        <p>{post?.commentCount}</p>
                                     </div>
-                                    <BookmarkBtn postId={post.id}></BookmarkBtn>
+                                    <BookmarkBtn postId={post?.id as string}></BookmarkBtn>
                                 </div>
                             </div>
                         </motion.div >
@@ -263,7 +250,7 @@ export default function Bookmark() {
                     <div ref={observerLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }} />
                     {(!loading && dataLoading) && <LoadingWrap />}
                     {
-                        (!dataLoading && !hasNextPage && userBookmarks.length > 0 && !loading) &&
+                        (!dataLoading && !hasNextPage && bookmarkList.length > 0 && !loading) &&
                         <NoMorePost>
                             <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965256/%EB%B6%81%EB%A7%88%ED%81%AC%EB%8B%A4%EB%B4%A4%EC%96%B4_vvrw2f.svg)`}></div>
                             <p>모두 확인했습니다.</p>
@@ -271,7 +258,7 @@ export default function Bookmark() {
                         </NoMorePost>
                     }
                     {
-                        (!dataLoading && userBookmarks.length === 0 && !loading) &&
+                        (!dataLoading && bookmarkList.length === 0 && !loading) &&
                         <NoMorePost>
                             <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965256/%EB%B6%81%EB%A7%88%ED%81%AC%EC%97%86%EC%96%B4_fkhi4n.svg)`}></div>
                             <p>북마크된 메모가 없습니다.</p>

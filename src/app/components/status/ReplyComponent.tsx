@@ -126,7 +126,6 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                     } as Reply
 
                 addReply(commentData);
-
                 setReplyText('');
                 setActiveReply(null);
             } catch (error) {
@@ -158,7 +157,7 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
 
     const handleMoreReply = () => {
         console.log(hasNextPage, '다음 페이지')
-        if (!isLoading && !usageLimit) {
+        if (hasNextPage && !isLoading && !usageLimit) {
             fetchNextPage();
         }
     }
@@ -180,7 +179,12 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                                     />
                                     <p className="memo_comment_user">{reply.displayName}</p>
                                     <p className="memo_comment_uid">@{reply.uid.slice(0, 8)}...</p>
-                                    <button className="comment_delete_btn" onClick={() => handleDelReply(reply.id)}></button>
+                                    <button className="comment_delete_btn"
+                                        onClick={() => handleDelReply(reply.id)}>
+                                        <div className="comment_delete_icon"
+                                            css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746003900/%EC%A7%80%EC%9B%8C%EB%B2%84%EB%A6%AC%EA%B8%B0_uiox61.svg)`}
+                                        ></div>
+                                    </button>
                                 </div>
                                 <span className="memo_reply_uid">@{reply.displayName}-{reply.uid.slice(0, 3)}...</span>
                                 <p className="memo_reply">{reply.commentText}</p>

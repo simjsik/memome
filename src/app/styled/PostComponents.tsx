@@ -222,6 +222,7 @@ align-content: flex-start;
       }
 
       .post_pr_img{
+        width: calc((100% / 4) - 4px);
         height: 100%;
         margin-right : 4px;
         border-radius : 8px;
@@ -1041,10 +1042,16 @@ width: 100%;
   right: -20px;
   width: 32px;
   height: 32px;
-  background: #fff;
+  padding : 4px;
+  background-color: #fff;
   border: 1px solid #ededed;
   border-radius: 4px;
   cursor : pointer;
+
+  .comment_delete_icon{
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .comment_input{
@@ -1060,7 +1067,7 @@ width: 100%;
     width : 68px;
     height : 48px;
     border  : 1px solid #ededed;
-    background : none;
+    background-color: #ffffff00;
     cursor : pointer;
   }
 
@@ -1125,7 +1132,7 @@ width : 68px;
 height : 48px;
 margin-top : 10px;
 border  : 1px solid #ededed;
-background : none;
+background-color: #ffffff00;
 cursor : pointer;
 }
 `
