@@ -310,7 +310,8 @@ align-content: flex-start;
     .all_post{
         width : 100%;
         height: 60px;
-        padding: 16px;
+        line-height: 60px;
+        padding: 0px 16px;
         border-bottom: 1px solid #ededed;
         text-align: center;
     }
@@ -378,7 +379,8 @@ align-content: flex-start;
 
     .all_post{
         height: 68px;
-        padding: 20px;
+        line-height: 68px;
+        padding: 0px 20px;
         border-bottom: 2px solid #ededed;
     }
   }
@@ -444,7 +446,8 @@ align-content: flex-start;
 
     .all_post{
         height: 84px;
-        padding: 24px;
+        line-height: 84px;
+        padding: 0px 24px;
     }
   }
 
@@ -511,7 +514,8 @@ align-content: flex-start;
 
     .all_post{
       height: 100px;
-      padding: 28px;
+      line-height: 100px;
+      padding: 0px 28px;
     }
   }
 

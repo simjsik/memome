@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
-import { DidYouLogin, hasGuestState, ImageUrlsState, loadingState, loginToggleState, modalState, PostData, PostingState, PostState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
+import { DidYouLogin, hasGuestState, ImageUrlsState, loadingState, loginToggleState, modalState, PostData, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
@@ -18,7 +18,7 @@ import { saveUnsavedPost } from '@/app/utils/saveUnsavedPost';
 import { uploadContentImgCdn, uploadImgCdn } from '@/app/utils/uploadCdn';
 import { btnVariants } from '@/app/styled/motionVariant';
 import { MoonLoader } from 'react-spinners';
-import { useAddUpdatePost } from '../main/hook/usePostMutation';
+import { useAddNewPost } from './hook/useNewPostMutation';
 
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
@@ -716,7 +716,6 @@ export default function PostMenu() {
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setModal = useSetRecoilState<boolean>(modalState);
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
-    const setNewPosts = useSetRecoilState<PostData[]>(PostState);
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const currentUser = useRecoilValue(userState)
     const hasGuest = useRecoilValue<boolean>(hasGuestState);
@@ -953,7 +952,7 @@ export default function PostMenu() {
         setPostTitle(value);
     }
 
-    const { mutate: fetchUpdatePost } = useAddUpdatePost();
+    const { mutate: fetchUpdateNewPost } = useAddNewPost();
 
     // 포스팅 업로드
     const uploadThisPost = async () => {
@@ -1023,30 +1022,28 @@ export default function PostMenu() {
                 const optContentUrls = await uploadContentImgCdn(posting, uploadedImageUrls);
 
                 // Firestore에 데이터 추가 (Admin SDK 사용)
-                const newPost = {
+                let newPost = {
                     tag: selectTag,
                     title: postTitle,
                     userId: uid as string, // uid로 사용자 ID 사용
                     displayName: currentUser.name as string,
                     photoURL: currentUser.photo as string,
                     content: optContentUrls,
-                    images: optImageUrls.length > 0 ? optImageUrls : undefined,
+                    images: optImageUrls.length > 0 ? optImageUrls : false,
                     createAt: Timestamp.now(),
                     commentCount: 0,
                     notice: checkedNotice,
-                }
+                } as PostData
 
                 const postRef = await addDoc(collection(db, "posts"), newPost);
 
-                setNewPosts((prev) => [
-                    {
-                        ...newPost,
-                        id: postRef.id,
-                        images: newPost.images || undefined
-                    }
-                    , ...prev])
+                newPost = {
+                    ...newPost,
+                    id: postRef.id,
+                }
 
-                fetchUpdatePost();
+                fetchUpdateNewPost(newPost);
+
                 setPostingComplete(true);
                 localStorage.removeItem('unsavedPost');
                 alert('포스팅 완료');
@@ -1231,7 +1228,6 @@ export default function PostMenu() {
     useEffect(() => {
         if (!postingComplete) {
             if (/\S/.test(posting) || /\S/.test(postTitle)) {
-
 
                 const handleBeforeUnload = () => {
                     if (postingText.length > 0) {
