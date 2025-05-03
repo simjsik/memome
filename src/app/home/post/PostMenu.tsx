@@ -18,6 +18,7 @@ import { saveUnsavedPost } from '@/app/utils/saveUnsavedPost';
 import { uploadContentImgCdn, uploadImgCdn } from '@/app/utils/uploadCdn';
 import { btnVariants } from '@/app/styled/motionVariant';
 import { MoonLoader } from 'react-spinners';
+import { useAddUpdatePost } from '../main/hook/usePostMutation';
 
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
@@ -952,6 +953,8 @@ export default function PostMenu() {
         setPostTitle(value);
     }
 
+    const { mutate: fetchUpdatePost } = useAddUpdatePost();
+
     // 포스팅 업로드
     const uploadThisPost = async () => {
         if (uploadLoading) {
@@ -1042,7 +1045,8 @@ export default function PostMenu() {
                         images: newPost.images || undefined
                     }
                     , ...prev])
-                    
+
+                fetchUpdatePost();
                 setPostingComplete(true);
                 localStorage.removeItem('unsavedPost');
                 alert('포스팅 완료');

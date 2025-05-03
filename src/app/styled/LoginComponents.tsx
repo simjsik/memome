@@ -67,6 +67,10 @@ export const LoginButtonWrap = styled.div`
 
         .auto_on{
           border: 2px solid #0087ff;
+
+          .auto_on_icon{
+            height : 100%;
+          }
         }
 
         p{

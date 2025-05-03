@@ -85,7 +85,6 @@ export default function ClientNotice() {
 
     const noticeList = notices?.pages.flatMap(page => page.data) || [];
 
-
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
 

@@ -132,7 +132,7 @@ export default function LoginBox() {
             typeof (error).code === 'string'
         );
     }
-    
+
     const handleLogin = async (email: string, password: string) => {
         if (isLoading) return;
         setLoginError(null);
@@ -542,11 +542,13 @@ export default function LoginBox() {
                             <div className="auto_login_btn">
                                 {
                                     hasAutoLogin ?
-                                        <button className="auto_on" onClick={() => setHasAutoLogin((prev) => !prev)}></button>
+                                        <button className="auto_on" onClick={() => setHasAutoLogin((prev) => !prev)}>
+                                            <div className="auto_on_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746267045/%EC%9E%90%EB%8F%99%EB%A1%9C%EA%B7%B8%EC%9D%B8%EC%B2%B4%ED%81%AC_gaqgly.svg)`}></div>
+                                        </button>
                                         :
                                         <button className="auto_off" onClick={() => setHasAutoLogin((prev) => !prev)}></button>
                                 }
-                                <p>로그인 상태 저장</p>
+                                <p>자동 로그인</p>
                             </div>
                             <div className="register_wrap">
                                 <LoginSpan>처음 이신가요?</LoginSpan >

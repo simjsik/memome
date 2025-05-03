@@ -29,7 +29,7 @@ router.post('/saveUser', async (req: Request, res: Response) => {
         if (!userSnapshot.exists) {
             const userData: newUser = {
                 displayName: displayName || randomName,
-                photoURL: "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744861940/%ED%94%84%EB%A1%9C%ED%95%84%EC%9A%A9_grt1en.png",
+                photoURL: "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg",
                 userId: uid,
             };
 
