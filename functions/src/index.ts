@@ -10,7 +10,6 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import {onRequest} from "firebase-functions/v2/https";
 import setCsrfTokenRouter from "./routes/setCsrfToken";
-import autoLoginRouter from "./routes/autoLoginApi";
 import validateRouter from "./routes/validateAuthToken";
 import loginRouter from "./routes/loginApi";
 import logoutRouter from "./routes/logoutApi";
@@ -217,7 +216,7 @@ export const setGoogleUser = functions.auth
   const userRef = adminDb.collection('users').doc(uid);
   const userSnap = await userRef.get();
 
-  // 필드가 이미 있으면 덮어쓰지 않고, 없으면 생성이 아닌 없을 때만 생성
+  // 필드가 없을 때만 생성
   if (!userSnap.exists) {
     await userRef.set({
       displayName: displayName || '',
@@ -259,7 +258,6 @@ app.get('/', (req : Request, res : Response) => {
 });
 
 app.use('/', setCsrfTokenRouter);
-app.use('/', autoLoginRouter);
 app.use('/', validateRouter);
 app.use('/', loginRouter);
 app.use('/', logoutRouter);

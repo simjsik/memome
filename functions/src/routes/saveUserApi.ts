@@ -33,7 +33,7 @@ router.post('/saveUser', async (req: Request, res: Response) => {
                 userId: uid,
             };
 
-            await userRef.set(userData);
+            await userRef.set(userData, {merge: true});
         }
 
         return res.status(200).json({message: "유저 정보 저장"});

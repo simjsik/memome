@@ -46,7 +46,7 @@ export const useAuthSync = () => {
                         uid: uid,
                         email: user.email,
                         name: user.displayName,
-                        photo: user.photoURL
+                        photo: user.photoURL as string
                     });
                     setHasGuest(isGuest ? true : user.isAnonymous);
                     setHasLogin(true);

@@ -54,11 +54,7 @@ export const LoginWrap = css`
         }
     }
 `
-// const LoginBg = css`
-// width : 100%;
-// height : 100%;
-// background : rgba(0,0,0,0.8);
-// `
+
 export const LogoBox = css`
     position: absolute;
     left: 50%;
@@ -83,15 +79,12 @@ export default function LoginBox() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loginError, setLoginError] = useState<string | null>(null);
-    // const [verifyReSend, setVerifyReSend] = useState<boolean>(false);
-    // const [unverifedUser, setUnverifiedUser] = useState<User | null>(null);
 
     const modalRef = useRef<HTMLDivElement>(null);
     // State
     const auths = getAuth();
     const router = useRouter();
-    const path = usePathname();
-
+    const pathName = usePathname();
     const firebaseErrorMessages: Record<string, string> = {
         "auth/user-not-found": "이메일 또는 비밀번호가 올바르지 않습니다.",
         "auth/wrong-password": "이메일 또는 비밀번호가 올바르지 않습니다.",
@@ -108,22 +101,6 @@ export default function LoginBox() {
         "auth/email-not-verified": "인증이 필요한 이메일입니다. 이메일을 확인해주세요.",
         // 추가적인 에러 코드 필요 시 확장 가능
     };
-
-    // const handleVerifyReSend = async (user: User) => {
-    //     try {
-    //         setLoginError("인증 메일이 재전송되었습니다. 이메일을 확인해주세요.");
-    //         setVerifyReSend(false);
-
-    //         await sendEmailVerification(user);
-    //         // 버튼 비활성화 타이머 설정
-    //         setTimeout(() => {
-    //             setVerifyReSend(true);;
-    //         }, 60000); // 60초
-    //     }
-    //     catch (error) {
-    //         setLoginError("인증 메일 전송에 실패했습니다. 다시 시도해주세요.");
-    //     }
-    // }
 
     const isFirebaseError = (error: unknown): error is FirebaseError => {
         return (
@@ -354,7 +331,8 @@ export default function LoginBox() {
                 data = await guestResponse.json();
                 const { guestName } = data;
                 await updateProfile(signUser, {
-                    displayName: guestName
+                    displayName: guestName,
+                    photoURL : 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg'
                 });
             }
 
@@ -426,82 +404,7 @@ export default function LoginBox() {
 
     return (
         <>
-            {path !== '/login' ?
-                <></>
-                // !hasLogin &&
-                // <div css={LoginWrap}>
-                //     {!hasLogin &&
-                //         <>
-                //             <div css={LoginBg}></div>
-                //             <LoginModalWrap>
-                //                 <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
-                //                     <LoginInputWrap>
-                //                         <div>
-                //                             <p>이메일 또는 아이디</p>
-                //                             <LoginInput type="email" placeholder='' value={email} onChange={(e) => setEmail(e.target.value)} />
-                //                         </div>
-                //                         <div>
-                //                             <p>패스워드</p>
-                //                             <LoginInput type="password" placeholder='' value={password} onChange={(e) => setPassword(e.target.value)} />
-                //                         </div>
-                //                     </LoginInputWrap>
-                //                     <div className="login_error_wrap">
-                //                         {
-                //                             loginError &&
-                //                             <p className="login_error">{loginError}</p>
-                //                         }
-                //                         {/* {
-                //                                 (loginError && verifyReSend) &&
-                //                                 <button
-                //                                     onClick={() => handleVerifyReSend(unverifedUser as User)}
-                //                                     disabled={!verifyReSend}
-                //                                 >인증 메일 재전송</button>
-                //                             } */}
-                //                     </div>
-                //                     {(loadingTag === 'Login' && isLoading) ?
-                //                         <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> :
-                //                         <LoginButton
-                //                             variants={btnVariants}
-                //                             whileHover="loginHover"
-                //                             whileTap="loginClick"
-                //                             type="submit">로그인</LoginButton>
-                //                     }
-                //                 </form>
-                //                 <div className="login_option_wrap">
-                //                     <div className="auto_login_btn">
-                //                         {
-                //                             hasAutoLogin ?
-                //                                 <button className="auto_on" onClick={() => setHasAutoLogin((prev) => !prev)}></button>
-                //                                 :
-                //                                 <button className="auto_off" onClick={() => setHasAutoLogin((prev) => !prev)}></button>
-                //                         }
-                //                         <p>로그인 상태 저장</p>
-                //                     </div>
-                //                     <div className="register_wrap">
-                //                         <LoginSpan>처음 이신가요?</LoginSpan >
-                //                         <Link href={'/login/signup'} legacyBehavior>
-                //                             <CreateButton>회원가입</CreateButton>
-                //                         </Link>
-                //                     </div>
-                //                 </div>
-                //                 <OtherLoginWrap>
-                //                     <LoginOr>또는</LoginOr>
-                //                     <div>
-                //                         {(loadingTag === 'Google' && isLoading) ? <GoogleLoginBtn><BeatLoader color="#000" size={8} /></GoogleLoginBtn> : <GoogleLoginBtn
-                //                             variants={btnVariants}
-                //                             whileHover="otherHover"
-                //                             whileTap="otherClick" onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleLoginBtn>}
-                //                         {(loadingTag === 'Guest' && isLoading) ? <GuestLoginBtn><BeatLoader color="#000" size={8} /></GuestLoginBtn> : <GuestLoginBtn
-                //                             variants={btnVariants}
-                //                             whileHover="otherHover"
-                //                             whileTap="otherClick" onClick={handleGuestLogin}>게스트 로그인</GuestLoginBtn>}
-                //                     </div>
-                //                 </OtherLoginWrap>
-                //             </LoginModalWrap>
-                //         </>
-                //     }
-                // </div >
-                :
+            {pathName === '/login' &&
                 <div css={LoginWrap}>
                     <div className="logo_box" css={LogoBox}></div>
                     <LoginButtonWrap>
