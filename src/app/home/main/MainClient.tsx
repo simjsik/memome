@@ -429,17 +429,18 @@ export default function MainHome() {
                 {/* 이미지 */}
                 {(post.images && post.images.length > 0) && (
                   <div className='post_pr_img_wrap'>
-                    {post.images.map((imageUrl, index) => (
-                      <div className='post_pr_img' key={index}
-                        css={css
-                          `
-                          background-image : url(${imageUrl});
+                    <div className='post_pr_img'
+                      css={css
+                        `
+                          background-image : url(${post.images[0]});
                           `}
-                      ></div>
-                    ))}
+                    >
+                      {post.images.length > 1 &&
+                        <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
+                      }
+                    </div>
                   </div>
                 )}
-
                 {/* 포스트 댓글, 북마크 등 */}
                 <div className='post_bottom_wrap'>
                   <div className='post_comment'>

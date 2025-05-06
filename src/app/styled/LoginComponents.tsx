@@ -85,88 +85,16 @@ export const LoginButtonWrap = styled.div`
       }
     }
 
-`
-export const LoginModalWrap = styled.div`
-  position: absolute;
-  top: 50%;
-  left : 50%;
-  transform: translate(-50%, -50%);
-  width: 520px;
-  height: 720px;
-  background: #fff;
-  padding: 40px;
-  border-radius: 8px;
-  box-shadow : 0px 0px 10px rgba(0,0,0,0.2);
-
-  .login_error_wrap{
-    display: flex;
-    margin-top: 4px;
-
-    button{
-        text-decoration: underline;
-        border: none;
-        background: none;
-        line-height: 15px;
-        font-family: 'var(--font-pretendard-light)';
-        cursor: pointer;
-    }
-  }
-
-  .login_error,
-  .sign_error{
-    font-size: 14px;
-    color: #fa5741;
-    margin-right: 4px;
-  }
-
-    .login_back{
+    @media (max-width: 480px) {
+        margin-top: 60px;
         width: 100%;
-        height: 52px;
-        margin: 20px 0px 4px 0px;
-        border: 1px solid #0087ff;
-        border-radius: 4px;
+        height: 80%;
         background: #fff;
-        color: #0087ff;
-        font-size: 16px;
-        font-family: var(--font-pretendard-medium);
-        cursor: pointer;
-    }
-
-    .login_option_wrap{
-      display: flex;
-      margin-top: 6px;
-      justify-content: space-between;
-
-      .auto_login_btn{
-        display: flex;
-
-        .auto_off,
-        .auto_on{
-          width: 20px;
-          height: 20px;
-          margin-right: 4px;
-          border: 1px solid #e6e6ea;
-          border-radius: 4px;
-          background: #ffffff00;
-          cursor: pointer;
-        }
-
-        .auto_on{
-          border: 2px solid #0087ff;
-        }
-
-        p{
-          line-height: 20px;
-          font-size: 0.875rem;
-        }
-      }
-
-      .register_wrap{
-        display: flex;
-        line-height: 20px;
-      }
+        padding: 30px;
+        border-radius: 8px;
     }
 `
+
 export const LoginInputWrap = styled.div`
     margin-top: 10px;
     padding : 0px;

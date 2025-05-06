@@ -81,7 +81,9 @@ align-content: flex-start;
 
       .user_photo{
         width : 36px;
+        min-width: 36px;
         height : 36px;
+        min-height : 36px;
         margin-right : 8px;
         border-radius: 50%;
         background-size : cover;
@@ -136,7 +138,9 @@ align-content: flex-start;
       font-size : 0.875rem;
       line-height : 36px;
       }
-
+      .user_name{
+        min-width : fit-content;
+      }
       .user_uid,
       .post_date{
         flex : 0 0 auto;
@@ -222,13 +226,22 @@ align-content: flex-start;
       }
 
       .post_pr_img{
-        width: calc((100% / 4) - 4px);
+        position : relative;
+        width: 100%;
         height: 100%;
         margin-right : 4px;
         border-radius : 8px;
         background-size: cover;
         background-repeat: no-repeat;
         border : 1px solid #ededed;
+
+        .post_pr_more{
+          position: absolute;
+          bottom: 10px;
+          right: 10px;
+          width: 24px;
+          height: 24px;
+        }
       }
 
       .post_pr_img:last-child{
@@ -316,7 +329,33 @@ align-content: flex-start;
         text-align: center;
     }
 //----------------------------------------------------
-  @media (max-width: 768px) {
+  @media (max-width: 480px) {
+    overflow-y: scroll;
+    left: 0px;
+    width: 100%;
+    height: calc(100% - 82px);
+    max-width: none;
+    min-height: auto;
+
+    .post_drop_menu_btn{
+            position : relative;
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius : 50px;
+            background-color: #ffffff00;
+            cursor: pointer;
+
+            div{
+              position: absolute;
+              top: 36px;
+              right: 0;
+              width: 100px;
+            }
+    }
+  }
+
+  @media (min-width : 481px) and (max-width: 768px) {
     left: 80px;
     width: calc(100% - 80px);
     max-width: 600px;

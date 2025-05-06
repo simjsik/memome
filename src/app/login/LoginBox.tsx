@@ -53,12 +53,16 @@ export const LoginWrap = css`
             font-family: var(--font-pretendard-medium);
         }
     }
+
+    @media (max-width: 480px) {
+
+    }
 `
 
 export const LogoBox = css`
     position: absolute;
     left: 50%;
-    top: 80px;
+    top: 50px;
     transform: translateX(-50%);
     width: 160px;
     height: 40px;

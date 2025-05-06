@@ -18,24 +18,66 @@ width: 80px;
 height : 100%;
 background: #fff;
 
-&>div{
-position: relative;
-top: 50%;
-transform: translateY(-50%);
-}
+    .nav_wrap{
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+    }
 
-  @media (min-width: 1921px) {
-    width: clamp(80px, calc(80px + (100vw - 1921px) * 0.040625), 106px);
-  }
-  @media (min-width: 2560px) {
-    width: clamp(106px, calc(106px + (100vw - 2560px) * 0.040625), 132px);
-  }
-  @media (min-width: 3840px) {
-    width: clamp(132px, calc(132px + (100vw - 3840px) * 0.040625), 158px);
-  }
-  @media (min-width: 5120px) {
-    width: clamp(158px, calc(158px + (100vw - 5120px) * 0.040625), 164px);
-  }
+    .mb_status{
+        position: absolute;
+        left: 50%;
+        bottom: 40px;
+        transform: translateX(-50%);
+        background-size : cover;
+        background-position : center;
+        width : 42px;
+        height : 42px;
+        margin : 0 auto;
+        border : 1px solid #ededed;
+        border-radius : 50%;
+        background-color : #fff;
+    }
+
+    @media (max-width: 480px) {
+        position: fixed;
+        top : auto;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 82px;
+        background: #fff;
+        z-index: 1;
+        border-top: 1px solid #ededed;
+
+        .nav_wrap{
+            display : flex;
+            position: relative;
+            top: 40%;
+            transform: translateY(-50%);
+        }
+
+        .mb_status{
+            position: absolute;
+            left : auto;
+            right: 24px;
+            bottom: 100px;
+            transform : none;
+        }
+    }
+
+    @media (min-width: 1921px) {
+        width: clamp(80px, calc(80px + (100vw - 1921px) * 0.040625), 106px);
+    }
+    @media (min-width: 2560px) {
+        width: clamp(106px, calc(106px + (100vw - 2560px) * 0.040625), 132px);
+    }
+    @media (min-width: 3840px) {
+        width: clamp(132px, calc(132px + (100vw - 3840px) * 0.040625), 158px);
+    }
+    @media (min-width: 5120px) {
+        width: clamp(158px, calc(158px + (100vw - 5120px) * 0.040625), 164px);
+    }
 `
 const NavMenu = styled.div<{ isActive: boolean }>`
 display : flex;
@@ -85,6 +127,17 @@ height: 2px;
 &:hover{
 background : #f9f9f9;
 }
+    @media (max-width: 480px) {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 48px;
+        height: 48px;
+        margin: 0 auto;
+        margin-top: 0px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
 
   @media (min-width: 1921px) {
     width: clamp(48px, calc(48px + (100vw - 1921px) * 0.021875), 62px);
@@ -230,13 +283,12 @@ export default function NavBar() {
         <>
             {path !== '/home/post' &&
                 <NavBarWrap>
-                    <div>
+                    <div className='nav_wrap'>
                         {/* 공지사항 */}
                         <NavMenu isActive={1 === selectedMenu} onClick={() => handleNavClick(1)}>
                             <div className='post_alarm' css={css`${newNotice ? 'background : red' : 'background : none'}`}></div>
                             <div className='menu_icon'>
                                 {1 === selectedMenu ?
-
                                     <svg viewBox="0 0 40 40">
                                         <g>
                                             <path className='notice_path_01' d="M29.55,26.26,28.36,25a1.14,1.14,0,0,1-.3-.77V19.26a8.29,8.29,0,0,0-7-8.32,8.09,8.09,0,0,0-9.14,8v5.23a1.14,1.14,0,0,1-.3.77l-1.19,1.31a1.72,1.72,0,0,0,1.26,2.87H28.29A1.72,1.72,0,0,0,29.55,26.26Z" fill="#050505" />
@@ -255,7 +307,6 @@ export default function NavBar() {
                                         </g>
                                     </svg>
                                 }
-
                             </div>
                         </NavMenu>
                         {/* 메인 / 전체 포스트 */}
@@ -397,15 +448,8 @@ export default function NavBar() {
                             </NavMenu>
                         }
                     </div>
-                    {isMobile && <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); statusHandle(); }} css={css`
+                    {isMobile && <div className='mb_status' onClick={(e) => { e.preventDefault(); e.stopPropagation(); statusHandle(); }} css={css`
                         background-image : url(${currentUser?.photo});
-                        background-size : cover;
-                        background-position : center;
-                        width : 42px;
-                        height : 42px;
-                        margin : 0 auto;
-                        border : 1px solid #333;
-                        border-radius : 50%;
                     `}></div>}
                 </NavBarWrap >
             }

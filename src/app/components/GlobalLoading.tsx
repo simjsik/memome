@@ -18,7 +18,14 @@ const LoadingWrap = styled.div`
     top: 45%;
     margin : 0 auto;
   }
-  @media (max-width: 768px) {
+
+  @media (max-width: 480px) {
+    left: 0px;
+    width: 100%;
+    max-width: none;
+  }
+
+  @media (min-width: 481px) and (max-width: 768px) {
     left: 80px;
     width: calc(100% - 80px);
     max-width: 600px;

@@ -58,7 +58,16 @@ border-radius : 4px;
 cursor : pointer;
 }
 
-  @media (max-width: 768px) {
+  @media (max-width: 480px) {
+    position: absolute;
+    z-index: 10;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width : 100%;
+  }
+
+  @media (min-width : 481px) and (max-width: 1200px) {
     position: absolute;
     z-index: 10;
     left: 50%;
@@ -183,7 +192,7 @@ export default function StatusBox() {
             {path !== '/home/post' &&
                 <>
                     {(isMobile && mobileStatus) &&
-                        <div css={css`position : fixed; left: 0; top: 0; bottom : 0; right : 0; z-index : 1; background:rgba(0,0,0,0.7);`}>
+                        <div css={css`position : fixed; left: 0; top: 0; bottom : 0; right : 0; z-index : 10; background:rgba(0,0,0,0.7);`}>
                             <PostListWrap ref={statusRef} >
                                 <SearchComponent></SearchComponent>
                                 {

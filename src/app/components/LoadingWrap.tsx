@@ -8,6 +8,7 @@ position : relative;
 width : 100%;
 height : 60px;
 padding : 15px 0px;
+
   >span{
     margin : 0 auto;
   }
