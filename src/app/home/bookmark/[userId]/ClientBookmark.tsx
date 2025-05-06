@@ -16,6 +16,7 @@ import LoadingWrap from "@/app/components/LoadingWrap";
 import { useHandleUsernameClick } from "@/app/utils/handleClick";
 import { btnVariants } from "@/app/styled/motionVariant";
 import { cleanHtml } from "@/app/utils/CleanHtml";
+import { formatDate } from "@/app/utils/formatDate";
 
 export default function Bookmark() {
     const currentBookmark = useRecoilValue<string[]>(bookMarkState)
@@ -132,29 +133,6 @@ export default function Bookmark() {
         }
     }, [isLoading, setLoading])
 
-    const formatDate = (createAt: Timestamp | Date | string | number) => {
-        if ((createAt instanceof Timestamp)) {
-            return createAt.toDate().toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).replace(/\. /g, '.');
-        } else {
-            const date = new Date(createAt);
-
-            const format = date.toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            })
-            return format;
-        }
-    }
-
     // 포스트 보기
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
         router.push(`memo/${postId}`)
@@ -214,15 +192,16 @@ export default function Bookmark() {
                                 {/* 이미지 */}
                                 {(post?.images && post.images.length > 0) && (
                                     <div className='post_pr_img_wrap'>
-                                        {post.images.map((imageUrl, index) => (
-                                            <div className='post_pr_img' key={index}
-                                                css={css
-                                                    `
-                                                    background-image : url(${imageUrl});
-                                                    width: calc((100% / ${Array.isArray(post.images) && post.images.length}) - 4px);
+                                        <div className='post_pr_img'
+                                            css={css
+                                                `
+                                                    background-image : url(${post?.images[0]});
                                                     `}
-                                            ></div>
-                                        ))}
+                                        >
+                                            {post.images.length > 1 &&
+                                                <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
+                                            }
+                                        </div>
                                     </div>
                                 )}
 

@@ -755,7 +755,33 @@ export const NoticeWrap = styled.div`
       }
 
       //-------------------------------------------------------
-        @media (max-width: 768px) {
+        @media (max-width: 480px) {
+            overflow-y: scroll;
+            left: 0px;
+            width: 100%;
+            height: calc(100% - 82px);
+            max-width: none;
+            min-height: auto;
+
+            .post_drop_menu_btn{
+                    position : relative;
+                    width: 36px;
+                    height: 36px;
+                    border: none;
+                    border-radius : 50px;
+                    background-color: #ffffff00;
+                    cursor: pointer;
+
+                    div{
+                      position: absolute;
+                      top: 36px;
+                      right: 0;
+                      width: 100px;
+                    }
+            }
+        }
+
+        @media (min-width : 481px) and (max-width: 768px) {
           left: 80px;
           width: calc(100% - 80px);
           max-width: 600px;

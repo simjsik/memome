@@ -8,11 +8,8 @@ export const formatDate = (createAt: Timestamp | Date | string | number): string
 
     const now = new Date();
     const befMs = now.getTime() - date.getTime();
-    console.log('now:', now, 'date:', date);
-    console.log('befMs (ms):', befMs);
 
     const befHour = befMs / (1000 * 60 * 60);
-    console.log('befHour (hrs):', befHour);
 
     const befDay = befMs / (1000 * 60 * 24);
 
