@@ -59,12 +59,14 @@ cursor : pointer;
 }
 
   @media (max-width: 480px) {
-    position: absolute;
-    z-index: 10;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width : 100%;
+        position: absolute;
+        z-index: 10;
+        left: 0;
+        top: 0;
+        transform : none;
+        width: 100%;
+        height: 100%;
+        border-radius: 0px;
   }
 
   @media (min-width : 481px) and (max-width: 1200px) {

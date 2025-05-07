@@ -19,6 +19,10 @@ export const UserPostWrap = styled.div`
         padding: 20px;
         background-color: #ffffff00;
         cursor:pointer;
+
+        .user_post_content_wrap{
+            padding: 10px 0px 20px 44px;
+        }
     }
     // user_post_list_wrap
 
@@ -65,6 +69,7 @@ export const UserPostWrap = styled.div`
         }
     }
     // user_image_post_wrap
+
     .memo_tab,
     .image_tab{
         flex: 0 0 50%;
@@ -80,7 +85,7 @@ export const UserPostWrap = styled.div`
         .user_post_photo{
             min-width: 36px;
             height: 36px;
-            margin-right: 10px;
+            margin-right: 8px;
             border: 2px solid #ededed;
             border-radius: 50%;
             background-size: cover;
@@ -88,15 +93,10 @@ export const UserPostWrap = styled.div`
         }
         
         .user_post_name{
-            display: -webkit-box;
-            display: -webkit-flex;
-            display: -ms-flexbox;
             display: flex;
-            -webkit-flex: 0 0 86.5%;
-            -ms-flex: 0 0 86.5%;
-            flex: 0 0 86.5%;
             line-height: 36px;
-            font-size : 14px;
+            font-size : 0.875rem;
+            max-width: fit-content;
             font-family: var(--font-pretendard-bold);
         }
 
@@ -106,7 +106,7 @@ export const UserPostWrap = styled.div`
         
         span{
             display: block;
-            font-size: 14px;
+            font-size : 0.875rem;
             color: #272D2D;
             font-family: var(--font-pretendard-light);
         }
@@ -116,7 +116,8 @@ export const UserPostWrap = styled.div`
             position: relative;
             min-width: 36px;
             height: 36px;
-
+            margin-left: auto;
+            
             .post_drop_menu_btn{
             position : relative;
             width: 36px;
@@ -182,17 +183,17 @@ export const UserPostWrap = styled.div`
     // user_post_top
 
     .user_post_title_wrap{
-        padding-left: 52px;
         margin-top: 10px;
         
         .user_post_tag{
-            font-size: 14px;
+            font-size : 0.875rem;
             font-family: var(--font-pretendard-light);
         }
 
         .user_post_title{
-            margin-top: 4px;
-            font-size: 18px;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            font-family: var(--font-pretendard-bold);
 
             &:hover{
             text-decoration : underline;
@@ -206,7 +207,6 @@ export const UserPostWrap = styled.div`
         max-width: 550px;
         height: 80px;
         margin-top: 10px;
-        padding-left: 52px;
         overflow : hidden;
 
         img{
@@ -219,10 +219,10 @@ export const UserPostWrap = styled.div`
         display: flex;
         width: 100%;
         height: 180px;
-        padding: 0px 0px 0px 52px;
 
-        div{
-            width: calc((100% / 4) - 4px);
+        >div{
+            position: relative;
+            width: 100%;
             height: 100%;
             margin-right : 4px;
             border-radius : 8px;
@@ -231,11 +231,18 @@ export const UserPostWrap = styled.div`
             border : 1px solid #ededed;
         }
     }
+
+    .post_pr_more{
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 24px;
+        height: 24px;
+    }
     // user_post_img
 
     .user_post_bottom{
         display: flex;
-        padding: 36px 0px 0px 52px;
         justify-content: space-between;
 
         .user_post_comment{

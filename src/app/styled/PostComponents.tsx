@@ -120,7 +120,7 @@ align-content: flex-start;
     
       // 포스트 제목
       .post_title{
-        font-size: 1rem;
+        font-size: 0.9rem;
         border-bottom: none;
         margin-top: 8px;
       }
@@ -684,7 +684,7 @@ export const NoticeWrap = styled.div`
     }
 
     .post_title{
-        font-size: 1rem;
+        font-size: 0.9rem;
         margin-top: 8px;
         font-family: '__PretendardMedium_979b24';
         color: red;
@@ -898,22 +898,23 @@ background: #fff;
       display: flex;
       justify-content: space-between;
     }   
+
     .notice_post {
-    display:block;
-    margin-left : 10px;
-    flex: 1 0 100%;
-    line-height : 48px;
-    font-size: 1.25rem;
-    font-family: var(--font-pretendard-bold);
+      display:block;
+      margin-left : 10px;
+      flex: 1 0 100%;
+      line-height : 48px;
+      font-size: 1.25rem;
+      font-family: var(--font-pretendard-bold);
     }
 
     .all_post{
-    display:block;
-    margin-left : 10px;
-    flex: 1 0 80%;
-    line-height : 48px;
-    font-size: 1.25rem;
-    font-family: var(--font-pretendard-bold);
+      display:block;
+      margin-left : 10px;
+      flex: 1 0 80%;
+      line-height : 48px;
+      font-size: 1.25rem;
+      font-family: var(--font-pretendard-bold);
     }
 
     .post_header{

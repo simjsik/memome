@@ -13,12 +13,65 @@
 
 }
 
-@media (max-width: 768px) {
+
+
+
+.user_photo_wrap,
+.user_name_wrap {
+    padding: 20px;
+}
+
+.user_photo {
+    width: 128px;
+    height: 128px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    border-radius: 50%;
+    border: 4px solid #ededed;
+}
+
+.user_profile_wrap {
+    display: flex;
+    height: 300px;
+}
+
+.user_name {
+    font-size: 1rem;
+    font-family: var(--font-pretendard-bold);
+}
+
+.user_uid {
+    display: block;
+    font-family: var(--font-pretendard-light);
+    color: #272D2D;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 480px) {
+    .user_wrap {
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: calc(100% - 82px);
+        min-height: auto;
+        max-width: none;
+        overflow-y: scroll;
+        border-radius: 0px;
+        border: none;
+    }
+
+    .user_profile_wrap {
+        height: 240px;
+    }
+}
+
+@media (min-width : 481px) and (max-width: 768px) {
     .user_wrap {
         left: 80px;
         width: calc(100% - 80px);
         max-width: 600px;
     }
+
 }
 
 @media (min-width: 1200px) and (max-width : 1920px) {
@@ -43,34 +96,4 @@
     .user_wrap {
         width: clamp(1200px, calc(1200px + (100vw - 3840px) * 0.3125), 1600px);
     }
-}
-
-.user_photo_wrap,
-.user_name_wrap {
-    padding: 20px;
-}
-
-.user_photo {
-    width: 128px;
-    height: 128px;
-    background-size: cover;
-    background-repeat: no-repeat;
-    border-radius: 50%;
-    border: 4px solid #ededed;
-}
-
-.user_profile_wrap {
-    display: flex;
-    height: 300px;
-}
-
-.user_name {
-    font-size: 20px;
-    font-family: var(--font-pretendard-bold);
-}
-
-.user_uid {
-    display: block;
-    font-family: var(--font-pretendard-light);
-    color: #272D2D;
 }
