@@ -97,8 +97,9 @@ export default async function MemoPage({ params }: MemoPageProps) {
                                 style={{ backgroundImage: `url(${userData?.photoURL})` }}
                             ></div>
                             <p>
-                                {userData?.displayName} · {formatDate(post?.createAt)}
+                                {userData?.displayName} ·
                             </p>
+                            <span>{formatDate(post?.createAt)}</span>
                         </div>
                     </div>
                 </div>

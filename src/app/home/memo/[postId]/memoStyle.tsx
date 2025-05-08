@@ -24,39 +24,49 @@ border-bottom: 1px solid #ededed;
 }
 
 .post_category{
-font-size : 1rem;
-font-family : var(--font-pretendard-light);
-color: #acacac;
+    font-size : 0.875rem;
+    color: #acacac;
 }
 
 .post_title{
-font-size : 1.125rem;
-line-height : 32px;
-font-family : var(--font-pretendard-bold);
+    font-size : 1.25rem;
+    line-height : 32px;
+    font-family : var(--font-pretendard-bold);
 }
+
 .user_id{
 display : flex;
 }
+
 .user_profile {
-width : 32px;
-height : 32px;
-margin-right : 8px;
-border-radius : 50%;
-background-size: cover;
-background-repeat: no-repeat;
+    width : 32px;
+    height : 32px;
+    margin-right : 8px;
+    border-radius : 50%;
+    background-size: cover;
+    background-repeat: no-repeat;
 }
 
-.user_id p{
+.user_id p,
+.user_id span,{
 font-size : 0.75rem;
 line-height : 32px;
 }
-.post_content_wrap{
-margin-top : 40px;
-padding-bottom : 200px;
+
+.user_id>span{
+    margin-left : 4px;
+    font-family: var(--font-pretendard-light);
+    color: #acacac;
 }
+
+.post_content_wrap{
+    margin-top : 40px;
+    padding-bottom : 200px;
+}
+
 img {
-max-width: 780px;
-object-fit : cover;
+    max-width: 780px;
+    object-fit : cover;
 }
 
 .post_menu_wrap{
@@ -77,18 +87,30 @@ height : 24px;
 background : red;
 }
 
-    @media (max-width: 768px) {
-        left: 80px;
-        width: calc(100% - 80px);
-    }
-    @media (min-width: 768px) {
-        left: 80px;
-        width: calc(100% - 80px);
-        left : clamp(80px, calc(80px + (100vw - 1200px) * 0.53), 21.875vw);
+    @media (max-width: 480px) {
+        left: 0;
+        width: 100%;
+        height: calc(100% - 82px);
+        min-height: auto;
+        padding: 20px;
+
+        .post_title_wrap{
+            flex-direction: column;
+        }
+
+        .user_id{
+            margin-top: 12px;
+        }
     }
 
+    @media (min-width: 481px) and (max-width: 767px) {
+        left: 80px;
+        width: calc(100% - 80px);
+    }
+        
     @media (min-width: 768px) and (max-width : 1920px) {
         width: clamp(calc(700px - 80px), calc(600px + (100vw - 1200px) * 0.3125), 860px);
+        left : clamp(80px, calc(80px + (100vw - 1200px) * 0.53), 21.875vw);
     }
 
     @media (min-width: 1921px) {

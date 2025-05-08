@@ -249,7 +249,13 @@ export const statusState = atom<boolean>({
     default: false
 })
 
+export const commentModalState = atom<boolean>({
+    key: 'commentModalState',
+    default: false
+})
+
 export const nonceState = atom<string>({
     key: 'nonceState',
     default: ''
 })
+

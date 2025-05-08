@@ -17,6 +17,8 @@ import ReplyComponent from "./ReplyComponent";
 import { formatDate } from "@/app/utils/formatDate";
 import { motion } from "framer-motion";
 import { btnVariants } from "@/app/styled/motionVariant";
+import { useMediaQuery } from "react-responsive";
+import useOutsideClick from "@/app/hook/OutsideClickHook";
 
 interface ClientPostProps {
     post: string;
@@ -84,10 +86,10 @@ border-bottom : ${(props) => (props.btnStatus ? '2px solid #dedede' : '2px solid
 }
 
 .status_wrap{
-padding : 10px 0px;
-height: calc(100% - 276px);
-overflow-y: auto;
-overflow-x: hidden;
+    padding : 10px 0px;
+    height: calc(100% - 276px);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .status_post_list{
@@ -167,6 +169,25 @@ font-size : 14px;
         margin-top: 10px;
     }
 }
+
+@media (max-width : 480px){
+    .post_bottom{
+        position : static;
+        height: fit-content;
+        width: 100%;
+        margin-top:auto;
+        background-color: #fff;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+
+        .post_menu_wrap{
+            margin-top: 10px;
+        }
+    }
+
+    .status_wrap{
+        height: 100%;
+    }
+}
 `
 export default function MemoStatus({ post }: ClientPostProps) {
     const commentCount = useRecoilValue<number>(memoCommentCount);
@@ -174,12 +195,15 @@ export default function MemoStatus({ post }: ClientPostProps) {
     const [replyText, setReplyText] = useState<string>('');
     const [activeReply, setActiveReply] = useState<string | null>(null); // 활성화된 답글 ID
     const user = useRecoilValue(userState);
+    const isMobile = useMediaQuery({ maxWidth: 1200 });
 
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState);
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle);
     const [dataLoading, setDataLoading] = useState<boolean>(false);
+    const [commentInputOn, setcommentInputOn] = useState<boolean>(false);
     const observerLoadRef = useRef(null);
     const containerRef = useRef(null);
+    const commentInputRef = useRef<HTMLDivElement>(null);
     const [loading, setLoading] = useRecoilState(loadingState);
     // state
 
@@ -389,6 +413,12 @@ export default function MemoStatus({ post }: ClientPostProps) {
         setActiveReply((prev) => (prev === commentId ? null : commentId));
     } // 답글 입력 인풋 토글
 
+    // 외부 클릭 시 드롭다운 닫기
+    useOutsideClick(commentInputRef, () => {
+        if (commentText.trim().length < 1) {
+            setcommentInputOn(false);
+        }
+    });
     return (
         <MemoBox btnStatus>
             <div className="memo_btn_wrap">
@@ -455,25 +485,65 @@ export default function MemoStatus({ post }: ClientPostProps) {
                             <p>안녕하세요 댓글이 엄서요 첫 댓글을 달아보세용</p>
                         </div>
                     }
-                    <div className="post_bottom">
+                    <div className="post_bottom" ref={commentInputRef}>
                         <div className="post_menu_wrap">
                             <BookmarkBtn postId={post} />
                         </div>
-                        <PostCommentInputStyle>
-                            <div className="login_user_profile">
-                                <div className="login_user_photo"
-                                    css={css`
+                        {isMobile ?
+                            <>
+                                {commentInputOn ?
+                                    <PostCommentInputStyle>
+                                        <div className="login_user_profile">
+                                            <div className="login_user_photo"
+                                                css={css`
+                                                                            background-image : url(${user?.photo})
+                                                                        `}
+                                            ></div>
+                                            <p className="login_user_id">{user?.name}</p>
+                                        </div>
+                                        <textarea className="comment_input" placeholder="댓글 입력" value={commentText} onChange={(e) => setCommentText(e.target.value)} />
+                                        <motion.button variants={btnVariants}
+                                            whileHover="otherHover"
+                                            whileTap="otherClick"
+                                            className="comment_upload_btn" onClick={() => handleAddComment(null, 'comment')}>등록</motion.button>
+                                    </PostCommentInputStyle>
+                                    :
+                                    <motion.button css={
+                                        css`
+                                            width : 100%;
+                                            height : 52px;
+                                            background : #0087ff;
+                                            color : #fff;
+                                            border : 1px solid #ededed;
+                                            border-radius : 4px;
+                                            font-size : 1rem;
+                                            font-family : var(--font-pretendard-medium);
+                                            cursor : pointer;`
+                                    }
+                                        variants={btnVariants}
+                                        whileHover="otherHover"
+                                        whileTap="otherClick"
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setcommentInputOn(true) }}>댓글 쓰기</motion.button>
+                                }
+                            </>
+                            :
+                            <PostCommentInputStyle>
+                                <div className="login_user_profile">
+                                    <div className="login_user_photo"
+                                        css={css`
                                         background-image : url(${user?.photo})
                                         `}
-                                ></div>
-                                <p className="login_user_id">{user?.name}</p>
-                            </div>
-                            <textarea className="comment_input" placeholder="댓글 입력" value={commentText} onChange={(e) => setCommentText(e.target.value)} />
-                            <motion.button variants={btnVariants}
-                                whileHover="otherHover"
-                                whileTap="otherClick"
-                                className="comment_upload_btn" onClick={() => handleAddComment(null, 'comment')}>등록</motion.button>
-                        </PostCommentInputStyle>
+                                    ></div>
+                                    <p className="login_user_id">{user?.name}</p>
+                                </div>
+                                <textarea className="comment_input" placeholder="댓글 입력" value={commentText} onChange={(e) => setCommentText(e.target.value)} />
+                                <motion.button variants={btnVariants}
+                                    whileHover="otherHover"
+                                    whileTap="otherClick"
+                                    className="comment_upload_btn" onClick={() => handleAddComment(null, 'comment')}>등록</motion.button>
+                            </PostCommentInputStyle>
+                        }
+
                     </div>
                 </PostCommentStyle>
             </div>

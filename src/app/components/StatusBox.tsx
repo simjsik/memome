@@ -8,13 +8,14 @@ import { useParams, usePathname, } from 'next/navigation';
 import UserProfile from './status/UserProfile';
 import SearchComponent from './SearchComponent';
 import { useMediaQuery } from "react-responsive";
-import { statusState } from '../state/PostState';
+import { commentModalState, statusState } from '../state/PostState';
 import { css } from '@emotion/react';
 import { useRecoilState } from 'recoil';
 import { motion } from "framer-motion";
 import { btnVariants } from '../styled/motionVariant';
 import { useEffect, useRef, useState } from 'react';
 import useOutsideClick from '../hook/OutsideClickHook';
+import { ExitButtons } from './status/ExitButton';
 
 const PostListWrap = styled.div<{ $isMemoPage?: boolean }>`
 position : fixed;
@@ -40,6 +41,7 @@ background : #fff;
     border-radius : 8px;
     background : #fff;
 `}
+
 .list_top{
 position: relative;
 display : flex;
@@ -67,6 +69,10 @@ cursor : pointer;
         width: 100%;
         height: 100%;
         border-radius: 0px;
+
+        .list_top{
+            padding: 0px;
+        }
   }
 
   @media (min-width : 481px) and (max-width: 1200px) {
@@ -164,6 +170,7 @@ export default function StatusBox() {
     const params = useParams<{ postId: string }>();
     const postId = params?.postId || ''
     const isMobile = useMediaQuery({ maxWidth: 1200 });
+    const [commentOn, setCommentOn] = useRecoilState<boolean>(commentModalState);
     const [mobileStatus, setMobileStatus] = useRecoilState<boolean>(statusState);
     const [isMemoPage, setIsMemoPage] = useState<boolean>(false);
 
@@ -188,26 +195,21 @@ export default function StatusBox() {
             setMobileStatus(false);
         }
     });
+
     return (
         <>
 
             {path !== '/home/post' &&
                 <>
-                    {(isMobile && mobileStatus) &&
+                    {(isMobile && (commentOn || mobileStatus)) &&
                         <div css={css`position : fixed; left: 0; top: 0; bottom : 0; right : 0; z-index : 10; background:rgba(0,0,0,0.7);`}>
-                            <PostListWrap ref={statusRef} >
-                                <SearchComponent></SearchComponent>
-                                {
-                                    path !== `/home/memo/${params?.postId}` && <UserProfile></UserProfile >
-                                }
-                                <div className='list_top'>
-                                    {
-                                        path === `/home/memo/${params?.postId}` && <MemoStatus post={postId} />
-                                    }
-                                </div>
-                                {path !== '/home/memo' && <Logout></Logout>}
-                                <motion.button css={
-                                    css`position : absolute;
+                            {(!commentOn && mobileStatus) &&
+                                <PostListWrap ref={statusRef} >
+                                    <SearchComponent></SearchComponent>
+                                    <UserProfile></UserProfile >
+                                    <Logout></Logout>
+                                    <motion.button css={
+                                        css`position : absolute;
                                             bottom: 20px;
                                             width : calc(100% - 40px);
                                             height : 52px;
@@ -218,12 +220,25 @@ export default function StatusBox() {
                                             font-size : 1rem;
                                             font-family : var(--font-pretendard-medium);
                                             cursor : pointer;`
-                                }
-                                    variants={btnVariants}
-                                    whileHover="otherHover"
-                                    whileTap="otherClick"
-                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); statusHandle(); }}>취소</motion.button>
-                            </PostListWrap>
+                                    }
+                                        variants={btnVariants}
+                                        whileHover="otherHover"
+                                        whileTap="otherClick"
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); statusHandle(); }}>취소</motion.button>
+                                </PostListWrap>
+                            }
+                            {(path === `/home/memo/${params?.postId}` && commentOn && !mobileStatus) &&
+                                <PostListWrap>
+                                    <div className='list_top'>
+                                        <MemoStatus post={postId} />
+                                    </div>
+                                    <ExitButtons
+                                        variants={btnVariants}
+                                        whileHover="otherHover"
+                                        whileTap="otherClick"
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCommentOn(false); }}>닫기</ExitButtons>
+                                </PostListWrap>
+                            }
                         </div>
                     }
                     {!isMobile &&

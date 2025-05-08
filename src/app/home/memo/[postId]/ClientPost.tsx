@@ -2,15 +2,31 @@
 "use client";
 
 import { checkUsageLimit } from "@/app/utils/checkUsageLimit";
-import { loadingState, memoCommentCount, UsageLimitState, userData, userState } from "@/app/state/PostState";
+import { commentModalState, loadingState, memoCommentCount, UsageLimitState, userData, userState } from "@/app/state/PostState";
 import { useEffect } from "react";
 import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useMediaQuery } from "react-responsive";
+import styled from "@emotion/styled";
+import { motion } from "framer-motion";
 
+const CommentToggle = styled(motion.button)`
+    width: 42px;
+    height: 42px;
+    position: fixed;
+    bottom: 100px;
+    z-index: 1;
+    left: 20px;
+    border-radius: 50%;
+    border: none;
+    background: #fff;
+`
 export default function Memo({ commentLength }: { commentLength: number }) {
     const currentUser = useRecoilValue<userData | null>(userState)
     const setCommentLength = useSetRecoilState<number>(memoCommentCount)
     const setUsageLimit = useSetRecoilState<boolean>(UsageLimitState)
     const setLoading = useSetRecoilState<boolean>(loadingState);
+    const isMobile = useMediaQuery({ maxWidth: 1200 });
+    const setCommentOn = useSetRecoilState<boolean>(commentModalState);
 
     // state
 
@@ -46,6 +62,9 @@ export default function Memo({ commentLength }: { commentLength: number }) {
 
     return (
         <>
+            {isMobile &&
+                <CommentToggle onClick={() => setCommentOn(true)}>댓글버튼</CommentToggle>
+            }
         </>
     );
 }

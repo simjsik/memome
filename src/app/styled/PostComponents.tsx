@@ -1153,6 +1153,14 @@ width: 100%;
     font-family: var(--font-pretendard-medium);
   }
 }
+
+@media (max-width : 480px){
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: calc(100% - 100px);
+    overflow-y: scroll;
+}
 `
 export const PostCommentInputStyle = styled.div`
 position : relative;
