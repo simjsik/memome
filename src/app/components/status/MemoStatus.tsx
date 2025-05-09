@@ -478,7 +478,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                 </div>
                             ))}
                             <div ref={observerLoadRef} css={css`height: 1px; visibility: ${dataLoading ? "hidden" : "visible"};`} />
-                            {(!loading && (isAddComment || isDelComment || isAddReply)) && <LoadingWrap />}
+                            {(!loading && dataLoading && (isAddComment || isDelComment || isAddReply)) && <LoadingWrap />}
                         </>
                         :
                         <div>

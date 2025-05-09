@@ -294,6 +294,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                             backgroundColor: "#fafbfc",
                                             transition: { duration: 0.1 },
                                         }}
+                                        onClick={() => handleClickPost(post.id)}
                                     >
                                         <div className="user_post_profile_wrap">
                                             <div className="user_post_top">
@@ -329,7 +330,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                         <div className="user_post_content_wrap">
                                             <div className="user_post_title_wrap">
                                                 <span className="user_post_tag">[{post.tag}]</span>
-                                                <p className="user_post_title" onClick={() => handleClickPost(post.id)}>{post.title}</p>
+                                                <p className="user_post_title">{post.title}</p>
                                             </div>
                                             <div className="user_post_content" dangerouslySetInnerHTML={{ __html: post.content }}></div>
                                             {(post.images && post.images.length > 0) && (

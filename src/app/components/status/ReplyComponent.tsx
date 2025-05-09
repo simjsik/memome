@@ -163,7 +163,11 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
     }
     return (
         <>
-            <button className="reply_toggle_btn" onClick={() => setReplieToggle(prev => !prev)}>답글 보기</button >
+            {repliesToggle ?
+                <button className="reply_toggle_btn" onClick={() => setReplieToggle(prev => !prev)}>답글 닫기</button >
+                :
+                <button className="reply_toggle_btn" onClick={() => setReplieToggle(prev => !prev)}>답글 보기</button >
+            }
             {repliesToggle &&
                 <>
                     {replies?.pages.flatMap(page => page.data).map(reply => (

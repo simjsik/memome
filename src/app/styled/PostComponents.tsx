@@ -138,9 +138,12 @@ align-content: flex-start;
       font-size : 0.875rem;
       line-height : 36px;
       }
+
       .user_name{
+        font-family : var(--font-pretendard-bold);
         min-width : fit-content;
       }
+
       .user_uid,
       .post_date{
         flex : 0 0 auto;
@@ -1018,6 +1021,7 @@ width: 100%;
 }
 
 .memo_comment_user{
+  font-size : 0.875rem;
   font-family : var(--font-pretendard-bold);
 }
 
@@ -1081,13 +1085,14 @@ width: 100%;
 
 .memo_reply{
   margin-top : 4px;
-
+  font-size : 0.875rem;
 }
 
 .memo_reply_uid{
   display: block;
   width: fit-content;
   margin-top: 8px;
+  font-size : 0.875rem;
   color: #0087ff;
   background-color: #c8fffd;
 }
