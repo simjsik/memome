@@ -210,7 +210,7 @@ export default function SignUp() {
             // Firebase Authentication의 프로필 업데이트
             await updateProfile(user, {
                 displayName: formData.displayName || randomName,
-                photoURL: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744861940/%ED%94%84%EB%A1%9C%ED%95%84%EC%9A%A9_grt1en.png',
+                photoURL: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
             })
 
             // 이메일 인증 메일 전송
