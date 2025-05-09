@@ -375,17 +375,18 @@ export default function UserClient({ user }: ClientUserProps) {
                                 <>
                                     {
                                         (userPostList.length === 0 && !loading) ?
-                                            <NoMorePost>
-                                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966548/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_fahwir.svg)`}></div>
-                                                <p>모두 확인했습니다.</p>
-                                                <span>전체 메모를 전부 확인했습니다.</span>
-                                            </NoMorePost>
-                                            :
                                             < NoMorePost >
                                                 <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966543/%EB%A9%94%EB%AA%A8%EC%97%86%EC%96%B4_d0sm6q.svg)`}></div>
                                                 <p>메모가 없습니다.</p>
                                                 <span>새 메모를 작성 해보세요.</span>
                                             </NoMorePost>
+                                            :
+                                            <NoMorePost>
+                                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966548/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_fahwir.svg)`}></div>
+                                                <p>모두 확인했습니다.</p>
+                                                <span>전체 메모를 전부 확인했습니다.</span>
+                                            </NoMorePost>
+
                                     }
                                 </>
                             }
@@ -420,15 +421,15 @@ export default function UserClient({ user }: ClientUserProps) {
                                     {
                                         (userImageList.length === 0 && !loading) ?
                                             <NoMorePost>
-                                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966548/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_fahwir.svg)`}></div>
-                                                <p>모두 확인했습니다.</p>
-                                                <span>이미지가 포함된 메모를 전부 확인했습니다.</span>
-                                            </NoMorePost>
-                                            :
-                                            <NoMorePost>
                                                 <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966543/%EB%A9%94%EB%AA%A8%EC%97%86%EC%96%B4_d0sm6q.svg)`}></div>
                                                 <p>메모가 없습니다.</p>
                                                 <span>메모 작성 시 이미지를 추가 해보세요.</span>
+                                            </NoMorePost>
+                                            :
+                                            <NoMorePost>
+                                                <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966548/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_fahwir.svg)`}></div>
+                                                <p>모두 확인했습니다.</p>
+                                                <span>이미지가 포함된 메모를 전부 확인했습니다.</span>
                                             </NoMorePost>
                                     }
                                 </>
