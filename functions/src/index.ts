@@ -212,6 +212,8 @@ export const setHasUpdateFlag = onDocumentCreated(
 export const setGoogleUser = functions.auth
 .user()
 .onCreate(async (user: UserRecord) => {
+  if (!user.providerData.some((p) => p.providerId === 'google.com')) return;
+
   const {uid, displayName, email, photoURL} = user;
   const userRef = adminDb.collection('users').doc(uid);
   const userSnap = await userRef.get();

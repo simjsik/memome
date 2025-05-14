@@ -6,15 +6,23 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useRecoilValue, useSetRecoilState } from "recoil";
 import "./globals.css";
 import useAuthSync from "./hook/AuthSyncHook";
-import { bookMarkState, nonceState, userState } from "./state/PostState";
+import { adminState, bookMarkState, nonceState, userState } from "./state/PostState";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "./DB/firebaseConfig";
+import { auth, db } from "./DB/firebaseConfig";
 import { usePostUpdateChecker } from "./hook/ClientPolling";
 import { usePathname } from "next/navigation";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
+import { getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 
 const queryClient = new QueryClient();
+
+interface CustomClaims {
+    roles?: {
+        admin?: boolean;
+        subadmin?: boolean;
+    };
+}
 
 function InitializeLoginComponent({ children, nonce }: { children: ReactNode, nonce: string }) {
     const { clearUpdate } = usePostUpdateChecker();
@@ -22,7 +30,9 @@ function InitializeLoginComponent({ children, nonce }: { children: ReactNode, no
     const currentUser = useRecoilValue(userState);
     const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState);
     const setNonce = useSetRecoilState<string>(nonceState);
+    const setAdmin = useSetRecoilState<boolean>(adminState);
     const pathName = usePathname();
+
     const loadBookmarks = async (uid: string) => {
         try {
             console.log('북마크 데이터 요청')
@@ -44,14 +54,28 @@ function InitializeLoginComponent({ children, nonce }: { children: ReactNode, no
 
     useEffect(() => {
         loadBookmarks(currentUser.uid as string);
-        console.log(currentUser, '현재 유저')
     }, [currentUser])
 
     useEffect(() => {
-        console.log(currentUser.uid)
         clearUpdate();
         setNonce(nonce);
     }, [currentUser, pathName])
+
+    useEffect(() => {
+        const unsub = onAuthStateChanged(auth, async user => {
+            if (!user) {
+                setAdmin(false);
+                return;
+            }
+
+            const idTokenResult = await getIdTokenResult(user);
+            const claims = idTokenResult.claims as CustomClaims;
+            console.log(claims.roles?.admin, '현재 유저 관리자 권한')
+            setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
+        });
+
+        return unsub;
+    }, [])
     return <>{children}</>; // 반드시 children을 렌더링
 }
 

@@ -89,12 +89,6 @@ export const UsageLimitToggle = atom<boolean>({
     default: false
 })
 
-// 관리자 아이디
-export const ADMIN_ID = atom<string>({
-    key: 'ADMIN_USER_ID',
-    default: 'tTCS62tlKARTaRwGv8wsBEo7bbY2'
-})
-
 // 저장안된 포스트 작성 내용
 export const PostingState = atom<string>({
     key: 'PostingState',
@@ -163,6 +157,11 @@ export const userState = atom<userData>({
         photo: null,
         uid: null,
     },
+})
+
+export const adminState = atom<boolean>({
+    key: 'adminState',
+    default: false,
 })
 
 // 로그인 창 토글

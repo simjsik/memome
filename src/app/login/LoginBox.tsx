@@ -336,7 +336,7 @@ export default function LoginBox() {
                 const { guestName } = data;
                 await updateProfile(signUser, {
                     displayName: guestName,
-                    photoURL : 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg'
+                    photoURL: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg'
                 });
             }
 

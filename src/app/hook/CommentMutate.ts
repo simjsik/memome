@@ -1,6 +1,6 @@
 'use client';
 import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ADMIN_ID, Comment, memoCommentCount, memoCommentState, userState } from "../state/PostState";
+import { adminState, Comment, memoCommentCount, memoCommentState, userState } from "../state/PostState";
 import { addDoc, collection, doc, getDoc, getDocs, increment, query, runTransaction, Timestamp, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "../DB/firebaseConfig";
 import { useRecoilValue, useSetRecoilState } from "recoil";
@@ -149,7 +149,7 @@ export function useDelComment(
 ) {
     const queryClient = useQueryClient();
     const user = useRecoilValue(userState);
-    const ADMIN = useRecoilValue(ADMIN_ID);
+    const ADMIN = useRecoilValue(adminState);
     const setCommentList = useSetRecoilState(memoCommentState);
     const setCommentCount = useSetRecoilState(memoCommentCount);
 
@@ -164,7 +164,7 @@ export function useDelComment(
 
             const commentOwnerId = docSnap.data()?.uid;
 
-            if (user.uid === commentOwnerId || user.uid === ADMIN) {
+            if (user.uid === commentOwnerId || ADMIN) {
                 const batch = writeBatch(db);
 
                 batch.delete(docRef);
@@ -214,7 +214,7 @@ export function useDelReply(
 ) {
     const queryClient = useQueryClient();
     const user = useRecoilValue(userState);
-    const ADMIN = useRecoilValue(ADMIN_ID);
+    const ADMIN = useRecoilValue(adminState);
     const setCommentCount = useSetRecoilState(memoCommentCount);
 
     return useMutation<void, Error, string>({
@@ -229,7 +229,7 @@ export function useDelReply(
 
             const commentOwnerId = replySnap.data()?.uid;
 
-            if (user.uid === commentOwnerId || user.uid === ADMIN) {
+            if (user.uid === commentOwnerId || ADMIN) {
                 const batch = writeBatch(db);
                 batch.delete(replyRef);
 

@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { ADMIN_ID, DidYouLogin, loadingState, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
+import { adminState, DidYouLogin, loadingState, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
 import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
 import { deleteDoc, doc, getDoc, Timestamp, } from 'firebase/firestore';
@@ -45,8 +45,8 @@ export default function MainHome() {
 
   // 현재 로그인 한 유저
   const currentUser = useRecoilValue<userData>(userState)
+  const isAdmin = useRecoilValue<boolean>(adminState)
 
-  const ADMIN = useRecoilValue(ADMIN_ID);
   const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
   const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
 
@@ -272,7 +272,7 @@ export default function MainHome() {
       const postOwnerId = postDoc.data()?.userId;
 
       // 삭제 권한 확인
-      if (currentUserId === postOwnerId || currentUserId === ADMIN) {
+      if (currentUserId === postOwnerId || isAdmin) {
         const confirmed = confirm('게시글을 삭제 하시겠습니까?')
         if (!confirmed) return;
 
