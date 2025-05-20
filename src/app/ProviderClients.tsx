@@ -6,13 +6,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useRecoilValue, useSetRecoilState } from "recoil";
 import "./globals.css";
 import useAuthSync from "./hook/AuthSyncHook";
-import { adminState, bookMarkState, nonceState, userState } from "./state/PostState";
+import { adminState, bookMarkState, userState } from "./state/PostState";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./DB/firebaseConfig";
 import { usePostUpdateChecker } from "./hook/ClientPolling";
 import { usePathname } from "next/navigation";
-import { CacheProvider } from "@emotion/react";
-import createCache from "@emotion/cache";
 import { getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 
 const queryClient = new QueryClient();
@@ -24,12 +22,11 @@ interface CustomClaims {
     };
 }
 
-function InitializeLoginComponent({ children, nonce }: { children: ReactNode, nonce: string }) {
+function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const { clearUpdate } = usePostUpdateChecker();
 
     const currentUser = useRecoilValue(userState);
     const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState);
-    const setNonce = useSetRecoilState<string>(nonceState);
     const setAdmin = useSetRecoilState<boolean>(adminState);
     const pathName = usePathname();
 
@@ -58,7 +55,6 @@ function InitializeLoginComponent({ children, nonce }: { children: ReactNode, no
 
     useEffect(() => {
         clearUpdate();
-        setNonce(nonce);
     }, [currentUser, pathName])
 
     useEffect(() => {
@@ -79,20 +75,16 @@ function InitializeLoginComponent({ children, nonce }: { children: ReactNode, no
     return <>{children}</>; // 반드시 children을 렌더링
 }
 
-export default function ProviderClient({ children, nonce }: { children: ReactNode, nonce: string }) {
-    const cache = createCache({ key: 'custom', nonce });
-    console.log(nonce, '클라이언트 측 난수값')
+export default function ProviderClient({ children }: { children: ReactNode }) {
     return (
         <div className={`${PretendardLight.variable} ${PretendardMedium.variable} ${PretendardBold.variable} main_wrap`}>
             <QueryClientProvider client={queryClient}>
                 <RecoilRoot>
-                    <CacheProvider value={cache}>
-                        <InitializeLoginComponent nonce={nonce}>
-                            <>
-                                {children}
-                            </>
-                        </InitializeLoginComponent>
-                    </CacheProvider>
+                    <InitializeLoginComponent>
+                        <>
+                            {children}
+                        </>
+                    </InitializeLoginComponent>
                 </RecoilRoot>
             </QueryClientProvider>
         </div>

@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
-import { DidYouLogin, hasGuestState, ImageUrlsState, loadingState, loginToggleState, modalState, PostData, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
+import { adminState, DidYouLogin, hasGuestState, ImageUrlsState, loadingState, loginToggleState, modalState, PostData, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
@@ -19,6 +19,7 @@ import { uploadContentImgCdn, uploadImgCdn } from '@/app/utils/uploadCdn';
 import { btnVariants } from '@/app/styled/motionVariant';
 import { MoonLoader } from 'react-spinners';
 import { useAddNewPost } from './hook/useNewPostMutation';
+import { formatDate } from '@/app/utils/formatDate';
 
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
@@ -713,6 +714,7 @@ export default function PostMenu() {
     const tagRef = useRef<HTMLSelectElement>(null); // Quill 인스턴스 접근을 위한 ref 설정
     const styleToolRef = useRef<HTMLDivElement>(null); // Quill 인스턴스 접근을 위한 ref 설정
     const yourLogin = useRecoilValue(DidYouLogin)
+    const isAdmin = useRecoilValue(adminState)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setModal = useSetRecoilState<boolean>(modalState);
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
@@ -886,6 +888,7 @@ export default function PostMenu() {
 
     // 공지사항 글로 작성
     const HandleCheckedNotice = () => {
+        if (!isAdmin) return;
         setCheckedNotice((prev) => !prev);
 
         if (!checkedNotice) {
@@ -1060,29 +1063,6 @@ export default function PostMenu() {
         }
     }
 
-    const formatDate = (createAt: Timestamp | Date | string | number) => {
-        if ((createAt instanceof Timestamp)) {
-            return createAt.toDate().toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).replace(/\. /g, '.');
-        } else {
-            const date = new Date(createAt);
-
-            const format = date.toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            })
-            return format;
-        }
-    }
-
     // 이미지 최대 크기
     const MAX_IMG_SIZE = 2 * 1024 * 1024;
     // 이미지 최대 수
@@ -1154,34 +1134,34 @@ export default function PostMenu() {
     // 이미지 붙여넣기, 이미지 최대 수 제한 로직
     useEffect(() => {
         const editor = quillRef.current?.getEditor();
-        if (!editor) return;
+        const editorElem = quillRef.current?.getEditor().root;
+        if (!editor || !editorElem) return;
 
-        editor.clipboard.matchers = editor.clipboard.matchers.filter(matcher => matcher[0] !== 'IMG');
+        // 2) 알림 중복 방지 플래그
+        const alerted = false;
 
-        // 이미지 붙여넣기 차단 및 제한 처리
+        editor.clipboard.matchers = editor.clipboard.matchers.filter(
+            ([nodeName]) => nodeName !== 'IMG'
+        );
+
+        // // 이미지 붙여넣기 차단 및 제한 처리
         editor.clipboard.addMatcher('IMG', (node: Node, delta: Delta) => {
             if (storageLoad) return delta;
 
             const imgTags = Array.from(editor.root.querySelectorAll('img'));
-            const currentImageCount = imgTags.length;
-
-            const element = node as HTMLElement; // 안전하게 HTMLElement로 변환
-
-            // // 붙여넣기된 이미지 무조건 차단
-            if (element.getAttribute('src')?.startsWith('data:image') && !element.classList.contains('ql-editor')) {
-                alert('이미지 붙여넣기는 허용되지 않습니다.');
-                return new Delta();
-            }
 
             // 이미지 개수 초과 제한
-            if (currentImageCount >= MAX_IMG_COUNT) {
-                alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 추가할 수 있습니다.`);
-                return new Delta(); // 빈 Delta 반환 (추가 제한)
+            if (imgTags.length >= MAX_IMG_COUNT) {
+                if (!alerted) {
+                    alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 추가할 수 있습니다.`);
+                    return new Delta(); // 빈 Delta 반환 (추가 제한)
+                }
             }
 
             // 기본 동작 유지
             return delta;
         });
+
 
         // 텍스트 변경 이벤트: 이미지 개수 실시간 확인
         const handleImageLimit = () => {
@@ -1427,7 +1407,7 @@ export default function PostMenu() {
                             <input className='title_input' type="text" placeholder='제목' value={postTitle} onChange={handlePostingTitle} />
                             <div className='title_input_value'>
                                 <p>{postTitle.slice(0, title_limit_count)}</p>
-                                <p style={{ color: '#fa5741' }}>{postTitle.slice(title_limit_count)}</p>
+                                <p css={css`color: #fa5741;`}>{postTitle.slice(title_limit_count)}</p>
                             </div>
                             <span className='title_limit'>{postTitle.length} / 20</span>
                             {postTitle.length > 20 &&

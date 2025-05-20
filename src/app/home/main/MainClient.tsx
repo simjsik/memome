@@ -287,27 +287,20 @@ export default function MainHome() {
     }
   }
 
-  // 포스트 보기
-  const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
-    if (!yourLogin || usageLimit) {
-      if (usageLimit) {
-        return setLimitToggle(true);
-      }
-      if (!yourLogin) {
-        setLoginToggle(true);
-        setModal(true);
-        return;
-      }
-    }
-    router.push(`memo/${postId}`)
-  }
-
   const { mutate: fetchUpdatePost, isPending: isAddUpdatePost } = useAddUpdatePost();
 
   // 버튼 클릭 시 새 데이터 로드
   const handleUpdateClick = () => {
     fetchUpdatePost();
   };
+
+  // 포스트 보기
+  const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
+    if (usageLimit) {
+      return setLimitToggle(true);
+    }
+    router.push(`memo/${postId}`)
+  }
 
   // 페이지 이동 시 스크롤 위치 저장
   useEffect(() => {

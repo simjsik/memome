@@ -2,12 +2,15 @@ import sanitizeHtml from "sanitize-html";
 
 export const cleanHtml = (content: string) => {
     return sanitizeHtml(content, {
-        allowedTags: ["p", "span", "div", "strong", "em", "a", "ul", "li", "br", "img"], // 허용할 태그
+        allowedTags: ["h2", "p", "span", "div", "strong", "em", "a", "ul", "ol", "li", "br", "img"], // 허용할 태그
         allowedAttributes: {
             a: ["href", "target", "rel"], // 링크 속성만 허용
             img: ["src", "style"],
-            span: ["style"],
+            span: ["style", "class", "contenteditable"],
             div: ["style"],
+            li: ["data-list"],
+            p: ["style"],
+            strong : ["style"]
         },
         allowedSchemes: ["http", "https"], // http, https 링크만 허용
         allowedSchemesByTag: {

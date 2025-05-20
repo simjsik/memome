@@ -4,8 +4,8 @@ import ClientPost from './ClientPost';
 import { PostDetailWrap } from "./memoStyle";
 import { Metadata } from "next";
 import { adminDb } from "@/app/DB/firebaseAdminConfig";
-import { Timestamp } from 'firebase/firestore';
 import { cleanHtml } from '@/app/utils/CleanHtml';
+import { formatDate } from '@/app/utils/formatDate';
 
 interface MemoPageProps {
     params: {
@@ -70,17 +70,6 @@ export default async function MemoPage({ params }: MemoPageProps) {
 
     const userData = userDoc.exists ? userDoc.data() : { displayName: "unknown", photoURL: null } // .data() 호출 필요
 
-    // // 포스트 댓글 가져오기
-    const formatDate = (timestamp: Timestamp) => {
-        return timestamp.toDate().toLocaleString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).replace(/\. /g, '.');
-    };
-
     // Function
     return (
         <>
@@ -103,7 +92,7 @@ export default async function MemoPage({ params }: MemoPageProps) {
                         </div>
                     </div>
                 </div>
-                <div className="post_content_wrap" dangerouslySetInnerHTML={{ __html: cleanHtml(post?.content) }}></div>
+                <div className="post_content_wrap ql-editor" dangerouslySetInnerHTML={{ __html: cleanHtml(post?.content) }}></div>
             </PostDetailWrap>
         </>
     )

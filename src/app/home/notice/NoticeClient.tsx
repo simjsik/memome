@@ -7,7 +7,7 @@ import { NoMorePost, NoticeWrap, } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { Timestamp } from "firebase/firestore";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { motion } from "framer-motion";
@@ -30,6 +30,7 @@ export default function ClientNotice() {
     // 현재 로그인 한 유저
     const currentUser = useRecoilValue(userState)
 
+    const router = useRouter();
     const pathName = usePathname();
     const observerLoadRef = useRef(null);
     const uid = currentUser.uid
@@ -116,6 +117,14 @@ export default function ClientNotice() {
 
     }, [hasNextPage, fetchNextPage]);
 
+    // 포스트 보기
+    const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
+        if (usageLimit) {
+            return setLimitToggle(true);
+        }
+        router.push(`memo/${postId}`)
+    }
+
     // 에러 발생 시 데이터 요청 중지
     useEffect(() => {
         if (isError) {
@@ -193,7 +202,7 @@ export default function ClientNotice() {
                                 </p>
                             </div>
                             {/* 포스트 내용 */}
-                            <div className='post_content_wrap'>
+                            <div className='post_content_wrap' onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}>
                                 {/* 포스트 제목 */}
                                 <div className='post_title_wrap'>
                                     <span className='post_tag'>{post.tag}</span>
