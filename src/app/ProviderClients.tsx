@@ -12,6 +12,8 @@ import { auth, db } from "./DB/firebaseConfig";
 import { usePostUpdateChecker } from "./hook/ClientPolling";
 import { usePathname } from "next/navigation";
 import { getIdTokenResult, onAuthStateChanged } from "firebase/auth";
+import { CacheProvider } from "@emotion/react";
+import createCache from "@emotion/cache";
 
 const queryClient = new QueryClient();
 
@@ -75,16 +77,20 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     return <>{children}</>; // 반드시 children을 렌더링
 }
 
-export default function ProviderClient({ children }: { children: ReactNode }) {
+export default function ProviderClient({ children, nonce }: { children: ReactNode, nonce: string }) {
+    const cache = createCache({ key: 'custom', nonce });
+    console.log(nonce, '클라이언트 측 난수값')
     return (
         <div className={`${PretendardLight.variable} ${PretendardMedium.variable} ${PretendardBold.variable} main_wrap`}>
             <QueryClientProvider client={queryClient}>
                 <RecoilRoot>
-                    <InitializeLoginComponent>
-                        <>
-                            {children}
-                        </>
-                    </InitializeLoginComponent>
+                    <CacheProvider value={cache}>
+                        <InitializeLoginComponent>
+                            <>
+                                {children}
+                            </>
+                        </InitializeLoginComponent>
+                    </CacheProvider>
                 </RecoilRoot>
             </QueryClientProvider>
         </div>

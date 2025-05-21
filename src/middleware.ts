@@ -1,41 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chainMatch, isPageRequest, csp, strictDynamic } from '@next-safe/middleware';
 
-// function generateNonce(): string {
-//     const array = new Uint8Array(16);
-//     crypto.getRandomValues(array);
-//     // Uint8Array를 문자열로 변환
-//     let str = '';
-//     for (let i = 0; i < array.length; i++) {
-//         str += String.fromCharCode(array[i]);
-//     }
-//     // base64 인코딩
-//     return btoa(str);
-// }
-
-// // 미들웨어 함수 정의
-// export async function middleware(req: NextRequest) {
-//     const nonce = generateNonce();
-
-//     const requestHeaders = new Headers(req.headers);
-//     const response = NextResponse.next({
-//         request: { headers: requestHeaders }, // 수정된 요청 헤더 사용
-//     });
-//     requestHeaders.set(
-//         'Content-Security-Policy',
-//         `script-src 'self' 'nonce-${nonce}'; style-src 'self' 'nonce-${nonce}' 'unsafe-hashes';`
-//     );
-//     requestHeaders.set('x-csp-nonce', nonce); // 요청헤더 
-
-//     response.headers.set('X-Content-Type-Options', 'nosniff');
-//     response.headers.set('X-Frame-Options', 'DENY');
-//     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-
-//     return response;
-// }
+function generateNonce(): string {
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    // Uint8Array를 문자열로 변환
+    let str = '';
+    for (let i = 0; i < array.length; i++) {
+        str += String.fromCharCode(array[i]);
+    }
+    // base64 인코딩
+    return btoa(str);
+}
+const nonce = generateNonce();
 
 // 1) 인증·리다이렉트 로직 (기존 코드)
-function authRedirect(req: NextRequest) {
+export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
     const token = req.cookies.get('authToken')?.value;
     if (pathname === '/login' && token) {
@@ -46,36 +25,41 @@ function authRedirect(req: NextRequest) {
         const url = req.nextUrl.clone(); url.pathname = '/login';
         return NextResponse.redirect(url);
     }
-    return null;
+
+    const requestHeaders = new Headers(req.headers);
+
+    requestHeaders.set('x-csp-nonce', nonce); // 요청헤더 
+    const res = NextResponse.next({
+        request: { headers: requestHeaders },       // 수정된 요청 헤더 사용
+    });
+
+    // 추가 보안 헤더도 응답에 설정
+    res.headers.set('x-csp-nonce', nonce);
+    res.headers.set('X-Content-Type-Options', 'nosniff');
+    res.headers.set('X-Frame-Options', 'DENY');
+    res.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    res.headers.set(
+        'Content-Security-Policy',
+        `style-src 'self' 'nonce-${nonce}' 'unsafe-hashes' \
+        'sha256-otva1f6wkDzV9WurEmTw97pTGspFB6xN+csaPY1e4zI=' \
+        'sha256-57GCXobV9ZrfnnzAWcz//WfzeGNfevTKdsoxtI25AZQ=' \
+        'sha256-eXQbyB8YxZkWD5epgriI5Aoh333fjv618WjVSFU6Fbg=' \
+        'sha256-/njX6B78PGTBraXQ6mH1bYCXVi3WJKlCGN17JPEK4Q8=' \
+        'sha256-eNIPPaOamV/ib5wgfSPY7JyaVMnJjKTIIGo9yu04dns=' \
+        'sha256-uynp81lkWe3ENuo5JQDvzP2HBVZtV7rDFse1S5KMKYU=' \
+        'sha256-Z48SLN7BDrnlrkV3Ayto4e9RdtFuhJriqid0a0SU1gQ=' \
+        'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' \
+        'sha256-N6tSydZ64AHCaOWfwKbUhxXx2fRFDxHOaL3e3CO7GPI=' \
+        'sha256-fq7Md9B0amksVBTk/2TaltdrTVq2JN7fvIk0tt80qzU=' \
+        'sha256-xYFSKvPMCj0Vk3NmF1uDgVUQmi3L4JsVHJrhB8S4tbw=' \
+        'sha256-Ttt/bmFw+dmA+g2PkUEuxsBL6M02Q+HF61TAeiNsjro=' \
+        'sha256-MizmzrYbxcCxJr0W1K/Z14Iec3la7xLE9Fb2lkR0KQA=' \
+        'sha256-LnYONn2bqVTW1q+4xTrr6sjwVsmtd1c/XXHj4aRH75g=' \
+        ;`
+    );
+
+    return res;
 }
-
-// 2) CSP 자동화 미들웨어
-const cspMiddleware = csp({
-    directives: {
-        "default-src": ["self"],
-        "script-src": ["self"],
-        "style-src": ["self"],
-        "img-src": ["self", "data:"],
-        "font-src": ["self", "data:"],
-        "connect-src": ["self", "https:"]
-    },
-    reportOnly: false,       // 위반 리포트만 하고 싶다면 true
-});
-
-// 3) strict-dynamic 추가 (Optional)
-//    nonce 기반 CSP에서 동적 스크립트 로딩을 안전하게 허용
-const dynamicMiddleware = strictDynamic();
-
-// 4) 최종 내보내기: 페이지 요청에만 적용
-export default chainMatch(isPageRequest)(
-    (req: NextRequest) => {
-        const redirects = authRedirect(req);
-        if (redirects) return redirects;
-        return NextResponse.next();
-    },
-    cspMiddleware,
-    dynamicMiddleware
-);
 
 export const config = {
     matcher: ['/login/:path*', '/home/:path*']

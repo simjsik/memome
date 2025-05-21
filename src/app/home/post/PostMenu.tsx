@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
-import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { adminState, DidYouLogin, hasGuestState, ImageUrlsState, loadingState, loginToggleState, modalState, PostData, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
@@ -1020,7 +1020,7 @@ export default function PostMenu() {
                         return cloudinaryUrl.imgUrl;
                     })
                 );
-
+                console.log(imageUrls, '이미지 배열', optImageUrls, '업로드 되는 이미지 배열');
                 // content 내 이미지 URL을 최적화된 URL로 교체
                 const optContentUrls = await uploadContentImgCdn(posting, uploadedImageUrls);
 
@@ -1069,7 +1069,7 @@ export default function PostMenu() {
     const MAX_IMG_COUNT = 4;
 
     // 이미지 삽입 시 이미지 배열 관리
-    const imageHandler = async (url: string) => { // Quill 이미지 입력 시 imagesUrls 상태에 추가.
+    const imageHandler = async () => { // Quill 이미지 입력 시 imagesUrls 상태에 추가.
         const input = document.createElement('input');
         input.setAttribute('type', 'file');
         input.setAttribute('accept', 'image/*');
@@ -1077,39 +1077,145 @@ export default function PostMenu() {
 
         input.onchange = async () => { // 이미지 업로드 시 크기, 수 제한
             const file = input.files?.[0];
-
+            if (file) processImageFile(file);
             if (!file) return;
+        };
+    }
 
-            const currentImages = quillRef.current?.getEditor().root.querySelectorAll('img');
-            console.log(currentImages)
-            if (currentImages && currentImages.length > MAX_IMG_COUNT) {
+    const alertedRef = useRef(false);
+
+    // 공통 이미지 처리 함수
+    const processImageFile = useCallback((file: File) => {
+        const currentImages = quillRef.current?.getEditor().root.querySelectorAll('img');
+        if (currentImages && currentImages.length > MAX_IMG_COUNT) {
+            alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 업로드 가능합니다.`);
+            alertedRef.current = true;
+            return;
+        }
+        if (file.size > MAX_IMG_SIZE) {
+            alert("이미지 크기는 최대 2MB까지 허용됩니다.");
+            return;
+        }
+
+        // 이미지 URL 생성하여 Quill 에디터에 삽입
+        const reader = new FileReader();
+        reader.onload = () => {
+            const imageUrl = reader.result as string;
+            const editor = quillRef.current?.getEditor();
+            const range = editor?.getSelection();
+            if (range) {
+                editor?.insertEmbed(range.index, 'image', imageUrl);
+            }
+            // imageUrls 상태에 URL 추가
+            if (!imageUrls.includes(imageUrl)) {
+                setImageUrls((prev) => [...prev, imageUrl]);
+            }
+        };
+        reader.readAsDataURL(file);
+    }, [imageUrls, MAX_IMG_COUNT, MAX_IMG_SIZE]);
+
+    // 이미지 최대 수 제한 로직
+    useEffect(() => {
+        const editor = quillRef.current?.getEditor();
+
+        if (!editor) return;
+        const editorRoot = editor.root;
+
+        // 2) 알림 중복 방지 플래그
+        editor.clipboard.matchers = editor.clipboard.matchers.filter(
+            ([nodeName]) => nodeName !== 'IMG'
+        );
+
+        // // 이미지 제한 처리
+        editor.clipboard.addMatcher('IMG', (node: Node, delta: Delta) => {
+            if (storageLoad) return delta;
+
+            const imgTags = Array.from(editor.root.querySelectorAll('img'));
+
+            // 이미지 개수 초과 제한
+            if (imgTags.length >= MAX_IMG_COUNT) {
+                alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 추가할 수 있습니다.`);
+                alertedRef.current = true;
+                return new Delta(); // 빈 Delta 반환 (추가 제한)
+            }
+
+            // 기본 동작 유지
+            return delta;
+        });
+
+        // 붙여넣기 처리
+        const handlePaste = (e: ClipboardEvent) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (item.type.startsWith('image/')) {
+                    e.preventDefault(); // 기본 이미지 붙여넣기 방지
+                    const file = item.getAsFile()!;
+                    processImageFile(file);
+                }
+            }
+        };
+        
+        // 드래그&드롭 처리
+        const handleDrop = (e: DragEvent) => {
+            e.preventDefault();
+            const files = e.dataTransfer?.files;
+            if (!files || files.length === 0) return;
+
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    processImageFile(file);
+                }
+            });
+        };
+
+        // 텍스트 변경 이벤트: 이미지 개수 실시간 확인
+        const handleImageLimit = () => {
+            if (storageLoad) return;
+
+            const imgTags = Array.from(editor.root.querySelectorAll('img'));
+            const currentImageUrls = imgTags.map((img) => (img as HTMLImageElement).src);
+
+            // 이미지 개수 초과 시 초과 이미지를 삭제
+            if (currentImageUrls.length > MAX_IMG_COUNT) {
+                // **초과된 이미지만 삭제 (Quill의 이미지 삽입 후 동작)**
+                imgTags.slice(MAX_IMG_COUNT).forEach((img) => img.remove());
+
                 alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 업로드 가능합니다.`);
                 return;
             }
-            if (file.size > MAX_IMG_SIZE) {
-                alert("이미지 크기는 최대 2MB까지 허용됩니다.");
-                return;
-            }
-
-            if (!imageUrls.includes(url)) {
-                setImageUrls([...imageUrls, url]);
-            }
-
-            // 이미지 URL 생성하여 Quill 에디터에 삽입
-            const reader = new FileReader();
-            reader.onload = () => {
-                const imageUrl = reader.result as string;
-                const editor = quillRef.current?.getEditor();
-                const range = editor?.getSelection();
-                if (range) {
-                    editor?.insertEmbed(range.index, 'image', imageUrl);
-                }
-                // imageUrls 상태에 URL 추가
-                setImageUrls((prev) => [...prev, imageUrl]);
-            };
-            reader.readAsDataURL(file);
+            const imgs = Array.from(imgTags).map(img => img.src);
+            setImageUrls(prev => prev.filter(url => imgs.includes(url)));
         };
-    }
+
+        // 텍스트 커서 및 선택 범위 변경 시 도구에 반영
+        const handleCursorChange = () => {
+            const range = editor.getSelection(); // 현재 커서 범위
+            if (range) {
+                const currentFormats = editor.getFormat(range); // 커서 위치의 스타일 정보
+                setSelectedFontSize(currentFormats.size as string || '14px'); // 폰트 크기
+                setSelectedLineHeight(currentFormats.lineheight as string || '1'); // 줄 높이
+                setSelectedColor(currentFormats.color as string || '#191919'); // 글자 색
+                setSelectedBgColor(currentFormats.background as string || '#191919'); // 배경 색
+                setSelectedAlign(currentFormats.align as string || 'left'); // 정렬
+            }
+        };
+
+        // Quill 이벤트 등록
+        editor.on('text-change', handleImageLimit);
+        editor.on('selection-change', handleCursorChange);
+        editorRoot.addEventListener('paste', handlePaste, true);
+        editorRoot.addEventListener('drop', handleDrop, true);
+        return () => {
+            editor.clipboard.matchers = editor.clipboard.matchers.filter(matcher => matcher[0] !== 'IMG');
+            editor.off('selection-change', handleCursorChange);
+            editor.off('text-change', handleImageLimit);
+            editorRoot.removeEventListener('paste', handlePaste, true);
+            editorRoot.removeEventListener('drop', handleDrop, true);
+        };
+    }, [quillRef, storageLoad, processImageFile]);
 
     // 포스트 내용 로드
     const handleLoadPost = (loaded: boolean) => {
@@ -1131,79 +1237,6 @@ export default function PostMenu() {
         setConfirmed(false)
     }
 
-    // 이미지 붙여넣기, 이미지 최대 수 제한 로직
-    useEffect(() => {
-        const editor = quillRef.current?.getEditor();
-        const editorElem = quillRef.current?.getEditor().root;
-        if (!editor || !editorElem) return;
-
-        // 2) 알림 중복 방지 플래그
-        const alerted = false;
-
-        editor.clipboard.matchers = editor.clipboard.matchers.filter(
-            ([nodeName]) => nodeName !== 'IMG'
-        );
-
-        // // 이미지 붙여넣기 차단 및 제한 처리
-        editor.clipboard.addMatcher('IMG', (node: Node, delta: Delta) => {
-            if (storageLoad) return delta;
-
-            const imgTags = Array.from(editor.root.querySelectorAll('img'));
-
-            // 이미지 개수 초과 제한
-            if (imgTags.length >= MAX_IMG_COUNT) {
-                if (!alerted) {
-                    alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 추가할 수 있습니다.`);
-                    return new Delta(); // 빈 Delta 반환 (추가 제한)
-                }
-            }
-
-            // 기본 동작 유지
-            return delta;
-        });
-
-
-        // 텍스트 변경 이벤트: 이미지 개수 실시간 확인
-        const handleImageLimit = () => {
-            if (storageLoad) return;
-
-            const imgTags = Array.from(editor.root.querySelectorAll('img'));
-            const currentImageUrls = imgTags.map((img) => (img as HTMLImageElement).src);
-
-            // 이미지 개수 초과 시 초과 이미지를 삭제
-            if (currentImageUrls.length > MAX_IMG_COUNT) {
-                // **초과된 이미지만 삭제 (Quill의 이미지 삽입 후 동작)**
-                imgTags.slice(MAX_IMG_COUNT).forEach((img) => img.remove());
-
-                alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 업로드 가능합니다.`);
-                return;
-            }
-
-            setImageUrls(currentImageUrls.slice(0, MAX_IMG_COUNT)); // 상태 업데이트
-        };
-
-        // 텍스트 커서 및 선택 범위 변경 시 도구에 반영
-        const handleCursorChange = () => {
-            const range = editor.getSelection(); // 현재 커서 범위
-            if (range) {
-                const currentFormats = editor.getFormat(range); // 커서 위치의 스타일 정보
-                setSelectedFontSize(currentFormats.size as string || '14px'); // 폰트 크기
-                setSelectedLineHeight(currentFormats.lineheight as string || '1'); // 줄 높이
-                setSelectedColor(currentFormats.color as string || '#191919'); // 글자 색
-                setSelectedBgColor(currentFormats.background as string || '#191919'); // 배경 색
-                setSelectedAlign(currentFormats.align as string || 'left'); // 정렬
-            }
-        };
-
-        // Quill 이벤트 등록
-        editor.on('text-change', handleImageLimit);
-        editor.on('selection-change', handleCursorChange);
-        return () => {
-            editor.clipboard.matchers = editor.clipboard.matchers.filter(matcher => matcher[0] !== 'IMG');
-            editor.off('selection-change', handleCursorChange);
-            editor.off('text-change', handleImageLimit);
-        };
-    }, [quillRef, storageLoad, imageUrls]);
 
     useEffect(() => {
         if (!postingComplete) {
