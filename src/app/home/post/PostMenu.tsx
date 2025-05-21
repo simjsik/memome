@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { adminState, DidYouLogin, hasGuestState, ImageUrlsState, loadingState, loginToggleState, modalState, PostData, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
+import { adminState, DidYouLogin, ImageUrlsState, loadingState, loginToggleState, modalState, PostData, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
@@ -720,7 +720,6 @@ export default function PostMenu() {
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const currentUser = useRecoilValue(userState)
-    const hasGuest = useRecoilValue<boolean>(hasGuestState);
     const [storageLoad, setStorageLoad] = useRecoilState<boolean>(storageLoadState);
 
     const [postingComplete, setPostingComplete] = useState<boolean>(false);
@@ -807,16 +806,6 @@ export default function PostMenu() {
         loadQuill();
         setLoading(false)
     }, []);
-
-    // 게스트라면 글 작성 X
-    useEffect(() => {
-        if (hasGuest === true) {
-            router.push('/home/main');
-        }
-        if (!yourLogin) {
-            router.push('/login');
-        }
-    }, [hasGuest, yourLogin])
 
     // 폰트 사이즈 모듈
     const handleFontSizeChange = (size: string | null) => {

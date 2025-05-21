@@ -248,19 +248,6 @@ export default function MainHome() {
 
   // 포스트 삭제
   const deletePost = async (postId: string) => {
-    if (!yourLogin || usageLimit) {
-      if (usageLimit) {
-        return setLimitToggle(true);
-      }
-      if (!yourLogin) {
-        setLoginToggle(true);
-        setModal(true);
-        return;
-      }
-    }
-
-    const currentUserId = currentUser?.uid;
-
     try {
       // 게시글 존재 확인
       const postDoc = await getDoc(doc(db, 'posts', postId));
@@ -272,7 +259,7 @@ export default function MainHome() {
       const postOwnerId = postDoc.data()?.userId;
 
       // 삭제 권한 확인
-      if (currentUserId === postOwnerId || isAdmin) {
+      if (currentUser.uid === postOwnerId || isAdmin) {
         const confirmed = confirm('게시글을 삭제 하시겠습니까?')
         if (!confirmed) return;
 
@@ -286,7 +273,7 @@ export default function MainHome() {
       alert('게시글 삭제 중 오류가 발생했습니다.')
     }
   }
-
+  
   const { mutate: fetchUpdatePost, isPending: isAddUpdatePost } = useAddUpdatePost();
 
   // 버튼 클릭 시 새 데이터 로드

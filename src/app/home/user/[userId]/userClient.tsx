@@ -1,13 +1,13 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { ADMIN_ID, ImagePostData, loadingState, PostData, UsageLimitState, userData } from "@/app/state/PostState";
+import { adminState, ImagePostData, loadingState, PostData, UsageLimitState, userData, userState } from "@/app/state/PostState";
 import { css } from "@emotion/react";
 import { motion } from "framer-motion";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { UserPostWrap } from "./userStyle";
-import { auth, db } from "@/app/DB/firebaseConfig";
+import { db } from "@/app/DB/firebaseConfig";
 import { deleteDoc, doc, getDoc, Timestamp } from "firebase/firestore";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,7 @@ import { fetchImageList, fetchPostList } from "@/app/utils/fetchPostData";
 import LoadingWrap from "@/app/components/LoadingWrap";
 import { btnVariants } from "@/app/styled/motionVariant";
 import { formatDate } from "@/app/utils/formatDate";
+import useOutsideClick from "@/app/hook/OutsideClickHook";
 
 interface ClientUserProps {
     user: userData,
@@ -32,14 +33,14 @@ interface FetchImageListResponse {
 }
 
 export default function UserClient({ user }: ClientUserProps) {
-    const ADMIN = useRecoilValue(ADMIN_ID);
+    const isAdmin = useRecoilValue(adminState);
     const router = useRouter();
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const [postTab, setPostTab] = useState<boolean>(true)
     const [dropToggle, setDropToggle] = useState<string>('')
     const [loading, setLoading] = useRecoilState(loadingState);
     const [dataLoading, setDataLoading] = useState<boolean>(false);
-
+    const currentUser = useRecoilValue(userState)
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const observerLoadRef = useRef(null);
@@ -216,13 +217,6 @@ export default function UserClient({ user }: ClientUserProps) {
 
     // 포스트 삭제
     const deletePost = async (postId: string) => {
-        if (!auth.currentUser) {
-            alert('로그인이 필요합니다.');
-            return;
-        }
-
-        const currentUserId = auth.currentUser.uid;
-
         try {
             // 게시글 존재 확인
             const postDoc = await getDoc(doc(db, 'posts', postId));
@@ -234,7 +228,7 @@ export default function UserClient({ user }: ClientUserProps) {
             const postOwnerId = postDoc.data()?.userId;
 
             // 삭제 권한 확인
-            if (currentUserId === postOwnerId || currentUserId === ADMIN) {
+            if (currentUser.uid === postOwnerId || isAdmin) {
                 const confirmed = confirm('게시글을 삭제 하시겠습니까?')
                 if (!confirmed) return;
 
@@ -253,19 +247,12 @@ export default function UserClient({ user }: ClientUserProps) {
         router.push(`/home/memo/${userId}`)
     }
 
-    // 외부 클릭 감지 로직
-    useEffect(() => {
-        const handleOutsideClick = (event: MouseEvent) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target as Node) // 클릭된 위치가 드롭다운 내부가 아닌 경우
-            ) {
-                setDropToggle(''); // 드롭다운 닫기
-            }
-        };
-        document.addEventListener('mousedown', handleOutsideClick); // 이벤트 리스너 추가
-        return () => document.removeEventListener('mousedown', handleOutsideClick); // 클린업
-    }, []);
+    // 외부 클릭 시 드롭다운 닫기
+    useOutsideClick(dropdownRef, () => {
+        if (dropToggle) {
+            setDropToggle('');
+        }
+    });
 
     return (
         <>
