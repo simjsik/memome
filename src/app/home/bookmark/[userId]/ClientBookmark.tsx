@@ -145,7 +145,7 @@ export default function Bookmark() {
                 <PostWrap>
                     {!loading && <p className='all_post'>내 북마크</p>}
                     {/* 무한 스크롤 구조 */}
-                    {!loading && bookmarkList.map((post) => (
+                    {!loading && bookmarkList.length > 0 && bookmarkList.map((post) => (
                         <motion.div
                             key={post?.id}
                             className='post_box'

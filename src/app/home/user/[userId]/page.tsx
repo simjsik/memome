@@ -35,7 +35,6 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
     };
 }
 
-
 export default async function UserHome({ params }: UserPageProps) {
     const { userId } = params;
 
