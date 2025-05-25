@@ -33,7 +33,7 @@ align-content: flex-start;
     }
 
     // 포스트 프로필 박스
-      .post_profile_wrap{
+    .post_profile_wrap{
         display:flex;
         justify-content: space-between;
 
@@ -70,7 +70,7 @@ align-content: flex-start;
               cursor : pointer;
             }
         }
-      }
+    }
       .post_dropdown_wrap{
         height : 36px;
       }
@@ -123,6 +123,25 @@ align-content: flex-start;
         font-size: 0.9rem;
         border-bottom: none;
         margin-top: 8px;
+      }
+
+      .notice_tag{
+          width: fit-content;
+          display: block;
+          padding: 4px 6px;
+          border: 1px solid #ffc6c9;
+          background-color: #ffe3e4;
+          color: #ff4e59;
+          font-size: 0.875rem;
+          line-height: normal;
+          border-radius: 4px;
+      }
+
+      .notice_title{
+        width: 100%;
+        font-size: 0.9rem;
+        margin-top: 8px;
+        color: red;
       }
 
       // 포스트 내용
@@ -610,288 +629,6 @@ align-content: flex-start;
       height: clamp(72px, calc(72px + (100vw - 5120px) * 0.0125), 88px);
     }
   }
-`
-export const NoticeWrap = styled.div`
-    position : absolute;
-    left : clamp(80px, calc(80px + (100vw - 768px) * 0.5), 25%);
-    display : flex;
-    flex-wrap : wrap;
-    width:  600px;
-    height: fit-content;
-    min-height: 100%;
-    padding : 0px;
-    background : #fff;
-    border-radius : 4px;
-    border : none;
-    border-left : 1px solid #ededed;
-    border-right : 1px solid #ededed;
-
-    .post_box{
-        width: 100%;
-        border-bottom: 1px solid #ededed;
-        padding: 20px;
-        background: #fff;
-        cursor:pointer;
-    }
-
-    .post_profile{
-        display: flex;
-    }
-
-    .user_profile{
-        width: 36px;
-        height: 36px;
-        margin-right: 8px;
-        border-radius: 50%;
-        border: 2px solid #ededed;
-        background-size: cover;
-        background-repeat: no-repeat;
-    }
-
-    .user_name,
-    .user_uid,
-    .post_date{
-        font-size : 0.875rem;
-    }
-    
-    .user_name,
-    .user_uid{
-        line-height: 36px;
-        margin-right: 4px;
-    }
-
-    .user_name:hover{
-        text-decoration : underline;
-    }
-
-    .user_uid,
-    .post_date{
-        font-family : var(--font-pretendard-light);
-        line-height: 36px;
-    }
-
-    .post_title_wrap{
-        margin-top: 10px;
-    }
-
-    .post_tag{
-        width: fit-content;
-        display: block;
-        padding: 4px 6px;
-        border: 1px solid #ffc6c9;
-        background-color: #ffe3e4;
-        color: #ff4e59;
-        font-size: 0.875rem;
-        font-family: '__PretendardBold_73a78b';
-        border-radius: 4px;
-    }
-
-    .post_title{
-        font-size: 0.9rem;
-        margin-top: 8px;
-        font-family: '__PretendardMedium_979b24';
-        color: red;
-    }
-
-    .post_bottom_wrap{
-        margin-top: 20px;
-        margin-left: -6px;
-        padding-top: 10px;
-    }
-
-    .post_content_wrap{
-        padding: 0px 0px 10px 44px;
-
-        .post_text{
-            height: 80px;
-            overflow: hidden;
-            margin-top: 10px;
-
-            img{
-              display : none;
-            }
-        }
-
-        .post_pr_img_wrap{
-            width: 100%;
-            display: flex;
-            height: 180px;
-            
-            .post_pr_img{
-              height: 100%;
-              margin-right : 4px;
-              border-radius : 8px;
-              background-size: cover;
-              background-repeat: no-repeat;
-              border : 1px solid #ededed;
-            }
-
-            .post_pr_img:last-child{
-              margin-right : 0;
-            }
-        }
-    }
-
-      .post_comment_btn{
-        width: 32px;
-        height: 32px;
-        border : none;
-        border-radius : 50px;
-        background : #ffffff00;
-        padding: 6px;
-        cursor : pointer
-      }
-
-      .post_comment_icon{
-        width: 100%;
-        height: 100%;
-        background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449945/%EB%8C%93%EA%B8%80%EC%95%84%EC%9D%B4%EC%BD%98_xbunym.svg);
-      }
-
-      .post_comment{
-        font-family : var(--font-pretendard-medium);
-        font-size : 1rem;
-        color: #191919;
-        margin-left : 2px;
-        display : flex;
-        line-height : 32px;
-      }
-
-      //-------------------------------------------------------
-        @media (max-width: 480px) {
-            overflow-y: scroll;
-            left: 0px;
-            width: 100%;
-            height: calc(100% - 82px);
-            max-width: none;
-            min-height: auto;
-
-            .post_drop_menu_btn{
-                    position : relative;
-                    width: 36px;
-                    height: 36px;
-                    border: none;
-                    border-radius : 50px;
-                    background-color: #ffffff00;
-                    cursor: pointer;
-
-                    div{
-                      position: absolute;
-                      top: 36px;
-                      right: 0;
-                      width: 100px;
-                    }
-            }
-        }
-
-        @media (min-width : 481px) and (max-width: 768px) {
-          left: 80px;
-          width: calc(100% - 80px);
-          max-width: 600px;
-        }
-
-        @media (min-width: 1200px) and (max-width : 1920px) {
-          left : clamp(80px, calc(80px + (100vw - 1200px) * 0.53), 50vw);
-        }
-
-        @media (min-width: 1921px) {
-          border-left: 2px solid #ededed;
-          border-right: 2px solid #ededed;
-          width: clamp(600px, calc(600px + (100vw - 1920px) * 0.3125), 800px);
-
-          .post_content_wrap{
-            .post_pr_img_wrap{
-              height: clamp(180px, calc(180px + (100vw - 1920px) * 0.3125), 380px);
-            }
-          }
-
-          .post_title{
-            margin-top : 16px;
-          }
-
-          .post_text{
-            height: 100px;
-          }
-
-          .user_profile {
-            width: 42px;
-            height: 42px;
-          }
-
-          .user_name,
-          .user_uid,
-          .post_date{
-            line-height : 42px;
-          }
-
-          .post_content_wrap{
-              padding: 0px 0px 10px 50px;
-          }
-        }
-
-        @media (min-width: 2560px) {
-          width: clamp(800px, calc(800px + (100vw - 2560px) * 0.3125), 1200px);
-          .post_content_wrap{
-            .post_pr_img_wrap{
-              height: clamp(380px, calc(380px + (100vw - 2560px) * 0.3125), 780px);
-            }
-          }
-          .post_text{
-            height: 120px;
-          }
-
-          .post_title{
-            margin-top : 24px;
-          }
-          .user_profile {
-            width: 52px;
-            height: 52px;
-          }
-
-          .user_name,
-          .user_uid,
-          .post_date{
-            line-height : 52px;
-          }
-
-          .post_content_wrap{
-            padding: 0px 0px 10px 62px;
-          }
-        }
-
-        @media (min-width: 3840px) {
-          border-left: 3px solid #ededed;
-          border-right: 3px solid #ededed;
-
-          width: clamp(1200px, calc(1200px + (100vw - 3840px) * 0.3125), 1600px);
-          .post_content_wrap{
-            .post_pr_img_wrap{
-              height: clamp(780px, calc(780px + (100vw - 3840px) * 0.3125), 1000px);
-            }
-          }
-
-          .post_text{
-            height: 140px;
-          }
-
-          .post_title{
-            margin-top : 32px;
-          }
-          .user_profile {
-            width: 68px;
-            height: 68px;
-          }
-
-          .user_name,
-          .user_uid,
-          .post_date{
-            line-height : 68px;
-          }
-
-          .post_content_wrap{
-            padding: 0px 0px 10px 80px;
-          }
-        }
 `
 export const TitleHeader = styled.div`
 width: 100%;

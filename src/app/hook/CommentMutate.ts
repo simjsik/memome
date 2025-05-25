@@ -150,46 +150,10 @@ export function useDelComment(
     const queryClient = useQueryClient();
     const user = useRecoilValue(userState);
     const ADMIN = useRecoilValue(adminState);
-    const setCommentList = useSetRecoilState(memoCommentState);
     const setCommentCount = useSetRecoilState(memoCommentCount);
 
     return useMutation<void, Error, string>({
-        mutationFn: async (commentId) => {
-            const docRef = doc(db, 'posts', postId, 'comments', commentId);
-            const docSnap = await getDoc(docRef);
-            if (!docSnap.exists()) {
-                alert('해당 댓글을 찾을 수 없습니다.');
-                return;
-            }
-
-            const commentOwnerId = docSnap.data()?.uid;
-
-            if (user.uid === commentOwnerId || ADMIN) {
-                const batch = writeBatch(db);
-
-                batch.delete(docRef);
-
-                const repliesQuery = query(collection(db, 'posts', postId, 'comments', commentId, 'reply'));
-                const replySnapshot = await getDocs(repliesQuery);
-                replySnapshot.docs.forEach(dc => batch.delete(dc.ref));
-
-
-                // 댓글 수 수정: 현재 댓글과 답글 수를 계산
-                const postRef = doc(db, 'posts', postId)
-                batch.update(postRef, { commentCount: increment(-1 - replySnapshot.size) });
-
-                await batch.commit();
-
-                setCommentList((prevComments) => prevComments.filter(comment =>
-                    comment.id !== commentId && comment.parentId !== commentId
-                ));
-                setCommentCount(prev => prev - 1 - replySnapshot.size)
-            } else {
-                alert('댓글 삭제 권한이 없습니다.');
-                return;
-            }
-        },
-        onSuccess: (_, commentId) => {
+        onMutate: async (commentId) => {
             queryClient.setQueryData<InfiniteData<{ data: Comment[], nextPage: Timestamp | undefined }>>(
                 ['comments', postId],
                 old => {
@@ -203,8 +167,56 @@ export function useDelComment(
                     };
                 }
             );
+        },
+        mutationFn: async (commentId) => {
+            const docRef = doc(db, 'posts', postId, 'comments', commentId);
+            const docSnapshot = await getDoc(docRef);
+            if (!docSnapshot.exists()) {
+                throw new Error("NF") // NOT FOUND
+            }
+
+            const commentOwnerId = docSnapshot.data()?.uid;
+
+            if (user.uid !== commentOwnerId && commentOwnerId !== ADMIN) {
+                throw new Error('FB'); // FORBIDDEN
+            }
+
+            const confirmed = confirm('댓글을 삭제 하시겠습니까?')
+            if (!confirmed) return;
+
+            const batch = writeBatch(db);
+
+            batch.delete(docRef);
+
+            const repliesQuery = query(collection(db, 'posts', postId, 'comments', commentId, 'reply'));
+            const replySnapshot = await getDocs(repliesQuery);
+            replySnapshot.docs.forEach(dc => batch.delete(dc.ref));
+
+            // 댓글 수 수정: 현재 댓글과 답글 수를 계산
+            const postRef = doc(db, 'posts', postId)
+            batch.update(postRef, { commentCount: increment(-1 - replySnapshot.size) });
+
+            setCommentCount(prev => prev - (1 + replySnapshot.size));
+
+            await batch.commit();
+        },
+        onError: (err) => {
+            if (err.message === 'NF') {
+                alert('해당 댓글을 찾을 수 없습니다.');
+            } else if (err.message === 'FB') {
+                alert('삭제 권한이 없습니다.');
+            } else {
+                alert('댓글 삭제에 실패했습니다.');
+            }
+        },
+        onSuccess: () => {
             alert('삭제되었습니다');
-        }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['comments', postId],
+            });
+        },
     });
 }
 

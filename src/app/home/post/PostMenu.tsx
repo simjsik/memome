@@ -944,7 +944,7 @@ export default function PostMenu() {
         setPostTitle(value);
     }
 
-    const { mutate: fetchUpdateNewPost } = useAddNewPost();
+    const { mutate: fetchUpdateNewPost } = useAddNewPost(checkedNotice);
 
     // 포스팅 업로드
     const uploadThisPost = async () => {
@@ -1037,8 +1037,6 @@ export default function PostMenu() {
                 fetchUpdateNewPost(newPost);
 
                 setPostingComplete(true);
-                localStorage.removeItem('unsavedPost');
-                alert('포스팅 완료');
                 router.push('/home/main');
             } catch (error) {
                 alert('포스팅에 실패하였습니다: ' + error);
@@ -1146,7 +1144,7 @@ export default function PostMenu() {
                 }
             }
         };
-        
+
         // 드래그&드롭 처리
         const handleDrop = (e: DragEvent) => {
             e.preventDefault();

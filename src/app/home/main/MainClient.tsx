@@ -3,11 +3,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { adminState, DidYouLogin, loadingState, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
+import { DidYouLogin, loadingState, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
 import { usePathname, useRouter } from 'next/navigation';
 import { css } from '@emotion/react';
-import { deleteDoc, doc, getDoc, Timestamp, } from 'firebase/firestore';
-import { db } from '../../DB/firebaseConfig';
+import { Timestamp, } from 'firebase/firestore';
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 import { motion } from "framer-motion";
 
@@ -25,6 +24,7 @@ import useOutsideClick from '@/app/hook/OutsideClickHook';
 import { cleanHtml } from '@/app/utils/CleanHtml';
 import { formatDate } from '@/app/utils/formatDate';
 import { useAddUpdatePost } from './hook/usePostMutation';
+import { useDelPost } from '../post/hook/useNewPostMutation';
 
 
 export default function MainHome() {
@@ -45,7 +45,6 @@ export default function MainHome() {
 
   // 현재 로그인 한 유저
   const currentUser = useRecoilValue<userData>(userState)
-  const isAdmin = useRecoilValue<boolean>(adminState)
 
   const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
   const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
@@ -246,34 +245,15 @@ export default function MainHome() {
     }
   }, [isLoading, setLoading])
 
+  const { mutate: handledeletePost } = useDelPost();
+
   // 포스트 삭제
   const deletePost = async (postId: string) => {
-    try {
-      // 게시글 존재 확인
-      const postDoc = await getDoc(doc(db, 'posts', postId));
-      if (!postDoc.exists()) {
-        alert('해당 게시글을 찾을 수 없습니다.')
-        return;
-      }
-
-      const postOwnerId = postDoc.data()?.userId;
-
-      // 삭제 권한 확인
-      if (currentUser.uid === postOwnerId || isAdmin) {
-        const confirmed = confirm('게시글을 삭제 하시겠습니까?')
-        if (!confirmed) return;
-
-        await deleteDoc(doc(db, 'posts', postId));
-        alert('게시글이 삭제 되었습니다.');
-      } else {
-        alert('게시글 삭제 권한이 없습니다.');
-      }
-    } catch (error) {
-      console.error('게시글 삭제 중 오류가 발생했습니다.' + error)
-      alert('게시글 삭제 중 오류가 발생했습니다.')
-    }
+    const confirmed = confirm('게시글을 삭제 하시겠습니까?')
+    if (!confirmed) return;
+    handledeletePost(postId)
   }
-  
+
   const { mutate: fetchUpdatePost, isPending: isAddUpdatePost } = useAddUpdatePost();
 
   // 버튼 클릭 시 새 데이터 로드
