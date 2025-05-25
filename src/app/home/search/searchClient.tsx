@@ -7,11 +7,11 @@ import { SearchBoxWrap } from "./SearchStyle";
 import { css } from "@emotion/react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { collection, deleteDoc, doc, getDoc, Timestamp } from "firebase/firestore";
+import { collection, doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/app/DB/firebaseConfig";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
-import { ADMIN_ID, DidYouLogin, loadingState, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
+import { DidYouLogin, loadingState, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle } from "@/app/state/PostState";
 import { searchClient } from "@/app/utils/algolia";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { motion } from "framer-motion";
@@ -19,6 +19,7 @@ import { useHandleUsernameClick } from "@/app/utils/handleClick";
 import { btnVariants } from "@/app/styled/motionVariant";
 import { cleanHtml } from "@/app/utils/CleanHtml";
 import LoadingWrap from "@/app/components/LoadingWrap";
+import { useDelPost } from "../post/hook/useNewPostMutation";
 
 const formatDate = (createAt: Timestamp | Date | string | number) => {
     if ((createAt instanceof Timestamp)) {
@@ -86,8 +87,6 @@ function PostHit({ hit }: { hit: PostData }) {
     const [userData, setUserData] = useState<{ displayName: string; photoURL: string | null } | null>(null);
     const [loading, setIsLoading] = useState<boolean>(true);
     const setLoading = useSetRecoilState<boolean>(loadingState);
-    const currentUser = useRecoilValue(userState);
-    const ADMIN = useRecoilValue(ADMIN_ID);
     const yourLogin = useRecoilValue(DidYouLogin);
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState);
     const setModal = useSetRecoilState<boolean>(modalState);
@@ -134,45 +133,12 @@ function PostHit({ hit }: { hit: PostData }) {
 
     const handleUsernameClick = useHandleUsernameClick();
 
+    const { mutate: handledeletePost } = useDelPost();
     // 포스트 삭제
     const deletePost = async (postId: string) => {
-        if (!yourLogin || usageLimit) {
-            if (usageLimit) {
-                return setLimitToggle(true);
-            }
-            if (!yourLogin) {
-                setLoginToggle(true);
-                setModal(true);
-                return;
-            }
-        }
-
-        const currentUserId = currentUser?.uid;
-
-        try {
-            // 게시글 존재 확인
-            const postDoc = await getDoc(doc(db, 'posts', postId));
-            if (!postDoc.exists()) {
-                alert('해당 게시글을 찾을 수 없습니다.')
-                return;
-            }
-
-            const postOwnerId = postDoc.data()?.userId;
-
-            // 삭제 권한 확인
-            if (currentUserId === postOwnerId || currentUserId === ADMIN) {
-                const confirmed = confirm('게시글을 삭제 하시겠습니까?')
-                if (!confirmed) return;
-
-                await deleteDoc(doc(db, 'posts', postId));
-                alert('게시글이 삭제 되었습니다.');
-            } else {
-                alert('게시글 삭제 권한이 없습니다.');
-            }
-        } catch (error) {
-            console.error('게시글 삭제 중 오류가 발생했습니다.' + error)
-            alert('게시글 삭제 중 오류가 발생했습니다.')
-        }
+        const confirmed = confirm('게시글을 삭제 하시겠습니까?')
+        if (!confirmed) return;
+        handledeletePost(postId)
     }
 
     if (!userData) {
