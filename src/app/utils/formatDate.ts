@@ -15,12 +15,12 @@ export const formatDate = (createAt: Timestamp | Date | string | number): string
 
     if (befHour < 24) {
         // 0시간 방지
-        const hours = Math.max(befHour, 1);
+        const hours = Math.max(Math.round(befHour), 1);
         return `${hours}시간 전`;
     }
 
     if (befDay < 7) {
-        const days = Math.max(befDay, 1);
+        const days = Math.max(Math.round(befDay), 1);
         return `${days}일 전`;
     }
 
