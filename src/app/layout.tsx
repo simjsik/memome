@@ -12,7 +12,6 @@ type LayoutProps = {
 
 export default async function RootLayout({ children }: LayoutProps) {
   const headerNonce = headers().get('x-csp-nonce') ?? '';
-  console.log(headerNonce, '서버 측 난수값')
   return (
     <html lang="ko">
       <body>

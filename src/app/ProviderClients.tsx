@@ -68,7 +68,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
             const idTokenResult = await getIdTokenResult(user);
             const claims = idTokenResult.claims as CustomClaims;
-            console.log(claims.roles?.admin, '현재 유저 관리자 권한')
             setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
         });
 
