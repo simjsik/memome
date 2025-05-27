@@ -16,6 +16,7 @@ router.post('/saveUser', async (req: Request, res: Response) => {
     const {uid, displayName, hasGuest} = req.body;
 
     try {
+        // 게스트 일 경우
         const userRef = hasGuest ?
          adminDb.doc(`guests/${uid}`) :
          adminDb.doc(`users/${uid}`);
@@ -36,7 +37,9 @@ router.post('/saveUser', async (req: Request, res: Response) => {
             await userRef.set(userData, {merge: true});
         }
 
-        return res.status(200).json({message: "유저 정보 저장"});
+        return res.status(200).json({
+            message: "유저 정보 저장",
+        });
     } catch (error) {
         if (error) {
             return res.status(403).json({message: "유저 정보 저장 실패" + error});

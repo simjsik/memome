@@ -13,7 +13,6 @@ router.post('/validate', async (req: Request, res: Response) => {
         console.log(idToken?.slice(0, 8), uid, "유저 토큰 및 UID ( Validate API )");
         const authToken = req.cookies.authToken;
         const csrfToken = req.cookies.csrfToken;
-        const hasGuest = req.cookies.hasGuest;
 
         if (!idToken && (!uid && !csrfToken)) {
             console.log("유저 아이디 토큰 및 UID 누락 ( Validate API )");
@@ -26,8 +25,8 @@ router.post('/validate', async (req: Request, res: Response) => {
             if (!decodedToken) {
                 console.log("유저 아이디 토큰 검증 실패.");
                 return res.status(403).json({
-                     message: "ID 토큰이 유효하지 않거나 만료되었습니다.",
-                    });
+                    message: "ID 토큰이 유효하지 않거나 만료되었습니다.",
+                });
             }
         }
 
@@ -58,8 +57,9 @@ router.post('/validate', async (req: Request, res: Response) => {
                 );
             }
 
+            const hasGuest = decodedToken.roles?.guest === true;
             console.log(hasGuest, typeof(hasGuest), '( Validate API )');
-            const userRef = hasGuest === 'true' ?
+            const userRef = hasGuest ?
             adminDb.collection('guests').doc(uid) :
             adminDb.collection('users').doc(uid);
 

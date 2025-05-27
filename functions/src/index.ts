@@ -17,6 +17,7 @@ import saveUserRouter from "./routes/saveUserApi";
 import limitRouter from "./routes/firebaseLimit";
 import updateProfileRouter from "./routes/updateProfile";
 import uploadCdnImageRouter from "./routes/uploadCdnImage";
+import createCustomTokenRouter from "./routes/createCustomToken";
 import {adminDb} from "./DB/firebaseAdminConfig";
 import {UserRecord} from "firebase-admin/auth";
 
@@ -266,6 +267,7 @@ app.use('/', saveUserRouter);
 app.use('/', limitRouter);
 app.use('/', updateProfileRouter);
 app.use('/', uploadCdnImageRouter);
+app.use('/', createCustomTokenRouter);
 
 // Firebase Functions로 배포
 export const ApiRouter = onRequest(app);

@@ -1,21 +1,33 @@
 import express, {Request, Response} from "express";
 import cookieParser from "cookie-parser";
-import {adminDb} from "../DB/firebaseAdminConfig";
+import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
 
 const router = express.Router();
 const app = express();
 app.use(cookieParser());
 
 router.post('/limit', async (req: Request, res: Response) => {
-    const {userId} = req.body;
-    const hasGuest = req.cookies.hasGuest;
+    const {uid} = req.body;
+    const authToken = req.cookies.authToken;
+    console.log(authToken?.slice(0, 8), uid, "유저 토큰 및 UID ( Validate API )");
 
-    let limitCount = 80;
-    if (!userId) {
+    if (!uid) {
         return res.status(401).json({error: '유저가 없습니다.'});
     }
 
-    if (hasGuest === 'true') {
+    const decodedToken = await adminAuth.verifyIdToken(authToken);
+
+    if (!decodedToken) {
+        console.log("유저 아이디 토큰 검증 실패.");
+        return res.status(403).json({
+            message: "ID 토큰이 유효하지 않거나 만료되었습니다.",
+        });
+    }
+
+    const hasGuest = decodedToken.roles?.guest === true;
+
+    let limitCount = 80;
+    if (hasGuest) {
         limitCount = 40;
     }
 
@@ -24,7 +36,7 @@ router.post('/limit', async (req: Request, res: Response) => {
 
     try {
         // Firestore에서 문서 참조 얻기
-        const userDocRef = adminDb.doc(`userUsage/${userId}`);
+        const userDocRef = adminDb.doc(`userUsage/${uid}`);
         const userDocSnap = await userDocRef.get(); // 문서 읽기
         const userDoc = userDocSnap.data() as {
             readCount: number, lastUpdate: string

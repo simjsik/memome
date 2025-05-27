@@ -11,9 +11,10 @@ const useUpdateChecker = () => {
     const hasGuest = useRecoilValue(hasGuestState)
 
     useEffect(() => {
+        if (!currentUser.uid) return
         const fetchUpdateStatus = async () => {
             try {
-                const docRef = hasGuest ? doc(db, `guests/${currentUser?.uid}/status/postUpdates`) : doc(db, `users/${currentUser?.uid}/status/postUpdates`);
+                const docRef = hasGuest ? doc(db, `guests/${currentUser.uid}/status/postUpdates`) : doc(db, `users/${currentUser.uid}/status/postUpdates`);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     setHasUpdate(docSnap.data().hasUpdate || false);
@@ -35,7 +36,7 @@ const useUpdateChecker = () => {
 
     const clearUpdate = async () => {
         try {
-            if (currentUser) {
+            if (currentUser.uid) {
                 const userId = currentUser.uid
 
                 const validateResponse = await fetch(`/api/validate`, {

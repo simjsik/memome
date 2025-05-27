@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useRecoilValue, useSetRecoilState } from "recoil";
 import "./globals.css";
 import useAuthSync from "./hook/AuthSyncHook";
-import { adminState, bookMarkState, userState } from "./state/PostState";
+import { adminState, bookMarkState, hasGuestState, userState } from "./state/PostState";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./DB/firebaseConfig";
 import { usePostUpdateChecker } from "./hook/ClientPolling";
@@ -20,7 +20,7 @@ const queryClient = new QueryClient();
 interface CustomClaims {
     roles?: {
         admin?: boolean;
-        subadmin?: boolean;
+        guest?: boolean;
     };
 }
 
@@ -30,18 +30,16 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const currentUser = useRecoilValue(userState);
     const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState);
     const setAdmin = useSetRecoilState<boolean>(adminState);
+    const setGuest = useSetRecoilState<boolean>(hasGuestState);
     const pathName = usePathname();
 
     const loadBookmarks = async (uid: string) => {
         try {
-            console.log('북마크 데이터 요청')
             const bookmarks = await getDoc(doc(db, `users/${uid}/bookmarks/bookmarkId`));
-            console.log(bookmarks.exists(), '북마크 유무');
             if (bookmarks.exists()) {
                 // 북마크 데이터가 있을 경우
                 const data = bookmarks.data() as { bookmarkId: string[] };
                 setCurrentBookmark(data.bookmarkId); // Recoil 상태 업데이트
-                console.log(data.bookmarkId, '북마크 리스트 목록');
             }
         } catch (error) {
             console.error("북마크 데이터를 가져오는 중 오류 발생:", error);
@@ -69,10 +67,12 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
             const idTokenResult = await getIdTokenResult(user);
             const claims = idTokenResult.claims as CustomClaims;
             setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
+            setGuest(!!claims.roles?.guest); // !!로 boolean 타입 강제 변환
         });
 
         return unsub;
-    }, [])
+    }, []);
+
     return <>{children}</>; // 반드시 children을 렌더링
 }
 

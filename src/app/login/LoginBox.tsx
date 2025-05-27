@@ -17,8 +17,7 @@ import {
 import { browserLocalPersistence, browserSessionPersistence, getAuth, GoogleAuthProvider, setPersistence, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, signInWithPopup, updateProfile } from "firebase/auth";
 import { LoginOr, LoginSpan } from "../styled/LoginStyle";
 import { usePathname, useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../DB/firebaseConfig";
+import { auth } from "../DB/firebaseConfig";
 import { BeatLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -128,9 +127,6 @@ export default function LoginBox() {
             const signUser = userCredential.user
             const idToken = await signUser.getIdToken();
 
-            const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || [];
-            const role = ADMIN_EMAILS.includes(userCredential.user.email ?? '') ? 3 : 2;
-
             if (!signUser.emailVerified) {
                 return setLoginError('인증되지 않은 계정입니다. 이메일을 확인해주세요.');
             }
@@ -139,7 +135,7 @@ export default function LoginBox() {
                 method: "POST",
                 headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
                 credentials: "include",
-                body: JSON.stringify({ idToken, role, hasGuest: false }),
+                body: JSON.stringify({ idToken }),
             });
 
             if (!loginResponse.ok) {
@@ -199,16 +195,12 @@ export default function LoginBox() {
             const googleToken = await userCredential.user.getIdToken();
             // userCredential를 전부 보내주면 보안 상 문제가 생김. ( 최소 권한 원칙 )
 
-            // 역할 동적 할당 (환경 변수 기반)
-            const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || [];
-            const role = ADMIN_EMAILS.includes(userCredential.user.email ?? '') ? 3 : 2;
-
             // 서버로 ID 토큰 전송
             const googleResponse = await fetch("/api/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
                 credentials: "include",
-                body: JSON.stringify({ idToken: googleToken, role, hasGuest: false }),
+                body: JSON.stringify({ idToken: googleToken }),
             });
 
             if (!googleResponse.ok) {
@@ -263,7 +255,6 @@ export default function LoginBox() {
             let signUser;
             let data;
             let guestResponse;
-            let customTokenResponse;
             console.log(guestUid, '게스트 UID')
 
             // 공통 게스트 로그인 로직
@@ -272,9 +263,10 @@ export default function LoginBox() {
                     method: "POST",
                     headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
                     credentials: "include",
-                    body: JSON.stringify({ idToken, role: 1, hasGuest: true, guestUid }),
+                    body: JSON.stringify({ idToken, guestUid }),
                 });
             };
+
             const handleCustomTokenResponse = async (guestUid?: string) => {
                 return await fetch("/api/customToken", {
                     method: "POST",
@@ -287,27 +279,35 @@ export default function LoginBox() {
             if (guestUid) {
                 console.log('게스트 로그인 이력 유 : 로직 실행')
 
-                const guestDocRef = doc(db, 'guests', guestUid);
-                const guestsDoc = await getDoc(guestDocRef);
-                if (!guestsDoc.exists()) { // 🔥 존재하지 않는 UID 차단
-                    await auth.signOut(); // 🔥 세션 무효화
-                    localStorage.removeItem("guestUid"); // 🔥 잘못된 UID 삭제
-                    return setLoginError('게스트 로그인에 실패했습니다. 다시 시도 해주세요.')
+                const guestTokenResponse = await handleCustomTokenResponse(guestUid);
+                if (!guestTokenResponse.ok) {
+                    const errorData = await guestTokenResponse.json();
+                    const errorMessage = guestTokenResponse.status === 403
+                        ? '로그인 시도 실패. 다시 시도 해주세요.'
+                        : '게스트 로그인에 실패했습니다. 다시 시도 해주세요.';
+                    setLoginError(errorMessage);
+                    throw new Error(`서버 요청 에러 ${guestTokenResponse.status}: ${errorData.message}`);
                 }
 
-                customTokenResponse = await handleCustomTokenResponse(guestUid);
-                const tokenData = await customTokenResponse.json();
-                const { customToken } = tokenData;
+                const tokenData = await guestTokenResponse.json();
+                const token = tokenData.customToken;
 
-                const userCredential = await signInWithCustomToken(auth, customToken);
-                idToken = await userCredential.user.getIdToken();
+                const userCredential = await signInWithCustomToken(auth, token);
+                const signUser = userCredential.user
 
-                guestResponse = await handleGuestResponse(idToken, guestUid)
+                idToken = await signUser.getIdToken();
+
+                guestResponse = await handleGuestResponse(idToken, guestUid);
                 if (!guestResponse.ok) {
                     const errorData = await guestResponse.json();
                     const errorMessage = guestResponse.status === 403
                         ? '로그인 시도 실패. 다시 시도 해주세요.'
                         : '게스트 로그인에 실패했습니다. 다시 시도 해주세요.';
+                    if (guestResponse.status === 404) {
+                        await auth.signOut(); // 🔥 세션 무효화
+                        localStorage.removeItem("guestUid"); // 🔥 잘못된 UID 삭제
+                        setLoginError('게스트 로그인에 실패했습니다. 다시 시도 해주세요.');
+                    }
                     setLoginError(errorMessage);
                     throw new Error(`서버 요청 에러 ${guestResponse.status}: ${errorData.message}`);
                 }
@@ -315,14 +315,22 @@ export default function LoginBox() {
                 data = await guestResponse.json();
             } else {
                 console.log('게스트 로그인 이력 무 : 로직 실행')
-
                 const userCredential = await signInAnonymously(auth);
                 signUser = userCredential.user
-
-                idToken = await signUser.getIdToken();
                 guestUid = signUser.uid
 
-                guestResponse = await handleGuestResponse(idToken, guestUid)
+                await auth.signOut(); // 🔥 세션 무효화
+
+                const customTokenResponse = await handleCustomTokenResponse(guestUid);
+                const tokenData = await customTokenResponse.json();
+                const { customToken } = tokenData;
+
+                const guestCredential = await signInWithCustomToken(auth, customToken);
+                signUser = userCredential.user
+                idToken = await guestCredential.user.getIdToken();
+
+                guestUid = signUser.uid
+                guestResponse = await handleGuestResponse(idToken, guestUid);
                 if (!guestResponse.ok) {
                     const errorData = await guestResponse.json();
                     const errorMessage = guestResponse.status === 403
