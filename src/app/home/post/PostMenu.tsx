@@ -1224,7 +1224,6 @@ export default function PostMenu() {
         setConfirmed(false)
     }
 
-
     useEffect(() => {
         if (!postingComplete) {
             if (/\S/.test(posting) || /\S/.test(postTitle)) {

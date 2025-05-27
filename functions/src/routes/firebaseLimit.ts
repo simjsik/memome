@@ -7,11 +7,11 @@ const app = express();
 app.use(cookieParser());
 
 router.post('/limit', async (req: Request, res: Response) => {
-    const {uid} = req.body;
+    const {userId} = req.body;
     const authToken = req.cookies.authToken;
-    console.log(authToken?.slice(0, 8), uid, "유저 토큰 및 UID ( Validate API )");
+    console.log(authToken?.slice(0, 8), userId, "유저 토큰 및 UID ( Validate API )");
 
-    if (!uid) {
+    if (!userId) {
         return res.status(401).json({error: '유저가 없습니다.'});
     }
 
@@ -36,7 +36,7 @@ router.post('/limit', async (req: Request, res: Response) => {
 
     try {
         // Firestore에서 문서 참조 얻기
-        const userDocRef = adminDb.doc(`userUsage/${uid}`);
+        const userDocRef = adminDb.doc(`userUsage/${userId}`);
         const userDocSnap = await userDocRef.get(); // 문서 읽기
         const userDoc = userDocSnap.data() as {
             readCount: number, lastUpdate: string

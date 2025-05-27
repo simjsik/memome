@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
             title: userData?.displayName,
             description: userId.slice(0, 8) + "...",
             type: "article",
-            images: [{ url: userData?.photoURL || "/default.jpg" }]
+            images: [{ url: userData?.photoURL || 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg' }]
         }
     };
 }
