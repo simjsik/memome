@@ -270,7 +270,7 @@ export default function LoginBox() {
             const handleCustomTokenResponse = async (guestUid?: string) => {
                 return await fetch("/api/customToken", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
                     credentials: "include",
                     body: JSON.stringify({ guestUid }),
                 });

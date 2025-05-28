@@ -227,8 +227,8 @@ export default function MainHome() {
       fetchNextPage();
     }
   }, [DidYouLogin])
-  // 에러 시 사용 제한
 
+  // 에러 시 사용 제한
   useEffect(() => {
     if (isError) {
       console.log('사용 제한!', error.message)

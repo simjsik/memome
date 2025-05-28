@@ -1,12 +1,21 @@
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 import { useEffect } from "react";
 import { useSetRecoilState } from "recoil";
-import { DidYouLogin, userState } from "../state/PostState";
+import { adminState, DidYouLogin, hasGuestState, userState } from "../state/PostState";
 import { usePathname, useRouter } from "next/navigation";
+
+interface CustomClaims {
+    roles?: {
+        admin?: boolean;
+        guest?: boolean;
+    };
+}
 
 export const useAuthSync = () => {
     const setUser = useSetRecoilState(userState);
     const setHasLogin = useSetRecoilState(DidYouLogin);
+    const setAdmin = useSetRecoilState<boolean>(adminState);
+    const setGuest = useSetRecoilState<boolean>(hasGuestState);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -16,6 +25,10 @@ export const useAuthSync = () => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
                 console.log(user, '유저 동기화 유저 정보')
+                if (!user) {
+                    setAdmin(false);
+                    return;
+                }
                 if (user) {
                     const uid = user.uid
                     console.log(uid, '유저 동기화 유저 UID')
@@ -37,6 +50,11 @@ export const useAuthSync = () => {
                         throw new Error(`서버 요청 에러 ${loginResponse.status}: ${errorData.message}`);
                     }
 
+
+                    const idTokenResult = await getIdTokenResult(user);
+                    const claims = idTokenResult.claims as CustomClaims;
+                    setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
+                    setGuest(!!claims.roles?.guest); // !!로 boolean 타입 강제 변환
                     setUser({
                         uid: uid,
                         email: user.email,

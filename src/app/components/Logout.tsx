@@ -2,7 +2,7 @@
 "use client";
 
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { bookMarkState, DidYouLogin, loginToggleState, modalState, PostData, UsageLimitToggle, userBookMarkState, userData, userState } from "../state/PostState";
+import { bookMarkState, DidYouLogin, PostData, UsageLimitToggle, userBookMarkState, userData, userState } from "../state/PostState";
 import { css } from "@emotion/react";
 import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
@@ -46,24 +46,22 @@ const LogoutButton = css`
         font-size : 0.875rem
     }
 `
-const LogInButton = css`
-    position : absolute;
-    bottom: 20px;
-    width : calc(100% - 40px);
-    height : 52px;
-    background : #0087ff;
-    color : #fff;
-    border : none;
-    border-radius : 4px;
-    font-size : 16px;
-    font-family : var(--font-pretendard-medium)
-    cursor : pointer;
-`
+// const LogInButton = css`
+//     position : absolute;
+//     bottom: 20px;
+//     width : calc(100% - 40px);
+//     height : 52px;
+//     background : #0087ff;
+//     color : #fff;
+//     border : none;
+//     border-radius : 4px;
+//     font-size : 16px;
+//     font-family : var(--font-pretendard-medium)
+//     cursor : pointer;
+// `
 export default function Logout() {
-    const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
+    const setHasLogin = useSetRecoilState<boolean>(DidYouLogin)
     const [user, setUser] = useRecoilState<userData>(userState)
-    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
-    const setModal = useSetRecoilState<boolean>(modalState);
     const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState)
     const setUserCurrentBookmark = useSetRecoilState<PostData[]>(userBookMarkState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
@@ -92,7 +90,7 @@ export default function Logout() {
                     name: null,
                     email: null,
                     photo: null,
-                    uid: '', // uid는 빈 문자열로 초기화
+                    uid: null, // uid는 빈 문자열로 초기화
                 }); // 로그아웃 상태로 초기화
                 setCurrentBookmark([])
                 setUserCurrentBookmark([])
@@ -108,27 +106,16 @@ export default function Logout() {
         }
     }
 
-    const handleLoginToggle = () => {
-        setLoginToggle(true);
-        setModal(true);
-    }
-
     // Function
     return (
         <>
-            {hasLogin ?
-                <motion.button
-                    variants={btnVariants}
-                    whileHover="otherHover"
-                    whileTap="otherClick"
-                    onClick={handleLogout} css={LogoutButton}>로그아웃</motion.button >
-                :
-                <motion.button
-                    variants={btnVariants}
-                    whileHover="loginHover"
-                    whileTap="loginClick"
-                    onClick={handleLoginToggle} css={LogInButton}>로그인</motion.button>
-            }
+            <motion.button
+                variants={btnVariants}
+                whileHover="otherHover"
+                whileTap="otherClick"
+                onClick={handleLogout} css={LogoutButton}>
+                로그아웃
+            </motion.button >
         </>
     )
 }

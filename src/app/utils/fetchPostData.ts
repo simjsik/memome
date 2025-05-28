@@ -10,15 +10,17 @@ export const fetchPosts = async (
     pageSize: number,
 ) => {
     try {
-        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
+        const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            credentials: "include",
             body: JSON.stringify({ userId }),
         });
-        if (LimitResponse.status === 403) {
+        if (LimitResponse.status === 400) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+        }
+        if (LimitResponse.status === 403) {
+            throw new Error('데이터를 요청할 수 없습니다.');
         }
 
         const startAfterParam = pageParam
@@ -93,15 +95,17 @@ export const fetchNoticePosts = async (
     pageParam: Timestamp | undefined,
 ) => {
     try {
-        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
+        const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            credentials: "include",
             body: JSON.stringify({ userId }),
         });
-        if (LimitResponse.status === 403) {
+        if (LimitResponse.status === 400) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+        }
+        if (LimitResponse.status === 403) {
+            throw new Error('데이터를 요청할 수 없습니다.');
         }
 
         const startAfterParam = pageParam
@@ -176,15 +180,17 @@ export const fetchBookmarks = async (
 ) => {
     if (bookmarkIds.length <= 0) return;
     try {
-        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
+        const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            credentials: "include",
             body: JSON.stringify({ userId }),
         });
-        if (LimitResponse.status === 403) {
+        if (LimitResponse.status === 400) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+        }
+        if (LimitResponse.status === 403) {
+            throw new Error('데이터를 요청할 수 없습니다.');
         }
 
         // 닉네임 매핑을 위한 캐시 초기화
@@ -259,17 +265,18 @@ export const fetchComments = async (userId: string, postId: string, pageParam: T
             return { data: [], nextPage: undefined };
         }
 
-        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
+        const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            credentials: "include",
             body: JSON.stringify({ userId }),
         });
-        if (LimitResponse.status === 403) {
+        if (LimitResponse.status === 400) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
-
+        if (LimitResponse.status === 403) {
+            throw new Error('데이터를 요청할 수 없습니다.');
+        }
         const startAfterParam = pageParam
             ?
             new Timestamp(pageParam.seconds, pageParam.nanoseconds) // 변환
@@ -368,17 +375,18 @@ export const fetchReplies = async (userId: string, postId: string, commentId: st
             return { data: [], nextPage: undefined };
         }
 
-        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
+        const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            credentials: "include",
             body: JSON.stringify({ userId }),
         });
-        if (LimitResponse.status === 403) {
+        if (LimitResponse.status === 400) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
-
+        if (LimitResponse.status === 403) {
+            throw new Error('데이터를 요청할 수 없습니다.');
+        }
         const startAfterParam = pageParam
             ?
             new Timestamp(pageParam.seconds, pageParam.nanoseconds) // 변환
@@ -474,15 +482,17 @@ export const fetchPostList = async (
     pageParam: Timestamp | undefined,
 ) => {
     try {
-        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
+        const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            credentials: "include",
             body: JSON.stringify({ userId }),
         });
-        if (LimitResponse.status === 403) {
+        if (LimitResponse.status === 400) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+        }
+        if (LimitResponse.status === 403) {
+            throw new Error('데이터를 요청할 수 없습니다.');
         }
 
         const startAfterParam = pageParam
@@ -559,15 +569,17 @@ export const fetchImageList = async (
     pageParam: Timestamp | undefined,
 ) => {
     try {
-        const LimitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/limit`, {
+        const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            credentials: "include",
             body: JSON.stringify({ userId }),
         });
-        if (LimitResponse.status === 403) {
+        if (LimitResponse.status === 400) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+        }
+        if (LimitResponse.status === 403) {
+            throw new Error('데이터를 요청할 수 없습니다.');
         }
 
         const startAfterParam = pageParam

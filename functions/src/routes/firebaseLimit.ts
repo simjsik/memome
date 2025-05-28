@@ -9,16 +9,19 @@ app.use(cookieParser());
 router.post('/limit', async (req: Request, res: Response) => {
     const {userId} = req.body;
     const authToken = req.cookies.authToken;
-    console.log(authToken?.slice(0, 8), userId, "유저 토큰 및 UID ( Validate API )");
+    console.log(authToken?.slice(0, 8), userId, "유저 토큰 및 UID ( Limit API )");
 
     if (!userId) {
-        return res.status(401).json({error: '유저가 없습니다.'});
+        return res.status(403).json({error: '유저가 없습니다.'});
     }
 
+    if (!authToken) {
+        return res.status(403).json({error: '유저 토큰이 유효하지 않습니다.'});
+    }
     const decodedToken = await adminAuth.verifyIdToken(authToken);
 
     if (!decodedToken) {
-        console.log("유저 아이디 토큰 검증 실패.");
+        console.log("유저 토큰 검증 실패.");
         return res.status(403).json({
             message: "ID 토큰이 유효하지 않거나 만료되었습니다.",
         });
@@ -58,7 +61,7 @@ router.post('/limit', async (req: Request, res: Response) => {
             } else if (readCount >= limitCount) {
                 console.log('초과 제한!');
                 // 사용량 초과
-                return res.status(403).json({error: '사용량이 초과되었습니다.'});
+                return res.status(400).json({error: '사용량이 초과되었습니다.'});
             } else {
                 // 카운트 증가
                 await userDocRef.update({

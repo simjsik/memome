@@ -90,19 +90,20 @@ cursor : pointer;
     max-height : 2000px;
     right: clamp(320px, calc(320px + (100vw - 1920px) * 0.4375), 600px);
 
-      ${({ $isMemoPage }) =>
+    ${({ $isMemoPage }) =>
         $isMemoPage &&
         `
-    position : fixed;
-    top: 0;
-    right: 0;
-    width : 460px;
-    height: 100%;
-    padding : 20px;
-    border : 1px solid #ededed;
-    border-radius : 8px;
-    background : #fff;
-    `}
+        position : fixed;
+        top: 0;
+        right: 0;
+        width : 460px;
+        height: 100%;
+        padding : 20px;
+        border : 1px solid #ededed;
+        border-radius : 8px;
+        background : #fff;
+        `
+    }
   }
 
   @media (min-width: 2560px) {

@@ -637,18 +637,19 @@ export default function UserProfile() {
     useEffect(() => {
         handleProfileReset();
     }, [currentUser])
+
     return (
         <ProfileWrap>
             {/* 프로필 상단 */}
             <div className="profile_top">
                 <div className="profile_id">
-                    <p className="user_name">{currentUser?.name}</p>
+                    <p className="user_name">{currentUser.name}</p>
                     <span className="user_uid">
-                        @{currentUser?.uid?.slice(0, 8)}...
+                        @{currentUser.uid?.slice(0, 8)}...
                     </span>
                 </div>
                 <div className="user_photo" css={css`
-                        background-image : url(${currentUser?.photo});
+                        background-image : url(${currentUser.photo});
                         background-size : cover;
                         background-position : center;
                         width : 72px;
@@ -675,7 +676,7 @@ export default function UserProfile() {
                             <div className="update_box">
                                 <div className="user_name_change_wrap">
                                     <label>별명</label>
-                                    <input onChange={handleNameChange} type="text" value={updateUserName || ''} placeholder={currentUser?.name || '새 유저 별명'} />
+                                    <input onChange={handleNameChange} type="text" value={updateUserName || ''} placeholder={currentUser.name || '새 유저 별명'} />
                                     <p>{updateUserName?.length}/12</p>
                                 </div>
                                 <span className="update_error">{updateUserNameError}</span>
@@ -697,7 +698,7 @@ export default function UserProfile() {
                                 </div>
                                 <span className="update_error">{updateUserPhotoError}</span>
                                 {/* 업데이트 감지 시 버튼 */}
-                                {(updateUserName !== currentUser?.name || Boolean(updateUserPhoto) || updateUserPhotoPreview !== currentUser?.photo) &&
+                                {(updateUserName !== currentUser.name || Boolean(updateUserPhoto) || updateUserPhotoPreview !== currentUser.photo) &&
                                     <div className="update_btn_wrap">
                                         <p>저장하지 않은 변경 사항이 있습니다!</p>
                                         <button className="reset_update_btn" onClick={handleProfileReset}>
@@ -725,7 +726,7 @@ export default function UserProfile() {
                         < div className="profile_menu_wrap">
                             <div className="memo_box">
                                 <div className="menu_profile" css={css`
-                                    background-image : url(${currentUser?.photo});
+                                    background-image : url(${currentUser.photo});
                                     background-size : cover;
                                     background-position : center;
                                     width : 32px;

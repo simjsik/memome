@@ -6,31 +6,24 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useRecoilValue, useSetRecoilState } from "recoil";
 import "./globals.css";
 import useAuthSync from "./hook/AuthSyncHook";
-import { adminState, bookMarkState, hasGuestState, userState } from "./state/PostState";
+import { bookMarkState, userState } from "./state/PostState";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "./DB/firebaseConfig";
+import { db } from "./DB/firebaseConfig";
 import { usePostUpdateChecker } from "./hook/ClientPolling";
 import { usePathname } from "next/navigation";
-import { getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 
 const queryClient = new QueryClient();
 
-interface CustomClaims {
-    roles?: {
-        admin?: boolean;
-        guest?: boolean;
-    };
-}
+
 
 function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const { clearUpdate } = usePostUpdateChecker();
 
     const currentUser = useRecoilValue(userState);
     const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState);
-    const setAdmin = useSetRecoilState<boolean>(adminState);
-    const setGuest = useSetRecoilState<boolean>(hasGuestState);
+
     const pathName = usePathname();
 
     const loadBookmarks = async (uid: string) => {
@@ -56,29 +49,13 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     useEffect(() => {
         clearUpdate();
     }, [currentUser, pathName])
-
-    useEffect(() => {
-        const unsub = onAuthStateChanged(auth, async user => {
-            if (!user) {
-                setAdmin(false);
-                return;
-            }
-
-            const idTokenResult = await getIdTokenResult(user);
-            const claims = idTokenResult.claims as CustomClaims;
-            setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
-            setGuest(!!claims.roles?.guest); // !!로 boolean 타입 강제 변환
-        });
-
-        return unsub;
-    }, []);
-
     return <>{children}</>; // 반드시 children을 렌더링
 }
 
 export default function ProviderClient({ children, nonce }: { children: ReactNode, nonce: string }) {
     const cache = createCache({ key: 'custom', nonce });
     console.log(nonce, '클라이언트 측 난수값')
+
     return (
         <div className={`${PretendardLight.variable} ${PretendardMedium.variable} ${PretendardBold.variable} main_wrap`}>
             <QueryClientProvider client={queryClient}>
