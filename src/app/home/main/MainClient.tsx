@@ -223,10 +223,8 @@ export default function MainHome() {
   }, [hasNextPage, fetchNextPage, yourLogin])
 
   useEffect(() => {
-    if (DidYouLogin) {
-      fetchNextPage();
-    }
-  }, [DidYouLogin])
+    fetchNextPage();
+  }, [])
 
   // 에러 시 사용 제한
   useEffect(() => {
