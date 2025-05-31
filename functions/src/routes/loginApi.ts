@@ -16,7 +16,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
         const decodedToken = await adminAuth.verifyIdToken(idToken);
         if (!decodedToken) {
-            return res.status(403).json({message: "계정 토큰이 올바르지 않습니다."});
+            return res.status(401).json({message: "계정 토큰이 올바르지 않습니다."});
         }
 
         const uid = decodedToken.uid;
@@ -47,7 +47,7 @@ router.post('/login', async (req: Request, res: Response) => {
             if (!saveUserResponse?.ok) {
                 const errorData = await saveUserResponse?.json();
                 console.error("유저 저장 실패:", errorData.message);
-                return res.status(403).json({message: "유저 저장 실패."});
+                return res.status(401).json({message: "유저 저장 실패."});
             }
         }
 
@@ -60,12 +60,12 @@ router.post('/login', async (req: Request, res: Response) => {
         if (!tokenResponse?.ok) {
             const errorData = await tokenResponse?.json();
             console.error("토큰 인증 실패:", errorData.message);
-            return res.status(403).json({message: "토큰 인증 실패."});
+            return res.status(401).json({message: "토큰 인증 실패."});
         }
 
         if (!secret) {
             console.error("JWT 비밀 키 확인 불가");
-            return res.status(403).json({message: "JWT 비밀 키 확인 불가."});
+            return res.status(401).json({message: "JWT 비밀 키 확인 불가."});
         }
 
         const userToken = jwt.sign({uid}, secret, {expiresIn: "1h"});
@@ -99,7 +99,7 @@ router.post('/login', async (req: Request, res: Response) => {
         if (error === "auth/user-not-found") {
             return res.status(404).json({message: "User not found"});
         } else if (error === "auth/wrong-password") {
-            return res.status(401).json({message: "Incorrect password"});
+            return res.status(400).json({message: "Incorrect password"});
         }
         return res.status(500).json({message: "Login failed"});
     }

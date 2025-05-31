@@ -96,7 +96,6 @@ export default function Logout() {
                 setUserCurrentBookmark([])
                 setHasLogin(false)
                 setLimitToggle(false)
-                localStorage.removeItem("hasAutoLogin");
 
                 router.push('/login');
             }

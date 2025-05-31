@@ -14,7 +14,7 @@ import {
     LoginInputWrap,
     OtherLoginWrap
 } from "../styled/LoginComponents";
-import { browserLocalPersistence, browserSessionPersistence, getAuth, GoogleAuthProvider, setPersistence, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, signInWithPopup, updateProfile } from "firebase/auth";
+import { browserLocalPersistence, browserSessionPersistence, getAuth, GoogleAuthProvider, setPersistence, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile } from "firebase/auth";
 import { LoginOr, LoginSpan } from "../styled/LoginStyle";
 import { usePathname, useRouter } from "next/navigation";
 import { auth } from "../DB/firebaseConfig";
@@ -122,13 +122,15 @@ export default function LoginBox() {
             setLoadingTag('Login');
 
             await setPersistence(auth, hasAutoLogin ? browserLocalPersistence : browserSessionPersistence);
-            localStorage.setItem('hasAutoLogin', `${hasAutoLogin}`);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const signUser = userCredential.user
             const idToken = await signUser.getIdToken();
 
             if (!signUser.emailVerified) {
-                return setLoginError('인증되지 않은 계정입니다. 이메일을 확인해주세요.');
+                setLoginError('인증되지 않은 계정입니다. 이메일을 확인해주세요.');
+                // 2) 로그인 상태(임시로 남아있는 세션)를 제거
+                await signOut(auth);
+                return;
             }
             // 서버로 ID 토큰 전송
             const loginResponse = await fetch(`/api/login`, {
@@ -140,12 +142,7 @@ export default function LoginBox() {
 
             if (!loginResponse.ok) {
                 const errorData = await loginResponse.json();
-                setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.')
-                if (loginResponse.status === 403) {
-                    setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
-                    throw new Error(`CSRF 토큰 확인 불가 ${loginResponse.status}: ${errorData.message}`);
-                }
-                throw new Error(`서버 요청 에러 ${loginResponse.status}: ${errorData.message}`);
+                throw new Error(`로그인 시도 실패 ${loginResponse.status}: ${errorData.message}`);
             }
 
             const data = await loginResponse.json();
@@ -162,16 +159,14 @@ export default function LoginBox() {
         } catch (error: unknown) {
             // Firebase 에러 타입 보존
             if (isFirebaseError(error)) {
-                if (isFirebaseError(error)) {
-                    console.error("Firebase 오류:", error.code, error.message);
-                    setLoginError(firebaseErrorMessages[error.code] ?? "Firebase 오류 발생");
-                } else if (error) {
-                    console.error("일반 오류:", error);
-                    setLoginError(error);
-                } else {
-                    console.error("알 수 없는 오류 유형:", error);
-                    setLoginError("알 수 없는 오류");
-                }
+                console.error("Firebase 오류:", error.code, error.message);
+                setLoginError(firebaseErrorMessages[error.code] ?? "Firebase 오류 발생");
+            } else if (error instanceof Error) {
+                console.error("일반 오류:", error);
+                setLoginError(error.message);
+            } else {
+                console.error("알 수 없는 오류 유형:", error);
+                setLoginError("알 수 없는 오류");
             }
         } finally {
             setIsLoading(false); // 무조건 실행
@@ -189,7 +184,6 @@ export default function LoginBox() {
 
             // Google 로그인 팝업
             await setPersistence(auth, hasAutoLogin ? browserLocalPersistence : browserSessionPersistence);
-            localStorage.setItem('hasAutoLogin', `${hasAutoLogin}`);
             const provider = new GoogleAuthProvider();
             const userCredential = await signInWithPopup(auths, provider);
             const googleToken = await userCredential.user.getIdToken();
@@ -204,10 +198,9 @@ export default function LoginBox() {
             });
 
             if (!googleResponse.ok) {
-                const errorMsg = googleResponse.status === 403
-                    ? '로그인 시도 실패. 다시 시도 해주세요.'
-                    : '구글 로그인에 실패했습니다.';
-                throw new Error(errorMsg);
+                const errorData = await googleResponse.json();
+                setLoginError('로그인 시도 실패. 다시 시도 해주세요.')
+                throw new Error(`로그인 시도 실패 ${googleResponse.status}: ${errorData.message}`);
             }
 
             const data = await googleResponse.json();
@@ -222,17 +215,16 @@ export default function LoginBox() {
             setHasLogin(true);
             await router.push('/home/main');
         } catch (error: unknown) {
+            // Firebase 에러 타입 보존
             if (isFirebaseError(error)) {
-                console.error("Firebase 오류 발생:", error.code, error.message);
-                setLoginError(firebaseErrorMessages[error.code] ?? "알 수 없는 오류가 발생했습니다.");
-                // Firebase 에러 코드별 메시지 처리
-                if (error instanceof Error) {
-                    console.error("일반 오류 발생:", error.message);
-                    setLoginError(error.message);
-                } else {
-                    console.error("알 수 없는 에러 유형:", error);
-                    setLoginError("알 수 없는 오류가 발생했습니다.");
-                }
+                console.error("Firebase 오류:", error.code, error.message);
+                setLoginError(firebaseErrorMessages[error.code] ?? "Firebase 오류 발생");
+            } else if (error instanceof Error) {
+                console.error("일반 오류:", error);
+                setLoginError(error.message);
+            } else {
+                console.error("알 수 없는 오류 유형:", error);
+                setLoginError("알 수 없는 오류");
             }
         } finally {
             setIsLoading(false); // 무조건 실행
@@ -249,7 +241,6 @@ export default function LoginBox() {
             setLoadingTag('Guest');
 
             await setPersistence(auth, hasAutoLogin ? browserLocalPersistence : browserSessionPersistence);
-            localStorage.setItem('hasAutoLogin', `${hasAutoLogin}`);
             let guestUid = localStorage.getItem("guestUid");
             let idToken;
             let signUser;
@@ -282,11 +273,7 @@ export default function LoginBox() {
                 const guestTokenResponse = await handleCustomTokenResponse(guestUid);
                 if (!guestTokenResponse.ok) {
                     const errorData = await guestTokenResponse.json();
-                    const errorMessage = guestTokenResponse.status === 403
-                        ? '로그인 시도 실패. 다시 시도 해주세요.'
-                        : '게스트 로그인에 실패했습니다. 다시 시도 해주세요.';
-                    setLoginError(errorMessage);
-                    throw new Error(`서버 요청 에러 ${guestTokenResponse.status}: ${errorData.message}`);
+                    throw new Error(`로그인 시도 실패 ${guestTokenResponse.status}: ${errorData.message}`);
                 }
 
                 const tokenData = await guestTokenResponse.json();
@@ -300,16 +287,11 @@ export default function LoginBox() {
                 guestResponse = await handleGuestResponse(idToken, guestUid);
                 if (!guestResponse.ok) {
                     const errorData = await guestResponse.json();
-                    const errorMessage = guestResponse.status === 403
-                        ? '로그인 시도 실패. 다시 시도 해주세요.'
-                        : '게스트 로그인에 실패했습니다. 다시 시도 해주세요.';
                     if (guestResponse.status === 404) {
                         await auth.signOut(); // 🔥 세션 무효화
                         localStorage.removeItem("guestUid"); // 🔥 잘못된 UID 삭제
-                        setLoginError('게스트 로그인에 실패했습니다. 다시 시도 해주세요.');
                     }
-                    setLoginError(errorMessage);
-                    throw new Error(`서버 요청 에러 ${guestResponse.status}: ${errorData.message}`);
+                    throw new Error(`로그인 시도 실패 ${guestResponse.status}: ${errorData.message}`);
                 }
 
                 data = await guestResponse.json();
@@ -333,11 +315,7 @@ export default function LoginBox() {
                 guestResponse = await handleGuestResponse(idToken, guestUid);
                 if (!guestResponse.ok) {
                     const errorData = await guestResponse.json();
-                    const errorMessage = guestResponse.status === 403
-                        ? '로그인 시도 실패. 다시 시도 해주세요.'
-                        : '게스트 로그인에 실패했습니다. 다시 시도 해주세요.';
-                    setLoginError(errorMessage);
-                    throw new Error(`서버 요청 에러 ${guestResponse.status}: ${errorData.message}`);
+                    throw new Error(`로그인 시도 실패 ${guestResponse.status}: ${errorData.message}`);
                 }
 
                 data = await guestResponse.json();
@@ -361,15 +339,14 @@ export default function LoginBox() {
         } catch (error: unknown) {
             // Firebase 에러 타입 보존
             if (isFirebaseError(error)) {
-                console.error("Firebase 오류 발생:", error.code, error.message);
-                setLoginError(firebaseErrorMessages[error.code] ?? "알 수 없는 오류가 발생했습니다.");
-                if (error instanceof Error) {
-                    console.error("일반 오류 발생:", error.message);
-                    setLoginError(error.message);
-                } else {
-                    console.error("알 수 없는 에러 유형:", error);
-                    setLoginError("알 수 없는 오류가 발생했습니다.");
-                }
+                console.error("Firebase 오류:", error.code, error.message);
+                setLoginError(firebaseErrorMessages[error.code] ?? "Firebase 오류 발생");
+            } else if (error instanceof Error) {
+                console.error("일반 오류:", error);
+                setLoginError(error.message);
+            } else {
+                console.error("알 수 없는 오류 유형:", error);
+                setLoginError("알 수 없는 오류");
             }
         } finally {
             setIsLoading(false); // 무조건 실행

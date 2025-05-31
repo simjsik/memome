@@ -118,7 +118,6 @@ export default function UsageLimit() {
                 setUserCurrentBookmark([])
                 setHasLogin(false)
                 setLimitToggle(false)
-                localStorage.removeItem("hasAutoLogin");
 
                 router.push('/login');
             }

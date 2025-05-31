@@ -55,14 +55,11 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
-                console.log(user, '유저 동기화 유저 정보')
-                if (!user) {
-                    setAdmin(false);
-                    return;
-                }
+                console.log(user, '유저 동기화 유저 정보');
+
                 if (user) {
                     const uid = user.uid
-                    console.log(uid, '유저 동기화 유저 UID')
+                    console.log(uid, '유저 동기화 유저 UID');
                     const idToken = await user.getIdToken();
 
                     // 서버로 ID 토큰 전송
@@ -84,7 +81,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                     const idTokenResult = await getIdTokenResult(user);
                     const claims = idTokenResult.claims as CustomClaims;
                     setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
-                    setGuest(!!claims.roles?.guest); // !!로 boolean 타입 강제 변환
+                    setGuest(!!claims.roles?.guest);
                     setUser({
                         uid: uid,
                         email: user.email,
@@ -111,8 +108,8 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                         name: null,
                         email: null,
                         photo: null,
-                        uid: null, // uid는 빈 문자열로 초기화
-                    }); // 로그아웃 상태 처리
+                        uid: null,
+                    });
                     setHasLogin(false);
                     await auth.signOut();
                     router.push('/login');
