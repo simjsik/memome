@@ -54,7 +54,6 @@ export default function MainHome() {
   const pathName = usePathname();
   const observerLoadRef = useRef(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [dataLoading, setDataLoading] = useState<boolean>(false);
 
   // 웹소켓 연결---------------------------------------------------------------------------------
   const socketRef = useRef<Socket | null>(null);
@@ -143,7 +142,8 @@ export default function MainHome() {
     data: posts,
     fetchNextPage,
     hasNextPage,
-    isLoading,
+    isLoading: firstLoading,
+    isFetching: dataLoading,
     isError,
     error,
   } = useInfiniteQuery<
@@ -158,7 +158,6 @@ export default function MainHome() {
     queryFn: async ({ pageParam }) => {
       try {
         console.log(uid, '일반 포스트 요청')
-        setDataLoading(true);
         const validateResponse = await fetch(`/api/validate`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -170,7 +169,7 @@ export default function MainHome() {
           throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
         }
 
-        return await fetchPosts(uid as string, pageParam, 4);
+        return await fetchPosts(uid as string, pageParam, 8);
       } catch (error: unknown) {
         if (error instanceof Error) {
           console.error("일반 오류 발생:", error.message);
@@ -179,8 +178,6 @@ export default function MainHome() {
           console.error("알 수 없는 에러 유형:", error);
           throw new Error("알 수 없는 에러가 발생했습니다.");
         }
-      } finally {
-        setDataLoading(false);
       }
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
@@ -210,7 +207,10 @@ export default function MainHome() {
           fetchNextPage();
         }
       },
-      { threshold: 1.0 }
+      {
+        threshold: 1.0,
+        rootMargin: '0px 0px 20px 0px',
+      }
     );
 
     if (observerLoadRef.current) {
@@ -220,11 +220,7 @@ export default function MainHome() {
     return () => {
       if (observerLoadRef.current) obsever.unobserve(observerLoadRef.current);
     };
-  }, [hasNextPage, fetchNextPage, yourLogin])
-
-  useEffect(() => {
-    fetchNextPage();
-  }, [])
+  }, [hasNextPage, fetchNextPage])
 
   // 에러 시 사용 제한
   useEffect(() => {
@@ -236,12 +232,9 @@ export default function MainHome() {
     }
   }, [isError])
 
-  // 초기 데이터 로딩
   useEffect(() => {
-    if (!isLoading) {
-      setLoading(false); // 초기 로딩 해제
-    }
-  }, [isLoading, setLoading])
+    setLoading(false); // 초기 로딩 해제
+  }, [])
 
   const { mutate: handledeletePost } = useDelPost();
 
@@ -420,9 +413,18 @@ export default function MainHome() {
             </motion.div >
           ))
           }
-          <div ref={observerLoadRef} css={css`height: 1px; visibility: ${dataLoading ? "hidden" : "visible"};`}
+          <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`}
           />
           {(!loading && dataLoading) && <LoadingWrap />}
+          {isError &&
+            <NoMorePost>
+              <span>포스트 로드 중 문제가 발생했습니다.</span>
+              <motion.div className='retry_post_btn'
+                variants={btnVariants}
+                whileHover="loginHover"
+                whileTap="loginClick">재요청</motion.div>
+            </NoMorePost>
+          }
           {
             (!hasNextPage && !dataLoading && !loading) &&
             <>

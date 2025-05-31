@@ -3,9 +3,9 @@
 import { ReactNode, useEffect } from "react";
 import { PretendardBold, PretendardLight, PretendardMedium } from "@/app/styled/FontsComponets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RecoilRoot, useRecoilValue, useSetRecoilState } from "recoil";
+import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import "./globals.css";
-import { adminState, bookMarkState, DidYouLogin, hasGuestState, userState } from "./state/PostState";
+import { adminState, bookMarkState, DidYouLogin, hasGuestState, loadingState, userState } from "./state/PostState";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./DB/firebaseConfig";
 import { usePostUpdateChecker } from "./hook/ClientPolling";
@@ -49,12 +49,14 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const setHasLogin = useSetRecoilState(DidYouLogin);
     const setAdmin = useSetRecoilState<boolean>(adminState);
     const setGuest = useSetRecoilState<boolean>(hasGuestState);
+    const [loading, setLoading] = useRecoilState<boolean>(loadingState);
     const router = useRouter();
 
     useEffect(() => {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
+                setLoading(true);
                 console.log(user, '유저 동기화 유저 정보');
 
                 if (user) {
@@ -115,6 +117,8 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                     router.push('/login');
                     throw new Error("알 수 없는 에러가 발생했습니다.");
                 }
+            } finally {
+                setLoading(false);
             }
         });
         return () => unsubscribe();
@@ -127,6 +131,12 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     useEffect(() => {
         clearUpdate();
     }, [currentUser, pathName])
+
+    if (loading) {
+        return null;
+    }
+
+
     return <>{children}</>; // 반드시 children을 렌더링
 }
 

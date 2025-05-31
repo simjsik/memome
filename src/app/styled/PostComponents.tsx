@@ -351,6 +351,20 @@ align-content: flex-start;
         border-bottom: 1px solid #ededed;
         text-align: center;
     }
+
+    .retry_post_btn{
+      width: fit-content;
+      margin: 0 auto;
+      margin-top : 10px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      background: #0087ff;
+      color: #fff;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      font-size : 0.875rem;
+    }
 //----------------------------------------------------
   @media (max-width: 480px) {
     overflow-y: scroll;
@@ -1001,6 +1015,10 @@ export const NewPostBtn = styled(motion.button)`
     color: #fff;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     cursor: pointer;
+
+    .retry_post_btn{
+      position: static;
+    }
 `
 export const MyAlarmWrap = styled.div`
     margin-top: 32px;
