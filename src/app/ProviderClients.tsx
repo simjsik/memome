@@ -50,10 +50,8 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const setAdmin = useSetRecoilState<boolean>(adminState);
     const setGuest = useSetRecoilState<boolean>(hasGuestState);
     const router = useRouter();
-    const pathname = usePathname();
 
     useEffect(() => {
-        if (pathname === "/login") return;
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
@@ -82,7 +80,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                         }
                         throw new Error(`서버 요청 에러 ${loginResponse.status}: ${errorData.message}`);
                     }
-
 
                     const idTokenResult = await getIdTokenResult(user);
                     const claims = idTokenResult.claims as CustomClaims;
