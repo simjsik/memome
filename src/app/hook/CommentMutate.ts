@@ -1,19 +1,10 @@
 'use client';
 import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminState, Comment, memoCommentCount, memoCommentState, userState } from "../state/PostState";
-import { addDoc, collection, doc, getDoc, getDocs, increment, query, runTransaction, Timestamp, updateDoc, writeBatch } from "firebase/firestore";
+import { adminState, Comment, memoCommentCount, userState } from "../state/PostState";
+import { addDoc, collection, doc, getDoc, increment, Timestamp, writeBatch } from "firebase/firestore";
 import { db } from "../DB/firebaseConfig";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 
-interface NewComment {
-    replyId: string;
-    uid: string;
-    commentText: string;
-    createAt: Timestamp;
-    parentId: string | null;
-    displayName: string,
-    photoURL: string | null,
-}
 
 export interface Reply {
     id: string;
@@ -31,10 +22,9 @@ export function useAddComment(
 ) {
     const queryClient = useQueryClient();
     const user = useRecoilValue(userState); // 사용자 정보 훅
-    const setCommentList = useSetRecoilState(memoCommentState);
     const setCommentCount = useSetRecoilState(memoCommentCount);
 
-    return useMutation<Comment, Error, NewComment>({
+    return useMutation<Comment, Error, Comment>({
         mutationFn: async (newComment) => {
             // firebase에 추가
             const commentRef = await addDoc(collection(db, `posts/${postId}/comments`), {
@@ -43,15 +33,10 @@ export function useAddComment(
                 createAt: Timestamp.now(),
             });
 
-            // 댓글 수 수정
-            await updateDoc(doc(db, 'posts', postId), {
-                commentCount: increment(1),
-            });
-
             setCommentCount(prev => prev + 1);
             return {
-                id: commentRef.id,
                 ...newComment,
+                id: commentRef.id,
                 uid: user.uid,
                 displayName: user.name,
                 photoURL: user.photo,
@@ -74,11 +59,6 @@ export function useAddComment(
                     };
                 }
             );
-
-            setCommentList((prev) => [
-                ...prev,
-                savedComment as Comment
-            ]);
         },
     });
 }
@@ -93,25 +73,10 @@ export function useAddReply(
     return useMutation<Reply, Error, Reply>({
         mutationFn: async (reply) => {
             // firebase에 추가
-            const commentRef = doc(db, `posts/${postId}/comments/${reply.parentId}`);
-            console.log(postId, reply.parentId, '답글 작성 시 댓글 및 포스트 데이터');
             const replyRef = await addDoc(collection(db, `posts/${postId}/comments/${reply.parentId}/reply`), {
                 ...reply,
                 uid: user.uid,
                 createAt: Timestamp.now(),
-            });
-
-            // 댓글 수와 댓글의 답글 수 업데이트를 모두 보장하기 위해 트랜잭션 사용
-            await runTransaction(db, async (cd) => {
-                const postSnap = await cd.get(doc(db, 'posts', postId));
-                const commentSnap = await cd.get(commentRef);
-
-                if (!postSnap.exists() || !commentSnap.exists()) {
-                    throw new Error('댓글이 삭제되었거나 존재하지 않는 게시글 입니다.');
-                }
-
-                cd.update(doc(db, 'posts', postId), { commentCount: increment(1) });
-                cd.update(commentRef, { replyCount: increment(1) });
             });
 
             setCommentCount(prev => prev + 1);
@@ -140,6 +105,11 @@ export function useAddReply(
                     };
                 }
             );
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['comments', postId],
+            });
         },
     });
 }
@@ -174,8 +144,8 @@ export function useDelComment(
             if (!docSnapshot.exists()) {
                 throw new Error("NF") // NOT FOUND
             }
-
-            const commentOwnerId = docSnapshot.data()?.uid;
+            const commentData = docSnapshot.data();
+            const commentOwnerId = commentData.uid;
 
             if (user.uid !== commentOwnerId && commentOwnerId !== ADMIN) {
                 throw new Error('FB'); // FORBIDDEN
@@ -188,15 +158,11 @@ export function useDelComment(
 
             batch.delete(docRef);
 
-            const repliesQuery = query(collection(db, 'posts', postId, 'comments', commentId, 'reply'));
-            const replySnapshot = await getDocs(repliesQuery);
-            replySnapshot.docs.forEach(dc => batch.delete(dc.ref));
-
             // 댓글 수 수정: 현재 댓글과 답글 수를 계산
             const postRef = doc(db, 'posts', postId)
-            batch.update(postRef, { commentCount: increment(-1 - replySnapshot.size) });
+            batch.update(postRef, { commentCount: increment(-1 - commentData.replyCount) });
 
-            setCommentCount(prev => prev - (1 + replySnapshot.size));
+            setCommentCount(prev => prev - (1 + commentData.replyCount));
 
             await batch.commit();
         },
@@ -230,35 +196,7 @@ export function useDelReply(
     const setCommentCount = useSetRecoilState(memoCommentCount);
 
     return useMutation<void, Error, string>({
-        mutationFn: async (replyId) => {
-            const replyRef = doc(db, 'posts', postId, 'comments', parentId, 'reply', replyId);
-            const replySnap = await getDoc(replyRef);
-
-            if (!replySnap.exists()) {
-                alert('해당 댓글을 찾을 수 없습니다.');
-                return;
-            }
-
-            const commentOwnerId = replySnap.data()?.uid;
-
-            if (user.uid === commentOwnerId || ADMIN) {
-                const batch = writeBatch(db);
-                batch.delete(replyRef);
-
-                const postRef = doc(db, 'posts', postId);
-                const commentRef = doc(db, 'posts', postId, 'comments', parentId);
-
-                batch.update(postRef, { commentCount: increment(-1) });
-                batch.update(commentRef, { replyCount: increment(-1) });
-
-                await batch.commit();
-                setCommentCount(prev => prev - 1);
-            } else {
-                alert('댓글 삭제 권한이 없습니다.');
-                return;
-            }
-        },
-        onSuccess: (_, replyId) => {
+        onMutate: (replyId) => {
             queryClient.setQueryData<InfiniteData<{ data: Reply[], nextPage: Timestamp | undefined }>>(
                 ['replies', postId, parentId],
                 old => {
@@ -272,7 +210,43 @@ export function useDelReply(
                     };
                 }
             );
+        },
+        mutationFn: async (replyId) => {
+            const replyRef = doc(db, 'posts', postId, 'comments', parentId, 'reply', replyId);
+            const replySnap = await getDoc(replyRef);
+
+            if (!replySnap.exists()) {
+                throw new Error("NF") // NOT FOUND
+            }
+            const replyData = replySnap.data();
+            const replyOwnerId = replyData.uid;
+
+            if (user.uid !== replyOwnerId && replyOwnerId !== ADMIN) {
+                throw new Error('FB'); // FORBIDDEN
+            }
+
+            const batch = writeBatch(db);
+            batch.delete(replyRef);
+
+            await batch.commit();
+            setCommentCount(prev => prev - 1);
+        },
+        onError: (err) => {
+            if (err.message === 'NF') {
+                alert('해당 댓글을 찾을 수 없습니다.');
+            } else if (err.message === 'FB') {
+                alert('삭제 권한이 없습니다.');
+            } else {
+                alert('댓글 삭제에 실패했습니다.');
+            }
+        },
+        onSuccess: () => {
             alert('삭제되었습니다');
-        }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['comments', postId],
+            });
+        },
     });
 }

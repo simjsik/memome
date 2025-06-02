@@ -134,13 +134,62 @@ export const setHasDeleteCommentFlag = onDocumentDeleted(
   async (event) => {
     const commentData = event.data?.data();
     const postId = commentData?.postId; // 댓글 작성자 ID
+    const commentReplyCount = commentData?.replyCount; // 댓글 작성자 ID
     try {
       const postRef = await adminDb.collection("posts").doc(postId);
       await postRef.update({
-        commentCount: FieldValue.increment(-1),
+        commentCount: FieldValue.increment((-1) - (commentReplyCount)),
       });
     } catch (error) {
       console.error("업데이트 중 오류 발생:", error);
+    }
+  }
+);
+
+export const setHasUpdateReplyFlag = onDocumentCreated(
+  "posts/{postId}/comments/{commentId}/reply/{replyId}",
+  async (event) => {
+    const replyData = event.data?.data();
+    const postId = replyData?.postId; // 포스트 ID
+    const commentId = replyData?.parentId; // 댓글 ID
+    try {
+      const postRef = await adminDb.collection("posts").doc(postId);
+      const commentRef = postRef.collection("comment").doc(commentId);
+      await postRef.update({
+        commentCount: FieldValue.increment(1),
+      });
+      await commentRef.update({
+        replyCount: FieldValue.increment(1),
+      });
+    } catch (error) {
+      console.error(
+        `댓글(reply) 트리거 실패 (postId: ${postId}, commentId: ${commentId}):`,
+         error
+      );
+    }
+  }
+);
+
+export const setHasDeleteReplyFlag = onDocumentDeleted(
+  "posts/{postId}/comments/{commentId}/reply/{replyId}",
+  async (event) => {
+    const replyData = event.data?.data();
+    const postId = replyData?.postId; // 포스트 ID
+    const commentId = replyData?.parentId; // 댓글 ID
+    try {
+      const postRef = await adminDb.collection("posts").doc(postId);
+      const commentRef = postRef.collection("comment").doc(commentId);
+      await postRef.update({
+        commentCount: FieldValue.increment(-1),
+      });
+      await commentRef.update({
+        replyCount: FieldValue.increment(-1),
+      });
+    } catch (error) {
+      console.error(
+        `댓글(reply) 트리거 실패 (postId: ${postId}, commentId: ${commentId}):`,
+         error
+      );
     }
   }
 );

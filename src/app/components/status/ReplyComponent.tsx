@@ -156,11 +156,11 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
     } // 답글 입력 인풋 토글
 
     const handleMoreReply = () => {
-        console.log(hasNextPage, '다음 페이지')
         if (hasNextPage && !isLoading && !usageLimit) {
             fetchNextPage();
         }
     }
+
     return (
         <>
             {repliesToggle ?

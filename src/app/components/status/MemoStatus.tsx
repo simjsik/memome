@@ -353,14 +353,11 @@ export default function MemoStatus({ post }: ClientPostProps) {
 
     const handleDelComment = async (commentId: string) => {
         if (user) {
-            const confirmed = confirm('댓글을 삭제 하시겠습니까?')
-            if (confirmed) {
-                try {
-                    delComment(commentId);
-                } catch (error) {
-                    console.error('댓글 삭제 중 오류 발생:', error);
-                    alert('댓글 삭제 중 오류가 발생했습니다.');
-                }
+            try {
+                delComment(commentId);
+            } catch (error) {
+                console.error('댓글 삭제 중 오류 발생:', error);
+                alert('댓글 삭제 중 오류가 발생했습니다.');
             }
         }
     }
@@ -474,7 +471,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                     {comment.replyCount > 0 &&
                                         <ReplyComponent postId={post} commentId={comment.id} />
                                     }
-
                                 </div>
                             ))}
                             <div ref={observerLoadRef} css={css`height: 1px; visibility: ${dataLoading ? "hidden" : "visible"};`} />
@@ -495,9 +491,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                     <PostCommentInputStyle>
                                         <div className="login_user_profile">
                                             <div className="login_user_photo"
-                                                css={css`
-                                                                            background-image : url(${user?.photo})
-                                                                        `}
+                                                css={css`background-image : url(${user?.photo})`}
                                             ></div>
                                             <p className="login_user_id">{user?.name}</p>
                                         </div>

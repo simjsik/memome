@@ -199,7 +199,6 @@ export default function StatusBox() {
 
     return (
         <>
-
             {path !== '/home/post' &&
                 <>
                     {(isMobile && (commentOn || mobileStatus)) &&
