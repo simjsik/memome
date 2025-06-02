@@ -1,7 +1,10 @@
 import dotenv from "dotenv";
 dotenv.config();
-import {getFirestore, Timestamp} from "firebase-admin/firestore";
-import {onDocumentCreated} from "firebase-functions/v2/firestore";
+import {getFirestore, Timestamp, FieldValue} from "firebase-admin/firestore";
+import {
+  onDocumentCreated,
+  onDocumentDeleted,
+} from "firebase-functions/v2/firestore";
 import * as functions from 'firebase-functions/v1';
 import {initializeApp} from "firebase-admin/app";
 initializeApp();
@@ -109,6 +112,38 @@ async function sendNotice(postId: string, postData: PostData) {
 //     }
 //   }
 // );
+
+export const setHasUpdateCommentFlag = onDocumentCreated(
+  "posts/{postId}/comments/{commentId}",
+  async (event) => {
+    const commentData = event.data?.data();
+    const postId = commentData?.postId; // 댓글 작성자 ID
+    try {
+      const postRef = await adminDb.collection("posts").doc(postId);
+      await postRef.update({
+        commentCount: FieldValue.increment(1),
+      });
+    } catch (error) {
+      console.error("업데이트 중 오류 발생:", error);
+    }
+  }
+);
+
+export const setHasDeleteCommentFlag = onDocumentDeleted(
+  "posts/{postId}/comments/{commentId}",
+  async (event) => {
+    const commentData = event.data?.data();
+    const postId = commentData?.postId; // 댓글 작성자 ID
+    try {
+      const postRef = await adminDb.collection("posts").doc(postId);
+      await postRef.update({
+        commentCount: FieldValue.increment(-1),
+      });
+    } catch (error) {
+      console.error("업데이트 중 오류 발생:", error);
+    }
+  }
+);
 
 export const setHasUpdateFlag = onDocumentCreated(
   "posts/{postId}",

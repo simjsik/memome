@@ -13,6 +13,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { getAuth, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
+import GlobalLoadingWrap from "./components/GlobalLoading";
 
 const queryClient = new QueryClient();
 
@@ -84,7 +85,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                     const claims = idTokenResult.claims as CustomClaims;
                     setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
                     setGuest(!!claims.roles?.guest);
-                    setUser({
+                    await setUser({
                         uid: uid,
                         email: user.email,
                         name: user.displayName,
@@ -133,7 +134,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     }, [currentUser, pathName])
 
     if (loading) {
-        return null;
+        return <GlobalLoadingWrap />;
     }
 
 

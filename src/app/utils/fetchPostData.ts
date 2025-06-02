@@ -3,6 +3,29 @@ import { db } from "@/app/DB/firebaseConfig";
 import { Comment, ImagePostData, PostData } from "@/app/state/PostState";
 import { Reply } from "../hook/CommentMutate";
 
+// 1) 모듈 레벨에서 사용자 정보 캐시 선언 (한 번만 초기화됨)
+const userCache = new Map<string, { displayName: string; photoURL: string }>();
+
+async function getCachedUserInfo(userId: string) {
+    if (userCache.has(userId)) {
+        // 이미 한 번 읽은 값이 있으면 바로 리턴
+        console.log('이미 있는 유저 캐시!');
+        return userCache.get(userId)!;
+    }
+    console.log('새로운 유저 캐시!');
+    // 캐시에 없으면 Firestore에서 조회
+    const userDoc = await getDoc(doc(db, "users", userId));
+    const userData = userDoc.data() || { displayName: '', photoURL: '' };
+    const user = {
+        displayName: userData.displayName,
+        photoURL: userData.photoURL,
+    };
+
+    // 캐시에 저장
+    userCache.set(userId, user);
+    return user;
+}
+
 // 일반 포스트 무한 스크롤 로직
 export const fetchPosts = async (
     userId: string,
@@ -16,6 +39,10 @@ export const fetchPosts = async (
             credentials: "include",
             body: JSON.stringify({ userId }),
         });
+        const limitData = await LimitResponse.json();
+        if (!LimitResponse.ok) {
+            throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
+        }
         if (LimitResponse.status === 400) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
@@ -28,8 +55,6 @@ export const fetchPosts = async (
             new Timestamp(pageParam.seconds, pageParam.nanoseconds) // 변환
             : null;
 
-        console.log(startAfterParam instanceof Timestamp, 'PageParam 타입 확인');
-
         const queryBase =
             query(
                 collection(db, 'posts'),
@@ -37,8 +62,6 @@ export const fetchPosts = async (
                 orderBy('createAt', 'desc'),
                 limit(pageSize) // 필요한 수 만큼 데이터 가져오기
             )
-
-        console.log(pageParam, '= 페이지 시간', '= 페이지 사이즈', '받은 인자')
 
         const postQuery = startAfterParam
             ?
@@ -49,8 +72,6 @@ export const fetchPosts = async (
             :
             queryBase
 
-        console.log(pageParam, 'pageParam', postQuery, 'postQuery', '시작쿼리')
-
         const postSnapshot = await getDocs(postQuery);
 
         const postWithComment: PostData[] = await Promise.all(
@@ -58,15 +79,8 @@ export const fetchPosts = async (
                 // 포스트 가져오기
                 const postData = { id: document.id, ...document.data() } as PostData;
 
-                // 댓글 개수 가져오기
-                const commentRef = getDocs(collection(db, 'posts', document.id, 'comments'));
                 // 포스트 데이터에 유저 이름 매핑하기
-                const userDocRef = getDoc(doc(db, "users", postData.userId)); // DocumentReference 생성
-
-                const [commentSnapshot, userDoc] = await Promise.all([commentRef, userDocRef]);
-
-                postData.commentCount = commentSnapshot.size;
-                const userData = userDoc.data() || { displayName: '', photoURL: '' }
+                const userData = await getCachedUserInfo(postData.userId);
                 postData.displayName = userData.displayName;
                 postData.photoURL = userData.photoURL;
 
@@ -75,7 +89,6 @@ export const fetchPosts = async (
         );
 
         const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
-        console.log(lastVisible?.data(), lastVisible?.data().createAt, '보내는 인자')
 
         return {
             data: postWithComment,
@@ -101,6 +114,10 @@ export const fetchNoticePosts = async (
             credentials: "include",
             body: JSON.stringify({ userId }),
         });
+        const limitData = await LimitResponse.json();
+        if (!LimitResponse.ok) {
+            throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
+        }
         if (LimitResponse.status === 400) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
@@ -186,6 +203,10 @@ export const fetchBookmarks = async (
             credentials: "include",
             body: JSON.stringify({ userId }),
         });
+        const limitData = await LimitResponse.json();
+        if (!LimitResponse.ok) {
+            throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
+        }
         if (LimitResponse.status === 400) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }
@@ -271,6 +292,10 @@ export const fetchComments = async (userId: string, postId: string, pageParam: T
             credentials: "include",
             body: JSON.stringify({ userId }),
         });
+        const limitData = await LimitResponse.json();
+        if (!LimitResponse.ok) {
+            throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
+        }
         if (LimitResponse.status === 400) {
             throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
         }

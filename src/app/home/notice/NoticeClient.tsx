@@ -26,7 +26,6 @@ export default function ClientNotice() {
     const setModal = useSetRecoilState<boolean>(modalState);
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
-    const [dataLoading, setDataLoading] = useState<boolean>(false);
     const [loading, setLoading] = useRecoilState(loadingState);
     const [dropToggle, setDropToggle] = useState<string>('')
 
@@ -46,7 +45,8 @@ export default function ClientNotice() {
         data: notices,
         fetchNextPage,
         hasNextPage,
-        isLoading,
+        isLoading: firstLoading,
+        isFetching: dataLoading,
         isError,
     } = useInfiniteQuery<
         { data: PostData[]; nextPage: Timestamp | undefined }, // TQueryFnData
@@ -59,8 +59,6 @@ export default function ClientNotice() {
         queryKey: ['notices'],
         queryFn: async ({ pageParam }) => {
             try {
-                setDataLoading(true);
-
                 const validateResponse = await fetch(`/api/validate`, {
                     method: "POST",
                     credentials: "include",
@@ -81,8 +79,6 @@ export default function ClientNotice() {
                     console.error("알 수 없는 에러 유형:", error);
                     throw new Error("알 수 없는 에러가 발생했습니다.");
                 }
-            } finally {
-                setDataLoading(false);
             }
         },
         getNextPageParam: (lastPage) => lastPage.nextPage,
@@ -94,7 +90,6 @@ export default function ClientNotice() {
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
-
         if (!yourLogin || usageLimit) {
             if (usageLimit) {
                 setLimitToggle(true);
@@ -107,21 +102,26 @@ export default function ClientNotice() {
             return;
         }
 
-        if (!hasNextPage || !observerLoadRef.current) return;
-
-        const observer = new IntersectionObserver(
+        const obsever = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting) {
-                    fetchNextPage(); // ✅ hasNextPage가 true일 때만 실행
+                if (entries[0].isIntersecting && hasNextPage && !dataLoading) {
+                    fetchNextPage();
                 }
             },
-            { threshold: 1.0 }
+            {
+                threshold: 1.0,
+                rootMargin: '0px 0px 20px 0px',
+            }
         );
 
-        observer.observe(observerLoadRef.current);
-        return () => observer.disconnect();
+        if (observerLoadRef.current) {
+            obsever.observe(observerLoadRef.current);
+        }
 
-    }, [hasNextPage, fetchNextPage]);
+        return () => {
+            if (observerLoadRef.current) obsever.unobserve(observerLoadRef.current);
+        };
+    }, [hasNextPage, fetchNextPage])
 
     // 포스트 보기
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
@@ -147,12 +147,9 @@ export default function ClientNotice() {
         }
     }, [isError])
 
-    // 초기 데이터 로딩
     useEffect(() => {
-        if (!isLoading) {
-            setLoading(false); // 초기 로딩 해제
-        }
-    }, [isLoading, setLoading])
+        setLoading(false); // 초기 로딩 해제
+    }, [])
 
     useEffect(() => {
         // 페이지 진입 시 스크롤 위치 복원
@@ -294,8 +291,17 @@ export default function ClientNotice() {
                             </div>
                         </motion.div>
                     ))}
-                    <div ref={observerLoadRef} css={css`height: 1px; visibility: ${dataLoading ? "hidden" : "visible"};`} />
+                    <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`} />
                     {(!loading && dataLoading) && <LoadingWrap />}
+                    {isError &&
+                        <NoMorePost>
+                            <span>포스트 로드 중 문제가 발생했습니다.</span>
+                            <motion.div className='retry_post_btn'
+                                variants={btnVariants}
+                                whileHover="loginHover"
+                                whileTap="loginClick">재요청</motion.div>
+                        </NoMorePost>
+                    }
                     {(!dataLoading && !hasNextPage && !loading) &&
                         <>
                             {

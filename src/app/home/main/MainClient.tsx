@@ -236,22 +236,6 @@ export default function MainHome() {
     setLoading(false); // 초기 로딩 해제
   }, [])
 
-  const { mutate: handledeletePost } = useDelPost();
-
-  // 포스트 삭제
-  const deletePost = async (postId: string) => {
-    const confirmed = confirm('게시글을 삭제 하시겠습니까?')
-    if (!confirmed) return;
-    handledeletePost(postId)
-  }
-
-  const { mutate: fetchUpdatePost, isPending: isAddUpdatePost } = useAddUpdatePost();
-
-  // 버튼 클릭 시 새 데이터 로드
-  const handleUpdateClick = () => {
-    fetchUpdatePost();
-  };
-
   // 포스트 보기
   const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
     if (usageLimit) {
@@ -300,8 +284,21 @@ export default function MainHome() {
     }
   });
 
-  const { hasUpdate } = usePostUpdateChecker();
+  // 포스트 삭제
+  const { mutate: handledeletePost } = useDelPost();
+  const deletePost = async (postId: string) => {
+    const confirmed = confirm('게시글을 삭제 하시겠습니까?')
+    if (!confirmed) return;
+    handledeletePost(postId)
+  }
 
+  // 버튼 클릭 시 새 데이터 로드
+  const { mutate: fetchUpdatePost, isPending: isAddUpdatePost } = useAddUpdatePost();
+  const handleUpdateClick = () => {
+    fetchUpdatePost();
+  };
+
+  const { hasUpdate } = usePostUpdateChecker();
   const handleUsernameClick = useHandleUsernameClick();
   return (
     <>

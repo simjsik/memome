@@ -240,7 +240,7 @@ export const signUpState = atom<boolean>({
 
 export const loadingState = atom<boolean>({
     key: 'loadingState',
-    default: false
+    default: true,
 })
 
 export const statusState = atom<boolean>({
