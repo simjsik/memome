@@ -807,7 +807,8 @@ export default function PostMenu() {
                 }
             };
             loadQuill();
-            setLoading(false)
+
+            setLoading(false);
     }, []);
 
     // 폰트 사이즈 모듈

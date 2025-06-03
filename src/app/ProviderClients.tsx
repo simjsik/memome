@@ -26,10 +26,15 @@ interface CustomClaims {
 
 function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const { clearUpdate } = usePostUpdateChecker();
-
-    const currentUser = useRecoilValue(userState);
+    const setUser = useSetRecoilState(userState);
+    const setHasLogin = useSetRecoilState(DidYouLogin);
+    const setAdmin = useSetRecoilState<boolean>(adminState);
+    const setGuest = useSetRecoilState<boolean>(hasGuestState);
     const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState);
+    const currentUser = useRecoilValue(userState);
 
+    const [loading, setLoading] = useRecoilState<boolean>(loadingState);
+    const router = useRouter();
     const pathName = usePathname();
 
     const loadBookmarks = async (uid: string) => {
@@ -38,6 +43,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
             if (bookmarks.exists()) {
                 // 북마크 데이터가 있을 경우
                 const data = bookmarks.data() as { bookmarkId: string[] };
+                console.log(data.bookmarkId, '북마크 리스트')
                 setCurrentBookmark(data.bookmarkId); // Recoil 상태 업데이트
             }
         } catch (error) {
@@ -45,13 +51,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
             setCurrentBookmark([]);
         }
     }
-
-    const setUser = useSetRecoilState(userState);
-    const setHasLogin = useSetRecoilState(DidYouLogin);
-    const setAdmin = useSetRecoilState<boolean>(adminState);
-    const setGuest = useSetRecoilState<boolean>(hasGuestState);
-    const [loading, setLoading] = useRecoilState<boolean>(loadingState);
-    const router = useRouter();
 
     useEffect(() => {
         const auth = getAuth();

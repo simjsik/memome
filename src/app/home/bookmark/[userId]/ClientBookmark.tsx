@@ -8,7 +8,7 @@ import { css } from "@emotion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Timestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { motion } from "framer-motion";
 
@@ -22,7 +22,6 @@ export default function Bookmark() {
     const currentBookmark = useRecoilValue<string[]>(bookMarkState)
     const currentUser = useRecoilValue<userData>(userState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
-    const [dataLoading, setDataLoading] = useState<boolean>(false);
     const [loading, setLoading] = useRecoilState(loadingState);
 
     const router = useRouter();
@@ -35,7 +34,8 @@ export default function Bookmark() {
         fetchNextPage,
         hasNextPage,
         refetch,
-        isLoading,
+        isLoading: firstLoading,
+        isFetching: dataLoading,
         isError,  // 에러 상태
         // error,    // 에러 메시지
     } = useInfiniteQuery({
@@ -43,7 +43,6 @@ export default function Bookmark() {
         queryKey: ['bookmarks', currentUser?.uid],
         queryFn: async ({ pageParam = 0 }) => {
             try {
-                setDataLoading(true);
                 const validateResponse = await fetch(`/api/validate`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -70,10 +69,7 @@ export default function Bookmark() {
                     console.error("알 수 없는 에러 유형:", error);
                     throw new Error("알 수 없는 에러가 발생했습니다.");
                 }
-            } finally {
-                setDataLoading(false);
             }
-
         },
         getNextPageParam: (lastPage) => lastPage?.nextIndexData, // 다음 페이지 인덱스 반환
         staleTime: 5 * 60 * 1000, // 5분 동안 데이터 캐싱 유지
@@ -115,9 +111,7 @@ export default function Bookmark() {
     }, [hasNextPage, fetchNextPage, currentBookmark, bookmarks]);
 
     useEffect(() => {
-        if (bookmarks && bookmarkList.length > 0) {
-            fetchNextPage();
-        }
+        setLoading(false)
     }, [])
 
     useEffect(() => {
@@ -125,13 +119,6 @@ export default function Bookmark() {
             refetch();
         }
     }, [currentBookmark])
-
-    // 초기 데이터 로딩
-    useEffect(() => {
-        if (!isLoading) {
-            setLoading(false); // 초기 로딩 해제
-        }
-    }, [isLoading, setLoading])
 
     // 포스트 보기
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
@@ -226,7 +213,7 @@ export default function Bookmark() {
                         </motion.div >
                     ))
                     }
-                    <div ref={observerLoadRef} style={{ height: '1px', visibility: dataLoading ? "hidden" : "visible" }} />
+                    <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`} />
                     {(!loading && dataLoading) && <LoadingWrap />}
                     {
                         (!dataLoading && !hasNextPage && bookmarkList.length > 0 && !loading) &&

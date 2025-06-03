@@ -138,8 +138,6 @@ export const fetchNoticePosts = async (
                 limit(4) // 필요한 수 만큼 데이터 가져오기
             )
 
-        console.log(pageParam, '= 페이지 시간', '받은 인자')
-
         const postQuery = startAfterParam
             ?
             query(
@@ -149,7 +147,6 @@ export const fetchNoticePosts = async (
             :
             queryBase
 
-        console.log(pageParam, 'pageParam', postQuery, 'postQuery', '시작쿼리')
         const postSnapshot = await getDocs(postQuery);
 
         const postWithComment: PostData[] = await Promise.all(
@@ -157,16 +154,8 @@ export const fetchNoticePosts = async (
                 // 포스트 가져오기
                 const postData = { id: document.id, ...document.data() } as PostData;
 
-                // 댓글 개수 가져오기
-                const commentRef = getDocs(collection(db, 'posts', document.id, 'comments'));
                 // 포스트 데이터에 유저 이름 매핑하기
-                const userDocRef = getDoc(doc(db, "users", postData.userId)); // DocumentReference 생성
-
-                const [commentSnapshot, userDoc] = await Promise.all([commentRef, userDocRef]);
-
-                postData.commentCount = commentSnapshot.size;
-                const userData = userDoc.data() || { displayName: '', photoURL: '' }
-
+                const userData = await getCachedUserInfo(postData.userId);
                 postData.displayName = userData.displayName;
                 postData.photoURL = userData.photoURL;
 
@@ -175,7 +164,6 @@ export const fetchNoticePosts = async (
         );
 
         const lastVisible = postSnapshot.docs.at(-1); // 마지막 문서
-        console.log(lastVisible?.data(), lastVisible?.data().createAt, '보내는 인자')
         return {
             data: postWithComment,
             nextPage: lastVisible
@@ -214,49 +202,28 @@ export const fetchBookmarks = async (
             throw new Error('데이터를 요청할 수 없습니다.');
         }
 
-        // 닉네임 매핑을 위한 캐시 초기화
-        const userCache = new Map<string, { nickname: string; photo: string | null }>();
-
         const postIds = bookmarkIds.slice(startIdx, startIdx + pageSize);
-
-        console.log(startIdx, '첫 포스트 인덱스', postIds, '가져올 북마크 ID')
 
         const postWithComment: PostData[] = (
             await Promise.all(
                 postIds.map(async (postId: string) => {
                     // 포스트 가져오기
+                    console.log(postId, '북마크 아이디')
                     const postRef = doc(db, "posts", postId);
                     const postSnap = await getDoc(postRef);
 
                     if (!postSnap.exists()) return null;
 
-                    const postsData = postSnap.data()
+                    const postData = postSnap.data()
 
-                    postsData.id = postSnap.id; // 문서 ID를 추가
-                    // 댓글 개수 가져오기
-                    const commentRef = collection(db, 'posts', postId, 'comments');
-                    const commentSnapshot = await getDocs(commentRef);
-                    postsData.commentCount = commentSnapshot.size;
-
+                    postData.id = postSnap.id; // 문서 ID를 추가
                     // 포스트 데이터에 유저 이름 매핑하기
-                    if (!userCache.has(postsData.userId)) {
-                        const userDocRef = doc(db, "users", postsData.userId); // DocumentReference 생성
-                        const userDoc = await getDoc(userDocRef); // 문서 데이터 가져오기
+                    const userData = await getCachedUserInfo(postData.userId);
 
-                        const userData = userDoc.exists()
-                            ? userDoc.data()
-                            : { displayName: 'unknown', photoURL: null }
+                    postData.displayName = userData.displayName;
+                    postData.photoURL = userData.photoURL;
 
-                        userCache.set(postsData.userId, {
-                            nickname: userData.displayName,
-                            photo: userData.photoURL || null,
-                        });
-                    }
-                    const userData = userCache.get(postsData.userId) || { nickname: 'Unknown', photo: null }
-                    postsData.displayName = userData.nickname;
-                    postsData.photoURL = userData.photo;
-
-                    return postsData as PostData;
+                    return postData as PostData;
                 })
             )
         ).filter((post): post is PostData => post !== null);
@@ -268,8 +235,11 @@ export const fetchBookmarks = async (
 
         const nextIndex = startIdx + pageSize < bookmarkIds.length ? startIdx + pageSize : undefined;
 
-        // console.log(validPosts, '보내줄 포스트', nextIndex, '다음 페이지 기준')
-        return { data: validPosts, nextIndexData: nextIndex ? nextIndex : undefined };
+        console.log(validPosts, '보내줄 포스트', nextIndex, '다음 페이지 기준')
+        return {
+            data: validPosts,
+            nextIndexData: nextIndex ? nextIndex : undefined,
+        };
     } catch (error) {
         console.error("Error fetching data:", error);
         throw error;

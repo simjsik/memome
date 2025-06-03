@@ -39,7 +39,6 @@ export default function UserClient({ user }: ClientUserProps) {
     const [postTab, setPostTab] = useState<boolean>(true)
     const [dropToggle, setDropToggle] = useState<string>('')
     const [loading, setLoading] = useRecoilState(loadingState);
-    const [dataLoading, setDataLoading] = useState<boolean>(false);
     const currentUser = useRecoilValue(userState)
 
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -53,7 +52,8 @@ export default function UserClient({ user }: ClientUserProps) {
         data: userPosts,
         fetchNextPage,
         hasNextPage,
-        isLoading,
+        isLoading: postLoading,
+        isError: postError,
     } = useInfiniteQuery<
         FetchPostListResponse,
         Error,
@@ -65,8 +65,6 @@ export default function UserClient({ user }: ClientUserProps) {
         queryKey: ['postList', uid as string],
         queryFn: async ({ pageParam }) => {
             try {
-                setDataLoading(true)
-
                 const validateResponse = await fetch(`/api/validate`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -87,8 +85,6 @@ export default function UserClient({ user }: ClientUserProps) {
                     console.error("알 수 없는 에러 유형:", error);
                     throw new Error("알 수 없는 에러가 발생했습니다.");
                 }
-            } finally {
-                setDataLoading(false)
             }
         },
         getNextPageParam: (lastPage) => lastPage.nextPage,
@@ -101,7 +97,8 @@ export default function UserClient({ user }: ClientUserProps) {
         data: ImagePosts,
         fetchNextPage: fetchNextImgPage,
         hasNextPage: hasImagePage,
-        isLoading: isImagePostLoading,
+        isLoading: imageLoading,
+        isError: imageError,
     } = useInfiniteQuery<
         FetchImageListResponse,
         Error,
@@ -113,8 +110,6 @@ export default function UserClient({ user }: ClientUserProps) {
         queryKey: ['ImagePostList', uid as string],
         queryFn: async ({ pageParam }) => {
             try {
-                setDataLoading(true)
-
                 const validateResponse = await fetch(`/api/validate`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -135,8 +130,6 @@ export default function UserClient({ user }: ClientUserProps) {
                     console.error("알 수 없는 에러 유형:", error);
                     throw new Error("알 수 없는 에러가 발생했습니다.");
                 }
-            } finally {
-                setDataLoading(false)
             }
         },
         getNextPageParam: (lastPage) => lastPage.nextPage,
@@ -210,10 +203,8 @@ export default function UserClient({ user }: ClientUserProps) {
 
     // 초기 데이터 로딩
     useEffect(() => {
-        if ((!isLoading || !isImagePostLoading)) {
-            setLoading(false); // 초기 로딩 해제
-        }
-    }, [isLoading, isImagePostLoading, setLoading])
+        setLoading(false); // 초기 로딩 해제
+    }, [])
 
     // 포스트 삭제
     const deletePost = async (postId: string) => {
@@ -355,8 +346,17 @@ export default function UserClient({ user }: ClientUserProps) {
                                     </motion.div>
                                 ))
                             }
-                            {postTab && <div className="postObserver" ref={observerLoadRef} css={css`height: 1px; visibility: ${dataLoading ? "hidden" : "visible"};`} />}
-                            {(!loading && dataLoading) && <LoadingWrap />}
+                            {postTab && <div className="postObserver" ref={observerLoadRef} css={css`height: 1px; visibility: ${postLoading ? "hidden" : "visible"};`} />}
+                            {(!loading && postLoading) && <LoadingWrap />}
+                            {postError &&
+                                <NoMorePost>
+                                    <span>포스트 로드 중 문제가 발생했습니다.</span>
+                                    <motion.button className='retry_post_btn'
+                                        variants={btnVariants}
+                                        whileHover="loginHover"
+                                        whileTap="loginClick">재요청</motion.button>
+                                </NoMorePost>
+                            }
                             {
                                 (!hasNextPage && userPostList.length > 0 && !loading) &&
                                 <>
@@ -400,8 +400,17 @@ export default function UserClient({ user }: ClientUserProps) {
                                     </div>
                                 ))}
                             </div>
-                            {!postTab && <div className="imageObserver" ref={observerImageLoadRef} css={css`height: 1px; visibility: ${dataLoading ? "hidden" : "visible"};`} />}
-                            {(!loading && dataLoading) && <LoadingWrap />}
+                            {!postTab && <div className="imageObserver" ref={observerImageLoadRef} css={css`height: 1px; visibility: ${imageLoading ? "hidden" : "visible"};`} />}
+                            {(!loading && imageLoading) && <LoadingWrap />}
+                            {imageError &&
+                                <NoMorePost>
+                                    <span>포스트 로드 중 문제가 발생했습니다.</span>
+                                    <motion.button className='retry_post_btn'
+                                        variants={btnVariants}
+                                        whileHover="loginHover"
+                                        whileTap="loginClick">재요청</motion.button>
+                                </NoMorePost>
+                            }
                             {
                                 (!hasNextPage && userImageList.length > 0 && !loading) &&
                                 <>

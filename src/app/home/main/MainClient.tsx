@@ -87,6 +87,8 @@ export default function MainHome() {
     // 포스팅 저장된 내용 확인. 있어야 이미지 불러와짐
     const savedData = JSON.parse(localStorage.getItem('unsavedPost')!);
 
+    setLoading(false);
+
     if (savedData) {
       setStorageLoad(true);
     } else {
@@ -231,10 +233,6 @@ export default function MainHome() {
       }
     }
   }, [isError])
-
-  useEffect(() => {
-    setLoading(false); // 초기 로딩 해제
-  }, [])
 
   // 포스트 보기
   const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
@@ -410,16 +408,15 @@ export default function MainHome() {
             </motion.div >
           ))
           }
-          <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`}
-          />
+          <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`}/>
           {(!loading && dataLoading) && <LoadingWrap />}
           {isError &&
             <NoMorePost>
               <span>포스트 로드 중 문제가 발생했습니다.</span>
-              <motion.div className='retry_post_btn'
+              <motion.button className='retry_post_btn'
                 variants={btnVariants}
                 whileHover="loginHover"
-                whileTap="loginClick">재요청</motion.div>
+                whileTap="loginClick">재요청</motion.button>
             </NoMorePost>
           }
           {
