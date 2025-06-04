@@ -1,5 +1,4 @@
 import SearchClient from "./searchClient";
-export const dynamic = "force-static"; // 정적 렌더링 설정
 export const metadata = {
     title: "MEMOME :: 검색",
     description: "메모 검색",
