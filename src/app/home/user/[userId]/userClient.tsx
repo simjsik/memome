@@ -107,6 +107,7 @@ export default function UserClient({ user }: ClientUserProps) {
         Timestamp | undefined // TPageParam
     >({
         retry: false,
+        enabled : !postTab,
         queryKey: ['ImagePostList', uid as string],
         queryFn: async ({ pageParam }) => {
             try {
@@ -358,7 +359,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                 </NoMorePost>
                             }
                             {
-                                (!hasNextPage && userPostList.length > 0 && !loading) &&
+                                (!hasNextPage && !loading && !postLoading) &&
                                 <>
                                     {
                                         (userPostList.length === 0 && !loading) ?
@@ -412,14 +413,14 @@ export default function UserClient({ user }: ClientUserProps) {
                                 </NoMorePost>
                             }
                             {
-                                (!hasNextPage && userImageList.length > 0 && !loading) &&
+                                (!hasNextPage && !loading && !imageLoading) &&
                                 <>
                                     {
                                         (userImageList.length === 0 && !loading) ?
                                             <NoMorePost>
                                                 <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966543/%EB%A9%94%EB%AA%A8%EC%97%86%EC%96%B4_d0sm6q.svg)`}></div>
                                                 <p>메모가 없습니다.</p>
-                                                <span>메모 작성 시 이미지를 추가 해보세요.</span>
+                                                <span>이미지가 포함된 메모가 없습니다.</span>
                                             </NoMorePost>
                                             :
                                             <NoMorePost>

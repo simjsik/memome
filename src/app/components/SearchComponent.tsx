@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState, modalState, UsageLimitState, UsageLimitToggle } from "../state/PostState";
 import { searchClient } from "../utils/algolia";
+import LoadingWrap from "./LoadingWrap";
 // 검색 창 css
 const SearchWrap = styled.div`
 position: relative;
@@ -480,12 +481,12 @@ const SwiperHits = () => {
     if (!query) return <p>작성자 및 키워드를 입력해 검색해 보세요.</p>
 
     if (searchLoading) {
-        return;
+        return <LoadingWrap></LoadingWrap>;
     }
 
     // 검색어가 비어 있는 경우
     if (!debouncedQuery.trim()) {
-        return <p>작성자 및 키워드를 입력해 검색해 보세요.</p>;
+        return <p>작성자 및 키워드를 입력해 검색해 보세요</p>
     }
 
     const handleUserPage = (userId: string) => {
@@ -515,6 +516,9 @@ const SwiperHits = () => {
         </div >
     );
 
+    if (items.length === 0) {
+        return null;
+    }
     return (
         <>
             <Swiper

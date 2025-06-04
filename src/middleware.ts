@@ -17,14 +17,14 @@ const nonce = generateNonce();
 export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
     const token = req.cookies.get('authToken')?.value;
-    
-    if (pathname === '/login' && token) {
-        const url = req.nextUrl.clone(); url.pathname = '/home/main';
-        return NextResponse.redirect(url);
-    }
 
     if (pathname.startsWith('/home/') && !token) {
         const url = req.nextUrl.clone(); url.pathname = '/login';
+        return NextResponse.redirect(url);
+    }
+
+    if (pathname.startsWith('/login') && token) {
+        const url = req.nextUrl.clone(); url.pathname = '/home/main';
         return NextResponse.redirect(url);
     }
 

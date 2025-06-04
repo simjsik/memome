@@ -153,7 +153,7 @@ function PostHit({ hit }: { hit: PostData }) {
                         backgroundColor: "#fafbfc",
                         transition: { duration: 0.1 },
                     }}
-                    key={hit.id}
+                    key={hit.objectID as string}
                     className='post_box'
                 >
                     {/* 작성자 프로필 */}
@@ -183,16 +183,16 @@ function PostHit({ hit }: { hit: PostData }) {
                                 className='post_drop_menu_btn'
                                 aria-label='포스트 옵션 더보기'
                                 css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
-                                onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === hit.id ? '' : hit.id)); }}
+                                onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === hit.objectID as string ? '' : hit.objectID as string)); }}
                             >
-                                {dropToggle === hit.id &&
+                                {dropToggle === hit.objectID as string &&
                                     <div>
                                         <ul>
                                             <li className='post_drop_menu'>
                                                 <motion.button
                                                     variants={btnVariants}
                                                     whileHover="otherHover"
-                                                    onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(hit.id); }} className='post_dlt_btn'>게시글 삭제</motion.button>
+                                                    onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(hit.objectID as string); }} className='post_dlt_btn'>게시글 삭제</motion.button>
                                             </li>
                                         </ul>
                                     </div>
@@ -201,7 +201,7 @@ function PostHit({ hit }: { hit: PostData }) {
                         </div>
                     </div>
                     {/* 포스트 내용 */}
-                    <div className='post_content_wrap' onClick={(event) => { event.preventDefault(); handlePostClick(hit.id); }}>
+                    <div className='post_content_wrap' onClick={(event) => { event.preventDefault(); handlePostClick(hit.objectID as string); }}>
                         {/* 포스트 제목 */}
                         < div className='post_title_wrap' >
                             <span className='post_tag'>[{hit.tag}]</span>
@@ -238,7 +238,7 @@ function PostHit({ hit }: { hit: PostData }) {
                                 </motion.button>
                                 <p>{hit.commentCount}</p>
                             </div>
-                            <BookmarkBtn postId={hit.id}></BookmarkBtn>
+                            <BookmarkBtn postId={hit.objectID as string}></BookmarkBtn>
                         </div>
                     </div>
                 </motion.div >

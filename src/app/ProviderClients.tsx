@@ -9,7 +9,7 @@ import { adminState, bookMarkState, DidYouLogin, hasGuestState, loadingState, us
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./DB/firebaseConfig";
 import { usePostUpdateChecker } from "./hook/ClientPolling";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { getAuth, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
@@ -35,7 +35,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
     const [loading, setLoading] = useRecoilState<boolean>(loadingState);
     const router = useRouter();
-    const pathName = usePathname();
 
     const loadBookmarks = async (uid: string) => {
         try {
@@ -56,7 +55,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
-                setLoading(true);
                 console.log(user, '유저 동기화 유저 정보');
 
                 if (user) {
@@ -91,6 +89,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                         photo: user.photoURL as string
                     });
                     setHasLogin(true);
+                } else {
                 }
             } catch (error: unknown) {
                 if (error instanceof Error) {
@@ -130,20 +129,18 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         clearUpdate();
-    }, [currentUser, pathName])
+    }, [currentUser, router])
 
     if (loading) {
         return <GlobalLoadingWrap />;
     }
 
 
-    return <>{children}</>; // 반드시 children을 렌더링
+    return <>{children}</>;
 }
 
 export default function ProviderClient({ children, nonce }: { children: ReactNode, nonce: string }) {
     const cache = createCache({ key: 'custom', nonce });
-    console.log(nonce, '클라이언트 측 난수값')
-
     return (
         <div className={`${PretendardLight.variable} ${PretendardMedium.variable} ${PretendardBold.variable} main_wrap`}>
             <QueryClientProvider client={queryClient}>

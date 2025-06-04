@@ -24,7 +24,7 @@ export default function SearchPage({ serverState, serverUrl }: SearchPageProps) 
             <InstantSearchSSRProvider {...serverState}>
                 <InstantSearch
                     searchClient={searchClient}
-                    indexName="YourIndexName"
+                    indexName="user_index"
                     routing={{
                         router: createInstantSearchRouterNext({ singletonRouter, serverUrl }),
                     }}
