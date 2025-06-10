@@ -1,13 +1,13 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { Comment, loadingState, memoCommentCount, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
+import { Comment, loadingState, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
 import { Timestamp } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import BookmarkBtn from "../BookmarkBtn";
-import { PostCommentInputStyle, PostCommentStyle } from "@/app/styled/PostComponents";
+import { NoMorePost, PostCommentInputStyle, PostCommentStyle } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { fetchComments } from "@/app/utils/fetchPostData";
 import LoadingWrap from "../LoadingWrap";
@@ -190,7 +190,6 @@ font-size : 14px;
 }
 `
 export default function MemoStatus({ post }: ClientPostProps) {
-    const commentCount = useRecoilValue<number>(memoCommentCount);
     const [commentText, setCommentText] = useState<string>('');
     const [replyText, setReplyText] = useState<string>('');
     const [activeReply, setActiveReply] = useState<string | null>(null); // 활성화된 답글 ID
@@ -199,7 +198,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
 
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState);
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle);
-    const [dataLoading, setDataLoading] = useState<boolean>(false);
     const [commentInputOn, setcommentInputOn] = useState<boolean>(false);
     const observerLoadRef = useRef(null);
     const containerRef = useRef(null);
@@ -209,10 +207,11 @@ export default function MemoStatus({ post }: ClientPostProps) {
 
     // 댓글 무한 스크롤 로직----------------------------------------------------------------------------
     const {
-        data,
+        data: comment,
         fetchNextPage,
         hasNextPage,
-        isLoading,
+        isLoading: firstLoading,
+        isFetching: dataLoading,
         isError,
         error,
     } = useInfiniteQuery<
@@ -226,7 +225,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
         queryKey: ['comments', post],
         queryFn: async ({ pageParam }) => {
             try {
-                setDataLoading(true);
                 const validateResponse = await fetch(`/api/validate`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -247,15 +245,14 @@ export default function MemoStatus({ post }: ClientPostProps) {
                     console.error("알 수 없는 에러 유형:", error);
                     throw new Error("알 수 없는 에러가 발생했습니다.");
                 }
-            } finally {
-                setDataLoading(false);
             }
         },
         getNextPageParam: (lastPage) => lastPage.nextPage,
+        staleTime: 5 * 60 * 1000,
         initialPageParam: undefined,
     });
 
-    const commentList = data?.pages.flatMap(page => page.data) || []
+    const commentList = comment?.pages.flatMap(page => page.data) || []
 
     useEffect(() => {
         if (isError) {
@@ -298,10 +295,8 @@ export default function MemoStatus({ post }: ClientPostProps) {
 
     // 초기 데이터 로딩
     useEffect(() => {
-        if (!isLoading) {
-            setLoading(false); // 초기 로딩 해제
-        }
-    }, [isLoading, setLoading])
+        setLoading(false); // 초기 로딩 해제
+    }, [])
 
     const { mutate: addComment, isPending: isAddComment } = useAddComment(post);
 
@@ -419,67 +414,70 @@ export default function MemoStatus({ post }: ClientPostProps) {
     return (
         <MemoBox btnStatus>
             <div className="memo_btn_wrap">
-                <div className="comment_wrap">댓글 {commentCount}</div>
+                <div className="comment_wrap">댓글 {commentList.length}</div>
             </div>
             <div className="status_wrap" ref={containerRef}>
                 <PostCommentStyle>
-                    {commentCount > 0 ?
-                        // parentId가 없는 댓글(최상위 댓글)만 필터링
-                        <>
-                            {commentList.filter(comment => !comment.parentId).map(comment => (
-                                <div key={comment.id} className="memo_comment_wrap">
-                                    <div className="user_profile">
-                                        <div className="user_photo"
-                                            css={css`
+                    {commentList.filter(comment => !comment.parentId).map(comment => (
+                        <div key={comment.id} className="memo_comment_wrap">
+                            <div className="user_profile">
+                                <div className="user_photo"
+                                    css={css`
                                                 background-image : url(${comment.photoURL})
                                                 `}
-                                        ></div>
-                                        <p className="memo_comment_user">{comment.displayName}</p>
-                                        <p className="memo_comment_uid">@{comment.uid.slice(0, 8)}...</p>
-                                        <button className="comment_delete_btn"
-                                            onClick={() => handleDelComment(comment.id)}>
-                                            <div className="comment_delete_icon"
-                                                css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746003900/%EC%A7%80%EC%9B%8C%EB%B2%84%EB%A6%AC%EA%B8%B0_uiox61.svg)`}
-                                            ></div>
-                                        </button>
-                                    </div>
-                                    <p className="memo_comment">{comment.commentText}</p>
-                                    <p className="memo_comment_date">{formatDate(comment.createAt)}</p>
-                                    <motion.button variants={btnVariants}
+                                ></div>
+                                <p className="memo_comment_user">{comment.displayName}</p>
+                                <p className="memo_comment_uid">@{comment.uid.slice(0, 8)}...</p>
+                                <button className="comment_delete_btn"
+                                    onClick={() => handleDelComment(comment.id)}>
+                                    <div className="comment_delete_icon"
+                                        css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746003900/%EC%A7%80%EC%9B%8C%EB%B2%84%EB%A6%AC%EA%B8%B0_uiox61.svg)`}
+                                    ></div>
+                                </button>
+                            </div>
+                            <p className="memo_comment">{comment.commentText}</p>
+                            <p className="memo_comment_date">{formatDate(comment.createAt)}</p>
+                            <motion.button variants={btnVariants}
+                                whileHover="otherHover"
+                                whileTap="otherClick"
+                                className="comment_reply_btn" onClick={() => toggleReply(comment.id)}>답글</motion.button>
+                            {activeReply === comment.id && (
+                                <div className="reply_input_wrap">
+                                    <textarea
+                                        className="comment_input"
+                                        placeholder="답글 입력"
+                                        value={replyText}
+                                        onChange={(e) => setReplyText(e.target.value)}
+                                    />
+                                    <motion.button
+                                        variants={btnVariants}
                                         whileHover="otherHover"
                                         whileTap="otherClick"
-                                        className="comment_reply_btn" onClick={() => toggleReply(comment.id)}>답글</motion.button>
-                                    {activeReply === comment.id && (
-                                        <div className="reply_input_wrap">
-                                            <textarea
-                                                className="comment_input"
-                                                placeholder="답글 입력"
-                                                value={replyText}
-                                                onChange={(e) => setReplyText(e.target.value)}
-                                            />
-                                            <motion.button
-                                                variants={btnVariants}
-                                                whileHover="otherHover"
-                                                whileTap="otherClick"
-                                                className="comment_upload_btn"
-                                                onClick={() => handleAddReply(comment.id, comment.id)}
-                                            >
-                                                등록
-                                            </motion.button>
-                                        </div>
-                                    )}
-                                    {comment.replyCount > 0 &&
-                                        <ReplyComponent postId={post} commentId={comment.id} />
-                                    }
+                                        className="comment_upload_btn"
+                                        onClick={() => handleAddReply(comment.id, comment.id)}
+                                    >
+                                        등록
+                                    </motion.button>
                                 </div>
-                            ))}
-                            <div ref={observerLoadRef} css={css`height: 1px; visibility: ${dataLoading ? "hidden" : "visible"};`} />
-                            {(!loading && dataLoading && (isAddComment || isDelComment || isAddReply)) && <LoadingWrap />}
-                        </>
-                        :
-                        <div>
-                            <p>안녕하세요 댓글이 엄서요 첫 댓글을 달아보세용</p>
+                            )}
+                            {comment.replyCount > 0 &&
+                                <ReplyComponent postId={post} commentId={comment.id} />
+                            }
                         </div>
+                    ))}
+                    <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`} />
+                    {(!loading && dataLoading && (isAddComment || isDelComment || isAddReply)) && <LoadingWrap />}
+                    {
+                        (!hasNextPage && !dataLoading && !loading) &&
+                        <>
+                            {commentList.length === 0 &&
+                                <NoMorePost>
+                                    <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1749549274/%EB%AD%94%EA%B0%80%EC%97%86%EC%9D%84%EB%95%8C_bvky0y.svg)`}></div>
+                                    <p>댓글이 없습니다.</p>
+                                    <span>첫 댓글을 작성해보세요.</span>
+                                </NoMorePost>
+                            }
+                        </>
                     }
                     <div className="post_bottom" ref={commentInputRef}>
                         <div className="post_menu_wrap">

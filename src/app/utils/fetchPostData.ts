@@ -210,7 +210,6 @@ export const fetchBookmarks = async (
             await Promise.all(
                 postIds.map(async (postId: string) => {
                     // 포스트 가져오기
-                    console.log(postId, '북마크 아이디')
                     const postRef = doc(db, "posts", postId);
                     const postSnap = await getDoc(postRef);
 
@@ -237,7 +236,6 @@ export const fetchBookmarks = async (
 
         const nextIndex = startIdx + pageSize < bookmarkIds.length ? startIdx + pageSize : undefined;
 
-        console.log(validPosts, '보내줄 포스트', nextIndex, '다음 페이지 기준')
         return {
             data: validPosts,
             nextIndexData: nextIndex ? nextIndex : undefined,
@@ -306,9 +304,10 @@ export const fetchComments = async (userId: string, postId: string, pageParam: T
             commentSnap.docs.map(async (docSnapshot) => {
                 const commentData = { id: docSnapshot.id, ...docSnapshot.data() } as Comment;
                 const userId: string = commentData.uid;
-
+                console.log(commentData, '댓글 정보')
                 // 캐시에 작성자 정보가 없으면 먼저 users 컬렉션에서 조회
                 const userData = await getCachedUserInfo(userId);
+                console.log(userData, '댓글 유저 정보')
                 commentData.displayName = userData.displayName;
                 commentData.photoURL = userData.photoURL;
 
@@ -317,7 +316,6 @@ export const fetchComments = async (userId: string, postId: string, pageParam: T
         );
 
         const lastVisible = commentSnap.docs.at(-1); // 마지막 문서
-        console.log(lastVisible?.data(), lastVisible?.data().createAt, '보내는 인자')
 
         return {
             data: comments,
@@ -384,7 +382,7 @@ export const fetchReplies = async (userId: string, postId: string, commentId: st
         const commentSnap = await getDocs(commentQuery);
 
         if (commentSnap.empty) {
-            console.error('댓글이 없습니다.')
+            console.error('댓글 데이터가 없습니다.')
             return { data: [], nextPage: undefined };
         }
 
@@ -576,7 +574,6 @@ export const fetchImageList = async (
         });
 
         const lastVisible = postlistSnapshot.docs.at(-1); // 마지막 문서
-        console.log(imageData, imageData.length === 0, '이미지 포스트 리스트');
         return {
             data: imageData,
             nextPage: lastVisible
