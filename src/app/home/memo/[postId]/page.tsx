@@ -49,21 +49,48 @@ export async function generateMetadata({ params }: MemoPageProps): Promise<Metad
     const postRef = adminDb.collection("posts").doc(postId);
     const postSnap = await postRef.get();
 
+
     if (!postSnap.exists) {
-        return { title: "페이지를 찾을 수 없음" };
+        return {
+            title: `MEMOME :: 페이지를 찾을 수 없습니다.`,
+            description: "...",
+            openGraph: {
+                title: `MEMOME :: 페이지를 찾을 수 없습니다.`,
+                description: "...",
+                type: "article",
+                url: `https://memome-delta.vercel.app/home/main`,
+                images: [{ url: "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1749549274/%EB%AD%94%EA%B0%80%EC%97%86%EC%9D%84%EB%95%8C_bvky0y.svg" }]
+            },
+            twitter: {
+                card: 'summary_large_image',
+                title: `MEMOME :: 페이지를 찾을 수 없습니다.`,
+                description: "...",
+                images: [{ url: "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1749549274/%EB%AD%94%EA%B0%80%EC%97%86%EC%9D%84%EB%95%8C_bvky0y.svg" }]
+            },
+        };
     }
 
     const post = postSnap.data();
 
+    const plainText = post?.content.replace(/<[^>]*>/g, '');
+    const description = plainText.slice(0, 150) + '...';
+
     return {
         title: `MEMOME :: ${post?.title}`,
-        description: post?.content.slice(0, 150) + "...",
+        description: description,
         openGraph: {
-            title: post?.title,
-            description: post?.content.slice(0, 150) + "...",
+            title: `MEMOME :: ${post?.title}`,
+            description: description,
             type: "article",
-            images: [{ url: post?.images?.[0] || "/default.jpg" }]
-        }
+            url: `https://memome-delta.vercel.app/home/memo/${params.postId}`,
+            images: [{ url: post?.images?.[0] || "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1749549274/%EB%AD%94%EA%B0%80%EC%97%86%EC%9D%84%EB%95%8C_bvky0y.svg" }]
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `MEMOME :: ${post?.title}`,
+            description: description,
+            images: [{ url: post?.images?.[0] || "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1749549274/%EB%AD%94%EA%B0%80%EC%97%86%EC%9D%84%EB%95%8C_bvky0y.svg" }]
+        },
     };
 }
 

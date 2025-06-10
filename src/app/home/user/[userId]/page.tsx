@@ -21,20 +21,46 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
         return { title: "페이지를 찾을 수 없음" };
     }
 
+    if (!userSnap.exists) {
+        return {
+            title: `MEMOME :: 유저를 찾을 수 없습니다.`,
+            description: "...",
+            openGraph: {
+                title: `MEMOME :: 유저를 찾을 수 없습니다.`,
+                description: "...",
+                type: "article",
+                url: `https://memome-delta.vercel.app/home/main`,
+                images: [{ url: "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg" }]
+            },
+            twitter: {
+                card: 'summary_large_image',
+                title: `MEMOME :: 유저를 찾을 수 없습니다.`,
+                description: "...",
+                images: [{ url: "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg" }]
+            },
+        };
+    }
+
     const userData = userSnap.data();
 
     return {
         title: `MEMOME :: ${userData?.displayName}(@${userId.slice(0, 8)}...)`,
         description: userId.slice(0, 8) + "...",
         openGraph: {
-            title: userData?.displayName,
+            title: `MEMOME :: ${userData?.displayName}(@${userId.slice(0, 8)}...)`,
             description: userId.slice(0, 8) + "...",
             type: "article",
+            url: `https://memome-delta.vercel.app/home/user/${params.userId}`,
             images: [{ url: userData?.photoURL || 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg' }]
-        }
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `MEMOME :: ${userData?.displayName}(@${userId.slice(0, 8)}...)`,
+            description: userId.slice(0, 8) + "...",
+            images: [{ url: userData?.photoURL || 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg' }]
+        },
     };
 }
-
 export default async function UserHome({ params }: UserPageProps) {
     const { userId } = params;
 
