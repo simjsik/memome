@@ -89,6 +89,9 @@ export async function middleware(req: NextRequest) {
         'sha256-mlvKTh4cY0NtScXMXssQZx1uhMGsU+Njhc6T2pydrsc=' \
         'sha256-sx4JfhEoQ5Fo7gxkE1gOYSq2CyhlSc08QUReDJODysI=' \
         'sha256-vq8yuYEzk/UEKx9ljiX6S26DsM13TOltuT5XHKUx13E=' \
+        'sha256-iCAiL17AJ2UHMXEKFfT4Zpt26VlTU0/uorVMjLn/890=' \
+        'sha256-jwWvjTqUcwRivhPpzxSmQviBbVVAcxiqDybwA1DeLwg=' \
+        'sha256-EZPzprA/HrmKtEbD+m6ZBGfpZbBDUwGAJh40N1DipZQ=' \
         ;`
     );
 
