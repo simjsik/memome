@@ -92,6 +92,11 @@ export async function middleware(req: NextRequest) {
         'sha256-iCAiL17AJ2UHMXEKFfT4Zpt26VlTU0/uorVMjLn/890=' \
         'sha256-jwWvjTqUcwRivhPpzxSmQviBbVVAcxiqDybwA1DeLwg=' \
         'sha256-EZPzprA/HrmKtEbD+m6ZBGfpZbBDUwGAJh40N1DipZQ=' \
+        'sha256-zBbmyZbc/pcETv15w4K5wdeKFoPmeL5InSPiW2gBkpg=' \
+        'sha256-RdqrNHJ3uaiBgj3+SjpgYxDbM9LFhbGqsqVzq/Q4YNk=' \
+        'sha256-Hc7Ttvc5W+kkM5cbk2UD0X8Dmcr2d58Lt8kvodMF+FM=' \
+        'sha256-J+jUkfHNIX8UJL6WN7levMV/71YVOFI8M4fd8verXaA=' \
+        'sha256-NM1NLf1ygWBaA07i3BTNxvZ888oTNxKi/OUUatvAan8=' \
         ;`
     );
 
