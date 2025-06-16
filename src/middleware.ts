@@ -97,6 +97,16 @@ export async function middleware(req: NextRequest) {
         'sha256-Hc7Ttvc5W+kkM5cbk2UD0X8Dmcr2d58Lt8kvodMF+FM=' \
         'sha256-J+jUkfHNIX8UJL6WN7levMV/71YVOFI8M4fd8verXaA=' \
         'sha256-NM1NLf1ygWBaA07i3BTNxvZ888oTNxKi/OUUatvAan8=' \
+        'sha256-fpijDju8HYQBrdWC7Pu6S/zpaV7YAr3rMVkTslL3/sQ=' \
+        'sha256-1N91OtSg1n8z1mMgXyvIqcrRtbWQuAbepsUMOflw8a4=' \
+        'sha256-zPMiGFtI85WZqiJuWwviL/MK3eVTN23acRBpnMvwzss=' \
+        'sha256-GyCrQBo6s1GN3c57RCo+3zNw4SN/Ah5Jdci3DmrDHAc=' \
+        'sha256-VzArkaHqscWn+i33QxTwWaZNiN8BOFalaWZ/WO0k8cY=' \
+        'sha256-36Oj1w9Bg4evALbyxa+4DpFUoEMqMSL7a2IQyWJniLI=' \
+        'sha256-quX/9Fvq1GtrUByr7RTGLtSkN745gS6pw8V+td6GmaQ=' \
+        'sha256-fuvOyr+5ReVROhbwl5YKEu8cykKFkYzBApSneJD9es4=' \
+        'sha256-UeUI9OOPflq8RGmnhZE+L7IYhw5hK6XRMWFItQzpxNA=' \
+        'sha256-ZKFgAuqnJZHkR3z/VuyVaLcwjjuw5InUxuRG+Jt3Fnk=' \
         ;`
     );
 
