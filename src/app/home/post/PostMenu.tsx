@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
-import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { adminState, DidYouLogin, ImageUrlsState, loadingState, loginToggleState, modalState, PostData, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
@@ -231,7 +231,6 @@ margin : 0 auto;
         overflow: visible;
         padding: 0px 20px;
     }
-
 
 
     // 커스텀 도구
@@ -768,47 +767,47 @@ export default function PostMenu() {
     // quill 모듈 로드
     useEffect(() => {
         if (typeof window === "undefined") return;
-            const loadQuill = async () => {
-                try {
+        const loadQuill = async () => {
+            try {
 
-                    // Lineheight 모듈
-                    class LineHeightBlot extends Block {
-                        static blotName = "lineheight";
-                        static tagName = "div";
-                        static scope = Quill.import('parchment').Scope.BLOCK;
+                // Lineheight 모듈
+                class LineHeightBlot extends Block {
+                    static blotName = "lineheight";
+                    static tagName = "div";
+                    static scope = Quill.import('parchment').Scope.BLOCK;
 
-                        static create(value: string): HTMLElement {
-                            const node = super.create(value);
-                            node.style.lineHeight = value;
-                            return node;
-                        }
-
-                        static formats(node: HTMLElement): string | null {
-                            return node.style.lineHeight || null;
-                        }
+                    static create(value: string): HTMLElement {
+                        const node = super.create(value);
+                        node.style.lineHeight = value;
+                        return node;
                     }
 
-                    LineHeightBlot.blotName = "lineheight";
-                    LineHeightBlot.tagName = "div"; // 블록 요소
-
-                    Quill.register(LineHeightBlot);
-
-                    // Font Size 설정
-                    const fontSize = Quill.import('attributors/style/size') as StyleAttributor;
-                    fontSize.whitelist = fontsize;
-                    Quill.register(fontSize, true);
-
-                    // Image Resize 모듈 등록
-                    Quill.register("modules/ImageResize", QuillResizeImage);
-
-                    setQuillLoaded(true); // Quill 로드 완료 상태 업데이트
-                } catch (error) {
-                    console.error('Quill 로드 중 에러 발생:', error);
+                    static formats(node: HTMLElement): string | null {
+                        return node.style.lineHeight || null;
+                    }
                 }
-            };
-            loadQuill();
 
-            setLoading(false);
+                LineHeightBlot.blotName = "lineheight";
+                LineHeightBlot.tagName = "div"; // 블록 요소
+
+                Quill.register(LineHeightBlot);
+
+                // Font Size 설정
+                const fontSize = Quill.import('attributors/style/size') as StyleAttributor;
+                fontSize.whitelist = fontsize;
+                Quill.register(fontSize, true);
+
+                // Image Resize 모듈 등록
+                Quill.register("modules/ImageResize", QuillResizeImage);
+
+                setQuillLoaded(true); // Quill 로드 완료 상태 업데이트
+            } catch (error) {
+                console.error('Quill 로드 중 에러 발생:', error);
+            }
+        };
+        loadQuill();
+
+        setLoading(false);
     }, []);
 
     // 폰트 사이즈 모듈
@@ -880,7 +879,7 @@ export default function PostMenu() {
     };
 
     // 공지사항 글로 작성
-    const HandleCheckedNotice = () => {
+    const handleCheckedNotice = () => {
         if (!isAdmin) return;
         setCheckedNotice((prev) => !prev);
 
@@ -889,6 +888,10 @@ export default function PostMenu() {
         } else {
             setSelectedTag('기타')
         }
+    }
+
+    const handleSelectTag = (e: ChangeEvent<HTMLSelectElement>) => {
+        setSelectedTag(e.target.value);
     }
 
     // 도구 토글
@@ -1138,7 +1141,7 @@ export default function PostMenu() {
         const handlePaste = (e: ClipboardEvent) => {
             const items = e.clipboardData?.items;
             if (!items) return;
-
+            console.log(items, '이미지 붙여넣기')
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
                 if (item.type.startsWith('image/')) {
@@ -1155,6 +1158,7 @@ export default function PostMenu() {
             const files = e.dataTransfer?.files;
             if (!files || files.length === 0) return;
 
+            console.log(files, '이미지 드래그 드롭')
             Array.from(files).forEach(file => {
                 if (file.type.startsWith('image/')) {
                     processImageFile(file);
@@ -1387,7 +1391,7 @@ export default function PostMenu() {
                             variants={btnVariants}
                             whileHover={checkedNotice ? "NtcHover" : "NtcOffHover"}
                             whileTap={checkedNotice ? "NtcClick" : "NtcOffClick"}
-                            className='notice_btn' onClick={HandleCheckedNotice}>
+                            className='notice_btn' onClick={handleCheckedNotice}>
                             {checkedNotice ?
                                 <>
                                     <svg width="32" height="32" viewBox="0 8 40 40">
@@ -1419,7 +1423,7 @@ export default function PostMenu() {
                                 <option value="공지사항">공지사항</option>
                             </select>
                             :
-                            <select ref={tagRef} className='tag_sel' defaultValue={'기타'}>
+                            <select ref={tagRef} className='tag_sel' defaultValue={'기타'} onChange={(e) => handleSelectTag(e)}>
                                 <option value="기타">기타</option>
                                 <option value="잡담">잡담</option>
                                 <option value="공부">공부</option>

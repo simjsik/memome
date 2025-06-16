@@ -16,11 +16,20 @@ border-right : 1px solid #ededed;
 // 기본
 
 .post_title_wrap{
-display : flex;
-justify-content: space-between;
-margin-top :12px;
-padding-bottom : 10px;
-border-bottom: 1px solid #ededed;
+    display : flex;
+    justify-content: space-between;
+    margin-top :12px;
+    padding-bottom : 10px;
+    border-bottom: 1px solid #ededed;
+}
+
+.ql-code-block-container{
+    font-family: monospace;
+    background: #1e1e1e;
+    padding: 1rem;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 0.875rem;
 }
 
 .post_category{
@@ -35,7 +44,7 @@ border-bottom: 1px solid #ededed;
 }
 
 .user_id{
-display : flex;
+    display : flex;
 }
 
 .user_profile {
@@ -65,7 +74,7 @@ line-height : 32px;
 }
 
 img {
-    max-width: 780px;
+    max-width: 100%;
     object-fit : cover;
 }
 
