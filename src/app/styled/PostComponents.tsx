@@ -236,9 +236,12 @@ align-content: flex-start;
       .post_text{
         height: 80px;
         overflow: hidden;
-      }
-      .post_text p:nth-of-type(n+5){
-        display : none
+
+        p{
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
       }
 
       // 포스트 이미지 미리보기
@@ -437,7 +440,7 @@ align-content: flex-start;
     .user_name,
     .user_uid,
     .post_date{
-       line-height : 42px;
+       line-height : 1rem;
     }
 
     .post_content_wrap{

@@ -6,12 +6,12 @@ import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
 import { css } from '@emotion/react';
-import Delta from 'quill-delta';
 import QuillResizeImage from 'quill-resize-image';
 import ReactQuill, { Quill } from 'react-quill-new';
+import Block from 'quill/blots/block';
+import Delta from 'quill-delta';
 import styled from '@emotion/styled';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
-import Block from 'quill/blots/block';
 import { StyleAttributor } from 'parchment';
 import { db } from '@/app/DB/firebaseConfig';
 import { saveUnsavedPost } from '@/app/utils/saveUnsavedPost';
@@ -124,7 +124,10 @@ margin : 0 auto;
             position: absolute;
             top: 0;
             display: flex;
-            line-height: 49px;
+
+            p{
+                line-height : 3rem;
+            }
         }
 
         .title_limit{
@@ -709,6 +712,7 @@ font-family : var(--font-pretendard-bold);
 color: #bdbdbd;
 }
 `
+
 export default function PostMenu() {
     const router = useRouter();
     const pathname = usePathname();
@@ -759,14 +763,13 @@ export default function PostMenu() {
         ]
     }
 
-    const fontsize = ['10px', '12px', '14px', '16px', '18px', '20px', '24px']
-    const lineheight = ['1', '1.5', '2', '2.5', '3', '4', '5']
+    const fontsize = ['0.625rem', '0.75rem', '0.875rem', '1rem', '1.125rem', '1.25rem', '1.375rem']
+    const lineheight = ['1rem', '1.5rem', '2rem', '2.5rem', '3rem', '4rem', '5rem']
     const [quillLoaded, setQuillLoaded] = useState(false);
     // tool toggle state
 
     // quill 모듈 로드
     useEffect(() => {
-        if (typeof window === "undefined") return;
         const loadQuill = async () => {
             try {
 
@@ -1062,20 +1065,6 @@ export default function PostMenu() {
     // 이미지 최대 수
     const MAX_IMG_COUNT = 4;
 
-    // 이미지 삽입 시 이미지 배열 관리
-    const imageHandler = async () => { // Quill 이미지 입력 시 imagesUrls 상태에 추가.
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-
-        input.onchange = async () => { // 이미지 업로드 시 크기, 수 제한
-            const file = input.files?.[0];
-            if (file) processImageFile(file);
-            if (!file) return;
-        };
-    }
-
     const alertedRef = useRef(false);
 
     // 공통 이미지 처리 함수
@@ -1108,10 +1097,24 @@ export default function PostMenu() {
         reader.readAsDataURL(file);
     }, [imageUrls, MAX_IMG_COUNT, MAX_IMG_SIZE]);
 
+    // 이미지 삽입 시 이미지 배열 관리
+    const imageHandler = async () => { // Quill 이미지 입력 시 imagesUrls 상태에 추가.
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+        input.onchange = async () => { // 이미지 업로드 시 크기, 수 제한
+            const file = input.files?.[0];
+            if (file) processImageFile(file);
+            if (!file) return;
+        };
+    }
+
     // 이미지 최대 수 제한 로직
     useEffect(() => {
+        if (!quillLoaded) return;
         const editor = quillRef.current?.getEditor();
-
         if (!editor) return;
         const editorRoot = editor.root;
 
@@ -1210,7 +1213,7 @@ export default function PostMenu() {
             editorRoot.removeEventListener('paste', handlePaste, true);
             editorRoot.removeEventListener('drop', handleDrop, true);
         };
-    }, [quillRef, storageLoad, processImageFile]);
+    }, [quillRef, storageLoad, quillLoaded, processImageFile]);
 
     // 포스트 내용 로드
     const handleLoadPost = (loaded: boolean) => {

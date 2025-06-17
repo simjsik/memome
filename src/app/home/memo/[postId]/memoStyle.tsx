@@ -8,7 +8,7 @@ left : 420px;
 width : 860px;
 height : fit-content;
 min-height : 100vh;
-padding : 40px;
+padding : 20px;
 background : #fff;
 border-left : 1px solid #ededed;
 border-right : 1px solid #ededed;
@@ -124,7 +124,7 @@ background : red;
 
     @media (min-width: 1921px) {
         width: clamp(860px, calc(860px + (100vw - 1920px) * 0.21875), 1000px);
-
+        
         .post_title_wrap{
             margin-top: 18px;
             padding-bottom: 16px;
@@ -134,6 +134,7 @@ background : red;
         border-left : 2px solid #ededed;
         border-right : 2px solid #ededed;
         width: clamp(1000px, calc(1000px + (100vw - 2560px) * 0.375), 1480px);
+        padding : 40px;
 
         .post_title_wrap{
             margin-top: 32px;

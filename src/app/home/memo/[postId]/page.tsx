@@ -3,7 +3,7 @@ import ClientPost from './ClientPost';
 import { PostDetailWrap } from "./memoStyle";
 import { Metadata } from "next";
 import { adminDb } from "@/app/DB/firebaseAdminConfig";
-import { cleanHtml } from '@/app/utils/CleanHtml';
+import { SSRcleanHtml } from '@/app/utils/CleanHtml';
 import { Timestamp } from 'firebase-admin/firestore';
 interface MemoPageProps {
     params: {
@@ -148,7 +148,7 @@ export default async function MemoPage({ params }: MemoPageProps) {
                         </div>
                     </div>
                 </div>
-                <div className="post_content_wrap ql-editor" dangerouslySetInnerHTML={{ __html: cleanHtml(post?.content) }}></div>
+                <div className="post_content_wrap ql-editor" dangerouslySetInnerHTML={{ __html: SSRcleanHtml(post?.content) }}></div>
             </PostDetailWrap>
         </>
     )

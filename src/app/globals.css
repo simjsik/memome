@@ -23,10 +23,12 @@ html {
   max-width: 100vw;
 }
 
+div,
 p,
 span,
 a {
   font-family: var(--font-pretendard-medium);
+  line-height: 1.5;
 }
 
 

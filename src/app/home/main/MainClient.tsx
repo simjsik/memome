@@ -371,7 +371,7 @@ export default function MainHome() {
                   <span className='post_tag'>[{post.tag}]</span>
                   <h2 className='post_title'>{post.title}</h2>
                 </div>
-                <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml(post.content) }}></div>
+                <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml((post.content)) }}></div>
                 {/* 이미지 */}
                 {(post.images && post.images.length > 0) && (
                   <div className='post_pr_img_wrap'>
