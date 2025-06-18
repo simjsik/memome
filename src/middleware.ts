@@ -111,6 +111,18 @@ export async function middleware(req: NextRequest) {
         'sha256-Wfz0thE/IrR3/Jygu9VXO1dcAt8HLdVFtF5alYM4wQE=' \
         'sha256-MCdQMVP3PRWuR0RP0SE7f2sPNHoHrTHaqRoCnWEULjU=' \
         'sha256-gYIFq4BNIhJgWvJZopH/IEqmdHrmAFDiyeoI07ClSRg=' \
+        'sha256-i85DZxxh5WXQV7zXDze16A4nwsvgshEVEGK71ytGLLg=' \
+        'sha256-qJtchQe6jYOmp61rywmuNiP04OLXhvqo5txpPVW4Y3o=' \
+        'sha256-6m2/18O8XSI0OLaj54U5axZU5zScBicUK6wA9X9p//I=' \
+        'sha256-Rd7FIUlQzi/avT19VP1pnhjSiNP4ns9+ltRqELyzTWw=' \
+        'sha256-ncQuBgTBbCJe5SI1KtOv1JRZnwn867RDs8GD1tKyVHI=' \
+        'sha256-HxMJT8X4mciyeE2oDvO08C4Uaz0W6txUAoMRae6cQfU=' \
+        'sha256-SPo+sbojE11tTqLtg0KTGKDcEGa6j4AjUTA316gnSmA=' \
+        'sha256-8FwacSQUj/uGBplEs3IY0gsYauL21hsiHMzIvS0FXDE=' \
+        'sha256-i1EfB2+xYUUG32uDRMNI/DN/F9YIrGWOYdHENz9GKME=' \
+        'sha256-pxBXuHetGtR+LLcZp/WQn/VdlMPd5J3wt/GK/QIMeTQ=' \
+        'sha256-LnKs1keCqxctv78a9FO7W61BCqpiiqpg2vyBGsOCMcI=' \
+        'sha256-yZHoMYHCTL4UbTCYI1O6T5p9JLgVM1ZYBzlEpDYz0DM=' \
         ;`
     );
 

@@ -764,6 +764,15 @@ export default function PostMenu() {
     }
 
     const fontsize = ['0.625rem', '0.75rem', '0.875rem', '1rem', '1.125rem', '1.25rem', '1.375rem']
+    const fontSizeOptions = [
+        { value: '0.625rem', label: '10px' },
+        { value: '0.75rem', label: '12px' },
+        { value: '0.875rem', label: '14px' },
+        { value: '1rem', label: '16px' },
+        { value: '1.125rem', label: '18px' },
+        { value: '1.25rem', label: '20px' },
+        { value: '1.375rem', label: '22px' },
+    ];
     const lineheight = ['1rem', '1.5rem', '2rem', '2.5rem', '3rem', '4rem', '5rem']
     const [quillLoaded, setQuillLoaded] = useState(false);
     // tool toggle state
@@ -814,13 +823,13 @@ export default function PostMenu() {
     }, []);
 
     // 폰트 사이즈 모듈
-    const handleFontSizeChange = (size: string | null) => {
+    const handleFontSizeChange = (size: string | null, label: string | null) => {
         if (quillRef.current) {
             const editor = quillRef.current.getEditor();
             const range = editor.getSelection(); // 현재 선택된 영역
-            if (range && size) {
+            if (range && size && label) {
                 editor.format('size', size); // 선택 영역에 폰트 크기 적용
-                setSelectedFontSize(size); // 상태 업데이트
+                setSelectedFontSize(label); // 상태 업데이트
             }
         }
     };
@@ -1325,7 +1334,7 @@ export default function PostMenu() {
                 container: "#toolbar",
                 handlers: {
                     image: imageHandler, // 이미지 핸들러
-                    size: (value: string) => handleFontSizeChange(value),
+                    size: (value: string, label: string) => handleFontSizeChange(value, label),
                     color: (value: string) => handleFontColorChange(value),
                     lineheight: (value: string) => handleLineheightChange(value),
                 },
@@ -1497,15 +1506,16 @@ export default function PostMenu() {
                                     </motion.button>
                                     {toolToggle === 'fontsize' &&
                                         <ul className='ql_size_list'>
-                                            {fontsize.map((size, ftIndex) => (
+                                            {fontSizeOptions.map((size, ftIndex) => (
                                                 <li className='ql_size_item' key={ftIndex}>
-                                                    <button data-size-select={size} type='button' className={selectFontSize === size ? 'ql_size_btn setFont' : 'ql_size_btn'}
+                                                    <button data-size-select={size.value} data-label-select={size.label} type='button' className='ql_size_btn'
                                                         onClick={(e) => {
                                                             const dataSize = (e.currentTarget as HTMLElement).getAttribute('data-size-select')
-                                                            handleFontSizeChange(dataSize)
+                                                            const datalabel = (e.currentTarget as HTMLElement).getAttribute('data-label-select')
+                                                            handleFontSizeChange(dataSize, datalabel)
                                                         }
                                                         }>
-                                                        {size}
+                                                        {size.label}
                                                     </button>
                                                 </li>
                                             ))}
