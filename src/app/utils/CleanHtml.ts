@@ -24,7 +24,7 @@ function truncateBlocks(html: string, maxBlocks = 2): string {
 
 export const cleanHtml = (content: string, maxBlocks = 2) => {
     const filtered = sanitizeHtml(content, {
-        allowedTags: ["h2", "p", "span", "div", "strong", "em", "a", "ul", "ol", "li", "br", "img", "pre", "code"], // 허용할 태그
+        allowedTags: ["h1", "p", "span", "div", "strong", "em", "a", "ul", "ol", "li", "br", "img", "pre", "code"], // 허용할 태그
         allowedAttributes: {
             a: ["href", "target", "rel"], // 링크 속성만 허용
             img: ["src", "style"],
@@ -56,7 +56,7 @@ export const cleanHtml = (content: string, maxBlocks = 2) => {
 
 export const SSRcleanHtml = (content: string) => {
     return sanitizeHtml(content, {
-        allowedTags: ["h2", "p", "span", "div", "strong", "em", "a", "ul", "ol", "li", "br", "img", "pre", "code"], // 허용할 태그
+        allowedTags: ["h1", "p", "span", "div", "strong", "em", "a", "ul", "ol", "li", "br", "img", "pre", "code"], // 허용할 태그
         allowedAttributes: {
             a: ["href", "target", "rel"], // 링크 속성만 허용
             img: ["src", "style"],

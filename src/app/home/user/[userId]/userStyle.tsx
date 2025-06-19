@@ -102,6 +102,7 @@ export const UserPostWrap = styled.div`
 
         p{
             margin-right: 4px;
+            line-height : inherit;
         }
         
         span{
@@ -109,6 +110,7 @@ export const UserPostWrap = styled.div`
             font-size : 0.875rem;
             color: #272D2D;
             font-family: var(--font-pretendard-light);
+            line-height : inherit;
         }
 
 
@@ -232,6 +234,12 @@ export const UserPostWrap = styled.div`
 
         img{
             display : none;
+        }
+        
+        p{
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
     }
     // user_post_content

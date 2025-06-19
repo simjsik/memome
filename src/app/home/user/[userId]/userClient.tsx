@@ -316,7 +316,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                                     </>
                                                     :
                                                     <>
-                                                        <span className='user_post_tag'>{[post.tag]}</span>
+                                                        <span className='user_post_tag'>[{post.tag}]</span>
                                                         <p className="user_post_title">{post.title}</p>
                                                     </>
                                                 }
