@@ -1153,7 +1153,6 @@ export default function PostMenu() {
         const handlePaste = (e: ClipboardEvent) => {
             const items = e.clipboardData?.items;
             if (!items) return;
-            console.log(items, '이미지 붙여넣기')
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
                 if (item.type.startsWith('image/')) {
