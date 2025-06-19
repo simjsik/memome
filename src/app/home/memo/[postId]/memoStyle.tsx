@@ -37,6 +37,18 @@ border-right : 1px solid #ededed;
     color: #acacac;
 }
 
+.notice{
+          width: fit-content;
+          display: block;
+          padding: 4px 6px;
+          border: 1px solid #ffc6c9;
+          background-color: #ffe3e4;
+          color: #ff4e59;
+          font-size: 0.875rem;
+          line-height: normal;
+          border-radius: 4px;
+}
+
 .post_title{
     font-size : 1.25rem;
     line-height : 32px;

@@ -24,7 +24,7 @@ function truncateBlocks(html: string, maxBlocks = 2): string {
 
 export const cleanHtml = (content: string, maxBlocks = 2) => {
     const filtered = sanitizeHtml(content, {
-        allowedTags: ["h1", "p", "span", "div", "strong", "em", "a", "ul", "ol", "li", "br", "img", "pre", "code"], // 허용할 태그
+        allowedTags: ["h1", "p", "span", "div", "strong", "em", "a", "ul", "ol", "li", "br", "img", "pre", "code", "u"], // 허용할 태그
         allowedAttributes: {
             a: ["href", "target", "rel"], // 링크 속성만 허용
             img: ["src", "style"],
@@ -32,7 +32,8 @@ export const cleanHtml = (content: string, maxBlocks = 2) => {
             div: ["style", "data-language", "class", "spellcheck"],
             li: ["data-list"],
             p: ["style"],
-            strong: ["style"]
+            strong: ["style"],
+            u: ["style"]
         },
         allowedSchemes: ["http", "https"], // http, https 링크만 허용
         allowedSchemesByTag: {
@@ -45,7 +46,7 @@ export const cleanHtml = (content: string, maxBlocks = 2) => {
                 'height': [/^\d+(?:px|%)$/],
                 'color': [/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, /^rgb\((\d{1,3},\s?){2}\d{1,3}\)$/],
                 'background-color': [/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, /^rgb\((\d{1,3},\s?){2}\d{1,3}\)$/],
-                'font-size': [/^\d+(?:px|em|rem|%)$/],
+                'font-size': [/^\d+(\.\d+)?(px|em|rem|%)$/],
                 'line-height': [/^\d+(\.\d+)?$/]
             }
         }
@@ -56,7 +57,7 @@ export const cleanHtml = (content: string, maxBlocks = 2) => {
 
 export const SSRcleanHtml = (content: string) => {
     return sanitizeHtml(content, {
-        allowedTags: ["h1", "p", "span", "div", "strong", "em", "a", "ul", "ol", "li", "br", "img", "pre", "code"], // 허용할 태그
+        allowedTags: ["h1", "p", "span", "div", "strong", "em", "a", "ul", "ol", "li", "br", "img", "pre", "code", "u"], // 허용할 태그
         allowedAttributes: {
             a: ["href", "target", "rel"], // 링크 속성만 허용
             img: ["src", "style"],
@@ -64,7 +65,8 @@ export const SSRcleanHtml = (content: string) => {
             div: ["style", "data-language", "class", "spellcheck"],
             li: ["data-list"],
             p: ["style"],
-            strong: ["style"]
+            strong: ["style"],
+            u: ["style"]
         },
         allowedSchemes: ["http", "https"], // http, https 링크만 허용
         allowedSchemesByTag: {
@@ -77,7 +79,7 @@ export const SSRcleanHtml = (content: string) => {
                 'height': [/^\d+(?:px|%)$/],
                 'color': [/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, /^rgb\((\d{1,3},\s?){2}\d{1,3}\)$/],
                 'background-color': [/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, /^rgb\((\d{1,3},\s?){2}\d{1,3}\)$/],
-                'font-size': [/^\d+(?:px|em|rem|%)$/],
+                'font-size': [/^\d+(\.\d+)?(px|em|rem|%)$/],
                 'line-height': [/^\d+(\.\d+)?$/]
             }
         }
