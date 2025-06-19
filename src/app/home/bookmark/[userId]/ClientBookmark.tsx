@@ -172,26 +172,29 @@ export default function Bookmark() {
                             < div className='post_content_wrap' >
                                 {/* 포스트 제목 */}
                                 < div className='post_title_wrap' >
-                                    <span className='post_tag'>[{post?.tag}]</span>
-                                    <h2 className='post_title'>{post?.title}</h2>
+                                    {post?.notice ?
+                                        <>
+                                            <span className='notice_tag'>{post?.tag}</span>
+                                            <h2 className='notice_title'>{post?.title}</h2>
+                                        </>
+                                        :
+                                        <>
+                                            <span className='post_tag'>[{post?.tag}]</span>
+                                            <h2 className='post_title'>{post?.title}</h2>
+                                        </>
+                                    }
                                 </div>
                                 <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml(post?.content as string) }}></div>
                                 {/* 이미지 */}
                                 {(post?.images && post.images.length > 0) && (
                                     <div className='post_pr_img_wrap'>
-                                        <div className='post_pr_img'
-                                            css={css
-                                                `
-                                                    background-image : url(${post?.images[0]});
-                                                    `}
-                                        >
+                                        <div className='post_pr_img' css={css`background-image : url(${post?.images[0]});`}>
                                             {post.images.length > 1 &&
                                                 <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
                                             }
                                         </div>
                                     </div>
                                 )}
-
                                 {/* 포스트 댓글, 북마크 등 */}
                                 <div className='post_bottom_wrap'>
                                     <div className='post_comment'>

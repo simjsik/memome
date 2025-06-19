@@ -155,8 +155,12 @@ align-content: flex-start;
       .user_uid,
       .post_date,
       .post_comment {
-      font-size : 0.875rem;
-      line-height : 36px;
+        font-size : 0.875rem;
+        line-height : 36px;
+      }
+
+      .post_comment p{
+        line-height : 2rem;
       }
 
       .user_name{

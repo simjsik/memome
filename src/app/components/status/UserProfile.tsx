@@ -95,7 +95,7 @@ height : 100%;
 .memo_btn{
     position: absolute;
     right: 0;
-    padding: 4px 10px;
+    padding: 8px 16px;
     border: 1px solid #ededed;
     background: #fff;
     cursor :pointer;

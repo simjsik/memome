@@ -18,6 +18,7 @@ import LoadingWrap from "@/app/components/LoadingWrap";
 import { btnVariants } from "@/app/styled/motionVariant";
 import { formatDate } from "@/app/utils/formatDate";
 import useOutsideClick from "@/app/hook/OutsideClickHook";
+import { cleanHtml } from "@/app/utils/CleanHtml";
 
 interface ClientUserProps {
     user: userData,
@@ -107,7 +108,7 @@ export default function UserClient({ user }: ClientUserProps) {
         Timestamp | undefined // TPageParam
     >({
         retry: false,
-        enabled : !postTab,
+        enabled: !postTab,
         queryKey: ['ImagePostList', uid as string],
         queryFn: async ({ pageParam }) => {
             try {
@@ -308,10 +309,19 @@ export default function UserClient({ user }: ClientUserProps) {
                                         </div>
                                         <div className="user_post_content_wrap">
                                             <div className="user_post_title_wrap">
-                                                <span className="user_post_tag">[{post.tag}]</span>
-                                                <p className="user_post_title">{post.title}</p>
+                                                {post.notice ?
+                                                    <>
+                                                        <span className='user_notice_tag'>{post.tag}</span>
+                                                        <p className="user_notice_title">{post.title}</p>
+                                                    </>
+                                                    :
+                                                    <>
+                                                        <span className='user_post_tag'>{[post.tag]}</span>
+                                                        <p className="user_post_title">{post.title}</p>
+                                                    </>
+                                                }
                                             </div>
-                                            <div className="user_post_content" dangerouslySetInnerHTML={{ __html: post.content }}></div>
+                                            <div className="user_post_content" dangerouslySetInnerHTML={{ __html: cleanHtml(post.content) }}></div>
                                             {(post.images && post.images.length > 0) && (
                                                 <>
                                                     <div className="user_post_img">

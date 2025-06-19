@@ -185,12 +185,26 @@ export const UserPostWrap = styled.div`
     .user_post_title_wrap{
         margin-top: 10px;
         
-        .user_post_tag{
+        .user_post_tag,
+        .user_notice_tag{
             font-size : 0.875rem;
             font-family: var(--font-pretendard-light);
         }
 
-        .user_post_title{
+        .user_notice_tag{
+          width: fit-content;
+          display: block;
+          padding: 4px 6px;
+          border: 1px solid #ffc6c9;
+          background-color: #ffe3e4;
+          color: #ff4e59;
+          font-size: 0.875rem;
+          line-height: normal;
+          border-radius: 4px;
+        }
+
+        .user_post_title,
+        .user_notice_title{
             margin-top: 8px;
             font-size: 0.9rem;
             font-family: var(--font-pretendard-bold);
@@ -199,6 +213,13 @@ export const UserPostWrap = styled.div`
             text-decoration : underline;
             cursor : pointer;
             }
+        }
+
+        .user_notice_title{
+            width: 100%;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            color: red;
         }
     }
     // user_post_title_wrap
