@@ -9,6 +9,8 @@ import { useEffect } from 'react';
 import { css } from '@emotion/react';
 import { saveUnsavedPost } from '../utils/saveUnsavedPost';
 import { useMediaQuery } from 'react-responsive';
+import { motion } from "framer-motion";
+import { btnVariants } from '../styled/motionVariant';
 
 const NavBarWrap = styled.div`
 position: fixed;
@@ -103,15 +105,17 @@ border-radius : 50%;
     width : 40px;
     height : 40px;
     margin-top: 4px;
-
+    background-color : #fff;
     svg{
         width: 40px;
         height : 40px;
     }
 }
+
 .no_active_icon{
-cursor : default;
+    cursor : default;
 }
+
 .menu_p{
 font-size : 12px;
 color : ${(props) => props.isActive ? '#191919' : '#acacac'};
@@ -125,7 +129,7 @@ height: 2px;
 }
 
 &:hover{
-background : #f9f9f9;
+    background : #f9f9f9;
 }
     @media (max-width: 480px) {
         display: flex;
@@ -287,7 +291,10 @@ export default function NavBar() {
                         {/* 공지사항 */}
                         <NavMenu isActive={1 === selectedMenu} onClick={() => handleNavClick(1)}>
                             <div className='post_alarm' css={css`${newNotice ? 'background : red' : 'background : none'}`}></div>
-                            <div className='menu_icon'>
+                            <motion.div
+                                variants={btnVariants}
+                                whileHover="otherHover"
+                                className='menu_icon'>
                                 {1 === selectedMenu ?
                                     <svg viewBox="0 0 40 40">
                                         <g>
@@ -307,12 +314,15 @@ export default function NavBar() {
                                         </g>
                                     </svg>
                                 }
-                            </div>
+                            </motion.div>
                         </NavMenu>
                         {/* 메인 / 전체 포스트 */}
                         <NavMenu isActive={2 === selectedMenu} onClick={() => handleNavClick(2)}>
                             <div className='post_alarm'></div>
-                            <div className='menu_icon'>
+                            <motion.div
+                                variants={btnVariants}
+                                whileHover="otherHover"
+                                className='menu_icon'>
                                 {2 === selectedMenu ?
                                     <svg viewBox="0 0 40 40">
                                         <g>
@@ -327,7 +337,7 @@ export default function NavBar() {
                                             <rect fill="none" />
                                         </g>
                                     </svg>}
-                            </div>
+                            </motion.div>
                         </NavMenu>
                         {/* 북마크 */}
                         {hasGuest ?
@@ -344,7 +354,10 @@ export default function NavBar() {
                             </NavMenu>
                             :
                             <NavMenu isActive={3 === selectedMenu} onClick={() => handleNavClick(3)}>
-                                <div className='menu_icon'>
+                                <motion.div
+                                    variants={btnVariants}
+                                    whileHover="otherHover"
+                                    className='menu_icon'>
                                     {3 === selectedMenu ?
                                         <svg viewBox="0 0 40 40">
                                             <g>
@@ -362,7 +375,7 @@ export default function NavBar() {
                                             </g>
                                         </svg>
                                     }
-                                </div>
+                                </motion.div>
                             </NavMenu>
                         }
                         {/* 프로필 */}
@@ -381,7 +394,10 @@ export default function NavBar() {
                             </NavMenu>
                             :
                             <NavMenu isActive={4 === selectedMenu} onClick={() => handleNavClick(4)}>
-                                <div className='menu_icon'>
+                                <motion.div
+                                    variants={btnVariants}
+                                    whileHover="otherHover"
+                                    className='menu_icon'>
                                     {4 === selectedMenu ?
                                         <svg viewBox="0 0 36 36">
                                             <g id="Layer_2" data-name="Layer 2">
@@ -400,7 +416,7 @@ export default function NavBar() {
                                         </svg>
                                     }
 
-                                </div>
+                                </motion.div>
                             </NavMenu>
                         }
                         {/* 포스팅 */}
@@ -422,7 +438,10 @@ export default function NavBar() {
                             </NavMenu>
                             :
                             <NavMenu isActive={5 === selectedMenu} onClick={() => handleNavClick(5)}>
-                                <div className='menu_icon'>
+                                <motion.div
+                                    variants={btnVariants}
+                                    whileHover="otherHover"
+                                    className='menu_icon'>
                                     {selectedMenu === 5 ?
                                         <svg viewBox="0 0 40 40">
                                             <g>
@@ -444,7 +463,7 @@ export default function NavBar() {
                                             </g>
                                         </svg>
                                     }
-                                </div>
+                                </motion.div>
                             </NavMenu>
                         }
                     </div>
