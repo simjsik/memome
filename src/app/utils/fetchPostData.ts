@@ -43,13 +43,14 @@ export const fetchPosts = async (
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
-            throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
-        }
-        if (LimitResponse.status === 400) {
-            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
-        }
-        if (LimitResponse.status === 403) {
-            throw new Error('데이터를 요청할 수 없습니다.');
+            if (LimitResponse.status === 400) {
+                throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+            }
+            if (LimitResponse.status === 403) {
+                throw new Error('데이터를 요청할 수 없습니다.');
+            } else {
+                throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
+            }
         }
 
         const startAfterParam = pageParam
@@ -195,13 +196,14 @@ export const fetchBookmarks = async (
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
-            throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
-        }
-        if (LimitResponse.status === 400) {
-            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
-        }
-        if (LimitResponse.status === 403) {
-            throw new Error('데이터를 요청할 수 없습니다.');
+            if (LimitResponse.status === 400) {
+                throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+            }
+            if (LimitResponse.status === 403) {
+                throw new Error('데이터를 요청할 수 없습니다.');
+            } else {
+                throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
+            }
         }
 
         const postIds = bookmarkIds.slice(startIdx, startIdx + pageSize);
@@ -262,13 +264,14 @@ export const fetchComments = async (userId: string, postId: string, pageParam: T
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
-            throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
-        }
-        if (LimitResponse.status === 400) {
-            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
-        }
-        if (LimitResponse.status === 403) {
-            throw new Error('데이터를 요청할 수 없습니다.');
+            if (LimitResponse.status === 400) {
+                throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+            }
+            if (LimitResponse.status === 403) {
+                throw new Error('데이터를 요청할 수 없습니다.');
+            } else {
+                throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
+            }
         }
 
         const startAfterParam = pageParam
@@ -346,13 +349,14 @@ export const fetchReplies = async (userId: string, postId: string, commentId: st
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
-            throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
-        }
-        if (LimitResponse.status === 400) {
-            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
-        }
-        if (LimitResponse.status === 403) {
-            throw new Error('데이터를 요청할 수 없습니다.');
+            if (LimitResponse.status === 400) {
+                throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+            }
+            if (LimitResponse.status === 403) {
+                throw new Error('데이터를 요청할 수 없습니다.');
+            } else {
+                throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
+            }
         }
 
         const startAfterParam = pageParam
@@ -431,13 +435,14 @@ export const fetchPostList = async (
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
-            throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
-        }
-        if (LimitResponse.status === 400) {
-            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
-        }
-        if (LimitResponse.status === 403) {
-            throw new Error('데이터를 요청할 수 없습니다.');
+            if (LimitResponse.status === 400) {
+                throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+            }
+            if (LimitResponse.status === 403) {
+                throw new Error('데이터를 요청할 수 없습니다.');
+            } else {
+                throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
+            }
         }
 
         const startAfterParam = pageParam
@@ -520,13 +525,14 @@ export const fetchImageList = async (
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
-            throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
-        }
-        if (LimitResponse.status === 400) {
-            throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
-        }
-        if (LimitResponse.status === 403) {
-            throw new Error('데이터를 요청할 수 없습니다.');
+            if (LimitResponse.status === 400) {
+                throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
+            }
+            if (LimitResponse.status === 403) {
+                throw new Error('데이터를 요청할 수 없습니다.');
+            } else {
+                throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
+            }
         }
 
         const startAfterParam = pageParam

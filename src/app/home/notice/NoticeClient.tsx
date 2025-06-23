@@ -306,7 +306,8 @@ export default function ClientNotice() {
                             <motion.div className='retry_post_btn'
                                 variants={btnVariants}
                                 whileHover="loginHover"
-                                whileTap="loginClick">재요청</motion.div>
+                                whileTap="loginClick"
+                                onClick={() => fetchNextPage()}>재요청</motion.div>
                         </NoMorePost>
                     }
                     {(!dataLoading && !hasNextPage && !loading) &&

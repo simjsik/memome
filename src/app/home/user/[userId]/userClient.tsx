@@ -377,7 +377,8 @@ export default function UserClient({ user }: ClientUserProps) {
                                     <motion.button className='retry_post_btn'
                                         variants={btnVariants}
                                         whileHover="loginHover"
-                                        whileTap="loginClick">재요청</motion.button>
+                                        whileTap="loginClick"
+                                        onClick={() => fetchNextPage()}>재요청</motion.button>
                                 </NoMorePost>
                             }
                             {
@@ -430,7 +431,8 @@ export default function UserClient({ user }: ClientUserProps) {
                                     <motion.button className='retry_post_btn'
                                         variants={btnVariants}
                                         whileHover="loginHover"
-                                        whileTap="loginClick">재요청</motion.button>
+                                        whileTap="loginClick"
+                                        onClick={() => fetchNextPage()}>재요청</motion.button>
                                 </NoMorePost>
                             }
                             {
