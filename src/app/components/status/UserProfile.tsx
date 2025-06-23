@@ -1,11 +1,11 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState, modalState, noticeList, noticeType, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
-import { deleteDoc, doc, Timestamp, } from "firebase/firestore";
+import { deleteDoc, doc } from "firebase/firestore";
 import { css } from "@emotion/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { MyAlarmWrap } from "@/app/styled/PostComponents";
@@ -15,6 +15,8 @@ import { uploadImgCdn } from "@/app/utils/uploadCdn";
 import { motion } from "framer-motion";
 import { btnVariants } from "@/app/styled/motionVariant";
 import { BeatLoader } from "react-spinners";
+import { formatDate } from "@/app/utils/formatDate";
+import LoadLoading from "../LoadLoading";
 
 
 const ProfileWrap = styled.div`
@@ -365,6 +367,8 @@ export default function UserProfile() {
     const [updateUserPhotoPreview, setUpdateUserPhotoPreview] = useState<string | null>(currentUser.photo)
     const [loading, setLoading] = useState(false);
     const [alarmLoading, setAlarmLoading] = useState(false);
+    const [routed, setRouted] = useState<boolean>(false);
+
     // state
     const updatePhotoRef = useRef<HTMLInputElement | null>(null)
     // ref
@@ -531,29 +535,6 @@ export default function UserProfile() {
         }
     }
 
-    const formatDate = (createAt: Timestamp | Date | string | number) => {
-        if ((createAt instanceof Timestamp)) {
-            return createAt.toDate().toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).replace(/\. /g, '.');
-        } else {
-            const date = new Date(createAt);
-
-            const format = date.toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            })
-            return format;
-        }
-    }
-
     const noticeConfirm = async (noticeId: string) => {
         if (alarmLoading) {
             return;
@@ -618,7 +599,13 @@ export default function UserProfile() {
 
     const handleMemoClick = () => {
         if (yourLogin && !usageLimit) {
-            router.push('/home/post');
+            setRouted(true);
+            setTimeout(() => {
+                startTransition(() => {
+                    router.push('/home/post');
+                });
+            }, 0);
+
         } else if (usageLimit) {
             return setLimitToggle(true);
         } else {
@@ -641,6 +628,7 @@ export default function UserProfile() {
     return (
         <ProfileWrap>
             {/* 프로필 상단 */}
+            {routed && <LoadLoading />}
             <div className="profile_top">
                 <div className="profile_id">
                     <p className="user_name">{currentUser.name}</p>

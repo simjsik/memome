@@ -131,7 +131,7 @@ export default function Bookmark() {
         setRoutePostId(postId);
         setTimeout(() => {
             startTransition(() => {
-                router.push(`memo/${postId}`)
+                router.push(`/home/memo/${postId}`)
             });
         }, 0);
     }
