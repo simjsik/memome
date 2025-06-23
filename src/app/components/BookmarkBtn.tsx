@@ -89,7 +89,6 @@ export default function BookmarkBtn({ postId }: PostId) {
                         bookmarkId: arrayUnion(postId),
                     }).catch(async (error) => {
                         if (error instanceof FirebaseError && error.code === 'not-found') {
-                            console.log('북마크 없음. 추가 실행');
                             await setDoc(bookmarkRef, { bookmarkId: [postId] });
                         } else if (error instanceof FirebaseError) {
                             throw new Error(error.message + ' - 북마크 추가 실패');
@@ -115,20 +114,15 @@ export default function BookmarkBtn({ postId }: PostId) {
 
                 // 캐싱된 데이터를 수동으로 업데이트
                 queryClient.setQueryData<BookmarkCache>(['bookmarks', currentUser.uid], (oldData) => {
-                    // console.log("Before update:", oldData); // 업데이트 이전 데이터 확인
                     if (!oldData) return oldData;
 
                     const newData = {
                         ...oldData,
                         pages: oldData.pages.map((page) => {
-                            // console.log("Before filter:", page.data.pages); // 필터링 전 데이터 확인
                             const filteredData = page.data.filter((post: PostData) => post.id !== postId);
-                            // console.log("After filter:", filteredData); // 필터링 후 데이터 확인
                             return { ...page, data: filteredData };
                         }),
                     };
-
-                    // console.log("After update:", newData.pages); // 업데이트 이후 데이터 확인
                     return newData;
                 });
             }

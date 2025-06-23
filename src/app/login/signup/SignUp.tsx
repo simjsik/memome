@@ -188,7 +188,6 @@ export default function SignUp() {
 
         try {
             // 이메일/비밀번호로 계정 생성
-            console.log(email, password, '계정 생성 데이터')
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             const uid = user.uid

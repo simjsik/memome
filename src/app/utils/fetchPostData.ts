@@ -304,10 +304,8 @@ export const fetchComments = async (userId: string, postId: string, pageParam: T
             commentSnap.docs.map(async (docSnapshot) => {
                 const commentData = { id: docSnapshot.id, ...docSnapshot.data() } as Comment;
                 const userId: string = commentData.uid;
-                console.log(commentData, '댓글 정보')
                 // 캐시에 작성자 정보가 없으면 먼저 users 컬렉션에서 조회
                 const userData = await getCachedUserInfo(userId);
-                console.log(userData, '댓글 유저 정보')
                 commentData.displayName = userData.displayName;
                 commentData.photoURL = userData.photoURL;
 
@@ -456,7 +454,6 @@ export const fetchPostList = async (
             orderBy('createAt', 'desc'),
             limit(6)
         );
-        // console.log(pageParam?.at(1), '= 페이지 시간', pageSize, '= 페이지 사이즈', '받은 인자')
         const postQuery = startAfterParam
             ?
             query(
@@ -496,7 +493,6 @@ export const fetchPostList = async (
         });
 
         const lastVisible = postlistSnapshot.docs.at(-1); // 마지막 문서
-        // console.log(postWithComment, lastVisible?.data(), lastVisible?.data().notice, lastVisible?.data().createAt, '보내는 인자')
 
         return {
             imageData: imageData,

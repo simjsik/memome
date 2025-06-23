@@ -15,8 +15,6 @@ export const checkUsageLimit = async (userId: string) => {
         if (LimitResponse.status === 404) {
             throw new Error('사용량 확인 요청 실패');
         }
-
-        console.log('사용량 요청 확인', userId);
     } catch (error) {
         console.error('사용량 확인 중 에러 발생.' + error)
         throw error;

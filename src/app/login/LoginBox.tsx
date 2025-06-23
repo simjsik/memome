@@ -246,7 +246,6 @@ export default function LoginBox() {
             let signUser;
             let data;
             let guestResponse;
-            console.log(guestUid, '게스트 UID')
 
             // 공통 게스트 로그인 로직
             const handleGuestResponse = async (idToken: string, guestUid?: string) => {
@@ -268,7 +267,6 @@ export default function LoginBox() {
             };
 
             if (guestUid) {
-                console.log('게스트 로그인 이력 유 : 로직 실행')
 
                 const guestTokenResponse = await handleCustomTokenResponse(guestUid);
                 if (!guestTokenResponse.ok) {
@@ -296,7 +294,6 @@ export default function LoginBox() {
 
                 data = await guestResponse.json();
             } else {
-                console.log('게스트 로그인 이력 무 : 로직 실행')
                 const userCredential = await signInAnonymously(auth);
                 signUser = userCredential.user
                 guestUid = signUser.uid

@@ -1028,7 +1028,7 @@ export default function PostMenu() {
                         return cloudinaryUrl.imgUrl;
                     })
                 );
-                console.log(imageUrls, '이미지 배열', optImageUrls, '업로드 되는 이미지 배열');
+                
                 // content 내 이미지 URL을 최적화된 URL로 교체
                 const optContentUrls = await uploadContentImgCdn(posting, uploadedImageUrls);
 
@@ -1169,7 +1169,6 @@ export default function PostMenu() {
             const files = e.dataTransfer?.files;
             if (!files || files.length === 0) return;
 
-            console.log(files, '이미지 드래그 드롭')
             Array.from(files).forEach(file => {
                 if (file.type.startsWith('image/')) {
                     processImageFile(file);

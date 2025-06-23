@@ -42,7 +42,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
             if (bookmarks.exists()) {
                 // 북마크 데이터가 있을 경우
                 const data = bookmarks.data() as { bookmarkId: string[] };
-                console.log(data.bookmarkId, '북마크 리스트')
                 setCurrentBookmark(data.bookmarkId); // Recoil 상태 업데이트
             }
         } catch (error) {
@@ -55,11 +54,9 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
-                console.log(user, '유저 동기화 유저 정보');
 
                 if (user) {
                     const uid = user.uid
-                    console.log(uid, '유저 동기화 유저 UID');
                     const idToken = await user.getIdToken();
 
                     // 서버로 ID 토큰 전송

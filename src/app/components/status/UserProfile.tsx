@@ -393,7 +393,6 @@ export default function UserProfile() {
                 let profileImageUrl = currentUser.photo
                 let userProfileDate
                 const uid = currentUser.uid
-                console.log(image?.slice(0, 8), '클라이언트 측 유저 이미지 업데이트')
                 if (image) {
                     // 받아온 image인자가 File 타입이기 때문에 Cloudinary에 저장을 위해 base64로 변경
                     const base64Image = await fileToBase64(image);
@@ -568,8 +567,6 @@ export default function UserProfile() {
                 // 삭제 권한 확인
                 await deleteDoc(noticeDoc);
 
-                console.log('알림 확인')
-
                 // noticeLists 상태에서 해당 알림 제거
                 setNoticeLists((prevNotices) =>
                     prevNotices.filter((notice) => notice.noticeId !== noticeId)
@@ -581,7 +578,7 @@ export default function UserProfile() {
                 setAlarmLoading(false);
             }
         } else {
-            console.log('유저 확인 실패')
+            console.error('유저 확인 실패')
         }
     }
 

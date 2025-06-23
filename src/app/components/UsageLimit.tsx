@@ -103,7 +103,7 @@ export default function UsageLimit() {
 
                 if (!response.ok) {
                     const errorData = await response.json()
-                    console.log('로그아웃 실패 :', errorData.message)
+                    console.error('로그아웃 실패 :', errorData.message)
                 }
 
                 await signOut(auth);
