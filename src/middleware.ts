@@ -207,6 +207,26 @@ export async function middleware(req: NextRequest) {
         'sha256-zP3GyL83rTnRgL8kGWjAptekxQlsuxUrx76xU7L+kQk=' \
         'sha256-z7gCHD0QEXPaiDv7eDRzgo26xGcQtYlgZuW10QG2sOk=' \
         'sha256-MpP4CDTJLlJOeXTJa1uPhne05EwoXHT2TZAjJQrwq9o=' \
+        'sha256-eHg2zJ4J21StOV6uCh0nQZUBYYkGJXaG1s2lTJZg68U=' \
+        'sha256-7XGJhUxr1vqT/Rio8z83l3cBcervEhZC8idbfSgYhyQ=' \
+        'sha256-hs2yPMDmZqO58WUsDMY1WQlS9wbhqkjhYT0d/RTS49Y=' \
+        'sha256-oqnV97edZCXXe+HVUovxXhRwDy7rti3lPCP6V2zRF/M=' \
+        'sha256-SnGQ5QJYZCN0jQAIGDrgd+Tx6aQnT55Lk58nghDaDfw=' \
+        'sha256-aKcJit3F8P8zc4tV+Jjs3Ysauo92Q9iLrPzrIhijLcs=' \
+        'sha256-P9ogvVVplDGAV03RoSxzaibdeEAYgHxpPag30Ipz9qo=' \
+        'sha256-5N6Na+xznwzf3kJKlnsW2dbDWdx3/rySTf0O+SrMVHA=' \
+        'sha256-JNHZIASGXOxGItQErt9rDjZIO97/yKInBGHAyEXT++c=' \
+        'sha256-f44Cv8vAN8bFjHuFUsRmVqaCPx+Z3KB9vciZFaIC0r8=' \
+        'sha256-tVlCu5WmZUuoPmHgd7M1eRaeJO1MezXKO3oOlVM23qA=' \
+        'sha256-C1+8eCHGJroiV3PRAYrmiioZZ98XpNDn/VJtj5DKUqs=' \
+        'sha256-YKNPY80J/DM7D1DsnNFShWHeUXv4KsWgtAA8KL+cJOk=' \
+        'sha256-ZXwrx+dy8rIWKYasqbGuJ1XGEUt9rajg8aID28qAsGY=' \
+        'sha256-NcHmxLPEKfWJTMqJixtRWKqMYFCYyEfy1X3fE3WXoBI=' \
+        'sha256-0S5Y/rv/078kJschKGcB7kzEH28DzgDm6Mda/k7Q4QU=' \
+        'sha256-7QlltfyW4uWB2GL4ojWJ0nQ9b+FVEiwhaYzXuOvuWAk=' \
+        'sha256-aKOrEndNAkbZLWQwXuOdouODgmzKFolS/nSZblBj+uA=' \
+        'sha256-uMDKqHX5r43MreOnC4PGRb0EL3XpDWzzrOAG77TNf88=' \
+        'sha256-WnBPKOFanrxhJ8VKEyObZl0FMgrs8zU/gS/0escC7H0=' \
         ;`
     );
 
