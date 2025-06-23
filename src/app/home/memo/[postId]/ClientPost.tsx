@@ -45,16 +45,13 @@ export default function Memo({ commentLength }: { commentLength: number }) {
                         if (err.message.includes('사용량 제한')) {
                             setUsageLimit(true);
                         } else {
-                            console.log('사용량을 불러오는 중 에러가 발생했습니다.');
+                            console.error('사용량을 불러오는 중 에러가 발생했습니다.');
                         }
                     }
                 }
             }
             checkLimit();
-        } else {
-            console.log('제한 안함')
         }
-
         setLoading(false)
     }, [])
 

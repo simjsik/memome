@@ -69,19 +69,13 @@ export default function MainHome() {
 
     const sockets = socketRef.current;
 
-    sockets.on("connect", () => {
-      // console.log("WebSocket 연결 성공");
-    });
-
     // 새 공지 수신
     sockets.on("new-notice", () => {
-      // console.log("새 공지 알림:", data);
       setNewNotice(true);
     });
 
     // 새 알림 수신
     sockets.on("initial-notices", (data) => {
-      // console.log("새 알림:", data);
       setNoticeLists(data);
     });
 
@@ -136,7 +130,7 @@ export default function MainHome() {
     if (currentUser) {
       sockets.emit("register", { uid: currentUser?.uid }); // UID를 서버에 전송
 
-      if (!currentUser.uid) return console.log('유저 없음');
+      if (!currentUser.uid) return console.error('유저 없음');
     }
   }, [currentUser])
 
@@ -160,7 +154,6 @@ export default function MainHome() {
     queryKey: ['posts'],
     queryFn: async ({ pageParam }) => {
       try {
-        console.log(uid, '일반 포스트 요청')
         const validateResponse = await fetch(`/api/validate`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -228,7 +221,6 @@ export default function MainHome() {
   // 에러 시 사용 제한
   useEffect(() => {
     if (isError) {
-      console.log('사용 제한!', error.message)
       if (error.message === '사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.') {
         setUsageLimit(true);
       }
@@ -250,7 +242,6 @@ export default function MainHome() {
 
   // 페이지 이동 시 스크롤 위치 저장
   useEffect(() => {
-    console.log('페이지 이동')
     // 페이지 진입 시 스크롤 위치 복원
     const savedScroll = sessionStorage.getItem(`scroll-${pathName}`);
 

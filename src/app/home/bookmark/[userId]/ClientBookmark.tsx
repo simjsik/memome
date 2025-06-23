@@ -89,7 +89,7 @@ export default function Bookmark() {
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
-        if (usageLimit) return console.log('함수 요청 안함.');
+        if (usageLimit) return;
 
         if (currentBookmark.length > 0 || (bookmarks && bookmarks.pages.length > 0)) {
             const observer = new IntersectionObserver(

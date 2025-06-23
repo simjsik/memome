@@ -18,9 +18,8 @@ const useUpdateChecker = () => {
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     setHasUpdate(docSnap.data().hasUpdate || false);
-                    console.log(docSnap.data()?.hasUpdate, '업데이트 확인!');
                 } else {
-                    console.log('업데이트 확인 실패')
+                    console.error('업데이트 확인 실패')
                 }
             } catch (error) {
                 console.error("Error fetching update status:", error);
@@ -58,7 +57,6 @@ const useUpdateChecker = () => {
                 await updateDoc(docRef, { hasUpdate: false });
 
                 setHasUpdate(false);
-                console.log('업데이트 완료')
             }
         } catch (error) {
             console.error("Error clearing update status:", error);

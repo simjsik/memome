@@ -85,7 +85,6 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
 
     useEffect(() => {
         if (isError) {
-            console.log('사용 제한!', error.message)
             if (error.message === '사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.') {
                 setUsageLimit(true);
             }

@@ -283,12 +283,9 @@ const CustomSearch = () => {
 };
 
 export default function SearchClient() {
-    const searchParams = useSearchParams();
-    const query = searchParams?.get('query') || '';
     const setLoading = useSetRecoilState<boolean>(loadingState);
 
     useEffect(() => {
-        console.log(query)
         setLoading(false)
     }, [])
     return (

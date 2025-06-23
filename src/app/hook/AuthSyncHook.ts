@@ -15,10 +15,8 @@ export const useAuthSync = () => {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
-                console.log(user, '유저 동기화 유저 정보')
                 if (user) {
                     const uid = user.uid
-                    console.log(uid, '유저 동기화 유저 UID')
                     const idToken = await user.getIdToken();
 
                     // 서버로 ID 토큰 전송
