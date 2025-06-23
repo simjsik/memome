@@ -52,10 +52,6 @@ export const UserPostWrap = styled.div`
                 height: 28px;
             }
 
-            .image_post_img:nth-of-type(n+2){
-                display:none;
-            }
-
             &:hover{
                 cursor:pointer;
             }

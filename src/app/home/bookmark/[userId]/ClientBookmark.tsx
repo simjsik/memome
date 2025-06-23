@@ -2,14 +2,14 @@
 "use client";
 import { fetchBookmarks } from "@/app/utils/fetchPostData";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
-import { bookMarkState, loadingState, UsageLimitState, userData, userState } from "@/app/state/PostState";
+import { bookMarkState, loadingState, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
 import { css } from "@emotion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Timestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { startTransition, useEffect, useRef, useState } from "react";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { motion } from "framer-motion";
 
 import LoadingWrap from "@/app/components/LoadingWrap";
@@ -17,15 +17,18 @@ import { useHandleUsernameClick } from "@/app/utils/handleClick";
 import { btnVariants } from "@/app/styled/motionVariant";
 import { cleanHtml } from "@/app/utils/CleanHtml";
 import { formatDate } from "@/app/utils/formatDate";
+import LoadLoading from "@/app/components/LoadLoading";
 
 export default function Bookmark() {
     const currentBookmark = useRecoilValue<string[]>(bookMarkState)
     const currentUser = useRecoilValue<userData>(userState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [loading, setLoading] = useRecoilState(loadingState);
-
+    const [routePostId, setRoutePostId] = useState<string | null>(null);
     const router = useRouter();
     const observerLoadRef = useRef(null);
+
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
 
     const uid = currentUser.uid
 
@@ -122,8 +125,17 @@ export default function Bookmark() {
 
     // 포스트 보기
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
-        router.push(`memo/${postId}`)
+        if (usageLimit) {
+            return setLimitToggle(true);
+        }
+        setRoutePostId(postId);
+        setTimeout(() => {
+            startTransition(() => {
+                router.push(`memo/${postId}`)
+            });
+        }, 0);
     }
+
 
     const handleUsernameClick = useHandleUsernameClick();
     return (
@@ -142,6 +154,7 @@ export default function Bookmark() {
                                 transition: { duration: 0.1 },
                             }}
                         >
+                            {routePostId === post?.id && <LoadLoading />}
                             {/* 작성자 프로필 */}
                             <div className='post_profile_wrap'>
                                 <div className='user_profile'>

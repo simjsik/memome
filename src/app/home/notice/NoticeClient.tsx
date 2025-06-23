@@ -8,7 +8,7 @@ import { css } from "@emotion/react";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { Timestamp } from "firebase/firestore";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState, } from "react";
+import { startTransition, useEffect, useRef, useState, } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { motion } from "framer-motion";
 import LoadingWrap from "@/app/components/LoadingWrap";
@@ -19,6 +19,7 @@ import { useDelPost } from "../post/hook/useNewPostMutation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { cleanHtml } from "@/app/utils/CleanHtml";
 import useOutsideClick from "@/app/hook/OutsideClickHook";
+import LoadLoading from "@/app/components/LoadLoading";
 
 export default function ClientNotice() {
     const yourLogin = useRecoilValue(DidYouLogin)
@@ -28,7 +29,7 @@ export default function ClientNotice() {
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [loading, setLoading] = useRecoilState(loadingState);
     const [dropToggle, setDropToggle] = useState<string>('')
-
+    const [routePostId, setRoutePostId] = useState<string | null>(null);
     // 포스트 스테이트
 
     // 현재 로그인 한 유저
@@ -128,7 +129,12 @@ export default function ClientNotice() {
         if (usageLimit) {
             return setLimitToggle(true);
         }
-        router.push(`memo/${postId}`)
+        setRoutePostId(postId);
+        setTimeout(() => {
+            startTransition(() => {
+                router.push(`memo/${postId}`)
+            });
+        }, 0);
     }
 
     const { mutate: handledeletePost } = useDelPost();
@@ -204,6 +210,7 @@ export default function ClientNotice() {
                             key={post.id}
                             className='post_box'
                         >
+                            {routePostId === post.id && <LoadLoading />}
                             {/* 작성자 프로필 */}
                             <div className='post_profile_wrap'>
                                 <div className='user_profile'>

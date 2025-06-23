@@ -5,13 +5,13 @@ import { useSearchParams } from "next/navigation";
 import { InstantSearch, SearchBox, useInfiniteHits, useSearchBox } from "react-instantsearch";
 import { SearchBoxWrap } from "./SearchStyle";
 import { css } from "@emotion/react";
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { collection, doc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/app/DB/firebaseConfig";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
-import { DidYouLogin, loadingState, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle } from "@/app/state/PostState";
+import { loadingState, PostData, UsageLimitState, UsageLimitToggle } from "@/app/state/PostState";
 import { searchClient } from "@/app/utils/algolia";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { motion } from "framer-motion";
@@ -20,6 +20,7 @@ import { btnVariants } from "@/app/styled/motionVariant";
 import { cleanHtml } from "@/app/utils/CleanHtml";
 import LoadingWrap from "@/app/components/LoadingWrap";
 import { useDelPost } from "../post/hook/useNewPostMutation";
+import LoadLoading from "@/app/components/LoadLoading";
 
 const formatDate = (createAt: Timestamp | Date | string | number) => {
     if ((createAt instanceof Timestamp)) {
@@ -87,29 +88,23 @@ function PostHit({ hit }: { hit: PostData }) {
     const [userData, setUserData] = useState<{ displayName: string; photoURL: string | null } | null>(null);
     const [loading, setIsLoading] = useState<boolean>(true);
     const setLoading = useSetRecoilState<boolean>(loadingState);
-    const yourLogin = useRecoilValue(DidYouLogin);
-    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState);
-    const setModal = useSetRecoilState<boolean>(modalState);
     const usageLimit = useRecoilValue<boolean>(UsageLimitState);
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle);
     const [dropToggle, setDropToggle] = useState<string>('');
-
+    const [routePostId, setRoutePostId] = useState<string | null>(null);
     const router = useRouter();
     const dropdownRef = useRef<HTMLDivElement>(null);
     // 포스트 보기
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
-        console.log(postId, '검색 페이지 이동 포스트 ID');
-        if (!yourLogin || usageLimit) {
-            if (usageLimit) {
-                return setLimitToggle(true);
-            }
-            if (!yourLogin) {
-                setLoginToggle(true);
-                setModal(true);
-                return;
-            }
+        if (usageLimit) {
+            return setLimitToggle(true);
         }
-        router.push(`memo/${postId}`)
+        setRoutePostId(postId);
+        setTimeout(() => {
+            startTransition(() => {
+                router.push(`memo/${postId}`)
+            });
+        }, 0);
     }
 
     useEffect(() => {
@@ -156,6 +151,7 @@ function PostHit({ hit }: { hit: PostData }) {
                     key={hit.objectID as string}
                     className='post_box'
                 >
+                    {routePostId === hit.objectID && <LoadLoading />}
                     {/* 작성자 프로필 */}
                     <div className='post_profile_wrap'>
                         <div className='user_profile'>

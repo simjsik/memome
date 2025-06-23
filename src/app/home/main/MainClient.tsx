@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { startTransition, useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { DidYouLogin, loadingState, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
 import { usePathname, useRouter } from 'next/navigation';
@@ -25,6 +25,7 @@ import { cleanHtml } from '@/app/utils/CleanHtml';
 import { formatDate } from '@/app/utils/formatDate';
 import { useAddUpdatePost } from './hook/usePostMutation';
 import { useDelPost } from '../post/hook/useNewPostMutation';
+import LoadLoading from '@/app/components/LoadLoading';
 
 
 export default function MainHome() {
@@ -54,7 +55,7 @@ export default function MainHome() {
   const pathName = usePathname();
   const observerLoadRef = useRef(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
+  const [routePostId, setRoutePostId] = useState<string | null>(null);
   // 웹소켓 연결---------------------------------------------------------------------------------
   const socketRef = useRef<Socket | null>(null);
   const uid = currentUser.uid
@@ -239,7 +240,12 @@ export default function MainHome() {
     if (usageLimit) {
       return setLimitToggle(true);
     }
-    router.push(`memo/${postId}`)
+    setRoutePostId(postId);
+    setTimeout(() => {
+      startTransition(() => {
+        router.push(`memo/${postId}`)
+      });
+    }, 0);
   }
 
   // 페이지 이동 시 스크롤 위치 저장
@@ -312,103 +318,106 @@ export default function MainHome() {
           {(!loading && isAddUpdatePost) && <LoadingWrap />}
           {/* 무한 스크롤 구조 */}
           {!loading && postList.map(post => (
-            <motion.div
-              whileHover={{
-                backgroundColor: "#fafbfc",
-                transition: { duration: 0.1 },
-              }}
-              key={post.id}
-              className='post_box'
-            >
-              {/* 작성자 프로필 */}
-              <div className='post_profile_wrap'>
-                <div className='user_profile'>
-                  <div className='user_photo'
-                    css={css`background-image : url(${post.photoURL})`}
-                  >
-                  </div>
-                  <p className='user_name'
-                    onClick={(e) => { e.preventDefault(); handleUsernameClick(post.userId); }}
-                  >
-                    {post.displayName}
-                  </p>
-                  <span className='user_uid'>
-                    @{post.userId.slice(0, 6)}...
-                  </span>
-                  <p className='post_date'>
-                    · {formatDate(post.createAt)}
-                  </p>
-                </div>
-                <div className='post_dropdown_wrap' ref={dropdownRef}>
-                  <motion.button
-                    variants={btnVariants}
-                    whileHover="iconWrapHover"
-                    whileTap="iconWrapClick"
-                    className='post_drop_menu_btn'
-                    aria-label='포스트 옵션 더보기'
-                    css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
-                    onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
-                  >
-                    {dropToggle === post.id &&
-                      <div>
-                        <ul>
-                          <li className='post_drop_menu'>
-                            <motion.button
-                              variants={btnVariants}
-                              whileHover="otherHover"
-                              onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</motion.button>
-                          </li>
-                        </ul>
-                      </div>
-                    }
-                  </motion.button>
-                </div>
-              </div>
-              {/* 포스트 내용 */}
-              <div className='post_content_wrap' onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}>
-                {/* 포스트 제목 */}
-                < div className='post_title_wrap' >
-                  <span className='post_tag'>[{post.tag}]</span>
-                  <h2 className='post_title'>{post.title}</h2>
-                </div>
-                <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml((post.content)) }}></div>
-                {/* 이미지 */}
-                {(post.images && post.images.length > 0) && (
-                  <div className='post_pr_img_wrap'>
-                    <div className='post_pr_img'
-                      css={css
-                        `
-                          background-image : url(${post.images[0]});
-                          `}
+            <>
+              <motion.div
+                whileHover={{
+                  backgroundColor: "#fafbfc",
+                  transition: { duration: 0.1 },
+                }}
+                key={post.id}
+                className='post_box'
+              >
+                {routePostId === post.id && <LoadLoading />}
+                {/* 작성자 프로필 */}
+                <div className='post_profile_wrap'>
+                  <div className='user_profile'>
+                    <div className='user_photo'
+                      css={css`background-image : url(${post.photoURL})`}
                     >
-                      {post.images.length > 1 &&
-                        <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
-                      }
                     </div>
+                    <p className='user_name'
+                      onClick={(e) => { e.preventDefault(); handleUsernameClick(post.userId); }}
+                    >
+                      {post.displayName}
+                    </p>
+                    <span className='user_uid'>
+                      @{post.userId.slice(0, 6)}...
+                    </span>
+                    <p className='post_date'>
+                      · {formatDate(post.createAt)}
+                    </p>
                   </div>
-                )}
-                {/* 포스트 댓글, 북마크 등 */}
-                <div className='post_bottom_wrap'>
-                  <div className='post_comment'>
+                  <div className='post_dropdown_wrap' ref={dropdownRef}>
                     <motion.button
                       variants={btnVariants}
                       whileHover="iconWrapHover"
-                      whileTap="iconWrapClick" className='post_comment_btn'>
-                      <motion.div
-                        variants={btnVariants}
-                        whileHover="iconHover"
-                        whileTap="iconClick" className='post_comment_icon'>
-                      </motion.div>
+                      whileTap="iconWrapClick"
+                      className='post_drop_menu_btn'
+                      aria-label='포스트 옵션 더보기'
+                      css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
+                      onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
+                    >
+                      {dropToggle === post.id &&
+                        <div>
+                          <ul>
+                            <li className='post_drop_menu'>
+                              <motion.button
+                                variants={btnVariants}
+                                whileHover="otherHover"
+                                onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</motion.button>
+                            </li>
+                          </ul>
+                        </div>
+                      }
                     </motion.button>
-                    <p>{post.commentCount}</p>
                   </div>
-                  <BookmarkBtn postId={post.id}></BookmarkBtn>
                 </div>
-              </div>
-            </motion.div >
+                {/* 포스트 내용 */}
+                <div className='post_content_wrap' onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}>
+                  {/* 포스트 제목 */}
+                  < div className='post_title_wrap' >
+                    <span className='post_tag'>[{post.tag}]</span>
+                    <h2 className='post_title'>{post.title}</h2>
+                  </div>
+                  <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml((post.content)) }}></div>
+                  {/* 이미지 */}
+                  {(post.images && post.images.length > 0) && (
+                    <div className='post_pr_img_wrap'>
+                      <div className='post_pr_img'
+                        css={css
+                          `
+                          background-image : url(${post.images[0]});
+                          `}
+                      >
+                        {post.images.length > 1 &&
+                          <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
+                        }
+                      </div>
+                    </div>
+                  )}
+                  {/* 포스트 댓글, 북마크 등 */}
+                  <div className='post_bottom_wrap'>
+                    <div className='post_comment'>
+                      <motion.button
+                        variants={btnVariants}
+                        whileHover="iconWrapHover"
+                        whileTap="iconWrapClick" className='post_comment_btn'>
+                        <motion.div
+                          variants={btnVariants}
+                          whileHover="iconHover"
+                          whileTap="iconClick" className='post_comment_icon'>
+                        </motion.div>
+                      </motion.button>
+                      <p>{post.commentCount}</p>
+                    </div>
+                    <BookmarkBtn postId={post.id}></BookmarkBtn>
+                  </div>
+                </div>
+              </motion.div >
+            </>
           ))
           }
-          <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`}/>
+          <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`} />
           {(!loading && dataLoading) && <LoadingWrap />}
           {isError &&
             <NoMorePost>

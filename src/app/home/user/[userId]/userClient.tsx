@@ -1,15 +1,15 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { adminState, ImagePostData, loadingState, PostData, UsageLimitState, userData, userState } from "@/app/state/PostState";
+import { adminState, ImagePostData, loadingState, PostData, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
 import { css } from "@emotion/react";
 import { motion } from "framer-motion";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { UserPostWrap } from "./userStyle";
 import { db } from "@/app/DB/firebaseConfig";
 import { deleteDoc, doc, getDoc, Timestamp } from "firebase/firestore";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost } from "@/app/styled/PostComponents";
@@ -19,6 +19,7 @@ import { btnVariants } from "@/app/styled/motionVariant";
 import { formatDate } from "@/app/utils/formatDate";
 import useOutsideClick from "@/app/hook/OutsideClickHook";
 import { cleanHtml } from "@/app/utils/CleanHtml";
+import LoadLoading from "@/app/components/LoadLoading";
 
 interface ClientUserProps {
     user: userData,
@@ -41,6 +42,8 @@ export default function UserClient({ user }: ClientUserProps) {
     const [dropToggle, setDropToggle] = useState<string>('')
     const [loading, setLoading] = useRecoilState(loadingState);
     const currentUser = useRecoilValue(userState)
+    const [routePostId, setRoutePostId] = useState<string | null>(null);
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const observerLoadRef = useRef(null);
@@ -236,8 +239,16 @@ export default function UserClient({ user }: ClientUserProps) {
         }
     }
 
-    const handleClickPost = (userId: string) => {
-        router.push(`/home/memo/${userId}`)
+    const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
+        if (usageLimit) {
+            return setLimitToggle(true);
+        }
+        setRoutePostId(postId);
+        setTimeout(() => {
+            startTransition(() => {
+                router.push(`/home/memo/${postId}`)
+            });
+        }, 0);
     }
 
     // 외부 클릭 시 드롭다운 닫기
@@ -274,8 +285,9 @@ export default function UserClient({ user }: ClientUserProps) {
                                             backgroundColor: "#fafbfc",
                                             transition: { duration: 0.1 },
                                         }}
-                                        onClick={() => handleClickPost(post.id)}
+                                        onClick={() => handlePostClick(post.id)}
                                     >
+                                        {routePostId === post.id && <LoadLoading />}
                                         <div className="user_post_profile_wrap">
                                             <div className="user_post_top">
                                                 <div className="user_post_photo"
@@ -397,12 +409,11 @@ export default function UserClient({ user }: ClientUserProps) {
                                     <div key={post.id} className="user_image_wrap">
                                         {post.images.length > 0 && (
                                             <>
-                                                {post.images.map((imageUrl, index) => (
-                                                    <div key={index} className="image_post_img" css={css`
-                                                            background-image : url(${imageUrl})
-                                                        `}>
-                                                    </div>
-                                                ))}
+                                                {routePostId === post.id && <LoadLoading />}
+                                                <div className="image_post_img" css={css`
+                                                            background-image : url(${post.images[0]})
+                                                        `} onClick={() => handlePostClick(post.id)}>
+                                                </div>
                                                 {post.images.length > 1 &&
                                                     <div className="image_list_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
                                                 }
