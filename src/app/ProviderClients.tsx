@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client"
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { PretendardBold, PretendardLight, PretendardMedium } from "@/app/styled/FontsComponets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -10,10 +10,12 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "./DB/firebaseConfig";
 import { usePostUpdateChecker } from "./hook/ClientPolling";
 import { useRouter } from "next/navigation";
-import { CacheProvider } from "@emotion/react";
+import { CacheProvider, ThemeProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { getAuth, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 import GlobalLoadingWrap from "./components/GlobalLoading";
+import { darkTheme, lightTheme } from "./styled/theme";
+import GlobalStyles from "./components/GlobalStyles";
 
 const queryClient = new QueryClient();
 
@@ -138,16 +140,33 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
 export default function ProviderClient({ children, nonce }: { children: ReactNode, nonce: string }) {
     const cache = createCache({ key: 'custom', nonce });
+    const [isDark, setIsDark] = useState(false);
+
+    useEffect(() => {
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+        console.log(media, '테마')
+        setIsDark(media.matches);
+
+        const listener = (e: MediaQueryListEvent) => setIsDark(e.matches);
+
+        media.addEventListener('change', listener);
+
+        return () => media.removeEventListener('change', listener);
+    }, []);
+
     return (
         <div className={`${PretendardLight.variable} ${PretendardMedium.variable} ${PretendardBold.variable} main_wrap`}>
             <QueryClientProvider client={queryClient}>
                 <RecoilRoot>
                     <CacheProvider value={cache}>
-                        <InitializeLoginComponent>
-                            <>
-                                {children}
-                            </>
-                        </InitializeLoginComponent>
+                        <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
+                            <GlobalStyles />
+                            <InitializeLoginComponent>
+                                <>
+                                    {children}
+                                </>
+                            </InitializeLoginComponent>
+                        </ThemeProvider>
                     </CacheProvider>
                 </RecoilRoot>
             </QueryClientProvider>
