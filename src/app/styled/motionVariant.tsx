@@ -1,16 +1,18 @@
-export const btnVariants = {
+import type { Theme } from '@emotion/react';
+
+export const btnVariants = (theme: Theme) => ({
     //--- Hover
     loginHover: {
         backgroundColor: "#007ce9",
         transition: { duration: 0.2 },
     },
     otherHover: {
-        backgroundColor: "#f7f9fa",
+        backgroundColor: theme.colors.hoverBg,
         transition: { duration: 0.2 },
     },
 
     iconWrapHover: {
-        backgroundColor : '#ebebf5',
+        backgroundColor: '#ebebf5',
         transition: { duration: 0.2, },
     },
 
@@ -55,7 +57,7 @@ export const btnVariants = {
         transition: { duration: 0.2 },
     },
     iconWrapClick: {
-        backgroundColor : '#e1e1eb',
+        backgroundColor: '#e1e1eb',
         transition: { duration: 0.2, },
     },
     iconClick: {
@@ -90,4 +92,4 @@ export const btnVariants = {
         },
     },
 
-};
+});

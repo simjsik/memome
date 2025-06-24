@@ -5,15 +5,18 @@ export const lightTheme: Theme = {
         background: '#fff',
         text: '#333333',
         primary: '#0070f3',
-        // … 필요한 색상 추가
+        hoverBg: '#f7f9fa',
+        clickBg: '#f5f8fa',
     },
 };
 
 export const darkTheme: Theme = {
     colors: {
-        background: 'blue',
-        text: '#f0f0f0',
+        background: '#121212',
+        text: '#fff',
         primary: '#79b8ff',
+        hoverBg: '#1a1a1a',
+        clickBg: '#212121',
         // … 라이트 테마와 매칭되는 색상 추가
     },
 };

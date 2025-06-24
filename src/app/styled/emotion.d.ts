@@ -1,4 +1,3 @@
-// styled/emotion.d.ts
 import '@emotion/react';
 
 declare module '@emotion/react' {
@@ -7,7 +6,8 @@ declare module '@emotion/react' {
             background: string;
             text: string;
             primary: string;
-            // 필요하면 추가…
+            hoverBg: string;
+            clickBg: string;
         };
         // 다른 커스텀 프로퍼티가 있으면 여기에…
     }

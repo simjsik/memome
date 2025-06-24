@@ -7,18 +7,19 @@ const GlobalStyles = () => {
     return (
         <Global
             styles={css`
-        html, body {
-          margin: 0;
-          padding: 0;
-          background-color: ${theme.colors.background};
-          color:            ${theme.colors.text};
-          transition: background-color 0.3s, color 0.3s;
-        }
-        a {
-          color: ${theme.colors.primary};
-        }
-        /* 그 외 전역 스타일 */
-      `}
+                html, body {
+                    margin: 0;
+                    padding: 0;
+                    background-color: ${theme.colors.background};
+                    color:            ${theme.colors.text};
+                }
+                div{
+                    background-color: ${theme.colors.background};
+                }
+                a, span, h2, h1, strong, p, u, i {
+                    color: ${theme.colors.text};
+                }
+            `}
         />
     );
 };
