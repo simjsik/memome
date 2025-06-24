@@ -168,7 +168,7 @@ export const LoginButton = styled(motion.button)`
     border : none;
     border-radius : 4px;
     background : ${({ theme }) => theme.colors.primary};
-    color: ${({ theme }) => theme.colors.text};
+    color: #fff;
     font-size : 16px;
     font-family : var(--font-pretendard-medium);
     cursor: pointer;
