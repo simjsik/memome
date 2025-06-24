@@ -3,6 +3,7 @@ import { Theme } from '@emotion/react';
 export const lightTheme: Theme = {
     colors: {
         background: '#fff',
+        background_invisible: 'transparent',
         text: '#333333',
         primary: '#0070f3',
         hoverBg: '#f7f9fa',
@@ -13,6 +14,7 @@ export const lightTheme: Theme = {
 export const darkTheme: Theme = {
     colors: {
         background: '#121212',
+        background_invisible: 'transparent',
         text: '#fff',
         primary: '#79b8ff',
         hoverBg: '#1a1a1a',

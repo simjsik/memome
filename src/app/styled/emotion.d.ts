@@ -4,6 +4,7 @@ declare module '@emotion/react' {
     export interface Theme {
         colors: {
             background: string;
+            background_invisible: string;
             text: string;
             primary: string;
             hoverBg: string;
