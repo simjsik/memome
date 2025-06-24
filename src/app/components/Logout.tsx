@@ -3,7 +3,7 @@
 
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { bookMarkState, DidYouLogin, PostData, UsageLimitToggle, userBookMarkState, userData, userState } from "../state/PostState";
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
 import { motion } from "framer-motion";
@@ -66,6 +66,8 @@ export default function Logout() {
     const setUserCurrentBookmark = useSetRecoilState<PostData[]>(userBookMarkState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     // State
+
+    const theme = useTheme();
     const router = useRouter();
     // hook
 
@@ -109,7 +111,7 @@ export default function Logout() {
     return (
         <>
             <motion.button
-                variants={btnVariants}
+                variants={btnVariants(theme)}
                 whileHover="otherHover"
                 whileTap="otherClick"
                 onClick={handleLogout} css={LogoutButton}>

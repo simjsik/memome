@@ -9,7 +9,7 @@ import UserProfile from './status/UserProfile';
 import SearchComponent from './SearchComponent';
 import { useMediaQuery } from "react-responsive";
 import { commentModalState, statusState } from '../state/PostState';
-import { css } from '@emotion/react';
+import { css, useTheme } from '@emotion/react';
 import { useRecoilState } from 'recoil';
 import { motion } from "framer-motion";
 import { btnVariants } from '../styled/motionVariant';
@@ -174,7 +174,7 @@ export default function StatusBox() {
     const [commentOn, setCommentOn] = useRecoilState<boolean>(commentModalState);
     const [mobileStatus, setMobileStatus] = useRecoilState<boolean>(statusState);
     const [isMemoPage, setIsMemoPage] = useState<boolean>(false);
-
+    const theme = useTheme();
     // Function
     const statusRef = useRef<HTMLDivElement>(null);
 
@@ -221,7 +221,7 @@ export default function StatusBox() {
                                             font-family : var(--font-pretendard-medium);
                                             cursor : pointer;`
                                     }
-                                        variants={btnVariants}
+                                        variants={btnVariants(theme)}
                                         whileHover="otherHover"
                                         whileTap="otherClick"
                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); statusHandle(); }}>취소</motion.button>
@@ -233,7 +233,7 @@ export default function StatusBox() {
                                         <MemoStatus post={postId} />
                                     </div>
                                     <ExitButtons
-                                        variants={btnVariants}
+                                        variants={btnVariants(theme)}
                                         whileHover="otherHover"
                                         whileTap="otherClick"
                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCommentOn(false); }}>닫기</ExitButtons>

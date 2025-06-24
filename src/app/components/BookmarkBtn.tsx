@@ -10,6 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { FirebaseError } from "firebase/app";
 import { motion } from "framer-motion";
 import { btnVariants } from "../styled/motionVariant";
+import { useTheme } from "@emotion/react";
 
 const Bookmark = styled.button`
     width : 32px;
@@ -51,8 +52,8 @@ export default function BookmarkBtn({ postId }: PostId) {
     const [bookmarked, setBookmarked] = useState<boolean>(false)
     const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
     const setUserBookmarks = useSetRecoilState<PostData[]>(userBookMarkState)
-
     const currentUser = useRecoilValue(userState)
+    const theme = useTheme();
     // state
 
     useEffect(() => {
@@ -135,11 +136,12 @@ export default function BookmarkBtn({ postId }: PostId) {
         offHover: { fill: "transparent", stroke: "#191919", transition: { duration: 0.3 } },
         onHover: { fill: "#0087ff", stroke: "#0087ff", transition: { duration: 0.3 } },
     };
+    
     // function
     return (
         <MotionBookmark
             as={motion.button}
-            variants={btnVariants}
+            variants={btnVariants(theme)}
             whileHover="iconWrapHover"
             whileTap="iconWrapClick"
             onClick={(event) => { event.preventDefault(); event.stopPropagation(); addBookmark(postId); }}>

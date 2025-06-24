@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState, modalState, userData, userState } from "../state/PostState";
 import {
@@ -70,6 +70,7 @@ export const LogoBox = css`
     background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737169919/%EC%BB%AC%EB%9F%AC%EB%A1%9C%EA%B3%A0_snbplg.svg);
 `
 export default function LoginBox() {
+    const theme = useTheme();
     const setUser = useSetRecoilState<userData>(userState)
 
     const [loginToggle, setLoginToggle] = useRecoilState<boolean>(loginToggleState)
@@ -421,7 +422,7 @@ export default function LoginBox() {
                             {(loadingTag === 'Login' && isLoading) ?
                                 <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> :
                                 <LoginButton
-                                    variants={btnVariants}
+                                    variants={btnVariants(theme)}
                                     whileHover="loginHover"
                                     whileTap="loginClick"
                                     type="submit">로그인</LoginButton>
@@ -450,11 +451,11 @@ export default function LoginBox() {
                             <LoginOr>또는</LoginOr>
                             <div>
                                 {(loadingTag === 'Google' && isLoading) ? <GoogleLoginBtn><BeatLoader color="#000" size={8} /></GoogleLoginBtn> : <GoogleLoginBtn
-                                    variants={btnVariants}
+                                    variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     whileTap="otherClick" onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleLoginBtn>}
                                 {(loadingTag === 'Guest' && isLoading) ? <GuestLoginBtn><BeatLoader color="#000" size={8} /></GuestLoginBtn> : <GuestLoginBtn
-                                    variants={btnVariants}
+                                    variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     whileTap="otherClick" onClick={handleGuestLogin}>게스트 로그인</GuestLoginBtn>}
                             </div>

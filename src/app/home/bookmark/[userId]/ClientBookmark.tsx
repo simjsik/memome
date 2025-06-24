@@ -4,7 +4,7 @@ import { fetchBookmarks } from "@/app/utils/fetchPostData";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { bookMarkState, loadingState, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Timestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
@@ -27,7 +27,7 @@ export default function Bookmark() {
     const [routePostId, setRoutePostId] = useState<string | null>(null);
     const router = useRouter();
     const observerLoadRef = useRef(null);
-
+    const theme = useTheme();
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
 
     const uid = currentUser.uid
@@ -212,11 +212,11 @@ export default function Bookmark() {
                                 <div className='post_bottom_wrap'>
                                     <div className='post_comment'>
                                         <motion.button
-                                            variants={btnVariants}
+                                            variants={btnVariants(theme)}
                                             whileHover="iconWrapHover"
                                             whileTap="iconWrapClick" className='post_comment_btn'>
                                             <motion.div
-                                                variants={btnVariants}
+                                                variants={btnVariants(theme)}
                                                 whileHover="iconHover"
                                                 whileTap="iconClick" className='post_comment_icon'>
                                             </motion.div>

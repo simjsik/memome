@@ -5,7 +5,7 @@ import { startTransition, useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { DidYouLogin, loadingState, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
 import { usePathname, useRouter } from 'next/navigation';
-import { css } from '@emotion/react';
+import { css, useTheme } from '@emotion/react';
 import { Timestamp, } from 'firebase/firestore';
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 import { motion } from "framer-motion";
@@ -29,6 +29,7 @@ import LoadLoading from '@/app/components/LoadLoading';
 
 
 export default function MainHome() {
+  const theme = useTheme();
   const yourLogin = useRecoilValue(DidYouLogin)
   const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
   const setModal = useSetRecoilState<boolean>(modalState);
@@ -299,7 +300,7 @@ export default function MainHome() {
     <>
       {hasUpdate &&
         <NewPostBtn className='new_post_btn' onClick={handleUpdateClick}
-          variants={btnVariants}
+          variants={btnVariants(theme)}
           whileHover="loginHover"
           whileTap="loginClick">새로운 업데이트 확인</NewPostBtn>
       }
@@ -340,7 +341,7 @@ export default function MainHome() {
                   </div>
                   <div className='post_dropdown_wrap' ref={dropdownRef}>
                     <motion.button
-                      variants={btnVariants}
+                      variants={btnVariants(theme)}
                       whileHover="iconWrapHover"
                       whileTap="iconWrapClick"
                       className='post_drop_menu_btn'
@@ -353,7 +354,7 @@ export default function MainHome() {
                           <ul>
                             <li className='post_drop_menu'>
                               <motion.button
-                                variants={btnVariants}
+                                variants={btnVariants(theme)}
                                 whileHover="otherHover"
                                 onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</motion.button>
                             </li>
@@ -390,11 +391,11 @@ export default function MainHome() {
                   <div className='post_bottom_wrap'>
                     <div className='post_comment'>
                       <motion.button
-                        variants={btnVariants}
+                        variants={btnVariants(theme)}
                         whileHover="iconWrapHover"
                         whileTap="iconWrapClick" className='post_comment_btn'>
                         <motion.div
-                          variants={btnVariants}
+                          variants={btnVariants(theme)}
                           whileHover="iconHover"
                           whileTap="iconClick" className='post_comment_icon'>
                         </motion.div>
@@ -414,7 +415,7 @@ export default function MainHome() {
             <NoMorePost>
               <span>포스트 로드 중 문제가 발생했습니다.</span>
               <motion.button className='retry_post_btn'
-                variants={btnVariants}
+                variants={btnVariants(theme)}
                 whileHover="loginHover"
                 whileTap="loginClick"
                 onClick={() => fetchNextPage()}>재요청</motion.button>

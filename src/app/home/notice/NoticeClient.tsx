@@ -4,7 +4,7 @@
 import { fetchNoticePosts } from "@/app/utils/fetchPostData";
 import { DidYouLogin, loadingState, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import { NoMorePost, PostWrap, } from "@/app/styled/PostComponents";
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { Timestamp } from "firebase/firestore";
 import { usePathname, useRouter } from "next/navigation";
@@ -22,6 +22,7 @@ import useOutsideClick from "@/app/hook/OutsideClickHook";
 import LoadLoading from "@/app/components/LoadLoading";
 
 export default function ClientNotice() {
+    const theme = useTheme();
     const yourLogin = useRecoilValue(DidYouLogin)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
     const setModal = useSetRecoilState<boolean>(modalState);
@@ -232,7 +233,7 @@ export default function ClientNotice() {
                                 </div>
                                 <div className='post_dropdown_wrap' ref={dropdownRef}>
                                     <motion.button
-                                        variants={btnVariants}
+                                        variants={btnVariants(theme)}
                                         whileHover="iconWrapHover"
                                         whileTap="iconWrapClick"
                                         className='post_drop_menu_btn'
@@ -245,7 +246,7 @@ export default function ClientNotice() {
                                                 <ul>
                                                     <li className='post_drop_menu'>
                                                         <motion.button
-                                                            variants={btnVariants}
+                                                            variants={btnVariants(theme)}
                                                             whileHover="otherHover"
                                                             onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</motion.button>
                                                     </li>
@@ -282,11 +283,11 @@ export default function ClientNotice() {
                                 <div className='post_bottom_wrap'>
                                     <div className='post_comment'>
                                         <motion.button
-                                            variants={btnVariants}
+                                            variants={btnVariants(theme)}
                                             whileHover="iconWrapHover"
                                             whileTap="iconWrapClick" className='post_comment_btn'>
                                             <motion.div
-                                                variants={btnVariants}
+                                                variants={btnVariants(theme)}
                                                 whileHover="iconHover"
                                                 whileTap="iconClick" className='post_comment_icon'>
                                             </motion.div>
@@ -304,7 +305,7 @@ export default function ClientNotice() {
                         <NoMorePost>
                             <span>포스트 로드 중 문제가 발생했습니다.</span>
                             <motion.div className='retry_post_btn'
-                                variants={btnVariants}
+                                variants={btnVariants(theme)}
                                 whileHover="loginHover"
                                 whileTap="loginClick"
                                 onClick={() => fetchNextPage()}>재요청</motion.div>

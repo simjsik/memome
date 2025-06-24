@@ -2,7 +2,7 @@
 "use client";
 
 import { adminState, ImagePostData, loadingState, PostData, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 import { motion } from "framer-motion";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { startTransition, useEffect, useRef, useState } from "react";
@@ -35,6 +35,7 @@ interface FetchImageListResponse {
 }
 
 export default function UserClient({ user }: ClientUserProps) {
+    const theme = useTheme();
     const isAdmin = useRecoilValue(adminState);
     const router = useRouter();
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
@@ -263,13 +264,13 @@ export default function UserClient({ user }: ClientUserProps) {
             <UserPostWrap>
                 <div className="user_tab_wrap">
                     <motion.button
-                        variants={btnVariants}
+                        variants={btnVariants(theme)}
                         whileHover={{
                             borderBottom: '1px solid #191919',
                             cursor: 'pointer',
                         }} className="memo_tab" onClick={() => setPostTab(true)}>메모</motion.button>
                     <motion.button
-                        variants={btnVariants}
+                        variants={btnVariants(theme)}
                         whileHover={{
                             borderBottom: '1px solid #191919',
                             cursor: 'pointer',
@@ -299,7 +300,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                                 </div>
                                                 <div className="post_more">
                                                     <motion.button
-                                                        variants={btnVariants}
+                                                        variants={btnVariants(theme)}
                                                         whileHover="iconWrapHover"
                                                         whileTap="iconWrapClick"
                                                         className='post_drop_menu_btn'
@@ -350,11 +351,11 @@ export default function UserClient({ user }: ClientUserProps) {
                                             <div className="user_post_bottom">
                                                 <div className="user_post_comment">
                                                     <motion.button
-                                                        variants={btnVariants}
+                                                        variants={btnVariants(theme)}
                                                         whileHover="iconWrapHover"
                                                         whileTap="iconWrapClick" className='post_comment_btn'>
                                                         <motion.div
-                                                            variants={btnVariants}
+                                                            variants={btnVariants(theme)}
                                                             whileHover="iconHover"
                                                             whileTap="iconClick" className='post_comment_icon'>
                                                         </motion.div>
@@ -375,7 +376,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                 <NoMorePost>
                                     <span>포스트 로드 중 문제가 발생했습니다.</span>
                                     <motion.button className='retry_post_btn'
-                                        variants={btnVariants}
+                                        variants={btnVariants(theme)}
                                         whileHover="loginHover"
                                         whileTap="loginClick"
                                         onClick={() => fetchNextPage()}>재요청</motion.button>
@@ -429,7 +430,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                 <NoMorePost>
                                     <span>포스트 로드 중 문제가 발생했습니다.</span>
                                     <motion.button className='retry_post_btn'
-                                        variants={btnVariants}
+                                        variants={btnVariants(theme)}
                                         whileHover="loginHover"
                                         whileTap="loginClick"
                                         onClick={() => fetchNextPage()}>재요청</motion.button>

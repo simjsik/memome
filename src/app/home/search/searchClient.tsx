@@ -4,10 +4,10 @@
 import { useSearchParams } from "next/navigation";
 import { InstantSearch, SearchBox, useInfiniteHits, useSearchBox } from "react-instantsearch";
 import { SearchBoxWrap } from "./SearchStyle";
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 import { startTransition, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { collection, doc, getDoc, Timestamp } from "firebase/firestore";
+import { collection, doc, getDoc } from "firebase/firestore";
 import { db } from "@/app/DB/firebaseConfig";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
@@ -21,29 +21,7 @@ import { cleanHtml } from "@/app/utils/CleanHtml";
 import LoadingWrap from "@/app/components/LoadingWrap";
 import { useDelPost } from "../post/hook/useNewPostMutation";
 import LoadLoading from "@/app/components/LoadLoading";
-
-const formatDate = (createAt: Timestamp | Date | string | number) => {
-    if ((createAt instanceof Timestamp)) {
-        return createAt.toDate().toLocaleString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).replace(/\. /g, '.');
-    } else {
-        const date = new Date(createAt);
-
-        const format = date.toLocaleDateString('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        })
-        return format;
-    }
-}
+import { formatDate } from "@/app/utils/formatDate";
 
 // Hit 컴포넌트 정의
 
@@ -85,6 +63,7 @@ function CustomInfiniteHits() {
 
 
 function PostHit({ hit }: { hit: PostData }) {
+    const theme = useTheme();
     const [userData, setUserData] = useState<{ displayName: string; photoURL: string | null } | null>(null);
     const [loading, setIsLoading] = useState<boolean>(true);
     const setLoading = useSetRecoilState<boolean>(loadingState);
@@ -173,7 +152,7 @@ function PostHit({ hit }: { hit: PostData }) {
                         </div>
                         <div className='post_dropdown_wrap' ref={dropdownRef}>
                             <motion.button
-                                variants={btnVariants}
+                                variants={btnVariants(theme)}
                                 whileHover="iconWrapHover"
                                 whileTap="iconWrapClick"
                                 className='post_drop_menu_btn'
@@ -186,7 +165,7 @@ function PostHit({ hit }: { hit: PostData }) {
                                         <ul>
                                             <li className='post_drop_menu'>
                                                 <motion.button
-                                                    variants={btnVariants}
+                                                    variants={btnVariants(theme)}
                                                     whileHover="otherHover"
                                                     onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(hit.objectID as string); }} className='post_dlt_btn'>게시글 삭제</motion.button>
                                             </li>
@@ -223,11 +202,11 @@ function PostHit({ hit }: { hit: PostData }) {
                         <div className='post_bottom_wrap'>
                             <div className='post_comment'>
                                 <motion.button
-                                    variants={btnVariants}
+                                    variants={btnVariants(theme)}
                                     whileHover="iconWrapHover"
                                     whileTap="iconWrapClick" className='post_comment_btn'>
                                     <motion.div
-                                        variants={btnVariants}
+                                        variants={btnVariants(theme)}
                                         whileHover="iconHover"
                                         whileTap="iconClick" className='post_comment_icon'>
                                     </motion.div>

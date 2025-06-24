@@ -140,7 +140,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
 export default function ProviderClient({ children, nonce }: { children: ReactNode, nonce: string }) {
     const cache = createCache({ key: 'custom', nonce });
-    const [isDark, setIsDark] = useState(false);
+    const [isDark, setIsDark] = useState<boolean>(false);
 
     useEffect(() => {
         const media = window.matchMedia('(prefers-color-scheme: dark)');

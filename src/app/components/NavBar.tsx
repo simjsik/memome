@@ -6,7 +6,7 @@ import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
 import { DidYouLogin, hasGuestState, ImageUrlsState, loginToggleState, newNoticeState, PostingState, PostTitleState, SelectTagState, statusState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { useEffect } from 'react';
-import { css } from '@emotion/react';
+import { css, useTheme } from '@emotion/react';
 import { saveUnsavedPost } from '../utils/saveUnsavedPost';
 import { useMediaQuery } from 'react-responsive';
 import { motion } from "framer-motion";
@@ -199,7 +199,7 @@ export default function NavBar() {
     const imageUrls = useRecoilValue<string[]>(ImageUrlsState);
     const selectTag = useRecoilValue<string>(SelectTagState);
     const setMobileStatus = useSetRecoilState<boolean>(statusState);
-
+    const theme = useTheme();
     const isMobile = useMediaQuery({ maxWidth: 1200 });
     // State
     const router = useRouter();
@@ -292,7 +292,7 @@ export default function NavBar() {
                         <NavMenu isActive={1 === selectedMenu} onClick={() => handleNavClick(1)}>
                             <div className='post_alarm' css={css`${newNotice ? 'background : red' : 'background : none'}`}></div>
                             <motion.div
-                                variants={btnVariants}
+                                variants={btnVariants(theme)}
                                 whileHover="otherHover"
                                 className='menu_icon'>
                                 {1 === selectedMenu ?
@@ -320,7 +320,7 @@ export default function NavBar() {
                         <NavMenu isActive={2 === selectedMenu} onClick={() => handleNavClick(2)}>
                             <div className='post_alarm'></div>
                             <motion.div
-                                variants={btnVariants}
+                                variants={btnVariants(theme)}
                                 whileHover="otherHover"
                                 className='menu_icon'>
                                 {2 === selectedMenu ?
@@ -355,7 +355,7 @@ export default function NavBar() {
                             :
                             <NavMenu isActive={3 === selectedMenu} onClick={() => handleNavClick(3)}>
                                 <motion.div
-                                    variants={btnVariants}
+                                    variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     className='menu_icon'>
                                     {3 === selectedMenu ?
@@ -395,7 +395,7 @@ export default function NavBar() {
                             :
                             <NavMenu isActive={4 === selectedMenu} onClick={() => handleNavClick(4)}>
                                 <motion.div
-                                    variants={btnVariants}
+                                    variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     className='menu_icon'>
                                     {4 === selectedMenu ?
@@ -439,7 +439,7 @@ export default function NavBar() {
                             :
                             <NavMenu isActive={5 === selectedMenu} onClick={() => handleNavClick(5)}>
                                 <motion.div
-                                    variants={btnVariants}
+                                    variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     className='menu_icon'>
                                     {selectedMenu === 5 ?
