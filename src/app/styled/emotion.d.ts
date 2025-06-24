@@ -6,6 +6,7 @@ declare module '@emotion/react' {
             background: string;
             background_invisible: string;
             text: string;
+            text_tag : string;
             primary: string;
             hoverBg: string;
             clickBg: string;

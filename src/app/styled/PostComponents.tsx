@@ -14,11 +14,11 @@ width: 600px;
 height: fit-content;
 min-height: 100%;
 padding : 0px;
-background : #fff;
+background : ${({ theme }) => theme.colors.background};
 border-radius : 4px;
 border : none;
-border-left : 1px solid #ededed;
-border-right : 1px solid #ededed;
+border-left : 1px solid ${({ theme }) => theme.colors.border};
+border-right : 1px solid ${({ theme }) => theme.colors.border};
 align-content: flex-start;
 
     // 포스트 박스
@@ -27,9 +27,9 @@ align-content: flex-start;
       position: relative;
       display : block;
       flex : 1 0 100%;
-      background: #fff;
+      background: ${({ theme }) => theme.colors.background};
       padding : 20px;
-      border-bottom : 1px solid #ededed;
+      border-bottom : 1px solid ${({ theme }) => theme.colors.border};
       cursor : pointer;
     }
 
@@ -44,7 +44,7 @@ align-content: flex-start;
             height: 36px;
             border: none;
             border-radius : 50px;
-            background-color: #ffffff00;
+            background-color:${({ theme }) => theme.colors.background_invisible};
             cursor: pointer;
 
             div{
@@ -61,10 +61,10 @@ align-content: flex-start;
             .post_dlt_btn{
               width: 100%;
               height: 42px;
-              border: 1px solid #ededed;
-              background: #fff;
+              border: 1px solid ${({ theme }) => theme.colors.border};
+              background: ${({ theme }) => theme.colors.background};
               border-radius: 8px;
-              color : red;
+              color : ${({ theme }) => theme.colors.error};
             }
               
             button{
@@ -89,7 +89,7 @@ align-content: flex-start;
         border-radius: 50%;
         background-size : cover;
         background-repeat : no-repeat;
-        border : 1px solid #ededed;
+        border : 1px solid ${({ theme }) => theme.colors.border};
       }
       
     // 포스트 제목
@@ -116,7 +116,7 @@ align-content: flex-start;
         margin-right: 4px;
         font-size: 0.875rem;
         line-height: 24px;
-        color: #555;
+        color: ${({ theme }) => theme.colors.text_tag};
       }
     
       // 포스트 제목
@@ -196,7 +196,7 @@ align-content: flex-start;
         height: 32px;
         border : none;
         border-radius : 50%;
-        background : #ffffff00;
+        background : ${({ theme }) => theme.colors.background_invisible};
         padding: 6px;
         cursor : pointer
       }
@@ -210,7 +210,7 @@ align-content: flex-start;
       .post_comment{
         font-family : var(--font-pretendard-medium);
         font-size : 1rem;
-        color: #191919;
+        color: ${({ theme }) => theme.colors.text};
         margin-left : 2px;
         display : flex;
         line-height : 32px;
@@ -263,7 +263,7 @@ align-content: flex-start;
         border-radius : 8px;
         background-size: cover;
         background-repeat: no-repeat;
-        border : 1px solid #ededed;
+        border : 1px solid ${({ theme }) => theme.colors.border};
 
         .post_pr_more{
           position: absolute;
@@ -298,15 +298,15 @@ align-content: flex-start;
       width: fit-content;
       height: 24px;
       margin: 0 auto;
-      border-right : 1px solid #ededed;
-      border-left : 1px solid #ededed;
+      border-right : 1px solid ${({ theme }) => theme.colors.border};
+      border-left : 1px solid ${({ theme }) => theme.colors.border};
 
         button{
         display: block;
         width: 24px;
         margin-right : 4px;
         border: none;
-        background: none;
+        background: ${({ theme }) => theme.colors.background_invisible};
         cursor:pointer;
         }
 
@@ -315,47 +315,12 @@ align-content: flex-start;
         }
       }
 
-      // 공지사항 숨기기 버튼
-      .hide_notice_wrap{
-
-        label{
-        display : flex;
-        width : fit-content;
-        }
-
-        span {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        margin: 16px 4px 0px;
-        border: 1px solid #ccc; /* 기본 테두리 */
-        border-radius: 2px; /* 테두리 둥글게 */
-        background-color: white;
-        position: relative;
-        cursor:pointer;
-        }
-
-        input[type="checkbox"] {
-        appearance: none;
-        display: none; /* 화면에 표시되지 않도록 숨김 */
-        }
-
-        input[type="checkbox"]:checked + span {
-          border-color: #ccc; /* 체크 시 테두리 색 */
-          background-color: none; /* 체크 시 배경색 */
-        }
-          
-        .hide_text{
-            line-height: 48px;
-        }
-      }
-
     .all_post{
         width : 100%;
         height: 60px;
         line-height: 60px;
         padding: 0px 16px;
-        border-bottom: 1px solid #ededed;
+        border-bottom: 1px solid ${({ theme }) => theme.colors.border};
         text-align: center;
     }
 
@@ -366,7 +331,7 @@ align-content: flex-start;
       padding: 10px 20px;
       border-radius: 8px;
       border: none;
-      background: #0087ff;
+      background: ${({ theme }) => theme.colors.primary};
       color: #fff;
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
       cursor: pointer;
@@ -387,7 +352,7 @@ align-content: flex-start;
             height: 36px;
             border: none;
             border-radius : 50px;
-            background-color: #ffffff00;
+            background-color: ${({ theme }) => theme.colors.background_invisible};
             cursor: pointer;
 
             div{
@@ -410,8 +375,8 @@ align-content: flex-start;
   }
 
   @media (min-width: 1921px) {
-    border-right : 2px solid #ededed;
-    border-left : 2px solid #ededed;
+    border-right : 2px solid ${({ theme }) => theme.colors.border};
+    border-left : 2px solid ${({ theme }) => theme.colors.border};
     width: clamp(600px, calc(600px + (100vw - 1920px) * 0.3125), 800px);
     
     .post_pr_img_wrap{
@@ -464,7 +429,7 @@ align-content: flex-start;
         height: 68px;
         line-height: 68px;
         padding: 0px 20px;
-        border-bottom: 2px solid #ededed;
+        border-bottom: 2px solid ${({ theme }) => theme.colors.border};
     }
   }
 
@@ -535,13 +500,13 @@ align-content: flex-start;
   }
 
   @media (min-width: 3840px) {
-    border-right : 3px solid #ededed;
-    border-left : 3px solid #ededed;
+    border-right : 3px solid ${({ theme }) => theme.colors.border};
+    border-left : 3px solid ${({ theme }) => theme.colors.border};
     width: clamp(1200px, calc(1200px + (100vw - 3840px) * 0.3125), 1600px);
 
     .post_box{
       padding: 32px;
-      border-bottom: 3px solid #ededed;
+      border-bottom: 3px solid ${({ theme }) => theme.colors.border};
     }
     .post_pr_img_wrap{
       height: clamp(780px, calc(780px + (100vw - 3840px) * 0.3125), 1000px);
@@ -654,7 +619,7 @@ align-content: flex-start;
 `
 export const TitleHeader = styled.div`
 width: 100%;
-background: #fff;
+background: ${({ theme }) => theme.colors.background};
 
     .title_wrap{
       display: flex;
@@ -684,8 +649,8 @@ background: #fff;
     margin-top: 20px;
     padding : 0px;
     line-height : 48px;
-    border-top : 1px solid #dedede;
-    border-bottom : 1px solid #dedede;
+    border-top : 1px solid ${({ theme }) => theme.colors.border};
+    border-bottom : 1px solid ${({ theme }) => theme.colors.border};
 
     .h_title,
     .h_user,
@@ -710,198 +675,207 @@ export const PostListStyle = styled.div`
 display : flex;
 width : 100%;
 line-height : 40px;
-border-bottom: 1px solid #dedede;
+border-bottom: 1px solid ${({ theme }) => theme.colors.border};
 
-.bookmark_title_wrap{
-flex: 0 0 60%;
-display : flex;
-}
-.bookmark_sel_btn{
-width : 15px;
-height : 15px;
-margin: 13px 12px 0px 6px;
-}
-.post_tag{
-color : #8e8e8e;
-margin-right : 4px;
-font-size: 0.875rem;
-font-family : var(--font-pretendard-light);
-}
-.post_title {
-margin-right : 4px;
-font-size : 0.875rem;
-}
-& .post_title:hover{
-text-decoration : underline;
-cursor:pointer;
-}
-.post_comment{
-font-size : 0.875rem;
-}
-.post_user{
-flex: 0 0 20%;
-display : block;
-text-overflow: ellipsis;
-overflow : hidden;
-white-space : nowrap;
-color : #828282;
-font-family : var(--font-pretendard-light);
-font-size : 0.875rem;
-}
-.post_date{
-flex: 0 0 16%;
-font-size : 0.875rem;
-}
+  .bookmark_title_wrap{
+    flex: 0 0 60%;
+    display : flex;
+  }
 
-.bookmark_delete_btn{
-width : 18px;
-height : 18px;
-margin-top: 10px;
-background : red;
-border: none;
-}
+  .bookmark_sel_btn{
+    width : 15px;
+    height : 15px;
+    margin: 13px 12px 0px 6px;
+  }
+
+  .post_tag{
+    color : ${({ theme }) => theme.colors.text_tag};
+    margin-right : 4px;
+    font-size: 0.875rem;
+    font-family : var(--font-pretendard-light);
+  }
+
+  .post_title {
+    margin-right : 4px;
+    font-size : 0.875rem;
+  }
+
+  & .post_title:hover{
+    text-decoration : underline;
+    cursor:pointer;
+  }
+
+  .post_comment{
+    font-size : 0.875rem;
+  }
+
+  .post_user{
+    flex: 0 0 20%;
+    display : block;
+    text-overflow: ellipsis;
+    overflow : hidden;
+    white-space : nowrap;
+    color : ${({ theme }) => theme.colors.text_tag};
+    font-family : var(--font-pretendard-light);
+    font-size : 0.875rem;
+  }
+
+  .post_date{
+    flex: 0 0 16%;
+    font-size : 0.875rem;
+  }
+
+  .bookmark_delete_btn{
+    width : 18px;
+    height : 18px;
+    margin-top: 10px;
+    background : ${({ theme }) => theme.colors.error};
+    border: none;
+  }
 `
 export const PostCommentStyle = styled.div`
 width: 100%;
 
-.memo_comment_wrap{
-  border-bottom : 1px solid #ededed;
-  margin-top: 10px;
-  padding: 0px 0px 20px 40px;
-}
-.user_profile{
-  position: relative;
-  left: -40px;
-  display: flex;
-}
-
-.user_profile p{
-  line-height : 32px;
-}
-
-.memo_comment_user{
-  font-size : 0.875rem;
-  font-family : var(--font-pretendard-bold);
-}
-
-.memo_comment_uid {
-  font-family: var(--font-pretendard-light);
-  font-size: 0.875rem;
-  margin-left: 4px;
-}
-
-.user_photo,
-.reply_user_photo{
-  width : 32px;
-  height: 32px;
-  margin-right : 8px;
-  background-size : cover;
-  background-repeat : no-repeat;
-  border-radius : 50%;
-}
-
-.reply_user_photo{
-  width : 24px;
-  height: 24px;
-}
-
-// 댓글
-.memo_comment{
-  margin-top : 8px;
-}
-.reply_toggle_btn,
-.reply_more_btn{
-    font-family: var(--font-pretendard-medium);
-    color: #0087ff;
-    cursor : pointer;
-    border: none;
-    background: none;
-}
-
-.reply_toggle_btn{
-    font-size: 0.875rem;
-    margin-left: 12px;
-}
-
-.reply_more_btn{
-    width: calc(100% - 16px);
-    height: 42px;
-    font-size: 1rem;
-}
-.reply_wrap{
-  margin-top : 8px;
-  padding-left : 32px;
-  
+  .memo_comment_wrap{
+    border-bottom : 1px solid${({ theme }) => theme.colors.border};
+    margin-top: 10px;
+    padding: 0px 0px 20px 40px;
+  }
   .user_profile{
-    left : -32px;
+    position: relative;
+    left: -40px;
+    display: flex;
   }
 
-  .memo_comment_user,
-  .memo_comment_uid{
-    line-height: 24px;
+  .user_profile p{
+    line-height : 32px;
   }
-}
 
-.memo_reply{
-  margin-top : 4px;
-  font-size : 0.875rem;
-}
-
-.memo_reply_uid{
-  display: block;
-  width: fit-content;
-  margin-top: 8px;
-  font-size : 0.875rem;
-  color: #0087ff;
-  background-color: #c8fffd;
-}
-
-.memo_comment_date{
-  font-size: 0.875rem;
-  color: #777;
-  margin-top: 10px;
-}
-
-.comment_reply_btn{
-  width: 60px;
-  height: 32px;
-  border: 1px solid #ededed;
-  background: #fff;
-  margin: 8px 0px;
-  cursor : pointer;
-}
-
-.comment_delete_btn{
-  position: absolute;
-  right: -20px;
-  width: 32px;
-  height: 32px;
-  padding : 4px;
-  background-color: #fff;
-  border: 1px solid #ededed;
-  border-radius: 4px;
-  cursor : pointer;
-
-  .comment_delete_icon{
-    width: 100%;
-    height: 100%;
+  .memo_comment_user{
+    font-size : 0.875rem;
+    font-family : var(--font-pretendard-bold);
   }
-}
 
-.comment_input{
-  outline: none;
-  border: none;
-  padding: 10px;
-  font-family: var(--font-pretendard-medium);
-}
+  .memo_comment_uid {
+    font-family: var(--font-pretendard-light);
+    font-size: 0.875rem;
+    margin-left: 4px;
+  }
+
+  .user_photo,
+  .reply_user_photo{
+    width : 32px;
+    height: 32px;
+    margin-right : 8px;
+    background-size : cover;
+    background-repeat : no-repeat;
+    border-radius : 50%;
+  }
+
+  .reply_user_photo{
+    width : 24px;
+    height: 24px;
+  }
+
+  // 댓글
+  .memo_comment{
+    margin-top : 8px;
+  }
+
+  .reply_toggle_btn,
+  .reply_more_btn{
+      font-family: var(--font-pretendard-medium);
+      color: ${({ theme }) => theme.colors.primary};
+      cursor : pointer;
+      border: none;
+      background: none;
+  }
+
+  .reply_toggle_btn{
+      font-size: 0.875rem;
+      margin-left: 12px;
+  }
+
+  .reply_more_btn{
+      width: calc(100% - 16px);
+      height: 42px;
+      font-size: 1rem;
+  }
+  .reply_wrap{
+    margin-top : 8px;
+    padding-left : 32px;
+    
+    .user_profile{
+      left : -32px;
+    }
+
+    .memo_comment_user,
+    .memo_comment_uid{
+      line-height: 24px;
+    }
+  }
+
+  .memo_reply{
+    margin-top : 4px;
+    font-size : 0.875rem;
+  }
+
+  .memo_reply_uid{
+    display: block;
+    width: fit-content;
+    margin-top: 8px;
+    font-size : 0.875rem;
+    color: ${({ theme }) => theme.colors.primary};
+    background-color: #c8fffd;
+  }
+
+  .memo_comment_date{
+    font-size: 0.875rem;
+    color: ${({ theme }) => theme.colors.text_tag};
+    margin-top: 10px;
+  }
+
+  .comment_reply_btn{
+    width: 60px;
+    height: 32px;
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    background: #fff;
+    margin: 8px 0px;
+    cursor : pointer;
+  }
+
+  .comment_delete_btn{
+    position: absolute;
+    right: -20px;
+    width: 32px;
+    height: 32px;
+    padding : 4px;
+    background-color: ${({ theme }) => theme.colors.background};
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    border-radius: 4px;
+    cursor : pointer;
+
+    .comment_delete_icon{
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .comment_input{
+    outline: none;
+    border: none;
+    padding: 10px;
+    font-family: var(--font-pretendard-medium);
+  }
+
   .reply_input_wrap{
   position: relative;
 
   .comment_upload_btn{
     width : 68px;
     height : 48px;
-    border  : 1px solid #ededed;
-    background-color: #ffffff00;
+    border  : 1px solid ${({ theme }) => theme.colors.border};
+    background-color: ${({ theme }) => theme.colors.background};
     cursor : pointer;
   }
 
@@ -912,7 +886,7 @@ width: 100%;
     max-height : 220px;
     min-height : 56px;
     outline: none;
-    border: 1px solid #ededed;
+    border: 1px solid ${({ theme }) => theme.colors.border};
     padding: 10px;
     font-family: var(--font-pretendard-medium);
   }
@@ -932,7 +906,7 @@ width: 100%;
 height: 190px;
 margin-top : 10px;
 padding : 12px;
-border : 1px solid #ededed;
+border : 1px solid ${({ theme }) => theme.colors.border};
 
 // 로그인 유저 프로필 박스
 .login_user_profile{
@@ -973,17 +947,17 @@ bottom : 10px;
 width : 68px;
 height : 48px;
 margin-top : 10px;
-border  : 1px solid #ededed;
-background-color: #ffffff00;
+border  : 1px solid ${({ theme }) => theme.colors.border};
+background-color: ${({ theme }) => theme.colors.background_invisible};
 cursor : pointer;
 }
 `
 export const BookmarkWrap = styled.div`
     width: 600px;
     margin-left: 500px;
-    border-left: 1px solid #dedede;
-    border-right: 1px solid #dedede;
-    background: #fff;
+    border-left: 1px solid ${({ theme }) => theme.colors.border};
+    border-right: 1px solid ${({ theme }) => theme.colors.border};
+    background: ${({ theme }) => theme.colors.background};
 `
 export const NoMorePost = styled.div`
     width: 100%;
@@ -1005,7 +979,7 @@ export const NoMorePost = styled.div`
 
     span{
       display : block;
-      color: #999;
+      color: ${({ theme }) => theme.colors.text_tag};
       font-size: 0.875rem;
       margin-top : 4px;
     }
@@ -1018,7 +992,7 @@ export const NewPostBtn = styled(motion.button)`
     padding: 12px 10px;
     border-radius: 8px;
     border: none;
-    background: #0087ff;
+    background: ${({ theme }) => theme.colors.primary};
     color: #fff;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     cursor: pointer;
@@ -1035,7 +1009,7 @@ export const MyAlarmWrap = styled.div`
     .my_alarm{
       width: 120px;
       padding: 10px;
-      border: 1px solid #ededed;
+      border: 1px solid ${({ theme }) => theme.colors.border};
       border-radius: 8px;
     }
 
@@ -1057,7 +1031,7 @@ export const MyAlarmWrap = styled.div`
       height: 32px;
       margin-top: 4px;
       border: none;
-      background: #0087ff;
+      background: ${({ theme }) => theme.colors.primary};
       border-radius: 4px;
       color: #fff;
       cursor : pointer;

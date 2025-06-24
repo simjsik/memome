@@ -48,7 +48,6 @@ a {
 
 body {
   color: var(--foreground);
-  background: #fff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100%;
@@ -62,7 +61,6 @@ body {
 }
 
 a {
-  color: inherit;
   text-decoration: none;
 }
 

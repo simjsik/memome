@@ -9,7 +9,7 @@ export const LoginTitle = styled.h2`
 `
 export const LoginOr = styled.span`
     font-size: 0.875rem;
-    color: #c7c7c7;
+    color: ${({ theme }) => theme.colors.text};
     font-family: var(--font-pretendard-light);
     font-weight: 500;
     text-align: center;
@@ -31,7 +31,7 @@ export const LoginInput = styled.input`
     margin-bottom: 6px;
     padding: 16px 8px;
     border-radius: 4px;
-    border : 1px solid #ededed;
+    border : 1px solid ${({ theme }) => theme.colors.border};
     font-size: 1rem;
     font-family: var(--font-pretendard-medium);
     font-weight: 500;
