@@ -14,7 +14,7 @@ const GlobalStyles = () => {
                     color:            ${theme.colors.text};
                 }
                 div{
-                    background-color: ${theme.colors.background_invisible};
+                    background-color: ${theme.colors.background};
                 }
                 a, span, h2, h1, strong, p, u, i {
                     color: ${theme.colors.text};
