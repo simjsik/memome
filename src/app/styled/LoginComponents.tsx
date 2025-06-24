@@ -8,7 +8,6 @@ export const LoginButtonWrap = styled.div`
     margin-top: 120px;
     width: 520px;
     height: 720px;
-    background: #fff;
     padding: 40px;
     border-radius: 8px;
     
