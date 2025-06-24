@@ -9,6 +9,8 @@ declare module '@emotion/react' {
             primary: string;
             hoverBg: string;
             clickBg: string;
+            error: string;
+            border: string;
         };
         // 다른 커스텀 프로퍼티가 있으면 여기에…
     }

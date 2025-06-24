@@ -28,7 +28,7 @@ export const LoginButtonWrap = styled.div`
   .login_error,
   .sign_error{
     font-size: 14px;
-    color: #fa5741;
+    color: ${({ theme }) => theme.colors.error};
     margin-right: 4px;
   }
 
@@ -36,10 +36,10 @@ export const LoginButtonWrap = styled.div`
         width: 100%;
         height: 52px;
         margin: 20px 0px 4px 0px;
-        border: 1px solid #0087ff;
+        border: 1px solid ${({ theme }) => theme.colors.primary};
         border-radius: 4px;
         background: #fff;
-        color: #0087ff;
+        color: ${({ theme }) => theme.colors.primary};
         font-size: 16px;
         font-family: var(--font-pretendard-medium);
         cursor: pointer;
@@ -58,14 +58,14 @@ export const LoginButtonWrap = styled.div`
           width: 20px;
           height: 20px;
           margin-right: 4px;
-          border: 1px solid #e6e6ea;
+          border: 1px solid ${({ theme }) => theme.colors.border};
           border-radius: 4px;
-          background: #ffffff00;
+          background: ${({ theme }) => theme.colors.background_invisible};
           cursor: pointer;
         }
 
         .auto_on{
-          border: 2px solid #0087ff;
+          border: 2px solid ${({ theme }) => theme.colors.primary};
 
           .auto_on_icon{
             height : 100%;
@@ -88,7 +88,7 @@ export const LoginButtonWrap = styled.div`
         margin-top: 60px;
         width: 100%;
         height: 80%;
-        background: #fff;
+        background: ${({ theme }) => theme.colors.background};
         padding: 30px;
         border-radius: 8px;
     }
@@ -98,7 +98,7 @@ export const LoginInputWrap = styled.div`
     margin-top: 10px;
     padding : 0px;
     border-radius : 4px;
-    border : 1px solid #ededed;
+    border : 1px solid ${({ theme }) => theme.colors.border};
     
     div {
     padding: 8px 10px;
@@ -107,7 +107,7 @@ export const LoginInputWrap = styled.div`
     div:nth-of-type(2) {
     width: 100%;
     height: 100%;
-    border-top : 1px solid #ededed;
+    border-top : 1px solid ${({ theme }) => theme.colors.border};
     }
 
     p{
@@ -135,7 +135,7 @@ export const CreateInput = styled.input`
             margin: 0px;
             margin-top : 8px;
             padding: 4px 8px;
-            border : 1px solid #ededed;
+            border : 1px solid ${({ theme }) => theme.colors.border};
             border-radius : 8px;
             font-size: 16px;
             font-family : var(--font-pretendard-medium);
@@ -147,17 +147,17 @@ export const CreateInput = styled.input`
 `
 export const OtherLoginWrap = styled.div`
 margin-top : 60px;
-border-top : 1px solid #e6e6ea;
+border-top : 1px solid ${({ theme }) => theme.colors.border};
 padding-top : 10px;
 `
 export const CreateButton = styled.a`
     background: none;
     border: none;
-    color : #5688FF;
+    color : ${({ theme }) => theme.colors.primary};
     font-size : 14px;
     font-family : var(--font-pretendard-bold);
     font-weight: 700;
-    border-bottom: 1px solid #5688FF;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.primary};
     cursor: pointer;
 `
 
@@ -167,8 +167,8 @@ export const LoginButton = styled(motion.button)`
     margin: 20px 0px 4px 0px;
     border : none;
     border-radius : 4px;
-    background : #0087ff;
-    color: #fff;
+    background : ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.text};
     font-size : 16px;
     font-family : var(--font-pretendard-medium);
     cursor: pointer;
@@ -179,9 +179,9 @@ export const GoogleButton = styled.button`
     height : 48px;
     margin-top : 10px;
     padding : 0px 8px;
-    background-color : #fff;
-    color : #191919;
-    border : 1px solid #e6e6ea;
+    background-color : ${({ theme }) => theme.colors.background};
+    color : ${({ theme }) => theme.colors.text};
+    border : 1px solid ${({ theme }) => theme.colors.border};
     border-radius : 4px;
     cursor : pointer;
     line-height : 18px;
@@ -195,9 +195,9 @@ width: 100%;
     height : 48px;
     margin-top : 20px;
     padding : 0px 8px;
-    background-color : #fff;
-    color : #191919;
-    border : 1px solid #e6e6ea;
+    background-color : ${({ theme }) => theme.colors.background};
+    color :${({ theme }) => theme.colors.text};
+    border : 1px solid ${({ theme }) => theme.colors.border};
     border-radius : 4px;
     cursor : pointer;
     line-height : 18px;

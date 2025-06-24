@@ -5,9 +5,11 @@ export const lightTheme: Theme = {
         background: '#fff',
         background_invisible: 'transparent',
         text: '#333333',
-        primary: '#0070f3',
+        primary: '#0087ff',
         hoverBg: '#f7f9fa',
         clickBg: '#f5f8fa',
+        error: '#fa5741',
+        border: '#ededed',
     },
 };
 
@@ -16,9 +18,11 @@ export const darkTheme: Theme = {
         background: '#121212',
         background_invisible: 'transparent',
         text: '#fff',
-        primary: '#79b8ff',
+        primary: '#0087ff',
         hoverBg: '#1a1a1a',
         clickBg: '#212121',
+        error: '#fa5741',
+        border: '#303030',
         // … 라이트 테마와 매칭되는 색상 추가
     },
 };
