@@ -6,7 +6,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { DidYouLogin, loginToggleState, modalState, noticeList, noticeType, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
 import { deleteDoc, doc } from "firebase/firestore";
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { MyAlarmWrap } from "@/app/styled/PostComponents";
 import { useRouter } from "next/navigation";
@@ -352,6 +352,7 @@ margin-top : 20px;
 `
 
 export default function UserProfile() {
+    const theme = useTheme();
     const [currentUser, setCurrentUser] = useRecoilState<userData>(userState)
     const yourLogin = useRecoilValue(DidYouLogin)
     const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
@@ -643,7 +644,7 @@ export default function UserProfile() {
                         border-radius : 50%;
                     `}></div>
                 <motion.button
-                    variants={btnVariants}
+                    variants={btnVariants(theme)}
                     whileHover="otherHover"
                     whileTap="otherClick" className="update_toggle_btn" onClick={handleUpdateToggle}>
                     {updateToggle ?
@@ -669,7 +670,7 @@ export default function UserProfile() {
                                     <label>사진</label>
                                     <div className="photo_btn_wrap">
                                         <motion.label
-                                            variants={btnVariants}
+                                            variants={btnVariants(theme)}
                                             whileHover="otherHover"
                                             whileTap="otherClick" className="photo_update" htmlFor={'photo_input'}>사진 변경</motion.label>
                                         <motion.button
@@ -694,7 +695,7 @@ export default function UserProfile() {
                                                 <BeatLoader color="#fff" size={8} />
                                             </motion.button>
                                             : <motion.button
-                                                variants={btnVariants}
+                                                variants={btnVariants(theme)}
                                                 whileHover="loginHover"
                                                 whileTap="loginClick" className="update_btn" onClick={(e) => { e.preventDefault(); updateToProfile(updateUserPhoto, updateUserName); }}>
                                                 변경 사항 적용
@@ -721,7 +722,7 @@ export default function UserProfile() {
                                 `}></div>
                                 <p>새 메모를 작성하세요</p>
                                 <motion.button
-                                    variants={btnVariants}
+                                    variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     whileTap="otherClick" className="memo_btn" onClick={handleMemoClick}>메모</motion.button>
                             </div>
@@ -747,7 +748,7 @@ export default function UserProfile() {
                                                     <button><BeatLoader color="#000" size={8} /></button>
                                                     :
                                                     <motion.button
-                                                        variants={btnVariants}
+                                                        variants={btnVariants(theme)}
                                                         whileHover="loginHover"
                                                         whileTap="loginClick" onClick={() => noticeConfirm(notice.noticeId)}>알림 확인</motion.button>
                                                 }

@@ -3,6 +3,7 @@
 
 import { commentModalState } from "@/app/state/PostState";
 import { btnVariants } from "@/app/styled/motionVariant";
+import { useTheme } from "@emotion/react";
 import styled from "@emotion/styled";
 import { motion } from "framer-motion";
 import { useSetRecoilState } from "recoil";
@@ -23,10 +24,10 @@ cursor : pointer;
 
 export default function ExitButton() {
     const setCommentOn = useSetRecoilState<boolean>(commentModalState);
-
+    const theme = useTheme();
     return (
         <ExitButtons
-            variants={btnVariants}
+            variants={btnVariants(theme)}
             whileHover="otherHover"
             whileTap="otherClick"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCommentOn(false); }}>닫기</ExitButtons>

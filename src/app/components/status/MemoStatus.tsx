@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import BookmarkBtn from "../BookmarkBtn";
 import { NoMorePost, PostCommentInputStyle, PostCommentStyle } from "@/app/styled/PostComponents";
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 import { fetchComments } from "@/app/utils/fetchPostData";
 import LoadingWrap from "../LoadingWrap";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
@@ -190,6 +190,7 @@ font-size : 14px;
 }
 `
 export default function MemoStatus({ post }: ClientPostProps) {
+    const theme = useTheme();
     const [commentText, setCommentText] = useState<string>('');
     const [replyText, setReplyText] = useState<string>('');
     const [activeReply, setActiveReply] = useState<string | null>(null); // 활성화된 답글 ID
@@ -435,7 +436,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                             </div>
                             <p className="memo_comment">{comment.commentText}</p>
                             <p className="memo_comment_date">{formatDate(comment.createAt)}</p>
-                            <motion.button variants={btnVariants}
+                            <motion.button variants={btnVariants(theme)}
                                 whileHover="otherHover"
                                 whileTap="otherClick"
                                 className="comment_reply_btn" onClick={() => toggleReply(comment.id)}>답글</motion.button>
@@ -448,7 +449,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                         onChange={(e) => setReplyText(e.target.value)}
                                     />
                                     <motion.button
-                                        variants={btnVariants}
+                                        variants={btnVariants(theme)}
                                         whileHover="otherHover"
                                         whileTap="otherClick"
                                         className="comment_upload_btn"
@@ -492,7 +493,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                             <p className="login_user_id">{user?.name}</p>
                                         </div>
                                         <textarea className="comment_input" placeholder="댓글 입력" value={commentText} onChange={(e) => setCommentText(e.target.value)} />
-                                        <motion.button variants={btnVariants}
+                                        <motion.button variants={btnVariants(theme)}
                                             whileHover="otherHover"
                                             whileTap="otherClick"
                                             className="comment_upload_btn" onClick={() => handleAddComment(null, 'comment')}>등록</motion.button>
@@ -510,7 +511,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                             font-family : var(--font-pretendard-medium);
                                             cursor : pointer;`
                                     }
-                                        variants={btnVariants}
+                                        variants={btnVariants(theme)}
                                         whileHover="otherHover"
                                         whileTap="otherClick"
                                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setcommentInputOn(true) }}>댓글 쓰기</motion.button>
@@ -527,7 +528,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                     <p className="login_user_id">{user?.name}</p>
                                 </div>
                                 <textarea className="comment_input" placeholder="댓글 입력" value={commentText} onChange={(e) => setCommentText(e.target.value)} />
-                                <motion.button variants={btnVariants}
+                                <motion.button variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     whileTap="otherClick"
                                     className="comment_upload_btn" onClick={() => handleAddComment(null, 'comment')}>등록</motion.button>

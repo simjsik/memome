@@ -3,12 +3,13 @@
 
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { css } from "@emotion/react";
+import { css, useTheme } from "@emotion/react";
 import { CreateInput, LoginButton, LoginButtonWrap, } from "@/app/styled/LoginComponents";
 import { auth } from "@/app/DB/firebaseConfig";
 import { motion } from "framer-motion";
 import { LoginWrap, LogoBox } from "../LoginBox";
 import { useRouter } from "next/navigation";
+import { btnVariants } from "@/app/styled/motionVariant";
 
 interface FirebaseError extends Error {
     code: string;
@@ -90,6 +91,7 @@ const SignUpWrap = css`
 
 `
 export default function SignUp() {
+    const theme = useTheme();
     const [passwordConfirm, setPasswordConfirm] = useState<boolean>(true);
     const [signUpDone, setSignUpDone] = useState<boolean>(false);
 
@@ -233,25 +235,6 @@ export default function SignUp() {
 
     const EmotionLoginBtn = motion(LoginButton);
 
-    const btnVariants = {
-        loginHover: {
-            backgroundColor: "#007ce9",
-            transition: { duration: 0.3 },
-        },
-        otherHover: {
-            backgroundColor: "#f7f9fa",
-            transition: { duration: 0.3 },
-        },
-        loginClick: {
-            backgroundColor: "#2b9cff",
-            transition: { duration: 0.3 },
-        },
-        otherClick: {
-            backgroundColor: "#f5f8fa",
-            transition: { duration: 0.3 },
-        },
-    };
-
     return (
         <>
             <div css={LoginWrap}>
@@ -267,7 +250,7 @@ export default function SignUp() {
                                 <div className="sign_up_img" css={css`background : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744961861/MEMON_ddyqiy.svg);`}></div>
                                 <span>로그인 후 다양한 이야기를 메모 해주세요!</span>
                                 <EmotionLoginBtn
-                                    variants={btnVariants}
+                                    variants={btnVariants(theme)}
                                     whileHover="loginHover"
                                     whileTap="loginClick"
                                     onClick={() => router.push('/login')}>로그인 하러가기</EmotionLoginBtn>
@@ -330,12 +313,12 @@ export default function SignUp() {
                                     {errors.displayName && <p className="sign_error" style={{ color: 'red' }}>{errors.displayName}</p>}
                                 </div>
                                 <EmotionLoginBtn
-                                    variants={btnVariants}
+                                    variants={btnVariants(theme)}
                                     whileHover="loginHover"
                                     whileTap="loginClick"
                                     type="submit">회원가입</EmotionLoginBtn>
                                 <motion.button
-                                    variants={btnVariants}
+                                    variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     whileTap="otherClick"
                                     className="login_back" onClick={(e) => { e.preventDefault(); router.push('/login') }}>기존 계정으로 로그인</motion.button>
