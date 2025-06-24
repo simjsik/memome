@@ -13,11 +13,12 @@ const LoadingWrap = styled.div`
     top: 0;
     bottom: 0;
     z-index: 10;
-  >span{
-    position: absolute;
-    top: 45%;
-    margin : 0 auto;
-  }
+    
+    >span{
+      position: absolute;
+      top: 45%;
+      margin : 0 auto;
+    }
 `
 
 export default function GlobalLoadingWrap() {

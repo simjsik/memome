@@ -352,7 +352,7 @@ align-content: flex-start;
             height: 36px;
             border: none;
             border-radius : 50px;
-            background-color: ${({ theme }) => theme.colors.background_invisible};
+            background-color: ${({ theme }) => theme.colors.background};
             cursor: pointer;
 
             div{
@@ -929,28 +929,28 @@ font-size : 0.875rem;
 line-height : 24px;
 }
 
-.comment_input{
-max-width: 100%;
-min-width: 100%;
-max-height: 68px;
-min-height: 68px;
-margin-top: 4px;
-padding: 8px 4px;
-border-radius: 4px;
-border: none;
-}
+  .comment_input{
+    max-width: 100%;
+    min-width: 100%;
+    max-height: 68px;
+    min-height: 68px;
+    margin-top: 4px;
+    padding: 8px 4px;
+    border-radius: 4px;
+    border: none;
+  }
 
-.comment_upload_btn{
-position : absolute;
-right : 10px;
-bottom : 10px;
-width : 68px;
-height : 48px;
-margin-top : 10px;
-border  : 1px solid ${({ theme }) => theme.colors.border};
-background-color: ${({ theme }) => theme.colors.background_invisible};
-cursor : pointer;
-}
+  .comment_upload_btn{
+    position : absolute;
+    right : 10px;
+    bottom : 10px;
+    width : 68px;
+    height : 48px;
+    margin-top : 10px;
+    border  : 1px solid ${({ theme }) => theme.colors.border};
+    background-color: ${({ theme }) => theme.colors.background_invisible};
+    cursor : pointer;
+  }
 `
 export const BookmarkWrap = styled.div`
     width: 600px;

@@ -43,8 +43,8 @@ export const SearchBoxWrap = styled.div`
             background-color : #272D2D;
 
             svg {
-                    fill: #fff;
-                    stroke: #fff;
+                fill: ${({ theme }) => theme.colors.inverted_text};
+                stroke: ${({ theme }) => theme.colors.inverted_text};
             }
         }
     }
@@ -53,16 +53,16 @@ export const SearchBoxWrap = styled.div`
         width: 100%;
         height: 100%;
         border-radius: 8px;
-        border: 1px solid #ededed;
+        border: 1px solid ${({ theme }) => theme.colors.border};
         padding: 0px 10px 0px 46px;
 
         &:focus {
-        outline : 1px solid #191919;
+        outline : 1px solid ${({ theme }) => theme.colors.text};
         }
     }
 
     .ais_result_wrap{
-        border-top: 1px solid #ededed;
+        border-top: 1px solid ${({ theme }) => theme.colors.border};
         padding: 20px 20px 30px;
     }
 
@@ -75,7 +75,7 @@ export const SearchBoxWrap = styled.div`
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        border: 2px solid #ededed;
+        border: 2px solid ${({ theme }) => theme.colors.border};
         margin-right: 8px;
         background-size : cover;
         background-repeat : no-repeat;
@@ -140,7 +140,7 @@ export const SearchBoxWrap = styled.div`
         height: 32px;
         border : none;
         border-radius : 50%;
-        background : #ffffff00;
+        background : ${({ theme }) => theme.colors.background_invisible};
         padding: 6px;
         cursor : pointer;
     }
@@ -154,7 +154,7 @@ export const SearchBoxWrap = styled.div`
         .post_comment{
             font-family : var(--font-pretendard-medium);
             font-size : 14px;
-            color: #191919;
+            color: ${({ theme }) => theme.colors.text};
             margin-left : 0px;
             display : flex;
             line-height : 32px;
@@ -169,8 +169,8 @@ export const SearchBoxWrap = styled.div`
         width: 100%;
         height: 52px;
         border: none;
-        border-top: 1px solid #ededed;
-        background: #fff;
+        border-top: 1px solid ${({ theme }) => theme.colors.border};
+        background: ${({ theme }) => theme.colors.background};
         cursor:pointer
     }
 `

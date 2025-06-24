@@ -30,7 +30,7 @@ position: relative;
     flex-wrap: wrap;
     width: 100%;
     height: fit-content;
-    background: #fff;
+    background: ${({ theme }) => theme.colors.background};
     }
 
     .search_close_btn{
@@ -48,7 +48,7 @@ position: relative;
         line {
             width: 24px;
             height: 24px;
-            stroke : #272D2D;
+            stroke : ${({ theme }) => theme.colors.icon_on};
             stroke-width : 2px;
             stroke-linecap: round;
         }
@@ -83,12 +83,12 @@ position: relative;
         height: 42px;
         padding: 0px 10px 0px 46px;
         line-height: 42px;
-        border: 1px solid #ededed;
+        border: 1px solid ${({ theme }) => theme.colors.border};
         border-radius: 8px;
         font-size : 0.875rem;
 
             &:focus {
-            outline : 1px solid #0087ff;
+            outline : 1px solid ${({ theme }) => theme.colors.primary};
             }
 
         }
@@ -122,11 +122,11 @@ position: relative;
             height: 28px;
             border: none;
             border-radius: 50%;
-            background-color : #272D2D;
+            background-color : ${({ theme }) => theme.colors.text};
 
             svg {
-                    fill: #fff;
-                    stroke: #fff;
+                    fill: ${({ theme }) => theme.colors.background};
+                    stroke: ${({ theme }) => theme.colors.background};
                 }
         }
     }
@@ -149,8 +149,8 @@ position: relative;
             flex: 1 0 100%;
             height: 42px;
             font-size: 0.875rem;
-            border: 1px solid #ededed;
-            background: #fff;
+            border: 1px solid ${({ theme }) => theme.colors.border};
+            background: ${({ theme }) => theme.colors.background};
             cursor:pointer;
             }
 
@@ -159,7 +159,7 @@ position: relative;
             height: 42px;
             font-size: 0.875rem;
             border-top : none;
-            background: #fff;
+            background: ${({ theme }) => theme.colors.background};
             }
 
             button:last-child{
@@ -171,20 +171,20 @@ position: relative;
         width: 100px;
         height: 42px;
         font-size: 0.875rem;
-        border: 1px solid #ededed;
-        background: #fff;
+        border: 1px solid ${({ theme }) => theme.colors.border};
+        background: ${({ theme }) => theme.colors.background};
         cursor:pointer;
         }
     }
     // -------------------------------------------------
 
     .search_btn{
-    flex : 1 0 0%;
-    height: 42px;
-    background: #212121;
-    border: none;
-    border-radius: 8px;
-    color: #fff;
+        flex : 1 0 0%;
+        height: 42px;
+        background: ${({ theme }) => theme.colors.icon_on};
+        border: none;
+        border-radius: 8px;
+        color: ${({ theme }) => theme.colors.inverted_text};
     }
 
     // 검색결과
@@ -217,7 +217,7 @@ position: relative;
                 .result_tag{
                 font-size : 0.875rem;
                 line-height: 26px;
-                color : #333;
+                color : ${({ theme }) => theme.colors.text_tag};
                 margin-right : 4px;
                 }
 
@@ -232,7 +232,7 @@ position: relative;
                 }
 
                 .result_comment{
-                color: #f12014;
+                color: ${({ theme }) => theme.colors.error};
                 font-size: 0.875rem;
                 font-family: var(--font-pretendard-bold);
                 line-height: 26px;
@@ -294,7 +294,7 @@ position: relative;
             width: 42px;
             height: 42px;
             margin: 0 auto;
-            border: 1px solid #ededed;
+            border: 1px solid ${({ theme }) => theme.colors.border};
             border-radius: 50%;
             background-size: cover;
             background-repeat: no-repeat;
@@ -335,7 +335,7 @@ position: relative;
                 height: 56px;
                 padding: 0px 10px 0px 52px;
                 line-height: 56px;
-                border: 2px solid #ededed;
+                border: 2px solid ${({ theme }) => theme.colors.border};
             }
 
             .ais-SearchBox-submit svg {
@@ -363,7 +363,7 @@ position: relative;
                 height: 64px;
                 padding: 0px 10px 0px 62px;
                 line-height: 64px;
-                border: 2px solid #ededed;
+                border: 2px solid ${({ theme }) => theme.colors.border};
             }
 
             .ais-SearchBox-submit svg {
@@ -391,7 +391,7 @@ position: relative;
                 height: 76px;
                 padding: 0px 10px 0px 72px;
                 line-height: 76px;
-                border: 3px solid #ededed;
+                border: 3px solid ${({ theme }) => theme.colors.border};
             }
 
             .ais-SearchBox-submit svg {

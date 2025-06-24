@@ -3,20 +3,21 @@
 
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { bookMarkState, DidYouLogin, PostData, UsageLimitToggle, userBookMarkState, userData, userState } from "../state/PostState";
-import { css, useTheme } from "@emotion/react";
+import { useTheme } from "@emotion/react";
 import { signOut } from "firebase/auth";
 import { auth } from "../DB/firebaseConfig";
 import { motion } from "framer-motion";
 import { btnVariants } from "../styled/motionVariant";
 import { useRouter } from "next/navigation";
+import styled from "@emotion/styled";
 
-const LogoutButton = css`
+const LogoutButton = styled(motion.button)`
     position : absolute;
     bottom: 20px;
     width : calc(100% - 40px);
     height : 52px;
-    background : #fff;
-    color :rgb(255, 30, 0);
+    background : ${({ theme }) => theme.colors.background};
+    color : ${({ theme }) => theme.colors.error};
     border : 1px solid #ededed;
     border-radius : 4px;
     font-size : 1rem;
@@ -110,13 +111,13 @@ export default function Logout() {
     // Function
     return (
         <>
-            <motion.button
+            <LogoutButton
                 variants={btnVariants(theme)}
                 whileHover="otherHover"
                 whileTap="otherClick"
-                onClick={handleLogout} css={LogoutButton}>
+                onClick={handleLogout}>
                 로그아웃
-            </motion.button >
+            </LogoutButton >
         </>
     )
 }

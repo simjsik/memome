@@ -9,9 +9,9 @@ width : 860px;
 height : fit-content;
 min-height : 100vh;
 padding : 20px;
-background : #fff;
-border-left : 1px solid #ededed;
-border-right : 1px solid #ededed;
+background : ${({ theme }) => theme.colors.background};
+border-left : 1px solid ${({ theme }) => theme.colors.border};
+border-right : 1px solid ${({ theme }) => theme.colors.border};
 
 // 기본
 
@@ -20,7 +20,7 @@ border-right : 1px solid #ededed;
     justify-content: space-between;
     margin-top :12px;
     padding-bottom : 10px;
-    border-bottom: 1px solid #ededed;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
 }
 
 .ql-code-block-container{
@@ -34,7 +34,7 @@ border-right : 1px solid #ededed;
 
 .post_category{
     font-size : 0.875rem;
-    color: #acacac;
+    color: ${({ theme }) => theme.colors.text_tag};
 }
 
 .notice{
@@ -77,7 +77,7 @@ line-height : 32px;
 .user_id>span{
     margin-left : 4px;
     font-family: var(--font-pretendard-light);
-    color: #acacac;
+    color: ${({ theme }) => theme.colors.text_tag};
 }
 
 .post_content_wrap{
@@ -98,7 +98,7 @@ justify-content : space-between;
 .comment_toggle_btn{
 width : 60px;
 height : 32px;
-border : 1px solid #ededed;
+border : 1px solid ${({ theme }) => theme.colors.border};
 background : none;
 }
 
@@ -143,26 +143,26 @@ background : red;
         }
     }
     @media (min-width: 2560px) {
-        border-left : 2px solid #ededed;
-        border-right : 2px solid #ededed;
+        border-left : 2px solid ${({ theme }) => theme.colors.border};
+        border-right : 2px solid ${({ theme }) => theme.colors.border};
         width: clamp(1000px, calc(1000px + (100vw - 2560px) * 0.375), 1480px);
         padding : 40px;
 
         .post_title_wrap{
             margin-top: 32px;
             padding-bottom: 24px;
-            border-bottom : 2px solid #ededed;
+            border-bottom : 2px solid ${({ theme }) => theme.colors.border};
         }
     }
     @media (min-width: 3840px) {
-        border-left : 3px solid #ededed;
-        border-right : 3px solid #ededed;
+        border-left : 3px solid ${({ theme }) => theme.colors.border};
+        border-right : 3px solid ${({ theme }) => theme.colors.border};
         width: clamp(1480px, calc(1480px + (100vw - 3840px) * 0.375), 1960px);
 
         .post_title_wrap{
             margin-top: 48px;
             padding-bottom: 36px;
-            border-bottom : 3px solid #ededed;
+            border-bottom : 3px solid ${({ theme }) => theme.colors.border};
         }
     }
     @media (min-width: 5120px) {

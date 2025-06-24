@@ -420,7 +420,7 @@ export default function LoginBox() {
                                     } */}
                             </div>
                             {(loadingTag === 'Login' && isLoading) ?
-                                <LoginButton><BeatLoader color="#fff" size={8} /></LoginButton> :
+                                <LoginButton><BeatLoader color={theme.colors.inverted_text} size={8} /></LoginButton> :
                                 <LoginButton
                                     variants={btnVariants(theme)}
                                     whileHover="loginHover"
@@ -450,11 +450,11 @@ export default function LoginBox() {
                         <OtherLoginWrap>
                             <LoginOr>또는</LoginOr>
                             <div>
-                                {(loadingTag === 'Google' && isLoading) ? <GoogleLoginBtn><BeatLoader color="#000" size={8} /></GoogleLoginBtn> : <GoogleLoginBtn
+                                {(loadingTag === 'Google' && isLoading) ? <GoogleLoginBtn><BeatLoader color={theme.colors.inverted_text} size={8} /></GoogleLoginBtn> : <GoogleLoginBtn
                                     variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     whileTap="otherClick" onClick={handleGoogleLogin}>Google 계정으로 로그인</GoogleLoginBtn>}
-                                {(loadingTag === 'Guest' && isLoading) ? <GuestLoginBtn><BeatLoader color="#000" size={8} /></GuestLoginBtn> : <GuestLoginBtn
+                                {(loadingTag === 'Guest' && isLoading) ? <GuestLoginBtn><BeatLoader color={theme.colors.inverted_text} size={8} /></GuestLoginBtn> : <GuestLoginBtn
                                     variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     whileTap="otherClick" onClick={handleGuestLogin}>게스트 로그인</GuestLoginBtn>}

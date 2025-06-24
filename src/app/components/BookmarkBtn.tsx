@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { FirebaseError } from "firebase/app";
 import { motion } from "framer-motion";
 import { btnVariants } from "../styled/motionVariant";
-import { useTheme } from "@emotion/react";
+import { css, Theme, useTheme } from "@emotion/react";
 
 const Bookmark = styled.button`
     width : 32px;
@@ -18,7 +18,7 @@ const Bookmark = styled.button`
     cursor : pointer;
     border : none;
     border-radius: 50px;
-    background : #ffffff00;
+    background : ${({ theme }) => theme.colors.background_invisible};
     padding : 2px;
 
     @media (min-width: 1921px) {
@@ -132,11 +132,11 @@ export default function BookmarkBtn({ postId }: PostId) {
 
     const MotionBookmark = motion(Bookmark);
 
-    const pathVariants = {
-        offHover: { fill: "transparent", stroke: "#191919", transition: { duration: 0.3 } },
-        onHover: { fill: "#0087ff", stroke: "#0087ff", transition: { duration: 0.3 } },
-    };
-    
+    const pathVariants = (theme: Theme) => ({
+        offHover: { fill: theme.colors.background_invisible, stroke: theme.colors.text, transition: { duration: 0.3 } },
+        onHover: { fill: theme.colors.primary, stroke: theme.colors.primary, transition: { duration: 0.3 } },
+    });
+
     // function
     return (
         <MotionBookmark
@@ -150,8 +150,8 @@ export default function BookmarkBtn({ postId }: PostId) {
                     {bookmarked ?
                         <>
                             <motion.path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z"
-                                fill="#0087ff" stroke="#0087ff" strokeWidth="2"
-                                variants={pathVariants}
+                                css={css`fill: ${theme.colors.primary}; stroke: ${theme.colors.primary}; strokeWidth:2;`}
+                                variants={pathVariants(theme)}
                                 whileHover="onHover"
                             >
                             </motion.path>
@@ -161,8 +161,8 @@ export default function BookmarkBtn({ postId }: PostId) {
                         :
                         <>
                             <motion.path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z"
-                                fill="transparent" stroke="#ccc" strokeWidth="2"
-                                variants={pathVariants}
+                                css={css`fill: ${theme.colors.background_invisible}; stroke: ${theme.colors.text_tag}; strokeWidth:2;`}
+                                variants={pathVariants(theme)}
                                 whileHover="offHover"
                             >
                             </motion.path>

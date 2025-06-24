@@ -265,16 +265,11 @@ export default function UserClient({ user }: ClientUserProps) {
                 <div className="user_tab_wrap">
                     <motion.button
                         variants={btnVariants(theme)}
-                        whileHover={{
-                            borderBottom: '1px solid #191919',
-                            cursor: 'pointer',
-                        }} className="memo_tab" onClick={() => setPostTab(true)}>메모</motion.button>
+                        whileHover="otherHover"
+                        className="memo_tab" onClick={() => setPostTab(true)}>메모</motion.button>
                     <motion.button
                         variants={btnVariants(theme)}
-                        whileHover={{
-                            borderBottom: '1px solid #191919',
-                            cursor: 'pointer',
-                        }} className="image_tab" onClick={() => setPostTab(false)}>이미지</motion.button>
+                        whileHover="otherHover" className="image_tab" onClick={() => setPostTab(false)}>이미지</motion.button>
                 </div >
                 {
                     postTab ?
@@ -282,10 +277,8 @@ export default function UserClient({ user }: ClientUserProps) {
                             {
                                 !loading && userPostList.map((post) => (
                                     <motion.div key={post.id} className="user_post_list_wrap"
-                                        whileHover={{
-                                            backgroundColor: "#fafbfc",
-                                            transition: { duration: 0.1 },
-                                        }}
+                                        whileHover="otherHover"
+                                        variants={btnVariants(theme)}
                                         onClick={() => handlePostClick(post.id)}
                                     >
                                         {routePostId === post.id && <LoadLoading />}

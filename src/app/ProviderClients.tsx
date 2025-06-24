@@ -144,7 +144,7 @@ export default function ProviderClient({ children, nonce }: { children: ReactNod
 
     useEffect(() => {
         const media = window.matchMedia('(prefers-color-scheme: dark)');
-        console.log(media, '테마')
+
         setIsDark(media.matches);
 
         const listener = (e: MediaQueryListEvent) => setIsDark(e.matches);

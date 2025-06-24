@@ -18,7 +18,7 @@ const CommentToggle = styled(motion.button)`
     left: 20px;
     border-radius: 50%;
     border: none;
-    background: #fff;
+    background: ${({ theme }) => theme.colors.background};
 `
 export default function Memo({ commentLength }: { commentLength: number }) {
     const currentUser = useRecoilValue<userData | null>(userState)

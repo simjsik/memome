@@ -312,10 +312,8 @@ export default function MainHome() {
           {!loading && postList.map(post => (
             <>
               <motion.div
-                whileHover={{
-                  backgroundColor: "#fafbfc",
-                  transition: { duration: 0.1 },
-                }}
+                whileHover="otherHover"
+                variants={btnVariants(theme)}
                 key={post.id}
                 className='post_box'
               >

@@ -11,8 +11,8 @@ top : 40px;
 
 width: 48px;
 height: 48px;
-background: #fff;
-border : 1px solid #dedede;
+background: ${({ theme }) => theme.colors.background};
+border : 1px solid ${({ theme }) => theme.colors.border};
 
 &:hover{
 cursor : pointer;

@@ -149,10 +149,8 @@ export default function Bookmark() {
                             key={post?.id}
                             className='post_box'
                             onClick={(event) => { event.preventDefault(); handlePostClick(post?.id as string); }}
-                            whileHover={{
-                                backgroundColor: "#fafbfc",
-                                transition: { duration: 0.1 },
-                            }}
+                            whileHover='otherHover'
+                            variants={btnVariants(theme)}
                         >
                             {routePostId === post?.id && <LoadLoading />}
                             {/* 작성자 프로필 */}

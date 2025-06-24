@@ -32,8 +32,8 @@ margin : 0 auto;
         width : 100%;
         height : 100%;
         padding: 10px;
-        background : #fff;
-        border : 1px solid #ededed;
+        background : ${({ theme }) => theme.colors.background};
+        border : 1px solid ${({ theme }) => theme.colors.border};
         border-bottom : none;
         border-radius : 8px 8px 0px 0px;
         font-family : var(--font-pretendard-medium);
@@ -55,7 +55,7 @@ margin : 0 auto;
         width: 100%;
         height : 70px;
         padding-bottom: 20px;
-        border-bottom : 1px solid #ededed;
+        border-bottom : 1px solid ${({ theme }) => theme.colors.border};
         font-family : var(--font-pretendard-medium);
     }
 
@@ -65,9 +65,9 @@ margin : 0 auto;
         width: 49px;
         height: 49px;
         margin-right: 10px;
-        border: ${(props) => (props.notice ? '1px solid #fa5741' : '1px solid #ededed')};
+        border: ${(props) => (props.notice ? `${props.theme.colors.error}` : `1px solid ${props.theme.colors.border}`)};
         border-radius: 8px;
-        background: #fff;
+        background: ${({ theme }) => theme.colors.background};
         cursor: pointer;
 
         p{
@@ -77,7 +77,7 @@ margin : 0 auto;
             text-align: center;
             transform: translateX(-50%);
             font-size: 10px;
-            color : ${(props) => (props.notice ? '#fa5741' : '#bbb')};
+            color : ${(props) => (props.notice ? `${props.theme.colors.error}` : `${props.theme.colors.text_tag}`)};
             font-family : var(--font-pretendard-medium);
         }
     }
@@ -87,7 +87,7 @@ margin : 0 auto;
         margin-right : 10px;
         padding : 0px 12px;
         outline : none;
-        border: 1px solid #ededed;
+        border: 1px solid ${({ theme }) => theme.colors.border};
         border-radius : 8px;
     }
 
@@ -96,7 +96,7 @@ margin : 0 auto;
         padding : 0px 12px;
         font-size : 16px;
         outline : none;
-        border: 1px solid #ededed;
+        border: 1px solid ${({ theme }) => theme.colors.border};
         border-radius : 8px;
 
         .title_input{
@@ -112,7 +112,7 @@ margin : 0 auto;
 
             &::selection {  
                 color: transparent;  
-                background-color:rgb(76, 131, 250);
+                background-color:${({ theme }) => theme.colors.primary};
             }
         }
 
@@ -140,7 +140,7 @@ margin : 0 auto;
 
         .title_error{
             font-size: 14px;
-            color: #fa5741;
+            color: ${({ theme }) => theme.colors.error};
             margin-top : 2px;
             font-family : var(--font-pretendard-medium);
         }
@@ -164,9 +164,9 @@ margin : 0 auto;
         width: 64px;
         height: 64px;
         border: 2px solid #1a5bf5;
-        border-left: #fff;
+        border-left:${({ theme }) => theme.colors.background};
         border-radius: 0px 8px 8px 0px;
-        background: #0087ff;
+        background: ${({ theme }) => theme.colors.primary};
         font-size: 16px;
         color: #fff;
         cursor: pointer;
@@ -183,13 +183,13 @@ margin : 0 auto;
         width: 64px;
         height: 64px;
         padding: 6px;
-        border: 1px solid #ededed;
-        border-right: #fff;
-        background: #fff;
+        border: 1px solid ${({ theme }) => theme.colors.border};
+        border-right: ${({ theme }) => theme.colors.background};
+        background: ${({ theme }) => theme.colors.background};
         border-radius: 8px 0px 0px 8px;
 
         div{
-            background-color: #fff;
+            background-color: ${({ theme }) => theme.colors.background};
             width: 50px;
             height: 50px;
             border-radius: 4px;
@@ -203,7 +203,7 @@ margin : 0 auto;
         
         &:hover path,
         &:hover polyline{
-            stroke : #0087ff;
+            stroke : ${({ theme }) => theme.colors.primary};
         }
     }
     // 에디터 박스
@@ -211,7 +211,7 @@ margin : 0 auto;
         width: 100%;
         margin: 0 auto;
         padding-bottom: 39px;
-        border-bottom: 1px solid #ededed;
+        border-bottom: 1px solid ${({ theme }) => theme.colors.border};
 
         .ql-container{
             margin-top: 20px;
@@ -224,7 +224,7 @@ margin : 0 auto;
         width : 42px;
         height : 42px;
         margin-left : 3px;
-        background-color : #fff;
+        background-color : ${({ theme }) => theme.colors.background};
         border-radius : 4px;
     }
 
@@ -251,9 +251,9 @@ margin : 0 auto;
         width: 100%;
         height: fit-content;
         padding: 0px 8px;
-        background: #fff;
-        border: 1px solid #ededed;
-        border-right: 1px solid #fff;
+        background: ${({ theme }) => theme.colors.background};
+        border: 1px solid ${({ theme }) => theme.colors.border};
+        border-right: 1px solid ${({ theme }) => theme.colors.background};
         border-radius: 8px 0px 0px 8px;
     }
 
@@ -264,7 +264,7 @@ margin : 0 auto;
     // 삽입 도구
     .ql_submit_wrap{
         padding-bottom: 10px;
-        border-bottom: 1px solid #ededed;
+        border-bottom: 1px solid ${({ theme }) => theme.colors.border};
 
         >button{
             padding: 6px;
@@ -309,7 +309,7 @@ margin : 0 auto;
     .ql_align_toggle{
         min-width: 32px;
         height: 32px;
-        background : #fff;
+        background : ${({ theme }) => theme.colors.background};
         border : none;
         border-radius : 2px;
         font-family : var(--font-pretendard-medium);
@@ -337,7 +337,7 @@ margin : 0 auto;
         &:hover line,
         &:hover polyline,
         &:hover path{
-            stroke : #0087ff;
+            stroke : ${({ theme }) => theme.colors.primary};
         }
     }
 
@@ -345,7 +345,7 @@ margin : 0 auto;
         &:hover line,
         &:hover polyline,
         &:hover path{
-            fill : #0087ff;
+            fill : ${({ theme }) => theme.colors.primary};
         }
     }
 
@@ -354,7 +354,7 @@ margin : 0 auto;
         padding : 6px;
 
         svg{
-            border: 1px solid #e7e7e7;
+            border: 1px solid ${({ theme }) => theme.colors.border};
             border-radius : 2px;
         }
     }
@@ -370,7 +370,7 @@ margin : 0 auto;
     .ql_style_wrap button{
         min-width : 32px;
         height : 32px;
-        background-color : #fff;
+        background-color : ${({ theme }) => theme.colors.background};
         margin-top : 4px;
         border : none;
         border-radius : 2px;
@@ -389,8 +389,8 @@ margin : 0 auto;
         left: 48px;
         width: 80px;
         padding: 8px 0px;
-        background: #fff;
-        border: 1px solid #ededed;
+        background: ${({ theme }) => theme.colors.background};
+        border: 1px solid ${({ theme }) => theme.colors.border};
         border-radius: 4px;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     }
@@ -414,17 +414,17 @@ margin : 0 auto;
         background: none;
         cursor: pointer;
         padding-left: 8px;
-        color: #333;
+        color: ${({ theme }) => theme.colors.text};
     }
 
     & .ql_size_btn:hover,
     & .ql_lineheight_btn:hover{
-    color : #0087ff;
+    color : ${({ theme }) => theme.colors.primary};
     }
 
     .setFont,
     .setLineheight {
-    color : #0087ff;
+    color : ${({ theme }) => theme.colors.primary};
     }
 
     .ql-lineheight{
@@ -454,8 +454,8 @@ margin : 0 auto;
         width: 176px;
         margin-top: 4px;
         margin-left: 14px;
-        background: #fff;
-        border: 1px solid #ededed;
+        background: ${({ theme }) => theme.colors.background};
+        border: 1px solid ${({ theme }) => theme.colors.border};
         border-radius: 4px;
         padding: 8px;
         box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
@@ -486,7 +486,7 @@ margin : 0 auto;
 
     .ql_color_item:nth-of-type(1) .ql_color_pallete,
     .ql_background_item:nth-of-type(1) .ql_background_pallete{
-        border : 2px solid #ededed;
+        border : 2px solid ${({ theme }) => theme.colors.border};
         vertical-align: top; 
     }
 
@@ -514,8 +514,8 @@ margin : 0 auto;
         width: 140px;
         margin-top: 4px;
         margin-left: 4px;
-        background: #fff;
-        border: 1px solid #ededed;
+        background: ${({ theme }) => theme.colors.background};
+        border: 1px solid ${({ theme }) => theme.colors.border};
         border-radius: 4px;
         padding: 4px;
         box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
@@ -529,16 +529,16 @@ margin : 0 auto;
         width : 32px;
         height : 32px;
         border: none;
-        background: #fff;
+        background: ${({ theme }) => theme.colors.background};
         transition-duration : 0.1s;
 
         &:hover line{
-          stroke: #0087ff;
+          stroke: ${({ theme }) => theme.colors.primary};
         }
     }
 
     .setAlign line{
-        stroke : #0087ff;
+        stroke : ${({ theme }) => theme.colors.primary};
     }
 
     #toolbar {
@@ -646,7 +646,7 @@ margin : 0 auto;
         }
     }
 `
-const LoadModal = css`
+const LoadModal = styled.div`
 position:fixed;
 top:0;
 left:0;
@@ -655,62 +655,65 @@ bottom:0;
 z-index : 5;
 
 .load_modal_bg{
-width : 100%;
-height: 100%;
-background: rgba(255,255,255,0.8);
+    width : 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.8);
 }
 
-.load_btn_wrap{
-position: absolute;
-top: 50%;
-left: 50%;
-transform:translate(-50%,-50%);
+    .load_btn_wrap{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform:translate(-50%,-50%);
 
-width: 400px;
-height: 220px;
-padding: 20px;
-background : #fff;
-border : 1px solid #dedede;
-border-radius : 8px;
-box-shadow : 0px 0px 10px rgba(0,0,0,0.1);
-text-align : center;
-}
+        width: 400px;
+        height: 220px;
+        padding: 20px;
+        background : ${({ theme }) => theme.colors.background};
+        border : 1px solid ${({ theme }) => theme.colors.border};
+        border-radius : 8px;
+        box-shadow : 0px 0px 10px rgba(0,0,0,0.1);
+        text-align : center;
+    }
 
-.load_btn_wrap p{
-font-size : 24px;
-}
-.load_btn_wrap span{
-display:block;
-width:100%;
-margin-top:20px;
-font-size : 14px;
-color : #606060;
-}
+    .load_btn_wrap p{
+        font-size : 24px;
+    }
 
-.load_btn_wrap span:nth-of-type(2){
-margin-top:8px;
-}
+    .load_btn_wrap span{
+        display:block;
+        width:100%;
+        margin-top:20px;
+        font-size : 14px;
+        color : #606060;
+    }
 
-.load_ok_btn,
-.load_no_btn{
-width : 140px;
-height : 48px;
-background :none;
-border: 1px solid #dedede;
-border-radius : 4px;
-font-size : 16px;
-margin-top:32px;
-cursor:pointer;
-}
-.load_ok_btn{
-margin-right : 10px;
-border: 1px solid #0087ff;
-color : #0087ff;
-font-family : var(--font-pretendard-bold);
-}
-.load_no_btn{
-color: #bdbdbd;
-}
+    .load_btn_wrap span:nth-of-type(2){
+        margin-top:8px;
+    }
+
+    .load_ok_btn,
+        .load_no_btn{
+        width : 140px;
+        height : 48px;
+        background :none;
+        border: 1px solid ${({ theme }) => theme.colors.border};
+        border-radius : 4px;
+        font-size : 16px;
+        margin-top:32px;
+        cursor:pointer;
+    }
+
+    .load_ok_btn{
+        margin-right : 10px;
+        border: 1px solid ${({ theme }) => theme.colors.primary};
+        color : ${({ theme }) => theme.colors.primary};
+        font-family : var(--font-pretendard-bold);
+    }
+
+    .load_no_btn{
+        color: ${({ theme }) => theme.colors.text};
+    }
 `
 
 export default function PostMenu() {
@@ -1390,8 +1393,8 @@ export default function PostMenu() {
                             whileTap="otherClick">
                             <svg viewBox="-5 -5 32 32">
                                 <g>
-                                    <polyline points="8.55 8.72 3.37 14.49 8.55 19.68" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1.5} />
-                                    <path d="M3.37,14.49h8.27a8.54,8.54,0,0,0,4.18-1,5.45,5.45,0,0,0,3-5,5.48,5.48,0,0,0-3-5,8.63,8.63,0,0,0-4.23-1H9.51" fill='none' strokeLinecap='round' stroke='#191919' strokeWidth={1.5} />
+                                    <polyline points="8.55 8.72 3.37 14.49 8.55 19.68" fill='none' strokeLinecap='round' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                    <path d="M3.37,14.49h8.27a8.54,8.54,0,0,0,4.18-1,5.45,5.45,0,0,0,3-5,5.48,5.48,0,0,0-3-5,8.63,8.63,0,0,0-4.23-1H9.51" css={css`stroke : ${theme.colors.icon_on}`} fill='none' strokeLinecap='round' strokeWidth={1.5} />
                                     <rect width="22.18" height="22.18" fill='none' />
                                 </g>
                             </svg>
@@ -1420,8 +1423,8 @@ export default function PostMenu() {
                                     <svg width="32" height="32" viewBox="0 8 40 40">
                                         <g>
                                             <path className='notice_path_01' d="M29.55,26.26,28.36,25a1.14,1.14,0,0,1-.3-.77V19.26a8.29,8.29,0,0,0-7-8.32,8.09,8.09,0,0,0-9.14,8v5.23a1.14,1.14,0,0,1-.3.77l-1.19,1.31a1.72,1.72,0,0,0,1.26,2.87H28.29A1.72,1.72,0,0,0,29.55,26.26Z" fill="none" stroke='#ccc' strokeWidth={'2'} />
-                                            <path className='notice_path_02' d="M17.51,29.13a.34.34,0,0,0-.35.37,2.86,2.86,0,0,0,5.68,0,.34.34,0,0,0-.35-.37Z" fill="none" stroke='#ccc' strokeWidth={'2'} />
-                                            <circle cx="20" cy="9.15" r="1.15" fill="none" stroke='#ccc' strokeWidth={'2'} />
+                                            <path className='notice_path_02' d="M17.51,29.13a.34.34,0,0,0-.35.37,2.86,2.86,0,0,0,5.68,0,.34.34,0,0,0-.35-.37Z" fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2'} />
+                                            <circle cx="20" cy="9.15" r="1.15" fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2'} />
                                             <rect width="32" height="32" fill="none" />
                                         </g>
                                     </svg>
@@ -1445,7 +1448,7 @@ export default function PostMenu() {
                             <input className='title_input' type="text" placeholder='제목' value={postTitle} onChange={handlePostingTitle} />
                             <div className='title_input_value'>
                                 <p>{postTitle.slice(0, title_limit_count)}</p>
-                                <p css={css`color: #fa5741;`}>{postTitle.slice(title_limit_count)}</p>
+                                <p css={css`color: ${theme.colors.error}`}>{postTitle.slice(title_limit_count)}</p>
                             </div>
                             <span className='title_limit'>{postTitle.length} / 20</span>
                             {postTitle.length > 20 &&
@@ -1530,11 +1533,11 @@ export default function PostMenu() {
                                         <svg viewBox="0 0 32 32">
                                             <g>
                                                 <rect width="32" height="32" fill='none' />
-                                                <line x1="8" y1="8" x2="24" y2="8" fill='none' stroke='#191919' strokeWidth={1.5} />
-                                                <line x1="8" y1="24" x2="24" y2="24" fill='none' stroke='#191919' strokeWidth={1.5} />
-                                                <polyline points="14.21 12.55 16.25 10.4 18.4 12.55" fill='none' stroke='#191919' strokeWidth={1.5} />
-                                                <line x1="16.25" y1="10.32" x2="16.25" y2="21.6" fill='none' stroke='#191919' strokeWidth={1.5} />
-                                                <polyline points="18.35 19.45 16.31 21.6 14.15 19.45" fill='none' stroke='#191919' strokeWidth={1.5} />
+                                                <line x1="8" y1="8" x2="24" y2="8" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                <line x1="8" y1="24" x2="24" y2="24" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                <polyline points="14.21 12.55 16.25 10.4 18.4 12.55" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                <line x1="16.25" y1="10.32" x2="16.25" y2="21.6" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                <polyline points="18.35 19.45 16.31 21.6 14.15 19.45" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
                                             </g>
                                         </svg>
                                     </motion.button>
@@ -1562,7 +1565,7 @@ export default function PostMenu() {
                                         <svg viewBox="0 0 32 32">
                                             <g >
                                                 <rect width="32" height="32" fill='none' />
-                                                <path d="M20.73,9h-13a.24.24,0,0,0-.25.23v2.88h.69a2.43,2.43,0,0,1,.43-1.09H13a.24.24,0,0,1,.25.22V23.7a.24.24,0,0,0,.25.23H15a.24.24,0,0,0,.25-.23V11.28a.25.25,0,0,1,.26-.22h4a2.19,2.19,0,0,1,.8,1.46H21V9.27A.24.24,0,0,0,20.73,9Z" fill='#191919' />
+                                                <path d="M20.73,9h-13a.24.24,0,0,0-.25.23v2.88h.69a2.43,2.43,0,0,1,.43-1.09H13a.24.24,0,0,1,.25.22V23.7a.24.24,0,0,0,.25.23H15a.24.24,0,0,0,.25-.23V11.28a.25.25,0,0,1,.26-.22h4a2.19,2.19,0,0,1,.8,1.46H21V9.27A.24.24,0,0,0,20.73,9Z" css={css`fill : ${theme.colors.icon_on}`} />
                                                 <rect x="19.74" y="19.43" width="4.5" height="4.5" rx="0.3" fill={selectColor} />
                                             </g>
                                         </svg>
@@ -1626,44 +1629,44 @@ export default function PostMenu() {
                                         {selectAlign === 'left' ?
                                             <svg viewBox="0 0 32 32">
                                                 <g>
-                                                    <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1.5} />
-                                                    <line x1="6" y1="11.25" x2="18" y2="11.25" stroke='#191919' strokeWidth={1.5} />
-                                                    <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1.5} />
-                                                    <line x1="6" y1="20.75" x2="18" y2="20.75" stroke='#191919' strokeWidth={1.5} />
-                                                    <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1.5} />
+                                                    <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                    <line x1="6" y1="11.25" x2="18" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                    <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                    <line x1="6" y1="20.75" x2="18" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                    <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
                                                     <rect width="32" height="32" fill='none' />
                                                 </g>
                                             </svg>
                                             : selectAlign === 'center' ?
                                                 <svg viewBox="0 0 32 32">
                                                     <g>
-                                                        <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
-                                                        <line x1="10" y1="11.25" x2="22" y2="11.25" stroke='#191919' strokeWidth={1} />
-                                                        <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
-                                                        <line x1="10" y1="20.75" x2="22" y2="20.75" stroke='#191919' strokeWidth={1} />
-                                                        <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1} />
+                                                        <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                        <line x1="10" y1="11.25" x2="22" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                        <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                        <line x1="10" y1="20.75" x2="22" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                        <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
                                                         <rect width="32" height="32" fill='none' />
                                                     </g>
                                                 </svg>
                                                 : selectAlign === 'right' ?
                                                     <svg viewBox="0 0 32 32">
                                                         <g>
-                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="14" y1="11.25" x2="26" y2="11.25" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="14" y1="20.75" x2="26" y2="20.75" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1} />
+                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="14" y1="11.25" x2="26" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="14" y1="20.75" x2="26" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
                                                             <rect width="32" height="32" fill='none' />
                                                         </g>
                                                     </svg>
                                                     :
                                                     <svg viewBox="0 0 32 32">
                                                         <g>
-                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="11.25" x2="26" y2="11.25" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="20.75" x2="26" y2="20.75" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1} />
+                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="11.25" x2="26" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="20.75" x2="26" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
                                                             <rect width="32" height="32" fill='none' />
                                                         </g>
                                                     </svg>
@@ -1682,11 +1685,11 @@ export default function PostMenu() {
                                                 >
                                                     <svg viewBox="0 0 32 32">
                                                         <g>
-                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1.5} />
-                                                            <line x1="6" y1="11.25" x2="18" y2="11.25" stroke='#191919' strokeWidth={1.5} />
-                                                            <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1.5} />
-                                                            <line x1="6" y1="20.75" x2="18" y2="20.75" stroke='#191919' strokeWidth={1.5} />
-                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1.5} />
+                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                            <line x1="6" y1="11.25" x2="18" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                            <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                            <line x1="6" y1="20.75" x2="18" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
                                                             <rect width="32" height="32" fill='none' />
                                                         </g>
                                                     </svg>
@@ -1703,11 +1706,11 @@ export default function PostMenu() {
                                                 >
                                                     <svg viewBox="0 0 32 32">
                                                         <g>
-                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="10" y1="11.25" x2="22" y2="11.25" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="10" y1="20.75" x2="22" y2="20.75" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1} />
+                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="10" y1="11.25" x2="22" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="10" y1="20.75" x2="22" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
                                                             <rect width="32" height="32" fill='none' />
                                                         </g>
                                                     </svg>
@@ -1724,11 +1727,11 @@ export default function PostMenu() {
                                                 >
                                                     <svg viewBox="0 0 32 32">
                                                         <g>
-                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="14" y1="11.25" x2="26" y2="11.25" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="14" y1="20.75" x2="26" y2="20.75" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1} />
+                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="14" y1="11.25" x2="26" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="14" y1="20.75" x2="26" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
                                                             <rect width="32" height="32" fill='none' />
                                                         </g>
                                                     </svg>
@@ -1745,11 +1748,11 @@ export default function PostMenu() {
                                                 >
                                                     <svg viewBox="0 0 32 32">
                                                         <g>
-                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="11.25" x2="26" y2="11.25" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="16" x2="26" y2="16" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="20.75" x2="26" y2="20.75" stroke='#191919' strokeWidth={1} />
-                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" stroke='#191919' strokeWidth={1} />
+                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="11.25" x2="26" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="20.75" x2="26" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
                                                             <rect width="32" height="32" fill='none' />
                                                         </g>
                                                     </svg>
@@ -1771,7 +1774,7 @@ export default function PostMenu() {
             </QuillStyle >
             {
                 confirmed &&
-                <div css={LoadModal}>
+                <LoadModal>
                     <div className='load_modal_bg'></div>
                     <div className='load_btn_wrap'>
                         <p>작성 중인 내용이 있습니다.</p>
@@ -1780,7 +1783,7 @@ export default function PostMenu() {
                         <button className='load_ok_btn' onClick={() => handleLoadPost(true)}>확인</button>
                         <button className='load_no_btn' onClick={() => handleLoadPost(false)}>취소</button>
                     </div>
-                </div>
+                </LoadModal>
             }
         </>
     )

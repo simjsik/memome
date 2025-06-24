@@ -204,10 +204,8 @@ export default function ClientNotice() {
                     {/* 무한 스크롤 구조 */}
                     {!loading && noticeList.map((post) => (
                         <motion.div
-                            whileHover={{
-                                backgroundColor: "#fafbfc",
-                                transition: { duration: 0.1 },
-                            }}
+                            whileHover='otherHover'
+                            variants={btnVariants(theme)}
                             key={post.id}
                             className='post_box'
                         >

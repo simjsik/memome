@@ -10,14 +10,14 @@ export const UserPostWrap = styled.div`
         display: flex;
         width: 100%;
         height: 42px;
-        border-bottom: 1px solid #ededed;
+        border-bottom: 1px solid ${({ theme }) => theme.colors.border};
     }
     // user_tab_wrap
 
     .user_post_list_wrap{
-        border-bottom: 1px solid #ededed;
+        border-bottom: 1px solid ${({ theme }) => theme.colors.border};
         padding: 20px;
-        background-color: #ffffff00;
+        background-color: ${({ theme }) => theme.colors.background_invisible};
         cursor:pointer;
 
         .user_post_content_wrap{
@@ -70,7 +70,7 @@ export const UserPostWrap = styled.div`
     .image_tab{
         flex: 0 0 50%;
         border: none;
-        background: #fff;
+        background: ${({ theme }) => theme.colors.background};
     }
     // memo_tab & image_tab
 
@@ -82,7 +82,7 @@ export const UserPostWrap = styled.div`
             min-width: 36px;
             height: 36px;
             margin-right: 8px;
-            border: 2px solid #ededed;
+            border: 2px solid ${({ theme }) => theme.colors.border};
             border-radius: 50%;
             background-size: cover;
             background-repeat: no-repeat;
@@ -104,7 +104,7 @@ export const UserPostWrap = styled.div`
         span{
             display: block;
             font-size : 0.875rem;
-            color: #272D2D;
+            color: ${({ theme }) => theme.colors.text};
             font-family: var(--font-pretendard-light);
             line-height : inherit;
         }
@@ -122,7 +122,7 @@ export const UserPostWrap = styled.div`
             height: 36px;
             border: none;
             border-radius : 50%;
-            background-color: #fff;
+            background-color: ${({ theme }) => theme.colors.background};
             cursor: pointer;
 
             div{
@@ -140,8 +140,8 @@ export const UserPostWrap = styled.div`
             .post_dlt_btn{
               width: 100%;
               height: 42px;
-              border: 1px solid #ededed;
-              background: #fff;
+              border: 1px solid ${({ theme }) => theme.colors.border};
+              background: ${({ theme }) => theme.colors.background};
               border-radius: 8px;
               color : red;
             }
@@ -171,9 +171,9 @@ export const UserPostWrap = styled.div`
             .post_delete_btn{
                 width: 100%;
                 height: 100%;
-                background: #fff;
+                background: ${({ theme }) => theme.colors.background};
                 border: none;
-                color: #dd1717;
+                color: ${({ theme }) => theme.colors.error};
                 cursor : pointer;
             }
         }
@@ -253,7 +253,7 @@ export const UserPostWrap = styled.div`
             border-radius : 8px;
             background-size: cover;
             background-repeat: no-repeat;
-            border : 1px solid #ededed;
+            border : 1px solid ${({ theme }) => theme.colors.border};
         }
     }
 
@@ -279,7 +279,7 @@ export const UserPostWrap = styled.div`
             height: 32px;
             border : none;
             border-radius : 50%;
-            background : #fff;
+            background :${({ theme }) => theme.colors.background};
             cursor : pointer
         }
 
