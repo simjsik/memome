@@ -42,7 +42,7 @@ height : 100%;
 
 .user_uid{
     font-size : 0.875rem;
-    color: #555;
+    color: ${({ theme }) => theme.colors.text_tag};
     font-family: var(--font-pretendard-medium);
 }
 
@@ -51,15 +51,15 @@ height : 100%;
     background-position: center;
     min-width: 72px;
     height: 72px;
-    border: 1px solid #ededed;
+    border: 1px solid ${({ theme }) => theme.colors.border};
     border-radius: 50%;
 }
 .update_toggle_btn{
     width: 100%;
     padding: 8px;
-    border: 1px solid #ededed;
+    border: 1px solid ${({ theme }) => theme.colors.border};
     border-radius : 4px;
-    background: #fff;
+    background: ${({ theme }) => theme.colors.background};
     margin-top: 20px;
     cursor: pointer;
     font-size : 0.875rem;
@@ -67,7 +67,7 @@ height : 100%;
 
 // 프로필 하단
 .profile_menu_wrap{
-    border-top: 1px solid #ededed;
+    border-top: 1px solid ${({ theme }) => theme.colors.border};
     margin-top: 20px;
     padding: 20px 0px;
 }
@@ -90,7 +90,7 @@ height : 100%;
     width: 32px;
     height: 32px;
     margin-right: 8px;
-    border: 1px solid #ededed;
+    border: 1px solid ${({ theme }) => theme.colors.border};
     border-radius: 50%;
 }
 
@@ -98,8 +98,8 @@ height : 100%;
     position: absolute;
     right: 0;
     padding: 8px 16px;
-    border: 1px solid #ededed;
-    background: #fff;
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    background: ${({ theme }) => theme.colors.background};
     cursor :pointer;
     font-size : 0.75rem;
 }
@@ -121,7 +121,7 @@ margin-top : 20px;
         input{
         flex: 0 0 70%;
         margin-right: 8px;
-        border: 1px solid #ededed;
+        border: 1px solid ${({ theme }) => theme.colors.border};
         height: 42px;
         margin-top: 8px;
         padding-left: 10px;
@@ -130,7 +130,7 @@ margin-top : 20px;
         p{
         font-size: 0.75rem;
         margin-top: 36px;
-        color: #777;
+        color: ${({ theme }) => theme.colors.text_tag};
         }
     }
     // --------------------------------------
@@ -159,9 +159,9 @@ margin-top : 20px;
                 display: block;
                 width: 120px;
                 height: 40px;
-                border: 1px solid #ededed;
+                border: 1px solid ${({ theme }) => theme.colors.border};
                 border-radius: 8px;
-                background-color: #fff;
+                background-color: ${({ theme }) => theme.colors.background};
                 text-align: center;
                 margin-right: 8px;
                 cursor: pointer;
@@ -189,7 +189,7 @@ margin-top : 20px;
         .photo_preview{
             width: 62px;
             height: 62px;
-            border: 2px solid #ededed;
+            border: 2px solid ${({ theme }) => theme.colors.border};
             border-radius: 50%;
             background-size: cover;
             background-repeat : no-repeat;
@@ -201,7 +201,7 @@ margin-top : 20px;
     // 변경사항 있을 시 버튼
     .update_btn_wrap{
     margin-top : 40px;
-    border : 1px solid #ededed;
+    border : 1px solid ${({ theme }) => theme.colors.border};
     padding : 8px;
     border-radius : 8px;
     text-align : right;
@@ -225,7 +225,7 @@ margin-top : 20px;
         .update_btn{
         padding: 8px 18px;
         border: none;
-        background: #0087ff;
+        background: ${({ theme }) => theme.colors.primary};
         color: #fff;
         border-radius: 8px;
         cursor : pointer; 
@@ -310,12 +310,12 @@ margin-top : 20px;
 
         .memo_btn {
             padding: 6px 16px;
-            border: 3px solid #ededed;
+            border: 3px solid ${({ theme }) => theme.colors.border};
         }
 
         .update_toggle_btn{
             padding: 12px;
-            border: 3px solid #ededed;
+            border: 3px solid ${({ theme }) => theme.colors.border};
         }
     }
         
@@ -342,7 +342,7 @@ margin-top : 20px;
 
         .memo_btn {
             padding: 8px 20px;
-            border: 3px solid #ededed;
+            border: 3px solid ${({ theme }) => theme.colors.border};
         }
 
         .update_toggle_btn{
@@ -640,7 +640,7 @@ export default function UserProfile() {
                         background-position : center;
                         width : 72px;
                         height : 72px;
-                        border : 1px solid #333;
+                        border : 1px solid ${theme.colors.border};
                         border-radius : 50%;
                     `}></div>
                 <motion.button
@@ -717,7 +717,7 @@ export default function UserProfile() {
                                     background-position : center;
                                     width : 32px;
                                     height : 32px;
-                                    border : 1px solid #333;
+                                    border : 1px solid ${theme.colors.border};
                                     border-radius : 50%;
                                 `}></div>
                                 <p>새 메모를 작성하세요</p>
