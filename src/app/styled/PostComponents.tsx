@@ -204,7 +204,6 @@ align-content: flex-start;
       .post_comment_icon{
         width: 100%;
         height: 100%;
-        background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736449945/%EB%8C%93%EA%B8%80%EC%95%84%EC%9D%B4%EC%BD%98_xbunym.svg);
       }
 
       .post_comment{

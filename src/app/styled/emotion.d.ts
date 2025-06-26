@@ -6,15 +6,16 @@ declare module '@emotion/react' {
             background: string;
             background_invisible: string;
             text: string;
-            text_tag : string;
-            inverted_text : string;
+            text_tag: string;
+            inverted_text: string;
             primary: string;
             hoverBg: string;
             clickBg: string;
             error: string;
             border: string;
-            icon_off : string;
-            icon_on : string;
+            icon_off: string;
+            icon_on: string;
+            blur: string;
         };
         // 다른 커스텀 프로퍼티가 있으면 여기에…
     }

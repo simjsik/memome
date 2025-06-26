@@ -14,6 +14,7 @@ export const lightTheme: Theme = {
         border: '#ededed',
         icon_off: '#ccc',
         icon_on: '#050505',
+        blur: 'rgb(255,255,255,0.6)'
     },
 };
 
@@ -31,5 +32,6 @@ export const darkTheme: Theme = {
         border: '#303030',
         icon_off: '#fff',
         icon_on: '#fff',
+        blur: 'rgb(0,0,0,0.6)'
     },
 };
