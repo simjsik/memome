@@ -132,7 +132,6 @@ export default async function MemoPage({ params }: MemoPageProps) {
             <ClientPost commentLength={commentLength} />
             <PostDetailWrap>
                 <div>
-
                     {post?.notice ? <><span className="post_category notice">{post?.tag}</span></> : <><span className="post_category">[{post?.tag}]</span></>}
                     <div className="post_title_wrap">
                         <p className="post_title">

@@ -83,6 +83,7 @@ line-height : 32px;
 .post_content_wrap{
     margin-top : 40px;
     padding-bottom : 200px;
+    height : fit-content;
 }
 
 img {
@@ -114,6 +115,7 @@ background : red;
         height: calc(100% - 82px);
         min-height: auto;
         padding: 20px;
+        overflow-y : scroll;
 
         .post_title_wrap{
             flex-direction: column;
