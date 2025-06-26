@@ -288,6 +288,12 @@ export default function ClientNotice() {
                                                 variants={btnVariants(theme)}
                                                 whileHover="iconHover"
                                                 whileTap="iconClick" className='post_comment_icon'>
+                                                <svg viewBox="0 0 67.41 67.41">
+                                                    <g>
+                                                        <path fill='none' stroke-width={5} css={css`stroke : ${theme.colors.text}`} d="M48.23,6.7h-29C12.29,6.7,6.7,11.59,6.7,17.62V40.77c0,6,2.61,10.91,9.5,10.91h.91a1.84,1.84,0,0,1,1.95,1.71v5.26c0,1.55,1.88,2.54,3.45,1.81l13.72-8.32a4.9,4.9,0,0,1,2.08-.46h9.92c6.89,0,12.47-4.88,12.47-10.91V17.62C60.7,11.59,55.12,6.7,48.23,6.7Z" />
+                                                        <rect width="67.41" height="67.41" fill='none' />
+                                                    </g>
+                                                </svg>
                                             </motion.div>
                                         </motion.button>
                                         <p>{post.commentCount}</p>
