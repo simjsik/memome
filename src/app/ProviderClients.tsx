@@ -15,7 +15,7 @@ import createCache from "@emotion/cache";
 import { getAuth, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 import GlobalLoadingWrap from "./components/GlobalLoading";
 import { darkTheme, lightTheme } from "./styled/theme";
-import GlobalStyles from "./components/GlobalStyles";
+import GlobalStyles from "./styled/GlobalStyles";
 
 const queryClient = new QueryClient();
 

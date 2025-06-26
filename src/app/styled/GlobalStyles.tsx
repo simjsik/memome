@@ -16,7 +16,17 @@ const GlobalStyles = () => {
                     
                 a, span, h2, h1, strong, p, u, i {
                     color: ${theme.colors.text};
-                }
+                }             
+
+                :root {
+                --bg:      ${theme.colors.background};
+                --text:    ${theme.colors.text};
+                --tag:    ${theme.colors.text_tag};
+                --primary: ${theme.colors.primary};
+                --bd: ${theme.colors.border};
+                
+                /* 필요한 값 더 추가 */
+              }
             `}
         />
     );
