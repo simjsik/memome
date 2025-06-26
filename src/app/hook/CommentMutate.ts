@@ -175,9 +175,6 @@ export function useDelComment(
                 alert('댓글 삭제에 실패했습니다.');
             }
         },
-        onSuccess: () => {
-            alert('삭제되었습니다');
-        },
         onSettled: () => {
             queryClient.invalidateQueries({
                 queryKey: ['comments', postId],
