@@ -70,19 +70,19 @@ width : 100%;
     width: 100%;
     padding-left: 10px;
     text-align: left;
-    background: #fff;
+    background: ${({ theme }) => theme.colors.background};
     font-size: 16px;
     line-height: 38px;
 }
 
 .comment_wrap{
 border: none;
-border-bottom : ${(props) => (props.btnStatus ? '2px solid #191919' : '2px solid #dedede')};
+border-bottom : 2px solid ${({ theme }) => theme.colors.border};
 }
 
 .memo_btn{
 border: none;
-border-bottom : ${(props) => (props.btnStatus ? '2px solid #dedede' : '2px solid #191919')};
+border-bottom : 2px solid ${({ theme }) => theme.colors.border};
 }
 
 .status_wrap{
@@ -101,7 +101,7 @@ line-height : 18px;
 }
 
 & .status_wrap>div:hover {
-background : #fdfdfd;
+background : ${({ theme }) => theme.colors.hoverBg};
 }
 
 & .memo_title:hover{
@@ -113,7 +113,7 @@ cursor:pointer;
 width : 18px;
 height :18px;
 margin-right : 4px;
-background : #0087ff;
+background : ${({ theme }) => theme.colors.primary};
 }
 
 .memo_img_void{
@@ -132,7 +132,7 @@ max-width: 210px;
 
 .memo_tag {
 font-size: 14px;
-    color: #777;
+    color: ${({ theme }) => theme.colors.text_tag};
     margin-right : 2px;
 }
 
@@ -162,7 +162,7 @@ font-size : 14px;
     bottom: 0;
     z-index: 1;
     width: 100%;
-    background-color: #fff;
+    background-color: ${({ theme }) => theme.colors.background};
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 
     .post_menu_wrap{
@@ -176,7 +176,7 @@ font-size : 14px;
         height: fit-content;
         width: 100%;
         margin-top:auto;
-        background-color: #fff;
+        background-color: ${({ theme }) => theme.colors.background};
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 
         .post_menu_wrap{
@@ -503,9 +503,9 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                         css`
                                             width : 100%;
                                             height : 52px;
-                                            background : #0087ff;
+                                            background : ${theme.colors.primary};
                                             color : #fff;
-                                            border : 1px solid #ededed;
+                                            border : 1px solid ${theme.colors.border};
                                             border-radius : 4px;
                                             font-size : 1rem;
                                             font-family : var(--font-pretendard-medium);
