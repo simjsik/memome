@@ -838,7 +838,7 @@ width: 100%;
     width: 60px;
     height: 32px;
     border: 1px solid ${({ theme }) => theme.colors.border};
-    background: #fff;
+    background: ${({ theme }) => theme.colors.background};
     margin: 8px 0px;
     cursor : pointer;
   }

@@ -100,10 +100,6 @@ border-radius : 4px;
 line-height : 18px;
 }
 
-& .status_wrap>div:hover {
-background : ${({ theme }) => theme.colors.hoverBg};
-}
-
 & .memo_title:hover{
 text-decoration : underline;
 cursor:pointer;
