@@ -153,7 +153,7 @@ export const setHasUpdateReplyFlag = onDocumentCreated(
     const commentId = replyData?.parentId; // 댓글 ID
     try {
       const postRef = await adminDb.collection("posts").doc(postId);
-      const commentRef = postRef.collection("comment").doc(commentId);
+      const commentRef = postRef.collection("comments").doc(commentId);
       await postRef.update({
         commentCount: FieldValue.increment(1),
       });
@@ -177,7 +177,7 @@ export const setHasDeleteReplyFlag = onDocumentDeleted(
     const commentId = replyData?.parentId; // 댓글 ID
     try {
       const postRef = await adminDb.collection("posts").doc(postId);
-      const commentRef = postRef.collection("comment").doc(commentId);
+      const commentRef = postRef.collection("comments").doc(commentId);
       await postRef.update({
         commentCount: FieldValue.increment(-1),
       });

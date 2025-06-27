@@ -56,7 +56,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
-
                 if (user) {
                     const uid = user.uid
                     const idToken = await user.getIdToken();
@@ -80,6 +79,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                     const idTokenResult = await getIdTokenResult(user);
                     const claims = idTokenResult.claims as CustomClaims;
                     setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
+                    console.log(!!claims.roles?.admin, '어드민')
                     setGuest(!!claims.roles?.guest);
                     await setUser({
                         uid: uid,
