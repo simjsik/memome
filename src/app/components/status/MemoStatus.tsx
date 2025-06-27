@@ -409,7 +409,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
     return (
         <MemoBox btnStatus>
             <div className="memo_btn_wrap">
-                <div className="comment_wrap">댓글 {commentList.length}</div>
+                <div className="comment_wrap">댓글</div>
             </div>
             <div className="status_wrap" ref={containerRef}>
                 <PostCommentStyle>

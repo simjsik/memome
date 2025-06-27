@@ -186,6 +186,7 @@ export default function StatusBox() {
             setIsMemoPage(false);
         }
     }, [path])
+    
     // 768 상태 창 핸들러
     const statusHandle = () => {
         setMobileStatus((prev) => !prev);
