@@ -56,7 +56,7 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
 
                 if (!validateResponse.ok) {
                     const errorDetails = await validateResponse.json();
-                    throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
+                    throw new Error(`답글 요청 실패: ${errorDetails.message}`);
                 }
 
                 return fetchReplies(
@@ -216,7 +216,7 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                 </>
             }
             {dataLoading && <LoadingWrap />}
-            {(hasNextPage && !isLoading && !isFetchingNextPage && repliesToggle) &&
+            {((hasNextPage && repliesToggle) && !isFetchingNextPage) &&
                 <>{dataLoading ? <LoadingWrap /> : <button className="reply_more_btn" onClick={handleMoreReply}>더 보기</button>}</>
             }
         </>

@@ -147,7 +147,7 @@ export function useDelComment(
             const commentData = docSnapshot.data();
             const commentOwnerId = commentData.uid;
 
-            if (user.uid !== commentOwnerId && commentOwnerId !== ADMIN) {
+            if (user.uid !== commentOwnerId || !ADMIN) {
                 throw new Error('FB'); // FORBIDDEN
             }
 
@@ -168,11 +168,11 @@ export function useDelComment(
         },
         onError: (err) => {
             if (err.message === 'NF') {
-                alert('해당 댓글을 찾을 수 없습니다.');
+                return alert('해당 댓글을 찾을 수 없습니다.');
             } else if (err.message === 'FB') {
-                alert('삭제 권한이 없습니다.');
+                return alert('삭제 권한이 없습니다.');
             } else {
-                alert('댓글 삭제에 실패했습니다.');
+                return alert('댓글 삭제에 실패했습니다.');
             }
         },
         onSettled: () => {
@@ -211,14 +211,13 @@ export function useDelReply(
         mutationFn: async (replyId) => {
             const replyRef = doc(db, 'posts', postId, 'comments', parentId, 'reply', replyId);
             const replySnap = await getDoc(replyRef);
-
             if (!replySnap.exists()) {
                 throw new Error("NF") // NOT FOUND
             }
             const replyData = replySnap.data();
             const replyOwnerId = replyData.uid;
 
-            if (user.uid !== replyOwnerId && replyOwnerId !== ADMIN) {
+            if (user.uid !== replyOwnerId && !ADMIN) {
                 throw new Error('FB'); // FORBIDDEN
             }
 
@@ -227,14 +226,15 @@ export function useDelReply(
 
             await batch.commit();
             setCommentCount(prev => prev - 1);
+
         },
         onError: (err) => {
             if (err.message === 'NF') {
-                alert('해당 댓글을 찾을 수 없습니다.');
+                return alert('해당 답글을 찾을 수 없습니다.');
             } else if (err.message === 'FB') {
-                alert('삭제 권한이 없습니다.');
+                return alert('삭제 권한이 없습니다.');
             } else {
-                alert('댓글 삭제에 실패했습니다.');
+                return alert('답글 삭제에 실패했습니다.');
             }
         },
         onSuccess: () => {

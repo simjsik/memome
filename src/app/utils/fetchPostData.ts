@@ -15,7 +15,7 @@ async function getCachedUserInfo(userId: string) {
     // 캐시에 없으면 Firestore에서 조회
     let userDoc = await getDoc(doc(db, "users", userId));
     if (!userDoc) {
-        userDoc = await getDoc(doc(db, "guest", userId));
+        userDoc = await getDoc(doc(db, "guests", userId));
     }
     const userData = userDoc.data() || { displayName: '', photoURL: '' };
     const user = {
@@ -391,7 +391,7 @@ export const fetchReplies = async (userId: string, postId: string, commentId: st
         // 3. 각 댓글에 대해 작성자 정보 가져오기 (비동기 작업을 Promise.all으로 처리)
         const comments: Reply[] = await Promise.all(
             commentSnap.docs.map(async (docSnapshot) => {
-                const replyData = docSnapshot.data() as Reply;
+                const replyData = { id: docSnapshot.id, ...docSnapshot.data() } as Reply;
 
                 const userId: string = replyData.uid;
 
@@ -405,7 +405,6 @@ export const fetchReplies = async (userId: string, postId: string, commentId: st
         );
 
         const lastVisible = commentSnap.docs.at(-1); // 마지막 문서
-
         return {
             data: comments,
             nextPage: lastVisible
