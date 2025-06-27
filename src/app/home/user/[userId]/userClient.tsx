@@ -70,18 +70,19 @@ export default function UserClient({ user }: ClientUserProps) {
         queryKey: ['postList', uid as string],
         queryFn: async ({ pageParam }) => {
             try {
+                const userId = currentUser.uid
                 const validateResponse = await fetch(`/api/validate`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",
-                    body: JSON.stringify({ uid }),
+                    body: JSON.stringify({ userId }),
                 });
                 if (!validateResponse.ok) {
                     const errorDetails = await validateResponse.json();
                     throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
                 }
 
-                return fetchPostList(uid as string, pageParam);
+                return fetchPostList(userId as string, uid as string, pageParam);
             } catch (error) {
                 if (error instanceof Error) {
                     console.error("일반 오류 발생:", error.message);
@@ -116,18 +117,19 @@ export default function UserClient({ user }: ClientUserProps) {
         queryKey: ['ImagePostList', uid as string],
         queryFn: async ({ pageParam }) => {
             try {
+                const userId = currentUser.uid
                 const validateResponse = await fetch(`/api/validate`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",
-                    body: JSON.stringify({ uid }),
+                    body: JSON.stringify({ userId }),
                 });
                 if (!validateResponse.ok) {
                     const errorDetails = await validateResponse.json();
                     throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
                 }
 
-                return fetchImageList(uid as string, pageParam);
+                return fetchImageList(userId as string, uid as string, pageParam);
             } catch (error) {
                 if (error instanceof Error) {
                     console.error("일반 오류 발생:", error.message);

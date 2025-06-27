@@ -423,6 +423,7 @@ export const fetchReplies = async (userId: string, postId: string, commentId: st
 
 export const fetchPostList = async (
     userId: string,
+    profileUid: string,
     pageParam: Timestamp | undefined,
 ) => {
     try {
@@ -454,7 +455,7 @@ export const fetchPostList = async (
 
         const queryBase = query(
             postlistRef,
-            where('userId', '==', userId),
+            where('userId', '==', profileUid),
             orderBy('createAt', 'desc'),
             limit(6)
         );
@@ -513,6 +514,7 @@ export const fetchPostList = async (
 
 export const fetchImageList = async (
     userId: string,
+    profileUid: string,
     pageParam: Timestamp | undefined,
 ) => {
     try {
@@ -544,7 +546,7 @@ export const fetchImageList = async (
 
         const queryBase = query(
             postlistRef,
-            where('userId', '==', userId),
+            where('userId', '==', profileUid),
             where('images', '!=', false),
             orderBy('createAt', 'desc'),
             limit(10)
