@@ -15,6 +15,7 @@ const useUpdateChecker = () => {
         const fetchUpdateStatus = async () => {
             try {
                 const docRef = hasGuest ? doc(db, `guests/${currentUser.uid}/status/postUpdates`) : doc(db, `users/${currentUser.uid}/status/postUpdates`);
+
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     setHasUpdate(docSnap.data().hasUpdate || false);
@@ -52,7 +53,7 @@ const useUpdateChecker = () => {
                     }
                     throw new Error(`새 포스트 업데이트 실패 : ${errorDetails.message}`);
                 }
-
+                
                 const docRef = hasGuest ? doc(db, `guests/${userId}/status/postUpdates`) : doc(db, `users/${userId}/status/postUpdates`);
                 await updateDoc(docRef, { hasUpdate: false });
 

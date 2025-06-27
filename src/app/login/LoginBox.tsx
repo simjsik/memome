@@ -22,6 +22,7 @@ import { BeatLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { btnVariants } from "../styled/motionVariant";
+import { fetchCustomToken, fetchGuestLogin } from "./utils/authHelper";
 
 interface FirebaseError extends Error {
     code: string;
@@ -246,54 +247,17 @@ export default function LoginBox() {
             let idToken;
             let signUser;
             let data;
-            let guestResponse;
-
-            // 공통 게스트 로그인 로직
-            const handleGuestResponse = async (idToken: string, guestUid?: string) => {
-                return await fetch("/api/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
-                    credentials: "include",
-                    body: JSON.stringify({ idToken, guestUid }),
-                });
-            };
-
-            const handleCustomTokenResponse = async (guestUid?: string) => {
-                return await fetch("/api/customToken", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
-                    credentials: "include",
-                    body: JSON.stringify({ guestUid }),
-                });
-            };
 
             if (guestUid) {
-
-                const guestTokenResponse = await handleCustomTokenResponse(guestUid);
-                if (!guestTokenResponse.ok) {
-                    const errorData = await guestTokenResponse.json();
-                    throw new Error(`로그인 시도 실패 ${guestTokenResponse.status}: ${errorData.message}`);
-                }
-
-                const tokenData = await guestTokenResponse.json();
-                const token = tokenData.customToken;
+                const token = await fetchCustomToken(guestUid);
 
                 const userCredential = await signInWithCustomToken(auth, token);
-                const signUser = userCredential.user
+                signUser = userCredential.user
 
                 idToken = await signUser.getIdToken();
 
-                guestResponse = await handleGuestResponse(idToken, guestUid);
-                if (!guestResponse.ok) {
-                    const errorData = await guestResponse.json();
-                    if (guestResponse.status === 404) {
-                        await auth.signOut(); // 🔥 세션 무효화
-                        localStorage.removeItem("guestUid"); // 🔥 잘못된 UID 삭제
-                    }
-                    throw new Error(`로그인 시도 실패 ${guestResponse.status}: ${errorData.message}`);
-                }
-
-                data = await guestResponse.json();
+                data = await fetchGuestLogin(idToken);
+                console.log(data, '기존 게스트 정보')
             } else {
                 const userCredential = await signInAnonymously(auth);
                 signUser = userCredential.user
@@ -301,36 +265,27 @@ export default function LoginBox() {
 
                 await auth.signOut(); // 🔥 세션 무효화
 
-                const customTokenResponse = await handleCustomTokenResponse(guestUid);
-                const tokenData = await customTokenResponse.json();
-                const { customToken } = tokenData;
+                const customToken = await fetchCustomToken(guestUid);
 
                 const guestCredential = await signInWithCustomToken(auth, customToken);
                 signUser = userCredential.user
                 idToken = await guestCredential.user.getIdToken();
 
-                guestUid = signUser.uid
-                guestResponse = await handleGuestResponse(idToken, guestUid);
-                if (!guestResponse.ok) {
-                    const errorData = await guestResponse.json();
-                    throw new Error(`로그인 시도 실패 ${guestResponse.status}: ${errorData.message}`);
-                }
-
-                data = await guestResponse.json();
-                const { guestName } = data;
+                data = await fetchGuestLogin(idToken);
+                console.log(data, '신규 게스트 정보')
                 await updateProfile(signUser, {
-                    displayName: guestName,
+                    displayName: data.user.name,
                     photoURL: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg'
                 });
             }
 
-            const { uid, user } = data;
-            localStorage.setItem('guestUid', uid);
+            console.log(data, '유저 세션 정보')
+            localStorage.setItem('guestUid', data.uid);
             setUser({
-                name: user.name,
-                email: user.email,
-                photo: user.photo,
-                uid: uid,
+                name: data.name,
+                email: data.email,
+                photo: data.photo,
+                uid: data.uid,
             })
             setHasLogin(true);
             await router.push('/home/main');
@@ -338,7 +293,7 @@ export default function LoginBox() {
             // Firebase 에러 타입 보존
             if (isFirebaseError(error)) {
                 console.error("Firebase 오류:", error.code, error.message);
-                setLoginError(firebaseErrorMessages[error.code] ?? "Firebase 오류 발생");
+                setLoginError(firebaseErrorMessages[error.code] ?? "게스트 로그인 시도 실패");
             } else if (error instanceof Error) {
                 console.error("일반 오류:", error);
                 setLoginError(error.message);
