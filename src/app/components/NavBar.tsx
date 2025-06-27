@@ -90,7 +90,6 @@ height : 48px;
 margin : 0 auto;
 margin-top: 20px;
 border-radius : 8px;
-cursor: pointer;
 
     .post_alarm{
         position : absolute;
@@ -98,6 +97,11 @@ cursor: pointer;
         width :6px;
         height : 6px;
         border-radius : 50%;
+    }
+
+    .menu_icon{
+        cursor: pointer;
+        border-radius: 4px;
     }
 
     .menu_icon,
@@ -121,9 +125,6 @@ cursor: pointer;
         height: 2px;
     }
 
-    &:hover{
-        background : ${({ theme }) => theme.colors.hoverBg};
-    }
     @media (max-width: 480px) {
         display: flex;
         flex-direction: column;
@@ -341,7 +342,7 @@ export default function NavBar() {
                                     <svg viewBox="0 0 39 40">
                                         <g>
                                             <path d="M9,9.163V28.815a1.31,1.31,0,0,0,.637,1,1.292,1.292,0,0,0,1.181.068l7.691-4.811a1.445,1.445,0,0,1,1,0l7.673,4.811a1.292,1.292,0,0,0,1.181-.068,1.31,1.31,0,0,0,.637-1V9.163A1.249,1.249,0,0,0,27.691,8H10.309A1.249,1.249,0,0,0,9,9.163Z"
-                                                fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2.5'} opacity={0.1} />
+                                                fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2.5'} opacity={0.3} />
                                             <rect fill="none" stroke='none' />
                                         </g>
                                     </svg>
@@ -379,9 +380,9 @@ export default function NavBar() {
                                 <div className='no_active_icon'>
                                     <svg viewBox="0 0 36 36">
                                         <g id="Layer_2" data-name="Layer 2">
-                                            <circle cx="18" cy="11.5" r="4" fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2.5'} opacity={0.1} />
+                                            <circle cx="18" cy="11.5" r="4" fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2.5'} opacity={0.3} />
                                             <path d="M27.3,28.5a2,2,0,0,0,1.6-2.62C27.6,21.63,23.22,18.5,18,18.5S8.4,21.63,7.1,25.88A2,2,0,0,0,8.7,28.5Z"
-                                                fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2.5'} opacity={0.1} />
+                                                fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2.5'} opacity={0.3} />
                                             <rect fill="none" stroke='none' />
                                         </g>
                                     </svg>
@@ -421,9 +422,9 @@ export default function NavBar() {
                                     <svg viewBox="0 0 40 40">
                                         <g>
                                             <path d="M18,8H11.25A3.25,3.25,0,0,0,8,11.25v13.5A3.25,3.25,0,0,0,11.25,28h13.5A3.25,3.25,0,0,0,28,24.75V18"
-                                                transform="translate(1 1)" fill="none" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="2.5" css={css`stroke : ${theme.colors.icon_on}`} opacity={0.1} />
+                                                transform="translate(1 1)" fill="none" strokeLinecap="round" strokeMiterlimit="10" strokeWidth="2.5" css={css`stroke : ${theme.colors.icon_off}`} opacity={0.3} />
                                             <path d="M24,21.718a.524.524,0,0,0,.524.532l1.253-.16a.569.569,0,0,0,.3-.142L37.858,10.158a.753.753,0,0,0-.142-1.029l-.6-.594a.757.757,0,0,0-1.031-.142L24.276,20.174a.567.567,0,0,0-.142.3Z"
-                                                transform="translate(-8 -0.25)" css={css`fill : ${theme.colors.icon_on}`} opacity={0.1} />
+                                                transform="translate(-8 -0.25)" css={css`fill : ${theme.colors.icon_off}`} opacity={0.3} />
                                         </g>
                                         <g>
                                             <rect fill="none" />

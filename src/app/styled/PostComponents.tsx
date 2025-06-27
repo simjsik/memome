@@ -322,20 +322,6 @@ align-content: flex-start;
         border-bottom: 1px solid ${({ theme }) => theme.colors.border};
         text-align: center;
     }
-
-    .retry_post_btn{
-      width: fit-content;
-      margin: 0 auto;
-      margin-top : 10px;
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      background: ${({ theme }) => theme.colors.primary};
-      color: #fff;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-      cursor: pointer;
-      font-size : 0.875rem;
-    }
 //----------------------------------------------------
   @media (max-width: 480px) {
     overflow-y: scroll;
@@ -981,6 +967,20 @@ export const NoMorePost = styled.div`
       color: ${({ theme }) => theme.colors.text_tag};
       font-size: 0.875rem;
       margin-top : 4px;
+    }
+
+    .retry_post_btn{
+      width: fit-content;
+      margin: 0 auto;
+      margin-top : 10px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      background: ${({ theme }) => theme.colors.primary};
+      color: #fff;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      font-size : 0.875rem;
     }
 `
 export const NewPostBtn = styled(motion.button)`
