@@ -1124,6 +1124,16 @@ export default function PostMenu() {
         };
     }
 
+    const remToPxMap: Record<string, string> = {
+        '0.625rem': '10px',
+        '0.75rem': '12px',
+        '0.875rem': '14px',
+        '1rem': '16px',
+        '1.125rem': '18px',
+        '1.25rem': '20px',
+        '1.375rem': '22px',
+    };
+
     // 이미지 최대 수 제한 로직
     useEffect(() => {
         if (!quillLoaded) return;
@@ -1202,9 +1212,14 @@ export default function PostMenu() {
         // 텍스트 커서 및 선택 범위 변경 시 도구에 반영
         const handleCursorChange = () => {
             const range = editor.getSelection(); // 현재 커서 범위
+
             if (range) {
-                const currentFormats = editor.getFormat(range); // 커서 위치의 스타일 정보
-                setSelectedFontSize(currentFormats.size as string || '14px'); // 폰트 크기
+                const currentFormats = editor.getFormat(range);
+
+                const fontSizeRem = currentFormats.size as string;
+                const fontSizePx = remToPxMap[fontSizeRem] || '14px';
+
+                setSelectedFontSize(fontSizePx); // 폰트 크기
                 setSelectedLineHeight(currentFormats.lineheight as string || '1'); // 줄 높이
                 setSelectedColor(currentFormats.color as string || '#191919'); // 글자 색
                 setSelectedBgColor(currentFormats.background as string || '#191919'); // 배경 색
