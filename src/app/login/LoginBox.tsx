@@ -23,6 +23,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { btnVariants } from "../styled/motionVariant";
 import { fetchCustomToken, fetchGuestLogin } from "./utils/authHelper";
+import Image from "next/image";
 
 interface FirebaseError extends Error {
     code: string;
@@ -68,7 +69,6 @@ export const LogoBox = css`
     height: 40px;
     background-size: cover;
     background-repeat: no-repeat;
-    background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737169919/%EC%BB%AC%EB%9F%AC%EB%A1%9C%EA%B3%A0_snbplg.svg);
 `
 export default function LoginBox() {
     const theme = useTheme();
@@ -348,7 +348,15 @@ export default function LoginBox() {
         <>
             {pathName === '/login' &&
                 <div css={LoginWrap}>
-                    <div className="logo_box" css={LogoBox}></div>
+                    <div className="logo_box" css={LogoBox}>
+                        <Image
+                            src="https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737169919/%EC%BB%AC%EB%9F%AC%EB%A1%9C%EA%B3%A0_snbplg.svg"
+                            alt="logo"
+                            fill
+                            priority  // 첫 화면 LCP에 중요하면 추가
+                            style={{ objectFit: 'cover' }}
+                        />
+                    </div>
                     <LoginButtonWrap>
                         <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
                             <LoginInputWrap>
