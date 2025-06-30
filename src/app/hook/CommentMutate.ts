@@ -147,7 +147,7 @@ export function useDelComment(
             const commentData = docSnapshot.data();
             const commentOwnerId = commentData.uid;
 
-            if (user.uid !== commentOwnerId || !ADMIN) {
+            if (user.uid !== commentOwnerId &&!ADMIN) {
                 throw new Error('FB'); // FORBIDDEN
             }
 
