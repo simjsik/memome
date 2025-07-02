@@ -49,122 +49,112 @@ background : ${({ theme }) => theme.colors.background};
         justify-content: space-between;
         width: 100%;
         height: 100%;
-        padding: 10px 0px 96px;
     }
 
-.list_toggle {
-width : 48px;
-height : 48px;
-border : none;
-background : gray;
-border-radius : 4px;
-cursor : pointer;
-}
+    .list_toggle {
+        width : 48px;
+        height : 48px;
+        border : none;
+        background : gray;
+        border-radius : 4px;
+        cursor : pointer;
+    }
 
-  @media (max-width: 480px) {
+    @media (max-width: 480px) {
+            position: absolute;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            transform : none;
+            width: 100%;
+            height: 100%;
+            border-radius: 0px;
+    }
+
+    @media (min-width : 481px) and (max-width: 1200px) {
         position: absolute;
         z-index: 10;
-        left: 0;
-        top: 0;
-        transform : none;
-        width: 100%;
-        height: 100%;
-        border-radius: 0px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: clamp(
+            320px,
+            calc(400px + 16.667vw),
+            500px
+        );
 
         .list_top{
-            padding: 0px;
+            height : calc(100% - 64px);
         }
-  }
-
-  @media (min-width : 481px) and (max-width: 1200px) {
-    position: absolute;
-    z-index: 10;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  @media (min-width: 1921px) {
-    border-left: 2px solid ${({ theme }) => theme.colors.border};
-    border-right: 2px solid ${({ theme }) => theme.colors.border};
-    width: 500px;
-    max-height : 2000px;
-    right: clamp(320px, calc(320px + (100vw - 1920px) * 0.4375), 600px);
-
-    ${({ $isMemoPage, theme }) =>
-        $isMemoPage &&
-        `
-        position : fixed;
-        top: 0;
-        right: 0;
-        width : 460px;
-        height: 100%;
-        padding : 20px;
-        border : 1px solid ${theme.colors.border};
-        border-radius : 8px;
-        background : ${theme.colors.background};
-        `
     }
-  }
 
-  @media (min-width: 2560px) {
-    width: 600px;
-    padding : 28px;
-    right: clamp(500px, calc(500px + (100vw - 2560px) * 0.3125), 900px);
+    @media (min-width: 1921px) {
+        border-left: 1px solid ${({ theme }) => theme.colors.border};
+        border-right: 1px solid ${({ theme }) => theme.colors.border};
+        width: 500px;
+        max-height : 2000px;
+        right: clamp(320px, calc(320px + (100vw - 1920px) * 0.4375), 600px);
 
-    ${({ $isMemoPage, theme }) =>
+        ${({ $isMemoPage, theme }) =>
         $isMemoPage &&
         `
-        position : fixed;
-        top: 0;
-        right: 0;
-        height: 100%;
-        padding : 20px;
-        border : 1px solid ${theme.colors.border};
-        border-radius : 8px;
-        background : ${theme.colors.background};
-    `}
-  }
+            position : fixed;
+            top: 0;
+            right: 0;
+            padding : 20px;
+            border : 1px solid ${theme.colors.border};
+            border-radius : 8px;
+            `
+    }
+    }
 
-  @media (min-width: 3840px) {
-    border-left: 3px solid ${({ theme }) => theme.colors.border};
-    border-right: 3px solid ${({ theme }) => theme.colors.border};
-    width: 680px;
-    padding : 32px;
-    right: clamp(920px, calc(920px + (100vw - 3840px) * 0.3125), 1320px);
+    @media (min-width: 2560px) {
+        width: 600px;
+        padding : 28px;
+        right: clamp(500px, calc(500px + (100vw - 2560px) * 0.4223), 1060px);
+        border-left: 2px solid ${({ theme }) => theme.colors.border};
+        border-right: 2px solid ${({ theme }) => theme.colors.border};
 
-    ${({ $isMemoPage, theme }) =>
+        ${({ $isMemoPage, theme }) =>
         $isMemoPage &&
         `
-        position : fixed;
-        top: 0;
-        right: 0;
-        height: 100%;
-        padding : 20px;
-        border : 1px solid ${theme.colors.border};
-        border-radius : 8px;
-        background : ${theme.colors.background};
-    `}
-  }
-    
-  @media (min-width: 5120px) {
-    width: 760px;
-    padding : 36px;
-    right: clamp(1420px, calc(1420px + (100vw - 5120px) * 0.3125), 100vw);
+            position : fixed;
+            right: 0;
+            padding : 24px;
+            border : 2px solid ${theme.colors.border};
+        `}
+    }
 
-    ${({ $isMemoPage, theme }) =>
+    @media (min-width: 3840px) {
+        border-left: 3px solid ${({ theme }) => theme.colors.border};
+        border-right: 3px solid ${({ theme }) => theme.colors.border};
+        width: 800px;
+        padding : 32px;
+        right: clamp(920px, calc(920px + (100vw - 3840px) * 0.3125), 1320px);
+
+        ${({ $isMemoPage, theme }) =>
         $isMemoPage &&
         `
-        position : fixed;
-        top: 0;
-        right: 0;
-        height: 100%;
-        padding : 20px;
-        border : 1px solid ${theme.colors.border};
-        border-radius : 8px;
-        background : ${theme.colors.background};
-    `}
-  }
+            right: 0;
+            height: 100%;
+            padding : 28px;
+            border : 3px solid ${theme.colors.border};
+        `}
+    }
+        
+    @media (min-width: 5120px) {
+        width: 1000px;
+        padding : 36px;
+        right: clamp(1200px, calc(1200px + (100vw - 5120px) * 0.3125), 100vw);
+
+        ${({ $isMemoPage }) =>
+        $isMemoPage &&
+        `
+            right: 0;
+            position : fixed;
+            padding : 32px;
+        `}
+    }
 `
 
 export default function StatusBox() {
@@ -186,7 +176,7 @@ export default function StatusBox() {
             setIsMemoPage(false);
         }
     }, [path])
-    
+
     // 768 상태 창 핸들러
     const statusHandle = () => {
         setMobileStatus((prev) => !prev);

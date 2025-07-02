@@ -29,149 +29,134 @@ position: relative;
 width: 100%;
 overflow: hidden;
 
-.user_profile_wrap{
-display : flex;
-justify-content: space-between;
-}
-
-.user_profile_wrap .user_profile{
-width : 52px;
-height : 52px;
-border-radius : 50%;
-}
-
-.user_id {
-display : block;
-margin-top : 8px;
-}
-
-.user_id p{
-font-size : 18px;
-font-family : var(--font-pretendard-bold);
-}
-
-.user_id span{
-display: block;
-width : 70%;
-margin-top : 4px;
-overflow : hidden;
-text-overflow :ellipsis;
-font-size : 14px;
-font-family : var(--font-pretendard-light);
-}
-
-// 프로필
-.memo_btn_wrap{
-display : flex;
-width : 100%;
-}
-
-.memo_btn_wrap div{
-    width: 100%;
-    padding-left: 10px;
-    text-align: left;
-    background: ${({ theme }) => theme.colors.background};
-    font-size: 16px;
-    line-height: 38px;
-}
-
-.comment_wrap{
-border: none;
-border-bottom : 2px solid ${({ theme }) => theme.colors.border};
-}
-
-.memo_btn{
-border: none;
-border-bottom : 2px solid ${({ theme }) => theme.colors.border};
-}
-
-.status_wrap{
-    padding : 10px 0px;
-    height: calc(100% - 276px);
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.status_post_list{
-display : flex;
-justify-content : space-between;
-padding : 8px 4px;
-border-radius : 4px;
-line-height : 18px;
-}
-
-& .memo_title:hover{
-text-decoration : underline;
-cursor:pointer;
-}
-
-.memo_img_tag {
-width : 18px;
-height :18px;
-margin-right : 4px;
-background : ${({ theme }) => theme.colors.primary};
-}
-
-.memo_img_void{
-width : 18px;
-min-width : 18px;
-height : 18px;
-margin-right : 4px;
-background : none;
-}
-
-.memo_title_wrap{
-display : flex;
-flex : 0 0 65%;
-max-width: 210px;
-}
-
-.memo_tag {
-font-size: 14px;
-    color: ${({ theme }) => theme.colors.text_tag};
-    margin-right : 2px;
-}
-
-.memo_title{
-display: block;
-width: 60%;
-overflow: hidden;
-text-overflow: ellipsis;
-white-space:nowrap;
-font-size : 14px;
-font-family : var(--font-pretendard-bold);
-}
-
-.memo_date{
-flex : 0 0 30%;
-text-align: left;
-}
-
-.memo_date span{
-font-size : 14px;
-}
-// 스테이터스
-
-.post_bottom{
-    height: fit-content;
-    position: absolute;
-    bottom: 0;
-    z-index: 1;
-    width: 100%;
-    background-color: ${({ theme }) => theme.colors.background};
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-
-    .post_menu_wrap{
-        margin-top: 10px;
+    .user_profile_wrap{
+        display : flex;
+        justify-content: space-between;
     }
-}
 
-@media (max-width : 480px){
-    .post_bottom{
-        position : static;
-        height: fit-content;
+    .user_profile_wrap .user_profile{
+        width : 52px;
+        height : 52px;
+        border-radius : 50%;
+    }
+
+    .user_id {
+        display : block;
+        margin-top : 8px;
+    }
+
+    .user_id p{
+        font-size : 1.125rem;
+        font-family : var(--font-pretendard-bold);
+    }
+
+    .user_id span{
+        display: block;
+        width : 70%;
+        margin-top : 4px;
+        overflow : hidden;
+        text-overflow :ellipsis;
+        font-size : 0.875rem;
+        font-family : var(--font-pretendard-light);
+    }
+
+    // 프로필
+    .memo_btn_wrap{
+        display : flex;
+        width : 100%;
+    }
+
+    .memo_btn_wrap div{
         width: 100%;
-        margin-top:auto;
+        padding-left: 10px;
+        text-align: left;
+        background: ${({ theme }) => theme.colors.background};
+        font-size: 1rem;
+    }
+
+    .comment_wrap{
+        border: none;
+        border-bottom : 1px solid ${({ theme }) => theme.colors.border};
+    }
+
+    .memo_btn{
+        border: none;
+        border-bottom : 1px solid ${({ theme }) => theme.colors.border};
+    }
+
+    .status_wrap{
+        padding : 10px 0px;
+        height: calc(100% - 276px);
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .status_post_list{
+        display : flex;
+        justify-content : space-between;
+        padding : 8px 4px;
+        border-radius : 4px;
+        line-height : 18px;
+    }
+
+    & .memo_title:hover{
+        text-decoration : underline;
+        cursor:pointer;
+    }
+
+    .memo_img_tag {
+        width : 18px;
+        height :18px;
+        margin-right : 4px;
+        background : ${({ theme }) => theme.colors.primary};
+    }
+
+    .memo_img_void{
+        width : 18px;
+        min-width : 18px;
+        height : 18px;
+        margin-right : 4px;
+        background : none;
+    }
+
+    .memo_title_wrap{
+        display : flex;
+        flex : 0 0 65%;
+        max-width: 210px;
+    }
+
+    .memo_tag {
+    font-size: 0.875rem;
+        color: ${({ theme }) => theme.colors.text_tag};
+        margin-right : 2px;
+    }
+
+    .memo_title{
+        display: block;
+        width: 60%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space:nowrap;
+        font-size : 0.875rem;
+        font-family : var(--font-pretendard-bold);
+    }
+
+    .memo_date{
+        flex : 0 0 30%;
+        text-align: left;
+    }
+
+    .memo_date span{
+        font-size : 0.875rem;
+    }
+    // 스테이터스
+
+    .post_bottom{
+        height: fit-content;
+        position: absolute;
+        bottom: 0;
+        z-index: 1;
+        width: 100%;
         background-color: ${({ theme }) => theme.colors.background};
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 
@@ -180,10 +165,54 @@ font-size : 14px;
         }
     }
 
-    .status_wrap{
-        height: 100%;
+    @media (max-width : 480px){
+        .post_bottom{
+            position : static;
+            height: fit-content;
+            width: 100%;
+            margin-top:auto;
+            background-color: ${({ theme }) => theme.colors.background};
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+
+            .post_menu_wrap{
+                margin-top: 10px;
+            }
+        }
+
+        .status_wrap{
+            height: 100%;
+        }
     }
-}
+
+    @media (min-width: 1921px) {
+        .memo_btn_wrap div{
+            padding-left: 10px;
+        }
+    }
+
+    @media (min-width: 2560px) {
+        .comment_wrap{
+            border-bottom : 2px solid ${({ theme }) => theme.colors.border};
+        }
+
+        .memo_btn{
+            border-bottom : 2px solid ${({ theme }) => theme.colors.border};
+        }
+    }
+
+    @media (min-width: 3840px) {
+        .comment_wrap{
+            border-bottom : 3px solid ${({ theme }) => theme.colors.border};
+        }
+
+        .memo_btn{
+            border-bottom : 3px solid ${({ theme }) => theme.colors.border};
+        }
+    }
+
+    @media (min-width: 5120px) {
+        
+    }
 `
 export default function MemoStatus({ post }: ClientPostProps) {
     const theme = useTheme();

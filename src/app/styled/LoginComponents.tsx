@@ -14,20 +14,11 @@ export const LoginButtonWrap = styled.div`
   .login_error_wrap{
     display: flex;
     margin-top: 4px;
-
-    button{
-        text-decoration: underline;
-        border: none;
-        background: none;
-        line-height: 15px;
-        font-family: 'var(--font-pretendard-light)';
-        cursor: pointer;
-    }
   }
 
   .login_error,
   .sign_error{
-    font-size: 14px;
+    font-size: 0.875rem;
     color: ${({ theme }) => theme.colors.error};
     margin-right: 4px;
   }
@@ -40,7 +31,7 @@ export const LoginButtonWrap = styled.div`
         border-radius: 4px;
         background: #fff;
         color: ${({ theme }) => theme.colors.primary};
-        font-size: 16px;
+        font-size: 1rem;
         font-family: var(--font-pretendard-medium);
         cursor: pointer;
     }
@@ -68,19 +59,18 @@ export const LoginButtonWrap = styled.div`
           border: 2px solid ${({ theme }) => theme.colors.primary};
 
           .auto_on_icon{
+            position: relative;
             height : 100%;
           }
         }
 
         p{
-          line-height: 20px;
           font-size: 0.875rem;
         }
       }
 
       .register_wrap{
         display: flex;
-        line-height: 20px;
       }
     }
 
@@ -111,8 +101,8 @@ export const LoginInputWrap = styled.div`
     }
 
     p{
-    font-size : 14px;
-    font-family : var(--font-pretendard-light)
+      font-size : 0.875rem;
+      font-family : var(--font-pretendard-light)
     }
 `
 export const LoginInput = styled.input`
@@ -121,7 +111,7 @@ export const LoginInput = styled.input`
             margin-top : 4px;
             padding: 4px 0px;
             border : none;
-            font-size: 16px;
+            font-size: 1rem;
             font-family : var(--font-pretendard-medium);
             font-weight: 500;
 
@@ -137,7 +127,7 @@ export const CreateInput = styled.input`
             padding: 4px 8px;
             border : 1px solid ${({ theme }) => theme.colors.border};
             border-radius : 8px;
-            font-size: 16px;
+            font-size: 1rem;
             font-family : var(--font-pretendard-medium);
             font-weight: 500;
 
@@ -154,7 +144,7 @@ export const CreateButton = styled.a`
     background: none;
     border: none;
     color : ${({ theme }) => theme.colors.primary};
-    font-size : 14px;
+    font-size : 0.875rem;
     font-family : var(--font-pretendard-bold);
     font-weight: 700;
     border-bottom: 1px solid ${({ theme }) => theme.colors.primary};
@@ -169,7 +159,7 @@ export const LoginButton = styled(motion.button)`
     border-radius : 4px;
     background : ${({ theme }) => theme.colors.primary};
     color: #fff;
-    font-size : 16px;
+    font-size : 1rem;
     font-family : var(--font-pretendard-medium);
     cursor: pointer;
 `
@@ -184,8 +174,7 @@ export const GoogleButton = styled.button`
     border : 1px solid ${({ theme }) => theme.colors.border};
     border-radius : 4px;
     cursor : pointer;
-    line-height : 18px;
-    font-size : 14px;
+    font-size : 0.875rem;
     font-family : var(--font-pretendard-medium);
     font-weight: 500;
     cursor: pointer;
@@ -200,8 +189,7 @@ width: 100%;
     border : 1px solid ${({ theme }) => theme.colors.border};
     border-radius : 4px;
     cursor : pointer;
-    line-height : 18px;
-    font-size : 14px;
+    font-size : 0.875rem;
     font-family : var(--font-pretendard-medium);
     font-weight: 500;
     cursor: pointer;

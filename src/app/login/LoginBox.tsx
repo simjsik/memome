@@ -41,16 +41,16 @@ export const LoginWrap = css`
         margin: 0 auto;
 
         p:nth-of-type(1){
-            font-size: 12px;
+            font-size: 0.75rem;
             font-family: var(--font-pretendard-light);
         }
         p:nth-of-type(2){
-            font-size: 12px;
+            font-size: 0.75rem;
             font-family: var(--font-pretendard-bold);
             margin-top: 4px;
         }
         span{
-            font-size: 14px;
+            font-size: 0.875rem;
             font-family: var(--font-pretendard-medium);
         }
     }
@@ -396,7 +396,16 @@ export default function LoginBox() {
                                 {
                                     hasAutoLogin ?
                                         <button className="auto_on" onClick={() => setHasAutoLogin((prev) => !prev)}>
-                                            <div className="auto_on_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746267045/%EC%9E%90%EB%8F%99%EB%A1%9C%EA%B7%B8%EC%9D%B8%EC%B2%B4%ED%81%AC_gaqgly.svg)`}></div>
+                                            <div className="auto_on_icon">
+                                                <Image
+                                                    src={'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746267045/%EC%9E%90%EB%8F%99%EB%A1%9C%EA%B7%B8%EC%9D%B8%EC%B2%B4%ED%81%AC_gaqgly.svg'}
+                                                    alt="logo"
+                                                    fill
+                                                    priority  // 첫 화면 LCP에 중요하면 추가
+                                                    style={{ objectFit: 'cover' }}
+                                                >
+                                                </Image>
+                                            </div>
                                         </button>
                                         :
                                         <button className="auto_off" onClick={() => setHasAutoLogin((prev) => !prev)}></button>

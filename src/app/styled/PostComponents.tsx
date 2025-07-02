@@ -21,6 +21,15 @@ border-left : 1px solid ${({ theme }) => theme.colors.border};
 border-right : 1px solid ${({ theme }) => theme.colors.border};
 align-content: flex-start;
 
+    .all_post{
+      text-align: center;
+      display: block;
+      width: 100%;
+      line-height: 4rem;
+      font-size : 1rem;
+      border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+    }
+
     // 포스트 박스
     .post_box{
       width : 100%;
@@ -78,6 +87,7 @@ align-content: flex-start;
 
       .user_profile{
         display:flex;
+        line-height: 2rem;
       }
 
       .user_photo{
@@ -103,6 +113,7 @@ align-content: flex-start;
       flex-wrap: wrap;
       padding-left: 0px;
       padding-bottom: 10px;
+      margin-top : 10px;
     }
 
     .post_right_wrap{
@@ -115,15 +126,12 @@ align-content: flex-start;
         width: 100%;
         margin-right: 4px;
         font-size: 0.875rem;
-        line-height: 24px;
         color: ${({ theme }) => theme.colors.text_tag};
       }
     
       // 포스트 제목
       .post_title{
-        font-size: 0.9rem;
         border-bottom: none;
-        margin-top: 8px;
       }
 
       .notice_tag{
@@ -134,7 +142,6 @@ align-content: flex-start;
           background-color: #ffe3e4;
           color: #ff4e59;
           font-size: 0.875rem;
-          line-height: normal;
           border-radius: 4px;
       }
 
@@ -156,11 +163,6 @@ align-content: flex-start;
       .post_date,
       .post_comment {
         font-size : 0.875rem;
-        line-height : 36px;
-      }
-
-      .post_comment p{
-        line-height : 2rem;
       }
 
       .user_name{
@@ -189,6 +191,7 @@ align-content: flex-start;
         margin-left: -6px;
         padding-top: 10px;
         justify-content: space-between;
+        line-height: 2;
       }
 
       .post_comment_btn{
@@ -212,7 +215,6 @@ align-content: flex-start;
         color: ${({ theme }) => theme.colors.text};
         margin-left : 2px;
         display : flex;
-        line-height : 32px;
       }
 
       & .user_id:hover,
@@ -237,7 +239,7 @@ align-content: flex-start;
 
       // 포스트 내용
       .post_text{
-        height: 80px;
+        height: fit-content;
         overflow: hidden;
 
         p{
@@ -313,15 +315,6 @@ align-content: flex-start;
         margin : 0;
         }
       }
-
-    .all_post{
-        width : 100%;
-        height: 60px;
-        line-height: 60px;
-        padding: 0px 16px;
-        border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-        text-align: center;
-    }
 //----------------------------------------------------
   @media (max-width: 480px) {
     overflow-y: scroll;
@@ -368,10 +361,6 @@ align-content: flex-start;
       height: clamp(180px, calc(180px + (100vw - 1920px) * 0.3125), 380px);
     }
 
-    .post_tag{
-      line-height: 36px;
-    }
-
     .post_dropdown_wrap{
       width : 42px;
       height : 42px;
@@ -382,27 +371,13 @@ align-content: flex-start;
       height : 42px;
     }
 
-    .post_text{
-      height: 100px;
-    }
-
     .user_photo {
       width: 42px;
       height: 42px;
     }
 
-    .user_name,
-    .user_uid,
-    .post_date{
-       line-height : 1rem;
-    }
-
     .post_content_wrap{
         padding: 0px 0px 10px 50px;
-    }
-    
-    .post_comment{
-        line-height: clamp(32px, calc(32px + (100vw - 1921px) * 0.0125195618153365), 40px);
     }
   
     .post_comment_btn{
@@ -410,11 +385,8 @@ align-content: flex-start;
         height: clamp(32px, calc(32px + (100vw - 1921px) * 0.0125195618153365), 40px);
     }
 
-    .all_post{
-        height: 68px;
-        line-height: 68px;
-        padding: 0px 20px;
-        border-bottom: 2px solid ${({ theme }) => theme.colors.border};
+    .post_bottom_wrap{
+        line-height: 1.65;
     }
   }
 
@@ -429,10 +401,6 @@ align-content: flex-start;
       height: clamp(380px, calc(380px + (100vw - 2560px) * 0.3125), 780px);
     }
     
-    .post_tag{
-      line-height: 52px;
-    }
-
     .post_dropdown_wrap{
       width : 52px;
       height : 52px;
@@ -443,20 +411,14 @@ align-content: flex-start;
       height : 52px;
     }
 
-    .post_text{
-      height: 120px;
+    .post_title_wrap{
+      margin-top : 16px;
     }
 
     .user_photo {
-      width: 52px;
-      height: 52px;
+      width: 50px;
+      height: 50px;
       margin-right: 12px;
-    }
-
-    .user_name,
-    .user_uid,
-    .post_date{
-      line-height : 52px;
     }
 
     .user_name,
@@ -467,20 +429,10 @@ align-content: flex-start;
     .post_content_wrap{
       padding: 0px 0px 12px 62px;
     }
-
-    .post_comment{
-      line-height: clamp(40px, calc(40px + (100vw - 2560px) * 0.0125), 56px);
-    }
   
     .post_comment_btn{
       width: clamp(40px, calc(40px + (100vw - 2560px) * 0.0125), 56px);
       height: clamp(40px, calc(40px + (100vw - 2560px) * 0.0125), 56px);
-    }
-
-    .all_post{
-        height: 84px;
-        line-height: 84px;
-        padding: 0px 24px;
     }
   }
 
@@ -493,12 +445,9 @@ align-content: flex-start;
       padding: 32px;
       border-bottom: 3px solid ${({ theme }) => theme.colors.border};
     }
+
     .post_pr_img_wrap{
       height: clamp(780px, calc(780px + (100vw - 3840px) * 0.3125), 1000px);
-    }
-    
-    .post_tag{
-      line-height: 64px;
     }
 
     .post_dropdown_wrap{
@@ -511,20 +460,14 @@ align-content: flex-start;
       height : 68px;
     }
 
-    .post_text{
-      height: 160px;
+    .post_title_wrap{
+      margin-top : 20px;
     }
 
     .user_photo {
       width: 68px;
       height: 68px;
       margin-right: 16px;
-    }
-
-    .user_name,
-    .user_uid,
-    .post_date{
-     line-height : 68px;
     }
 
     .user_name,
@@ -536,19 +479,9 @@ align-content: flex-start;
       padding: 0px 0px 16px 80px;
     }
 
-    .post_comment{
-      line-height: clamp(56px, calc(56px + (100vw - 3840px) * 0.0125), 72px);
-    }
-  
     .post_comment_btn{
       width: clamp(56px, calc(56px + (100vw - 3840px) * 0.0125), 72px);
       height: clamp(56px, calc(56px + (100vw - 3840px) * 0.0125), 72px);
-    }
-
-    .all_post{
-      height: 100px;
-      line-height: 100px;
-      padding: 0px 28px;
     }
   }
 
@@ -558,8 +491,8 @@ align-content: flex-start;
     }
 
     .user_photo {
-      width: 84px;
-      height: 84px;
+      width: 80px;
+      height: 80px;
       margin-right: 20px;
     }
 
@@ -568,15 +501,13 @@ align-content: flex-start;
       height : 84px;
     }
 
+    .post_title_wrap{
+      margin-top : 24px;
+    }
+
     .post_profile_wrap .post_drop_menu_btn{
       width : 84px;
       height : 84px;
-    }
-
-    .user_name,
-    .user_uid,
-    .post_date{
-      line-height : 84px;
     }
 
     .user_name,
@@ -588,136 +519,13 @@ align-content: flex-start;
       padding: 0px 0px 20px 106px;
     }
 
-    .post_text{
-      height: 220px;
-    }
-
-    .post_comment{
-      line-height: clamp(72px, calc(72px + (100vw - 5120px) * 0.0125), 88px);
-    }
-  
     .post_comment_btn{
       width: clamp(72px, calc(72px + (100vw - 5120px) * 0.0125), 88px);
       height: clamp(72px, calc(72px + (100vw - 5120px) * 0.0125), 88px);
     }
   }
 `
-export const TitleHeader = styled.div`
-width: 100%;
-background: ${({ theme }) => theme.colors.background};
 
-    .title_wrap{
-      display: flex;
-      justify-content: space-between;
-    }   
-
-    .notice_post {
-      display:block;
-      margin-left : 10px;
-      flex: 1 0 100%;
-      line-height : 48px;
-      font-size: 1.25rem;
-      font-family: var(--font-pretendard-bold);
-    }
-
-    .all_post{
-      display:block;
-      margin-left : 10px;
-      flex: 1 0 80%;
-      line-height : 48px;
-      font-size: 1.25rem;
-      font-family: var(--font-pretendard-bold);
-    }
-
-    .post_header{
-    display:flex;
-    margin-top: 20px;
-    padding : 0px;
-    line-height : 48px;
-    border-top : 1px solid ${({ theme }) => theme.colors.border};
-    border-bottom : 1px solid ${({ theme }) => theme.colors.border};
-
-    .h_title,
-    .h_user,
-    .h_date{
-    font-family: var(--font-pretendard-bold);
-    font-size : 0.875rem;
-    }
-
-    .h_title{
-    flex : 0 0 60%;
-    text-align : center;
-    }
-    .h_user,
-    .h_date{
-    flex : 0 0 20%;
-    }
-
-    }
-    
-`
-export const PostListStyle = styled.div`
-display : flex;
-width : 100%;
-line-height : 40px;
-border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-
-  .bookmark_title_wrap{
-    flex: 0 0 60%;
-    display : flex;
-  }
-
-  .bookmark_sel_btn{
-    width : 15px;
-    height : 15px;
-    margin: 13px 12px 0px 6px;
-  }
-
-  .post_tag{
-    color : ${({ theme }) => theme.colors.text_tag};
-    margin-right : 4px;
-    font-size: 0.875rem;
-    font-family : var(--font-pretendard-light);
-  }
-
-  .post_title {
-    margin-right : 4px;
-    font-size : 0.875rem;
-  }
-
-  & .post_title:hover{
-    text-decoration : underline;
-    cursor:pointer;
-  }
-
-  .post_comment{
-    font-size : 0.875rem;
-  }
-
-  .post_user{
-    flex: 0 0 20%;
-    display : block;
-    text-overflow: ellipsis;
-    overflow : hidden;
-    white-space : nowrap;
-    color : ${({ theme }) => theme.colors.text_tag};
-    font-family : var(--font-pretendard-light);
-    font-size : 0.875rem;
-  }
-
-  .post_date{
-    flex: 0 0 16%;
-    font-size : 0.875rem;
-  }
-
-  .bookmark_delete_btn{
-    width : 18px;
-    height : 18px;
-    margin-top: 10px;
-    background : ${({ theme }) => theme.colors.error};
-    border: none;
-  }
-`
 export const PostCommentStyle = styled.div`
 width: 100%;
 
@@ -726,14 +534,12 @@ width: 100%;
     margin-top: 10px;
     padding: 0px 0px 20px 40px;
   }
+
   .user_profile{
     position: relative;
     left: -40px;
     display: flex;
-  }
-
-  .user_profile p{
-    line-height : 32px;
+    line-height: 2rem;
   }
 
   .memo_comment_user{
@@ -786,17 +592,14 @@ width: 100%;
       height: 42px;
       font-size: 1rem;
   }
+      
   .reply_wrap{
     margin-top : 8px;
     padding-left : 32px;
     
     .user_profile{
       left : -32px;
-    }
-
-    .memo_comment_user,
-    .memo_comment_uid{
-      line-height: 24px;
+      line-height : 2rem;
     }
   }
 
@@ -817,7 +620,6 @@ width: 100%;
   .memo_comment_date{
     font-size: 0.875rem;
     color: ${({ theme }) => theme.colors.text_tag};
-    margin-top: 10px;
   }
 
   .comment_reply_btn{
@@ -862,6 +664,7 @@ width: 100%;
     border  : 1px solid ${({ theme }) => theme.colors.border};
     background-color: ${({ theme }) => theme.colors.background};
     cursor : pointer;
+    font-size : 0.75rem;
   }
 
   .comment_input{
@@ -874,6 +677,7 @@ width: 100%;
     border: 1px solid ${({ theme }) => theme.colors.border};
     padding: 10px;
     font-family: var(--font-pretendard-medium);
+    font-size : 0.75rem;
   }
 }
 
@@ -884,7 +688,151 @@ width: 100%;
     height: calc(100% - 100px);
     overflow-y: scroll;
 }
+
+  @media (min-width: 1921px) {
+  .user_profile {
+    left: -50px;
+  }
+    .user_photo {
+      width: 42px;
+      height: 42px;
+    }
+
+    .memo_comment_wrap {
+        margin-top: 20px;
+        padding: 0px 0px 20px 60px;
+    }
+
+    .comment_delete_btn {
+        right: -20px;
+        width: 42px;
+        height: 42px;
+        padding: 4px;
+        background-color: ${({ theme }) => theme.colors.background};
+        border: 1px solid ${({ theme }) => theme.colors.border};
+    }
+
+    .comment_reply_btn {
+        width: 72px;
+        height: 42px;
+        background-color: ${({ theme }) => theme.colors.background};
+        border: 1px solid ${({ theme }) => theme.colors.border};
+        margin: 16px 0px;
+        cursor: pointer;
+        font-size : 0.75rem;
+    }
+
+    .reply_input_wrap .comment_input {
+        max-height: 300px;
+        min-height: 86px;
+        border: 1px solid ${({ theme }) => theme.colors.border};
+    }
+  }
+
+  @media (min-width: 2560px) {
+    .user_profile {
+      left: -60px;
+    }
+
+    .user_photo {
+      width: 48px;
+      height: 48px;
+      margin-right: 12px;
+    }
+
+    .user_name,
+    .user_uid{
+      margin-right: 6px;
+    }
+
+    .memo_comment_wrap {
+        margin-top: 30px;
+        padding: 0px 0px 20px 72px;
+    }
+
+    .comment_upload_btn {
+        width: 76px;
+        height: 54px;
+        border  : 2px solid ${({ theme }) => theme.colors.border};
+    }
+  }
+
+  @media (min-width: 3840px) {
+    .user_profile {
+        left: -78px;
+    }
+
+    .user_photo {
+      width: 68px;
+      height: 68px;
+    }
+
+    .memo_comment_wrap {
+        margin-top: 40px;
+        padding: 0px 0px 20px 86px;
+    }
+
+    .comment_delete_btn {
+        right: -20px;
+        width: 52px;
+        height: 52px;
+        border: 2px solid ${({ theme }) => theme.colors.border};
+    }
+
+    .comment_reply_btn {
+        width: 86px;
+        height: 52px;
+        border: 2px solid ${({ theme }) => theme.colors.border};
+    }
+
+    .reply_input_wrap .comment_input {
+        max-height: 300px;
+        min-height: 100px;
+        border: 2px solid ${({ theme }) => theme.colors.border};
+    }
+
+    
+    .reply_input_wrap .comment_upload_btn{
+        width: 86px;
+        height: 52px;
+        border  : 3px solid ${({ theme }) => theme.colors.border};
+    }
+  }
+
+  @media (min-width: 5120px) {
+    .user_profile {
+      left: -86px;
+    }
+
+    .user_photo {
+      width: 76px;
+      height: 76px;
+    }
+
+    .memo_comment_wrap {
+        margin-top: 50px;
+        padding: 0px 0px 20px 100px;
+    }
+
+    .comment_delete_btn {
+        width: 64px;
+        height: 64px;
+    }
+
+    .reply_input_wrap .comment_input {
+        max-height: 480px;
+        min-height: 160px;
+    }
+
+    
+    .reply_input_wrap .comment_upload_btn,
+    .comment_reply_btn{
+        width: 100px;
+        height: 68px;
+    }
+}
 `
+
 export const PostCommentInputStyle = styled.div`
 position : relative;
 width: 100%;
@@ -893,26 +841,26 @@ margin-top : 10px;
 padding : 12px;
 border : 1px solid ${({ theme }) => theme.colors.border};
 
-// 로그인 유저 프로필 박스
-.login_user_profile{
-display:flex;
-}
+  // 로그인 유저 프로필 박스
+  .login_user_profile{
+    display:flex;
+  }
 
-// 로그인 유저 프로필
-.login_user_photo{
-width : 24px;
-height : 24px;
-margin-right : 4px;
-border-radius : 50%;
-background-repeat : no-repeat;
-background-size : cover;
-}
+  // 로그인 유저 프로필
+  .login_user_photo{
+    width : 24px;
+    height : 24px;
+    margin-right : 4px;
+    border-radius : 50%;
+    background-repeat : no-repeat;
+    background-size : cover;
+  }
 
-// 로그인 유저 아이디
-.login_user_id{
-font-size : 0.875rem;
-line-height : 24px;
-}
+  // 로그인 유저 아이디
+  .login_user_id{
+    font-size : 0.875rem;
+    line-height : 1.5rem;
+  }
 
   .comment_input{
     max-width: 100%;
@@ -923,6 +871,7 @@ line-height : 24px;
     padding: 8px 4px;
     border-radius: 4px;
     border: none;
+    font-size : 0.875rem;
   }
 
   .comment_upload_btn{
@@ -932,10 +881,97 @@ line-height : 24px;
     width : 68px;
     height : 48px;
     margin-top : 10px;
-    border  : 1px solid ${({ theme }) => theme.colors.border};
     background-color: ${({ theme }) => theme.colors.background_invisible};
+    border  : 1px solid ${({ theme }) => theme.colors.border};
     cursor : pointer;
+    font-size : 0.875rem;
   }
+
+    @media (min-width : 481px) and (max-width: 1200px) {
+
+    }
+
+    @media (min-width: 1921px) {
+    height: 240px;
+
+        .login_user_photo{
+            width : 32px;
+            height : 32px;
+        }
+
+        .comment_input{
+            max-height: 108px;
+            min-height: 108px;
+            margin-top : 8px;
+        }
+    }
+
+    @media (min-width: 2560px) {
+    border  : 2px solid ${({ theme }) => theme.colors.border};
+
+        .login_user_photo{
+            width : 36px;
+            height : 36px;
+        }
+
+        .comment_upload_btn {
+            width: 76px;
+            height: 54px;
+            border  : 2px solid ${({ theme }) => theme.colors.border};
+        }
+    }
+
+    @media (min-width: 3840px) {
+    height: 360px;
+    padding: 28px;
+    border  : 3px solid ${({ theme }) => theme.colors.border};
+
+        .login_user_photo{
+            width : 52px;
+            height : 52px;
+            margin-right: 10px;
+        }
+
+        .comment_input{
+            max-height: 136px;
+            min-height: 136px;
+            margin-top: 16px;
+        }
+
+        .comment_upload_btn {
+            right: 30px;
+            bottom: 30px;
+            width: 128px;
+            height: 78px;
+            border  : 3px solid ${({ theme }) => theme.colors.border};
+        }
+    }
+        
+    @media (min-width: 5120px) {
+    height: 420px;
+    padding: 32px;
+    border  : 3px solid ${({ theme }) => theme.colors.border};
+
+        .login_user_photo{
+            width : 60px;
+            height : 60px;
+            margin-right: 10px;
+        }
+
+        .comment_input{
+            max-height: 152px;
+            min-height: 152px;
+            margin-top: 24px;
+        }
+
+        .comment_upload_btn {
+            right: 30px;
+            bottom: 30px;
+            width: 152px;
+            height: 92px;
+            border  : 3px solid ${({ theme }) => theme.colors.border};
+        }
+    }
 `
 export const BookmarkWrap = styled.div`
     width: 600px;

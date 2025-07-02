@@ -33,7 +33,7 @@ export const UsageWrap = styled.div<{ Limit: boolean }>`
     }
 
     p {
-        font-size: 20px;
+        font-size: 1.25rem;
         font-family: var(--font-pretendard-bold);
     }
 
@@ -63,7 +63,7 @@ export const UsageWrap = styled.div<{ Limit: boolean }>`
         background: #0087ff;
         color: #fff;
         font-family: var(--font-pretendard-medium);
-        font-size: 14px;
+        font-size: 0.875rem;
         border-radius : 6px;
         cursor : pointer;
     }

@@ -20,6 +20,25 @@ border-radius : 4px;
 font-size : 1rem;
 font-family : var(--font-pretendard-medium);
 cursor : pointer;
+
+    @media (min-width : 481px) and (max-width: 1200px) {
+
+    }
+
+    @media (min-width: 1921px) {
+    }
+
+    @media (min-width: 2560px) {
+
+    }
+
+    @media (min-width: 3840px) {
+
+    }
+        
+    @media (min-width: 5120px) {
+
+    }
 `
 
 export default function ExitButton() {

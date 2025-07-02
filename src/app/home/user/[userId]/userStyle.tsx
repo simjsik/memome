@@ -71,6 +71,7 @@ export const UserPostWrap = styled.div`
         flex: 0 0 50%;
         border: none;
         background: ${({ theme }) => theme.colors.background};
+        font-size : 0.75rem;
     }
     // memo_tab & image_tab
 
@@ -224,7 +225,7 @@ export const UserPostWrap = styled.div`
 
     .user_post_content{
         max-width: 550px;
-        height: 80px;
+        height: fit-content;
         margin-top: 10px;
         overflow : hidden;
 
@@ -306,4 +307,31 @@ export const UserPostWrap = styled.div`
         }
     }
     //user_post_bottom
+
+    @media (min-width: 1921px) {
+        .user_tab_wrap {
+            height: 52px;
+            border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+        }
+    }
+
+    @media (min-width: 2560px) {
+        .user_tab_wrap {
+            height: 60px;
+            border-bottom: 2px solid ${({ theme }) => theme.colors.border};
+        }
+    }
+
+    @media (min-width: 3840px) {
+        .user_tab_wrap {
+            height: 64px;
+            border-bottom: 3px solid ${({ theme }) => theme.colors.border};
+        }
+    }
+        
+    @media (min-width: 5120px) {
+        .user_tab_wrap {
+            height: 68px;
+        }
+    }
 `

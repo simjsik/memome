@@ -42,7 +42,7 @@ margin : 0 auto;
             position: absolute;
             bottom: 10px;
             right: 10px;
-            font-size: 14px;
+            font-size: 0.875rem;
             color: rgb(153, 153, 153);
             font-family: var(--font-pretendard-light);
         }
@@ -76,7 +76,7 @@ margin : 0 auto;
             bottom: 4px;
             text-align: center;
             transform: translateX(-50%);
-            font-size: 10px;
+            font-size: 0.875rem;
             color : ${(props) => (props.notice ? `${props.theme.colors.error}` : `${props.theme.colors.text_tag}`)};
             font-family : var(--font-pretendard-medium);
         }
@@ -94,7 +94,7 @@ margin : 0 auto;
     .title_input_wrap{
         flex : 1 0 65%;
         padding : 0px 12px;
-        font-size : 16px;
+        font-size : 1rem;
         outline : none;
         border: 1px solid ${({ theme }) => theme.colors.border};
         border-radius : 8px;
@@ -102,7 +102,7 @@ margin : 0 auto;
         .title_input{
             width : 100%;
             height : 100%;
-            font-size : 16px;
+            font-size : 1rem;
             outline : none;
             border: none;
             border-radius : 8px;
@@ -134,12 +134,12 @@ margin : 0 auto;
             position: absolute;
             right: 10px;
             line-height: 49px;
-            font-size: 14px;
+            font-size: 0.875rem;
             color : #999;
         }
 
         .title_error{
-            font-size: 14px;
+            font-size: 0.875rem;
             color: ${({ theme }) => theme.colors.error};
             margin-top : 2px;
             font-family : var(--font-pretendard-medium);
@@ -167,7 +167,7 @@ margin : 0 auto;
         border-left:${({ theme }) => theme.colors.background};
         border-radius: 0px 8px 8px 0px;
         background: ${({ theme }) => theme.colors.primary};
-        font-size: 16px;
+        font-size: 1rem;
         color: #fff;
         cursor: pointer;
         -webkit-writing-mode: vertical-rl;
@@ -258,7 +258,7 @@ margin : 0 auto;
     }
 
     #toolbar span{
-    font-size : 12px;
+    font-size : 0.75rem;
     }
 
     // 삽입 도구
@@ -677,14 +677,14 @@ z-index : 5;
     }
 
     .load_btn_wrap p{
-        font-size : 24px;
+        font-size : 1.5rem;
     }
 
     .load_btn_wrap span{
         display:block;
         width:100%;
         margin-top:20px;
-        font-size : 14px;
+        font-size : 0.875rem;
         color : #606060;
     }
 
@@ -699,7 +699,7 @@ z-index : 5;
         background :none;
         border: 1px solid ${({ theme }) => theme.colors.border};
         border-radius : 4px;
-        font-size : 16px;
+        font-size : 1rem;
         margin-top:32px;
         cursor:pointer;
     }

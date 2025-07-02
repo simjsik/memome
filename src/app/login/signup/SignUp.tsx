@@ -45,13 +45,13 @@ const SignUpForm = css`
             right : 10px;
             top : 57%;
             transform: translateY(-50%);
-            font-size : 14px;
+            font-size : 0.875rem;
             }
         }
     }
 
     label{
-        font-size : 14px;
+        font-size : 0.875rem;
         font-family: var(--font-pretendard-medium);
     }
 `
@@ -64,7 +64,7 @@ const SignUpWrap = css`
     }
     
     .sign_up_text{
-        font-size: 20px;
+        font-size: 1.25rem;
         font-family: var(--font-pretendard-bold);
         line-height: 28px;
     }

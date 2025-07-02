@@ -89,7 +89,7 @@ export const SearchBoxWrap = styled.div`
     }
     .ais_user_uid{
         font-family : var(--font-pretendard-light);
-        font-size : 14px;
+        font-size : 0.875rem;
     }
 
     .ais_post_content_wrap{
@@ -120,12 +120,12 @@ export const SearchBoxWrap = styled.div`
     }
 
     .ais_post_tag{
-        font-size: 14px;
+        font-size: 0.875rem;
         font-family: var(--font-pretendard-light);
     }
 
     .ais_post_title{
-        font-size: 16px;
+        font-size: 1rem;
         margin-top: 8px;
     }
 
@@ -153,7 +153,7 @@ export const SearchBoxWrap = styled.div`
 
         .post_comment{
             font-family : var(--font-pretendard-medium);
-            font-size : 14px;
+            font-size : 0.875rem;
             color: ${({ theme }) => theme.colors.text};
             margin-left : 0px;
             display : flex;
