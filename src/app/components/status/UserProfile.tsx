@@ -77,7 +77,6 @@ height : 100%;
     display: flex;
 
     p{
-    line-height : 32px;
     font-size : 0.875rem;
     }
 }
@@ -114,17 +113,19 @@ margin-top : 20px;
         flex-wrap: wrap;
         
         >label{
-        flex: 1 0 100%;
-        font-size: 0.875rem;
+            flex: 1 0 100%;
+            font-size: 0.875rem;
         }
 
         input{
-        flex: 0 0 70%;
-        margin-right: 8px;
-        border: 1px solid ${({ theme }) => theme.colors.border};
-        height: 42px;
-        margin-top: 8px;
-        padding-left: 10px;
+            flex: 0 0 70%;
+            margin-right: 8px;
+            border: 1px solid ${({ theme }) => theme.colors.border};
+            height: 42px;
+            margin-top: 8px;
+            padding-left: 10px;
+            border-radius : 8px;
+            font-size : 0.75rem;
         }
 
         p{
@@ -143,7 +144,7 @@ margin-top : 20px;
     flex-wrap: wrap;
 
         >label{
-        flex: 1 0 100%;
+            flex: 1 0 100%;
         }
 
         input[type="file"] {
@@ -152,10 +153,11 @@ margin-top : 20px;
 
         .photo_btn_wrap{
             display: flex;
-            flex: 0 0 60%;
+            flex: 0 0 50%;
             margin-top: 10px;
+        }
 
-            .photo_update{
+        .photo_update{
                 display: block;
                 width: 120px;
                 height: 40px;
@@ -165,25 +167,24 @@ margin-top : 20px;
                 text-align: center;
                 margin-right: 8px;
                 cursor: pointer;
-                line-height : 40px;
-            }
+                font-size : 0.75rem;
+        }
 
-            .photo_reset{
-                width: 72px;
+        .photo_reset{
+                width: 80px;
                 height: 42px;
                 padding: 10px;
                 border: none;
                 background: none;
-                line-height: 18px;
                 text-align: center;
                 -webkit-text-decoration: underline;
                 font-family: var(--font-pretendard-light);
                 cursor: pointer;
-            }
+                font-size : 0.75rem
+        }
 
-            .photo_reset:hover{
+        .photo_reset:hover{
             text-decoration : underline;
-            }
         }
 
         .photo_preview{
@@ -211,24 +212,26 @@ margin-top : 20px;
         }
 
         .reset_update_btn{
-        padding: 8px 18px;
-        border: none;
-        background: none; 
-        cursor : pointer;
-        margin : 12px 8px 0px 0px;
+            padding: 8px 18px;
+            border: none;
+            background: none; 
+            cursor : pointer;
+            margin : 12px 8px 0px 0px;
+            font-size: 0.75rem;
         }
 
         .reset_update_btn:hover{
-        text-decoration : underline;
+            text-decoration : underline;
         }
 
         .update_btn{
-        padding: 8px 18px;
-        border: none;
-        background: ${({ theme }) => theme.colors.primary};
-        color: #fff;
-        border-radius: 8px;
-        cursor : pointer; 
+            padding: 8px 18px;
+            border: none;
+            background: ${({ theme }) => theme.colors.primary};
+            color: #fff;
+            border-radius: 8px;
+            cursor : pointer; 
+            font-size: 0.75rem;
         }
     }
     // --------------------------------------
@@ -243,10 +246,6 @@ margin-top : 20px;
             height: 40px;
         }
 
-        .memo_box p {
-            line-height: 40px;
-        }
-
         .memo_btn {
             padding: 8px 16px;
         }
@@ -259,10 +258,6 @@ margin-top : 20px;
             width: 46px;
             height: 46px;
             margin-right: 12px;
-        }
-
-        .memo_box p {
-            line-height: 46px;
         }
 
         .memo_btn {
@@ -281,6 +276,52 @@ margin-top : 20px;
 
         .update_toggle_btn{
             padding: 10px;
+        }
+
+        .update_wrap{
+            .user_name_change_wrap,
+            .user_photo_change_wrap{
+                margin-top : 20px;
+            }
+
+            .user_name_change_wrap input {
+                border: 2px solid ${({ theme }) => theme.colors.border};
+                height: 62px;
+                margin-top: 8px;
+                padding-left: 10px;
+                border-radius: 8px;
+            }
+
+            .photo_btn_wrap{
+                line-height : 52px;
+            }
+
+            .user_photo_change_wrap .photo_update { 
+                width: 140px;
+                height: 52px;
+                border: 2px solid ${({ theme }) => theme.colors.border};
+                margin-right: 16px;
+            }
+
+            .user_photo_change_wrap .photo_reset {
+                width : 92px;
+                height: 52px;
+            }
+
+            .update_btn_wrap{
+                border: 2px solid ${({ theme }) => theme.colors.border};
+                padding: 16px;
+
+                .reset_update_btn {
+                    font-size: 0.75rem;
+                    padding: 16px 24px;
+                }
+
+                .update_btn {
+                    padding: 16px 32px;
+                    font-size: 0.75rem;
+                }
+            }
         }
     }
 
@@ -304,7 +345,6 @@ margin-top : 20px;
         }
 
         .memo_box p {
-            line-height: 54px;
             font-size: 0.875rem;
         }
 
@@ -316,6 +356,59 @@ margin-top : 20px;
         .update_toggle_btn{
             padding: 12px;
             border: 3px solid ${({ theme }) => theme.colors.border};
+        }
+
+        .update_wrap{
+
+            .user_name_change_wrap,
+            .user_photo_change_wrap{
+                margin-top : 40px;
+            }
+
+            .user_name_change_wrap input {
+                border: 3px solid ${({ theme }) => theme.colors.border};
+                height: 76px;
+                margin-top: 8px;
+                padding-left: 10px;
+                border-radius: 8px;
+            }
+
+            .photo_btn_wrap{
+                line-height : 68px;
+            }
+
+            .user_photo_change_wrap .photo_update { 
+                width: 140px;
+                height: 68px;
+                border: 3px solid ${({ theme }) => theme.colors.border};
+                margin-right: 16px;
+            }
+
+            .user_photo_change_wrap .photo_reset {
+                width : 112px;
+                height: 68px;
+            }
+
+            .user_photo_change_wrap .photo_preview {
+                width: 68px;
+                height: 68px;
+                border: 3px solid ${({ theme }) => theme.colors.border};
+                margin-top: 10px;
+            }
+
+            .update_btn_wrap{
+                margin-top: 60px;
+                border: 3px solid ${({ theme }) => theme.colors.border};
+                padding: 20px;
+
+                .reset_update_btn {
+                    padding: 20px 28px;
+                }
+
+                .update_btn {
+                    padding: 20px 36px;
+                }
+            }
         }
     }
         
@@ -336,9 +429,6 @@ margin-top : 20px;
             padding: 40px 0px;
         }
 
-        .memo_box p {
-            line-height: 64px;
-        }
 
         .memo_btn {
             padding: 8px 20px;
@@ -347,6 +437,53 @@ margin-top : 20px;
 
         .update_toggle_btn{
             padding: 16px;
+        }
+
+        .update_wrap{
+            .user_name_change_wrap,
+            .user_photo_change_wrap{
+                margin-top : 60px;
+            }
+
+            .user_name_change_wrap input {
+                height: 86px;
+                margin-top: 12px;
+                padding-left: 10px;
+                border-radius: 8px;
+            }
+
+            .photo_btn_wrap{
+                line-height : 76px;
+            }
+
+            .user_photo_change_wrap .photo_update { 
+                width: 180px;
+                height: 76px;
+                margin-right: 24px;
+            }
+
+            .user_photo_change_wrap .photo_reset {
+                width : 132px;
+                height: 76px;
+            }
+
+            .user_photo_change_wrap .photo_preview {
+                width: 76px;
+                height: 76px;
+            }
+
+            .update_btn_wrap{
+                margin-top: 80px;
+                padding: 24px;
+
+                .reset_update_btn {
+                    padding: 24px 32px;
+                }
+
+                .update_btn {
+                    padding: 24px 40px;
+                }
+            }
         }
     }
 `
