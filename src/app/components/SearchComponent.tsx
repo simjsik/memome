@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useRouter } from "next/navigation";
 import { useRecoilValue, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState, modalState, UsageLimitState, UsageLimitToggle } from "../state/PostState";
+import { DidYouLogin, loginToggleState, modalState, statusState, UsageLimitState, UsageLimitToggle } from "../state/PostState";
 import { searchClient } from "../utils/algolia";
 import LoadingWrap from "./LoadingWrap";
 // 검색 창 css
@@ -543,8 +543,7 @@ const SwiperHits = () => {
 export default function SearchComponent() {
     const router = useRouter();
     const yourLogin = useRecoilValue(DidYouLogin)
-    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
-    const setModal = useSetRecoilState<boolean>(modalState);
+    const setMobileStatus = useSetRecoilState<boolean>(statusState)
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
 
@@ -554,11 +553,6 @@ export default function SearchComponent() {
             if (!yourLogin || usageLimit) {
                 if (usageLimit) {
                     return setLimitToggle(true);
-                }
-                if (!yourLogin) {
-                    setLoginToggle(true);
-                    setModal(true);
-                    return;
                 }
                 return;
             }
@@ -570,6 +564,7 @@ export default function SearchComponent() {
 
             if (query) {
                 // 검색어가 비어있지 않다면 'home/search'로 이동
+                setMobileStatus(false);
                 router.push(`/home/search?query=${encodeURIComponent(query)}`);
             }
         }
