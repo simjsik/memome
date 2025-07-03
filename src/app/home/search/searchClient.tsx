@@ -11,7 +11,7 @@ import { collection, doc, getDoc } from "firebase/firestore";
 import { db } from "@/app/DB/firebaseConfig";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
-import { loadingState, PostData, UsageLimitState, UsageLimitToggle } from "@/app/state/PostState";
+import { loadingState, PostData, statusState, UsageLimitState, UsageLimitToggle } from "@/app/state/PostState";
 import { searchClient } from "@/app/utils/algolia";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { motion } from "framer-motion";
@@ -177,22 +177,27 @@ function PostHit({ hit }: { hit: PostData }) {
                     <div className='post_content_wrap' onClick={(event) => { event.preventDefault(); handlePostClick(hit.objectID as string); }}>
                         {/* 포스트 제목 */}
                         < div className='post_title_wrap' >
-                            <span className='post_tag'>[{hit.tag}]</span>
-                            <h2 className='post_title'>{hit.title}</h2>
+                            {hit.notice ?
+                                <>
+                                    <span className='notice_tag'>{hit.tag}</span>
+                                    <h2 className='notice_title'>{hit.title}</h2>
+                                </>
+                                :
+                                <>
+                                    <span className='post_tag'>[{hit.tag}]</span>
+                                    <h2 className='post_title'>{hit.title}</h2>
+                                </>
+                            }
                         </div>
                         <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml(hit.content) }}></div>
                         {/* 이미지 */}
                         {(hit.images && hit.images.length > 0) && (
                             <div className='post_pr_img_wrap'>
-                                {hit.images.map((imageUrl, index) => (
-                                    <div className='post_pr_img' key={index}
-                                        css={css
-                                            `
-                                  background-image : url(${imageUrl});
-                                  width: calc((100% / ${Array.isArray(hit.images) && hit.images.length}) - 4px);
-                                  `}
-                                    ></div>
-                                ))}
+                                <div className='post_pr_img' css={css`background-image : url(${hit.images[0]});`}>
+                                    {hit.images.length > 1 &&
+                                        <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
+                                    }
+                                </div>
                             </div>
                         )}
 
@@ -233,6 +238,7 @@ const CustomSearch = () => {
     const searchParams = useSearchParams();
     const query = searchParams?.get('query') || '';
     const router = useRouter();
+    const setMobileStatus = useSetRecoilState<boolean>(statusState)
 
     const handleSearch = (event: React.KeyboardEvent<HTMLDivElement>) => {
         // 엔터키를 감지
@@ -244,6 +250,7 @@ const CustomSearch = () => {
 
             if (query) {
                 // 검색어가 비어있지 않다면 'home/search'로 이동
+                setMobileStatus(false);
                 router.push(`/home/search?query=${encodeURIComponent(query)}`);
             }
         }

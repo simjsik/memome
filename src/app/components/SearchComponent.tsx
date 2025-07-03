@@ -75,7 +75,7 @@ position: relative;
         }
 
         .ais-SearchBox-form{
-        position : relative;
+            position : relative;
         }
 
         .ais-SearchBox-input{
@@ -324,7 +324,9 @@ position: relative;
             }
         }
     // ---------------------------------------------------
-
+    .ais-SearchBox-loadingIndicator{
+        display : none;
+    }
     
     @media (min-width: 1921px) {
         .user_result {

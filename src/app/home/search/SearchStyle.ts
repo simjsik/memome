@@ -18,16 +18,17 @@ export const SearchBoxWrap = styled.div`
         height: 42px;
 
         .ais-SearchBox-submit{
-            width: 42px;
-            height: 42px;
             position: absolute;
             left: 0;
             border: none;
             background: none;
+            width: 42px;
+            height: 42px;
+            padding: 14px;
 
             svg{
-                width: 24px;
-                height: 16px;
+                width: 100%;
+                height: 100%;
             }
         }
             
@@ -40,7 +41,7 @@ export const SearchBoxWrap = styled.div`
             height: 28px;
             border: none;
             border-radius: 50%;
-            background-color : #272D2D;
+            background-color : ${({ theme }) => theme.colors.text};
 
             svg {
                 fill: ${({ theme }) => theme.colors.inverted_text};
@@ -55,6 +56,7 @@ export const SearchBoxWrap = styled.div`
         border-radius: 8px;
         border: 1px solid ${({ theme }) => theme.colors.border};
         padding: 0px 10px 0px 46px;
+        font-size : 0.75em;
 
         &:focus {
         outline : 1px solid ${({ theme }) => theme.colors.text};
@@ -172,5 +174,96 @@ export const SearchBoxWrap = styled.div`
         border-top: 1px solid ${({ theme }) => theme.colors.border};
         background: ${({ theme }) => theme.colors.background};
         cursor:pointer
+    }
+
+    .ais-SearchBox-loadingIndicator{
+        display : none;
+    }
+        
+    @media (min-width: 2560px) {
+        .ais-SearchBox-form{
+            height: 56px;
+
+            .ais-SearchBox-input{
+                padding: 0px 10px 0px 56px;
+                border: 2px solid ${({ theme }) => theme.colors.border};
+            }
+
+            .ais-SearchBox-submit{
+                width: 56px;
+                height: 56px;
+                padding: 18px;
+            }
+                
+            .ais-SearchBox-reset{
+                top: 10px;
+                right: 10px;
+                width: 36px;
+                height: 36px;
+                
+                .ais-SearchBox-resetIcon{
+                    width : 12px;
+                    height : 12px;
+                }
+            }
+        }
+    }
+
+    @media (min-width: 3840px) {
+        .ais-SearchBox-form{
+            height: 76px;
+
+            .ais-SearchBox-input{
+                padding: 0px 10px 0px 86px;
+                border: 3px solid ${({ theme }) => theme.colors.border};
+            }
+
+            .ais-SearchBox-submit{
+                width: 76px;
+                height: 76px;
+                padding: 24px;
+            }
+                    
+            .ais-SearchBox-reset{
+                top: 13px;
+                right: 13px;
+                width: 48px;
+                height: 48px;
+
+                .ais-SearchBox-resetIcon{
+                    width : 14px;
+                    height : 14px;
+                }
+            }
+        }
+    }
+
+    @media (min-width: 5120px) {
+        .ais-SearchBox-form{
+            height: 92px;
+
+            .ais-SearchBox-input{
+                padding: 0px 10px 0px 92px;
+                border: 3px solid ${({ theme }) => theme.colors.border};
+            }
+
+            .ais-SearchBox-submit{
+                width: 92px;
+                height: 92px;
+                padding: 28px;
+            }
+                    
+            .ais-SearchBox-reset{
+                top: 15px;
+                right: 15px;
+                width: 62px;
+                height: 62px;
+
+                .ais-SearchBox-resetIcon{
+                    width : 20px;
+                    height : 20px;
+                }
+            }
+        }
     }
 `

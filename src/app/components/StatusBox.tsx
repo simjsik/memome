@@ -130,7 +130,7 @@ background : ${({ theme }) => theme.colors.background};
         border-right: 3px solid ${({ theme }) => theme.colors.border};
         width: 800px;
         padding : 32px;
-        right: clamp(920px, calc(920px + (100vw - 3840px) * 0.3125), 1320px);
+        right: clamp(860px, calc(860px + (100vw - 3840px) * 0.4223), 1320px);
 
         ${({ $isMemoPage, theme }) =>
         $isMemoPage &&
