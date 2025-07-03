@@ -12,7 +12,7 @@ import { deleteDoc, doc, getDoc, Timestamp } from "firebase/firestore";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
-import { NoMorePost } from "@/app/styled/PostComponents";
+import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
 import { fetchImageList, fetchPostList } from "@/app/utils/fetchPostData";
 import LoadingWrap from "@/app/components/LoadingWrap";
 import { btnVariants } from "@/app/styled/motionVariant";
@@ -276,75 +276,90 @@ export default function UserClient({ user }: ClientUserProps) {
                 {
                     postTab ?
                         <>
-                            {
-                                !loading && userPostList.map((post) => (
-                                    <motion.div key={post.id} className="user_post_list_wrap"
-                                        whileHover="otherHover"
+                            <PostWrap $userPage={true}>
+                                {!loading && userPostList.length > 0 && userPostList.map((post) => (
+                                    <motion.div
+                                        key={post?.id}
+                                        className='post_box'
+                                        onClick={(event) => { event.preventDefault(); handlePostClick(post?.id as string); }}
+                                        whileHover='otherHover'
                                         variants={btnVariants(theme)}
-                                        onClick={() => handlePostClick(post.id)}
                                     >
-                                        {routePostId === post.id && <LoadLoading />}
-                                        <div className="user_post_profile_wrap">
-                                            <div className="user_post_top">
-                                                <div className="user_post_photo"
-                                                    css={css`background-image : url(${user.photo})`}
-                                                ></div>
-                                                <div className="user_post_name">
-                                                    <p>{user.name}</p>
-                                                    <span>@{user.uid?.slice(0, 6)}... · {formatDate(post.createAt)}</span>
+                                        {routePostId === post?.id && <LoadLoading />}
+                                        {/* 작성자 프로필 */}
+                                        <div className='post_profile_wrap'>
+                                            <div className='user_profile'>
+                                                <div className='user_photo'
+                                                    css={css`background-image : url(${post?.photoURL})`}
+                                                >
                                                 </div>
-                                                <div className="post_more">
+                                                <p className='user_name'>
+                                                    {post?.displayName}
+                                                </p>
+                                                <span className='user_uid'>
+                                                    @{post?.userId.slice(0, 6)}...
+                                                </span>
+                                                <p className='post_date'>
+                                                    · {formatDate(post?.createAt as Timestamp)}
+                                                </p>
+                                            </div>
+                                            {user.uid === currentUser.uid &&
+                                                <div className='post_dropdown_wrap' ref={dropdownRef}>
                                                     <motion.button
                                                         variants={btnVariants(theme)}
                                                         whileHover="iconWrapHover"
                                                         whileTap="iconWrapClick"
                                                         className='post_drop_menu_btn'
+                                                        aria-label='포스트 옵션 더보기'
                                                         css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
                                                         onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
                                                     >
                                                         {dropToggle === post.id &&
-                                                            <div ref={dropdownRef}>
+                                                            <div>
                                                                 <ul>
                                                                     <li className='post_drop_menu'>
-                                                                        <button onClick={(event) => { event.preventDefault(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</button>
+                                                                        <motion.button
+                                                                            variants={btnVariants(theme)}
+                                                                            whileHover="otherHover"
+                                                                            onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</motion.button>
                                                                     </li>
                                                                 </ul>
                                                             </div>
                                                         }
                                                     </motion.button>
                                                 </div>
-                                            </div>
+                                            }
                                         </div>
-                                        <div className="user_post_content_wrap">
-                                            <div className="user_post_title_wrap">
-                                                {post.notice ?
+                                        {/* 포스트 내용 */}
+                                        < div className='post_content_wrap' >
+                                            {/* 포스트 제목 */}
+                                            < div className='post_title_wrap' >
+                                                {post?.notice ?
                                                     <>
-                                                        <span className='user_notice_tag'>{post.tag}</span>
-                                                        <p className="user_notice_title">{post.title}</p>
+                                                        <span className='notice_tag'>{post?.tag}</span>
+                                                        <h2 className='notice_title'>{post?.title}</h2>
                                                     </>
                                                     :
                                                     <>
-                                                        <span className='user_post_tag'>[{post.tag}]</span>
-                                                        <p className="user_post_title">{post.title}</p>
+                                                        <span className='post_tag'>[{post?.tag}]</span>
+                                                        <h2 className='post_title'>{post?.title}</h2>
                                                     </>
                                                 }
                                             </div>
-                                            <div className="user_post_content" dangerouslySetInnerHTML={{ __html: cleanHtml(post.content) }}></div>
-                                            {(post.images && post.images.length > 0) && (
-                                                <>
-                                                    <div className="user_post_img">
-                                                        <div css={css`
-                                                        background-image : url(${post.images[0]})
-                                                    `}>
-                                                            {post.images.length > 1 &&
-                                                                <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
-                                                            }
-                                                        </div>
+                                            <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml(post?.content as string) }}></div>
+                                            {/* 이미지 */}
+                                            {(post?.images && post.images.length > 0) && (
+                                                <div className='post_pr_img_wrap'>
+                                                    <div className='post_pr_img' css={css`background-image : url(${post?.images[0]});`}>
+                                                        {post.images.length > 1 &&
+                                                            <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
+                                                        }
                                                     </div>
-                                                </>
+                                                </div>
                                             )}
-                                            <div className="user_post_bottom">
-                                                <div className="user_post_comment">
+                                            {/* 포스트 댓글, 북마크 등 */}
+                                            <div className='post_bottom_wrap'>
+                                                <div className='post_comment'>
                                                     <motion.button
                                                         variants={btnVariants(theme)}
                                                         whileHover="iconWrapHover"
@@ -355,22 +370,21 @@ export default function UserClient({ user }: ClientUserProps) {
                                                             whileTap="iconClick" className='post_comment_icon'>
                                                             <svg viewBox="0 0 67.41 67.41">
                                                                 <g>
-                                                                    <path fill='none' css={css`stroke : ${theme.colors.text}; stroke-width: 5;`} d="M48.23,6.7h-29C12.29,6.7,6.7,11.59,6.7,17.62V40.77c0,6,2.61,10.91,9.5,10.91h.91a1.84,1.84,0,0,1,1.95,1.71v5.26c0,1.55,1.88,2.54,3.45,1.81l13.72-8.32a4.9,4.9,0,0,1,2.08-.46h9.92c6.89,0,12.47-4.88,12.47-10.91V17.62C60.7,11.59,55.12,6.7,48.23,6.7Z" />
+                                                                    <path fill='none' css={css`stroke : ${theme.colors.text}; stroke-width: 5`} d="M48.23,6.7h-29C12.29,6.7,6.7,11.59,6.7,17.62V40.77c0,6,2.61,10.91,9.5,10.91h.91a1.84,1.84,0,0,1,1.95,1.71v5.26c0,1.55,1.88,2.54,3.45,1.81l13.72-8.32a4.9,4.9,0,0,1,2.08-.46h9.92c6.89,0,12.47-4.88,12.47-10.91V17.62C60.7,11.59,55.12,6.7,48.23,6.7Z" />
                                                                     <rect width="67.41" height="67.41" fill='none' />
                                                                 </g>
                                                             </svg>
                                                         </motion.div>
                                                     </motion.button>
-                                                    <p>
-                                                        {post.commentCount}
-                                                    </p>
+                                                    <p>{post?.commentCount}</p>
                                                 </div>
-                                                <BookmarkBtn postId={post.id}></BookmarkBtn>
+                                                <BookmarkBtn postId={post?.id as string}></BookmarkBtn>
                                             </div>
                                         </div>
-                                    </motion.div>
+                                    </motion.div >
                                 ))
-                            }
+                                }
+                            </PostWrap>
                             {postTab && <div className="postObserver" ref={observerLoadRef} css={css`height: 1px; visibility: ${postLoading ? "hidden" : "visible"};`} />}
                             {(!loading && postLoading) && <LoadingWrap />}
                             {postError &&

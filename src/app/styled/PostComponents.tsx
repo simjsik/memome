@@ -4,10 +4,20 @@
 import styled from "@emotion/styled";
 import { motion } from "framer-motion";
 
-export const PostWrap = styled.div`
+interface PostWrapProps {
+  $userPage?: boolean;
+}
+export const PostWrap = styled.div<PostWrapProps>`
 // 포스트 리스트 스타일 별 우측이 간소화
-position : absolute;
+position : ${({ $userPage }) =>
+    $userPage ?
+      'inherit'
+      :
+      'absolute'
+  };
+
 left : clamp(80px, calc(80px + (100vw - 768px) * 0.5), 25%);
+
 display : flex;
 flex-wrap : wrap;
 width: 600px;
@@ -60,16 +70,16 @@ align-content: flex-start;
               position: absolute;
               top: 36px;
               width: 100px;
+              height : 42px;
             }
 
-            li{
-              width: 100%;
-              height: 42px;
+            ul,li{ 
+              height : 100%; 
             }
 
             .post_dlt_btn{
               width: 100%;
-              height: 42px;
+              height: 100%;
               border: 1px solid ${({ theme }) => theme.colors.border};
               background: ${({ theme }) => theme.colors.background};
               border-radius: 8px;
@@ -78,6 +88,7 @@ align-content: flex-start;
               
             button{
               cursor : pointer;
+              font-size : 0.75rem;
             }
         }
     }
@@ -386,7 +397,11 @@ align-content: flex-start;
     }
 
     .post_bottom_wrap{
-        line-height: 1.65;
+      line-height: clamp(
+        1.65rem,                                   
+        calc(1.65rem + (100vw - 1921px) * 0.009),
+        2.35rem
+      );
     }
   }
 
@@ -409,6 +424,16 @@ align-content: flex-start;
     .post_profile_wrap .post_drop_menu_btn{
       width : 52px;
       height : 52px;
+
+            div{
+              top: 52px;
+              width: 120px;
+              height: 52px;
+            }
+
+            .post_dlt_btn{
+              border: 2px solid ${({ theme }) => theme.colors.border};
+            }
     }
 
     .post_title_wrap{
@@ -434,6 +459,14 @@ align-content: flex-start;
       width: clamp(40px, calc(40px + (100vw - 2560px) * 0.0125), 56px);
       height: clamp(40px, calc(40px + (100vw - 2560px) * 0.0125), 56px);
     }
+
+    .post_bottom_wrap{
+      line-height: clamp(
+        1.65rem,                                   
+        calc(1.65rem + (100vw - 2560px) * 0.008),
+        2.35rem
+      );
+    }
   }
 
   @media (min-width: 3840px) {
@@ -458,6 +491,17 @@ align-content: flex-start;
     .post_profile_wrap .post_drop_menu_btn{
       width : 68px;
       height : 68px;
+
+      
+            div{
+              top: 68px;
+              width: 180px;
+              height: 82px;
+            }
+
+            .post_dlt_btn{
+              border: 3px solid ${({ theme }) => theme.colors.border};
+            }
     }
 
     .post_title_wrap{
@@ -482,6 +526,14 @@ align-content: flex-start;
     .post_comment_btn{
       width: clamp(56px, calc(56px + (100vw - 3840px) * 0.0125), 72px);
       height: clamp(56px, calc(56px + (100vw - 3840px) * 0.0125), 72px);
+    }
+
+    .post_bottom_wrap{
+      line-height: clamp(
+        1.85rem,                                   
+        calc(1.85rem + (100vw - 3840px) * 0.001),
+        2rem
+      );
     }
   }
 
@@ -508,6 +560,12 @@ align-content: flex-start;
     .post_profile_wrap .post_drop_menu_btn{
       width : 84px;
       height : 84px;
+
+            div{
+              top: 84px;
+              width: 210px;
+              height: 92px;
+            }
     }
 
     .user_name,
