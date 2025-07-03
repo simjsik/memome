@@ -73,11 +73,12 @@ height : 100%;
 }
 
 .memo_box{
+    line-height: 2rem;
     position: relative;
     display: flex;
 
     p{
-    font-size : 0.875rem;
+        font-size : 0.875rem;
     }
 }
 
@@ -260,8 +261,17 @@ margin-top : 20px;
             margin-right: 12px;
         }
 
-        .memo_btn {
-            padding: 9px 18px;
+        .memo_box{
+            .menu_profile{
+                width: 48px;
+                height: 48px;
+                margin-right: 16px;
+            }
+
+            .memo_btn{
+                padding: 10px 24px;
+                border: 2px solid ${({ theme }) => theme.colors.border};
+            }
         }
 
         .user_photo{
@@ -344,13 +354,17 @@ margin-top : 20px;
             padding: 32px 0px;
         }
 
-        .memo_box p {
-            font-size: 0.875rem;
-        }
+        .memo_box{
+            .menu_profile{
+                width: 64px;
+                height: 64px;
+                margin-right: 20px;
+            }
 
-        .memo_btn {
-            padding: 6px 16px;
-            border: 3px solid ${({ theme }) => theme.colors.border};
+            .memo_btn{
+                padding: 14px 32px;
+                border: 3px solid ${({ theme }) => theme.colors.border};
+            }
         }
 
         .update_toggle_btn{
@@ -415,11 +429,18 @@ margin-top : 20px;
     @media (min-width: 5120px) {
         padding-top: 60px;
 
-        .menu_profile{
-            width: 64px;
-            height: 64px;
-            margin-right: 16px;
+        .memo_box{
+            .menu_profile{
+                width: 78px;
+                height: 78px;
+                margin-right: 24px;
+            }
+
+            .memo_btn{
+                padding: 18px 40px;
+            }
         }
+
         .user_photo{
             width : 138px;
             height : 138px;
@@ -427,12 +448,6 @@ margin-top : 20px;
         .profile_menu_wrap {
             margin-top: 40px;
             padding: 40px 0px;
-        }
-
-
-        .memo_btn {
-            padding: 8px 20px;
-            border: 3px solid ${({ theme }) => theme.colors.border};
         }
 
         .update_toggle_btn{
