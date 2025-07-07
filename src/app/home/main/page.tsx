@@ -8,8 +8,6 @@ export const metadata = {
 // 서버 컴포넌트
 export default async function MemoPage() {
     return (
-        <>
-            <MainHome />
-        </>
+        <MainHome />
     )
 }

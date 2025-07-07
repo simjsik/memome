@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 interface PostWrapProps {
   $userPage?: boolean;
 }
-export const PostWrap = styled.div<PostWrapProps>`
+export const PostWrap = styled.main<PostWrapProps>`
 // 포스트 리스트 스타일 별 우측이 간소화
 position : ${({ $userPage }) =>
     $userPage ?
@@ -53,14 +53,19 @@ align-content: flex-start;
     }
 
     // 포스트 프로필 박스
+    .post_dropdown_wrap{
+      width : 34px;
+      height : 34px;
+    }
+
     .post_profile_wrap{
         display:flex;
         justify-content: space-between;
 
         .post_drop_menu_btn{
             position : relative;
-            width: 36px;
-            height: 36px;
+            width : 100%;
+            height : 100%;
             border: none;
             border-radius : 50px;
             background-color:${({ theme }) => theme.colors.background_invisible};
@@ -68,7 +73,7 @@ align-content: flex-start;
 
             div{
               position: absolute;
-              top: 36px;
+              top: 34px;
               width: 100px;
               height : 42px;
             }
@@ -88,13 +93,10 @@ align-content: flex-start;
               
             button{
               cursor : pointer;
-              font-size : 0.75rem;
+              font-size : 0.875rem;
             }
         }
     }
-      .post_dropdown_wrap{
-        height : 36px;
-      }
 
       .user_profile{
         display:flex;
@@ -102,10 +104,10 @@ align-content: flex-start;
       }
 
       .user_photo{
-        width : 36px;
-        min-width: 36px;
-        height : 36px;
-        min-height : 36px;
+        width: 34px;
+        min-width: 34px;
+        height: 34px;
+        min-height: 34px;
         margin-right : 8px;
         border-radius: 50%;
         background-size : cover;
@@ -1031,24 +1033,17 @@ border : 1px solid ${({ theme }) => theme.colors.border};
         }
     }
 `
-export const BookmarkWrap = styled.div`
-    width: 600px;
-    margin-left: 500px;
-    border-left: 1px solid ${({ theme }) => theme.colors.border};
-    border-right: 1px solid ${({ theme }) => theme.colors.border};
-    background: ${({ theme }) => theme.colors.background};
-`
-export const NoMorePost = styled.div`
+
+export const NoMorePost = styled.section`
     width: 100%;
     height: 240px;
     padding: 40px;
     text-align: center;
 
     .no_more_icon{
+      position : relative;
       width: 160px;
       height: 108px;
-      background-size: cover;
-      background-repeat: no-repeat;
       margin: 0 auto;
     }
 

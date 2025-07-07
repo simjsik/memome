@@ -82,7 +82,7 @@ export default async function UserHome({ params }: UserPageProps) {
 
     return (
         <>
-            <div className="user_wrap">
+            <section className="user_wrap">
                 <div className="user_profile_wrap">
                     <div className="user_photo_wrap">
                         <div className="user_photo" style={{ backgroundImage: `url(${userData?.photo})` }}></div>
@@ -95,7 +95,7 @@ export default async function UserHome({ params }: UserPageProps) {
                     </div>
                 </div>
                 {userData && <UserClient user={userData} />}
-            </div>
+            </section>
         </>
     )
 }

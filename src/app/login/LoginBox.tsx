@@ -257,7 +257,6 @@ export default function LoginBox() {
                 idToken = await signUser.getIdToken();
 
                 data = await fetchGuestLogin(idToken);
-                console.log(data, '기존 게스트 정보')
             } else {
                 const userCredential = await signInAnonymously(auth);
                 signUser = userCredential.user
@@ -272,7 +271,6 @@ export default function LoginBox() {
                 idToken = await guestCredential.user.getIdToken();
 
                 data = await fetchGuestLogin(idToken);
-                console.log(data, '신규 게스트 정보')
                 await updateProfile(signUser, {
                     displayName: data.user.name,
                     photoURL: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg'
@@ -348,7 +346,7 @@ export default function LoginBox() {
         <>
             {pathName === '/login' &&
                 <div css={LoginWrap}>
-                    <div className="logo_box" css={LogoBox}>
+                    <header className="logo_box" css={LogoBox}>
                         <Image
                             src="https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737169919/%EC%BB%AC%EB%9F%AC%EB%A1%9C%EA%B3%A0_snbplg.svg"
                             alt="logo"
@@ -356,7 +354,7 @@ export default function LoginBox() {
                             priority  // 첫 화면 LCP에 중요하면 추가
                             style={{ objectFit: 'cover' }}
                         />
-                    </div>
+                    </header>
                     <LoginButtonWrap>
                         <form onSubmit={(e) => { e.preventDefault(); handleLogin(email, password); }}>
                             <LoginInputWrap>
@@ -374,13 +372,6 @@ export default function LoginBox() {
                                     loginError &&
                                     <p className="login_error">{loginError}</p>
                                 }
-                                {/* {
-                                        (loginError && verifyReSend) &&
-                                        <button
-                                            onClick={() => handleVerifyReSend(unverifedUser as User)}
-                                            disabled={!verifyReSend}
-                                        >인증 메일 재전송</button>
-                                    } */}
                             </div>
                             {(loadingTag === 'Login' && isLoading) ?
                                 <LoginButton><BeatLoader color={'#fff'} size={8} /></LoginButton> :
@@ -399,7 +390,7 @@ export default function LoginBox() {
                                             <div className="auto_on_icon">
                                                 <Image
                                                     src={'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746267045/%EC%9E%90%EB%8F%99%EB%A1%9C%EA%B7%B8%EC%9D%B8%EC%B2%B4%ED%81%AC_gaqgly.svg'}
-                                                    alt="logo"
+                                                    alt="자동 로그인"
                                                     fill
                                                     priority  // 첫 화면 LCP에 중요하면 추가
                                                     style={{ objectFit: 'cover' }}
@@ -433,11 +424,11 @@ export default function LoginBox() {
                             </div>
                         </OtherLoginWrap>
                     </LoginButtonWrap >
-                    <div className="copyright_box">
+                    <footer className="copyright_box">
                         <p>본 사이트는 포트폴리오 사이트입니다.</p>
                         <p>로그인 및 회원가입 시 사이트 이용에 필요한 정보 외 사용되지 않습니다.</p>
                         <span>ⓒ 2025. SIM HYEOK BO All rights reserved.</span>
-                    </div>
+                    </footer>
                 </div >
             }
         </>

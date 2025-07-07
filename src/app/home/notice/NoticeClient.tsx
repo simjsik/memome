@@ -20,6 +20,7 @@ import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { cleanHtml } from "@/app/utils/CleanHtml";
 import useOutsideClick from "@/app/hook/OutsideClickHook";
 import LoadLoading from "@/app/components/LoadLoading";
+import Image from "next/image";
 
 export default function ClientNotice() {
     const theme = useTheme();
@@ -199,8 +200,8 @@ export default function ClientNotice() {
     const handleUsernameClick = useHandleUsernameClick();
     return (
         <>
-            <PostWrap>
-                <>
+            <PostWrap id="notice_post">
+                <section aria-labelledby="notice_post">
                     {/* 무한 스크롤 구조 */}
                     {!loading && noticeList.map((post) => (
                         <motion.div
@@ -265,12 +266,12 @@ export default function ClientNotice() {
                                 {/* 이미지 */}
                                 {(post.images && post.images.length > 0) && (
                                     <div className='post_pr_img_wrap'>
-                                        <div className='post_pr_img'
-                                            css={css
-                                                `
-                                                    background-image : url(${post.images[0]});
-                                                `}
-                                        >
+                                        <div className='post_pr_img'>
+                                            <Image
+                                                src={post.images[0]}
+                                                alt="포스트 이미지"
+                                                fill
+                                                style={{ objectFit: 'cover' }} />
                                             {post.images.length > 1 &&
                                                 <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
                                             }
@@ -306,13 +307,13 @@ export default function ClientNotice() {
                     <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`} />
                     {(!loading && dataLoading) && <LoadingWrap />}
                     {isError &&
-                        <NoMorePost>
+                        <NoMorePost id='post_error' aria-live='polite' role='status'>
                             <span>포스트 로드 중 문제가 발생했습니다.</span>
-                            <motion.div className='retry_post_btn'
+                            <motion.button className='retry_post_btn'
                                 variants={btnVariants(theme)}
                                 whileHover="loginHover"
                                 whileTap="loginClick"
-                                onClick={() => fetchNextPage()}>재요청</motion.div>
+                                onClick={() => fetchNextPage()}>재요청</motion.button>
                         </NoMorePost>
                     }
                     {(!dataLoading && !hasNextPage && !loading) &&
@@ -320,20 +321,30 @@ export default function ClientNotice() {
                             {
                                 noticeList.length > 0 ?
                                     <NoMorePost>
-                                        <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966540/%EA%B3%B5%EC%A7%80%EB%8B%A4%EB%B4%A4%EC%96%B4_lbmtbv.svg)`}></div>
+                                        <div className="no_more_icon">
+                                            <Image src={`https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966540/%EA%B3%B5%EC%A7%80%EB%8B%A4%EB%B4%A4%EC%96%B4_lbmtbv.svg`}
+                                                alt="전체 포스트 확인 완료"
+                                                fill
+                                                style={{ objectFit: 'cover' }}
+                                            ></Image></div>
                                         <p>모두 확인했습니다.</p>
                                         <span>전체 공지사항을 전부 확인했습니다.</span>
                                     </NoMorePost>
                                     :
                                     <NoMorePost>
-                                        <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966540/%EA%B3%B5%EC%A7%80%EC%97%86%EC%96%B4_xkphgs.svg)`}></div>
+                                        <div className="no_more_icon">
+                                            <Image src={`https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966540/%EA%B3%B5%EC%A7%80%EC%97%86%EC%96%B4_xkphgs.svg`}
+                                                alt="전체 포스트 확인 완료"
+                                                fill
+                                                style={{ objectFit: 'cover' }}
+                                            ></Image></div>
                                         <p>공지사항이 없습니다.</p>
                                         <span>전체 공지사항을 전부 확인했습니다.</span>
                                     </NoMorePost>
                             }
                         </>
                     }
-                </>
+                </section>
             </PostWrap>
         </>
     )

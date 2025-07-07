@@ -18,6 +18,7 @@ import { btnVariants } from "@/app/styled/motionVariant";
 import { cleanHtml } from "@/app/utils/CleanHtml";
 import { formatDate } from "@/app/utils/formatDate";
 import LoadLoading from "@/app/components/LoadLoading";
+import Image from "next/image";
 
 export default function Bookmark() {
     const currentBookmark = useRecoilValue<string[]>(bookMarkState)
@@ -140,12 +141,12 @@ export default function Bookmark() {
     const handleUsernameClick = useHandleUsernameClick();
     return (
         <>
-            {!usageLimit &&
-                <PostWrap>
-                    {!loading && <p className='all_post'>내 북마크</p>}
+            <PostWrap id='bookmark_post'>
+                <section aria-labelledby="bookmark_post">
+                    {!loading && <h2 className='all_post'>내 북마크</h2>}
                     {/* 무한 스크롤 구조 */}
                     {!loading && bookmarkList.length > 0 && bookmarkList.map((post) => (
-                        <motion.div
+                        <motion.article
                             key={post?.id}
                             className='post_box'
                             onClick={(event) => { event.preventDefault(); handlePostClick(post?.id as string); }}
@@ -199,7 +200,12 @@ export default function Bookmark() {
                                 {/* 이미지 */}
                                 {(post?.images && post.images.length > 0) && (
                                     <div className='post_pr_img_wrap'>
-                                        <div className='post_pr_img' css={css`background-image : url(${post?.images[0]});`}>
+                                        <div className='post_pr_img'>
+                                            <Image
+                                                src={post?.images[0]}
+                                                alt="포스트 이미지"
+                                                fill
+                                                style={{ objectFit: 'cover' }} />
                                             {post.images.length > 1 &&
                                                 <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
                                             }
@@ -230,29 +236,53 @@ export default function Bookmark() {
                                     <BookmarkBtn postId={post?.id as string}></BookmarkBtn>
                                 </div>
                             </div>
-                        </motion.div >
+                        </motion.article>
                     ))
                     }
                     <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`} />
                     {(!loading && dataLoading) && <LoadingWrap />}
-                    {
-                        (!dataLoading && !hasNextPage && bookmarkList.length > 0 && !loading) &&
-                        <NoMorePost>
-                            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965256/%EB%B6%81%EB%A7%88%ED%81%AC%EB%8B%A4%EB%B4%A4%EC%96%B4_vvrw2f.svg)`}></div>
-                            <p>모두 확인했습니다.</p>
-                            <span>북마크된 메모를 전부 확인했습니다.</span>
+                    {isError &&
+                        <NoMorePost id='post_error' aria-live='polite' role='status'>
+                            <span>포스트 로드 중 문제가 발생했습니다.</span>
+                            <motion.button className='retry_post_btn'
+                                variants={btnVariants(theme)}
+                                whileHover="loginHover"
+                                whileTap="loginClick"
+                                onClick={() => fetchNextPage()}>재요청</motion.button>
                         </NoMorePost>
                     }
                     {
-                        (!dataLoading && bookmarkList.length === 0 && !loading) &&
-                        <NoMorePost>
-                            <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965256/%EB%B6%81%EB%A7%88%ED%81%AC%EC%97%86%EC%96%B4_fkhi4n.svg)`}></div>
-                            <p>북마크된 메모가 없습니다.</p>
-                            <span>페이지를 탐색 후 원하는 메모를 북마크 해보세요.</span>
-                        </NoMorePost>
+                        (!hasNextPage && !dataLoading && !loading) &&
+                        <>
+                            {bookmarkList.length > 0 ?
+                                <NoMorePost id='no_more_post' aria-live="polite" role="status">
+                                    <div className="no_more_icon">
+                                        <Image src={`https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965256/%EB%B6%81%EB%A7%88%ED%81%AC%EB%8B%A4%EB%B4%A4%EC%96%B4_vvrw2f.svg`}
+                                            alt="전체 포스트 확인 완료"
+                                            fill
+                                            style={{ objectFit: 'cover' }}
+                                        ></Image>
+                                    </div>
+                                    <p>모두 확인했습니다.</p>
+                                    <span>북마크된 메모를 전부 확인했습니다.</span>
+                                </NoMorePost>
+                                :
+                                <NoMorePost id='no_more_post' aria-live="polite" role="status">
+                                    <div className="no_more_icon">
+                                        <Image src={`https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965256/%EB%B6%81%EB%A7%88%ED%81%AC%EC%97%86%EC%96%B4_fkhi4n.svg`}
+                                            alt="포스트 없음"
+                                            fill
+                                            style={{ objectFit: 'cover' }}
+                                        ></Image>
+                                    </div>
+                                    <p>북마크된 메모가 없습니다.</p>
+                                    <span>페이지를 탐색 후 원하는 메모를 북마크 해보세요.</span>
+                                </NoMorePost>
+                            }
+                        </>
                     }
-                </PostWrap >
-            }
+                </section>
+            </PostWrap >
         </>
     )
 }

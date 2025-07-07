@@ -13,6 +13,9 @@ a {
   font-family: var(--font-pretendard-medium);
 }
 
+section{
+  width: 100%;
+}
 
 @media (max-width: 480px) {
   html {

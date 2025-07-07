@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 import NavBar from "../components/NavBar";
 import StatusBox from "../components/StatusBox";
 import UsageLimit from "../components/UsageLimit";
-import LoginBox from "../login/LoginBox";
 import GlobalLoadingWrap from "../components/GlobalLoading";
 import RouteChangeListener from "../components/RouterListener";
 
@@ -15,9 +14,8 @@ export default function ProviderClient({ children }: LayoutProps) {
         <>
             <GlobalLoadingWrap />
             <RouteChangeListener></RouteChangeListener>
-            <LoginBox />
             <StatusBox />
-            <UsageLimit /> 
+            <UsageLimit />
             <NavBar />
             {children}
         </>

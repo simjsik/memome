@@ -3,7 +3,7 @@
 import styled from "@emotion/styled";
 import { motion } from 'framer-motion';
 
-export const LoginButtonWrap = styled.div`
+export const LoginButtonWrap = styled.main`
     margin: 0 auto;
     margin-top: 120px;
     width: 520px;

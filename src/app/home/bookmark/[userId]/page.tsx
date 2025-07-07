@@ -1,5 +1,4 @@
 import ClientBookmark from './ClientBookmark'
-import { BookmarkWrap } from '@/app/styled/PostComponents';
 
 export const metadata = {
     title: "MEMOME :: 북마크",
@@ -9,10 +8,6 @@ export const metadata = {
 export default async function Bookmark() {
 
     return (
-        <>
-            <BookmarkWrap>
-                <ClientBookmark />
-            </BookmarkWrap>
-        </>
+        <ClientBookmark />
     )
 }

@@ -26,6 +26,7 @@ import { formatDate } from '@/app/utils/formatDate';
 import { useAddUpdatePost } from './hook/usePostMutation';
 import { useDelPost } from '../post/hook/useNewPostMutation';
 import LoadLoading from '@/app/components/LoadLoading';
+import Image from 'next/image';
 
 
 export default function MainHome() {
@@ -305,13 +306,13 @@ export default function MainHome() {
           whileTap="loginClick">새로운 업데이트 확인</NewPostBtn>
       }
       {/* 공지사항 제외 전체 포스트 */}
-      <PostWrap>
-        <>
+      <PostWrap id='main_post'>
+        <section aria-labelledby='main_post'>
           {(!loading && isAddUpdatePost) && <LoadingWrap />}
           {/* 무한 스크롤 구조 */}
           {!loading && postList.map(post => (
             <>
-              <motion.div
+              <motion.article
                 whileHover="otherHover"
                 variants={btnVariants(theme)}
                 key={post.id}
@@ -373,12 +374,12 @@ export default function MainHome() {
                   {/* 이미지 */}
                   {(post.images && post.images.length > 0) && (
                     <div className='post_pr_img_wrap'>
-                      <div className='post_pr_img'
-                        css={css
-                          `
-                          background-image : url(${post.images[0]});
-                          `}
-                      >
+                      <div className='post_pr_img'>
+                        <Image
+                          src={post.images[0]}
+                          alt="포스트 이미지"
+                          fill
+                          style={{ objectFit: 'cover' }} />
                         {post.images.length > 1 &&
                           <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
                         }
@@ -409,14 +410,14 @@ export default function MainHome() {
                     <BookmarkBtn postId={post.id}></BookmarkBtn>
                   </div>
                 </div>
-              </motion.div >
+              </motion.article>
             </>
           ))
           }
           <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`} />
           {(!loading && dataLoading) && <LoadingWrap />}
           {isError &&
-            <NoMorePost>
+            <NoMorePost id='post_error' aria-live='polite' role='status'>
               <span>포스트 로드 중 문제가 발생했습니다.</span>
               <motion.button className='retry_post_btn'
                 variants={btnVariants(theme)}
@@ -429,21 +430,33 @@ export default function MainHome() {
             (!hasNextPage && !dataLoading && !loading) &&
             <>
               {postList.length > 0 ?
-                <NoMorePost>
-                  <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966548/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_fahwir.svg)`}></div>
+                <NoMorePost id='no_more_post' aria-live="polite" role="status">
+                  <div className="no_more_icon">
+                    <Image src={`https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966548/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_fahwir.svg`}
+                      alt="전체 포스트 확인 완료"
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    ></Image>
+                  </div>
                   <p>모두 확인했습니다.</p>
                   <span>전체 메모를 전부 확인했습니다.</span>
                 </NoMorePost>
                 :
-                <NoMorePost>
-                  <div className="no_more_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966543/%EB%A9%94%EB%AA%A8%EC%97%86%EC%96%B4_d0sm6q.svg)`}></div>
+                <NoMorePost id='no_more_post' aria-live="polite" role="status">
+                  <div className="no_more_icon">
+                    <Image src={`https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966543/%EB%A9%94%EB%AA%A8%EC%97%86%EC%96%B4_d0sm6q.svg`}
+                      alt="포스트 없음"
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    ></Image>
+                  </div>
                   <p>메모가 없습니다.</p>
                   <span>전체 메모를 전부 확인했습니다.</span>
                 </NoMorePost>
               }
             </>
           }
-        </>
+        </section >
       </PostWrap >
     </>
   )
