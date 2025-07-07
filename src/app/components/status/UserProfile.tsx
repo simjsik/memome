@@ -895,7 +895,7 @@ export default function UserProfile() {
                                                 <div className="alarm_title">
                                                     <p>{notice.noticeType}</p>
                                                 </div>
-                                                <p className="alram_date">{formatDate(notice.noticeAt)}</p>
+                                                <time className="alram_date">{formatDate(notice.noticeAt)}</time>
                                                 {alarmLoading ?
                                                     <button><BeatLoader color="#000" size={8} /></button>
                                                     :

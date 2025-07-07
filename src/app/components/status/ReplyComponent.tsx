@@ -191,7 +191,7 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                                 </div>
                                 <span className="memo_reply_uid">@{reply.displayName}-{reply.uid.slice(0, 3)}...</span>
                                 <p className="memo_reply">{reply.commentText}</p>
-                                <p className="memo_comment_date">{formatDate(reply.createAt)}</p>
+                                <time className="memo_comment_date">{formatDate(reply.createAt)}</time>
                                 <button className="comment_reply_btn" onClick={() => toggleReply(reply.id)}>답글</button>
                                 {activeReply === reply.id && (
                                     <div className="reply_input_wrap">

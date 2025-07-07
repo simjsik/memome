@@ -169,9 +169,9 @@ export default function Bookmark() {
                                     <span className='user_uid'>
                                         @{post?.userId.slice(0, 6)}...
                                     </span>
-                                    <p className='post_date'>
+                                    <time className='post_date'>
                                         · {formatDate(post?.createAt as Timestamp)}
-                                    </p>
+                                    </time>
                                 </div>
                                 <button
                                     className='post_drop_menu_btn'

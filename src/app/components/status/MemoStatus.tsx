@@ -460,7 +460,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                 </button>
                             </div>
                             <p className="memo_comment">{comment.commentText}</p>
-                            <p className="memo_comment_date">{formatDate(comment.createAt)}</p>
+                            <time className="memo_comment_date">{formatDate(comment.createAt)}</time>
                             <motion.button variants={btnVariants(theme)}
                                 whileHover="otherHover"
                                 whileTap="otherClick"

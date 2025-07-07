@@ -300,9 +300,9 @@ export default function UserClient({ user }: ClientUserProps) {
                                                 <span className='user_uid'>
                                                     @{post?.userId.slice(0, 6)}...
                                                 </span>
-                                                <p className='post_date'>
+                                                <time className='post_date'>
                                                     · {formatDate(post?.createAt as Timestamp)}
-                                                </p>
+                                                </time>
                                             </div>
                                             {user.uid === currentUser.uid &&
                                                 <div className='post_dropdown_wrap' ref={dropdownRef}>

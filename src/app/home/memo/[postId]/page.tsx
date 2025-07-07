@@ -144,7 +144,7 @@ export default async function MemoPage({ params }: MemoPageProps) {
                             <p>
                                 {userData?.displayName} ·
                             </p>
-                            <span>{formatDate(post?.createAt)}</span>
+                            <time>{formatDate(post?.createAt)}</time>
                         </div>
                     </div>
                 </div>

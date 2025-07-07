@@ -1793,7 +1793,7 @@ export default function PostMenu() {
                     <div className='load_modal_bg'></div>
                     <div className='load_btn_wrap'>
                         <p>작성 중인 내용이 있습니다.</p>
-                        <span>{formatDate(postDate)}에 작성 중이던 내용이 있습니다.</span>
+                        <span><time>{formatDate(postDate)}</time>에 작성 중이던 내용이 있습니다.</span>
                         <span>이어서 작성하시겠습니까?</span>
                         <button className='load_ok_btn' onClick={() => handleLoadPost(true)}>확인</button>
                         <button className='load_no_btn' onClick={() => handleLoadPost(false)}>취소</button>

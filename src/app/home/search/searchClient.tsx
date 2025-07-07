@@ -144,9 +144,9 @@ function PostHit({ hit }: { hit: PostData }) {
                             <span className='user_uid'>
                                 @{hit.userId.slice(0, 6)}...
                             </span>
-                            <p className='post_date'>
+                            <time className='post_date'>
                                 · {formatDate(hit.createAt)}
-                            </p>
+                            </time>
                         </div>
                         <div className='post_dropdown_wrap' ref={dropdownRef}>
                             <motion.button
