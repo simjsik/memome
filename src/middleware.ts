@@ -227,6 +227,8 @@ export async function middleware(req: NextRequest) {
         'sha256-aKOrEndNAkbZLWQwXuOdouODgmzKFolS/nSZblBj+uA=' \
         'sha256-uMDKqHX5r43MreOnC4PGRb0EL3XpDWzzrOAG77TNf88=' \
         'sha256-WnBPKOFanrxhJ8VKEyObZl0FMgrs8zU/gS/0escC7H0=' \
+        'sha256-pBNoS/Dw2SBKDzUfJdIJzVVWn9J2Qq4AnBKsu2jYKQg=' \
+        'sha256-181oE+v13en5m1SVaqSDIytwEayc9PNq9twwxL+w3yM=' \
         ;`
     );
 
