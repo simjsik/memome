@@ -1045,6 +1045,7 @@ export const NoMorePost = styled.section`
       width: 160px;
       height: 108px;
       margin: 0 auto;
+      background-size : cover;
     }
 
     p{

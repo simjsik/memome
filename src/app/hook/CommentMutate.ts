@@ -120,7 +120,6 @@ export function useDelComment(
     const queryClient = useQueryClient();
     const user = useRecoilValue(userState);
     const ADMIN = useRecoilValue(adminState);
-    const setCommentCount = useSetRecoilState(memoCommentCount);
 
     return useMutation<void, Error, string>({
         onMutate: async (commentId) => {
@@ -162,8 +161,6 @@ export function useDelComment(
             const postRef = doc(db, 'posts', postId)
             batch.update(postRef, { commentCount: increment(-1 - commentData.replyCount) });
 
-            setCommentCount(prev => prev - (1 + commentData.replyCount));
-
             await batch.commit();
         },
         onError: (err) => {
@@ -190,7 +187,6 @@ export function useDelReply(
     const queryClient = useQueryClient();
     const user = useRecoilValue(userState);
     const ADMIN = useRecoilValue(adminState);
-    const setCommentCount = useSetRecoilState(memoCommentCount);
 
     return useMutation<void, Error, string>({
         onMutate: (replyId) => {
@@ -225,8 +221,6 @@ export function useDelReply(
             batch.delete(replyRef);
 
             await batch.commit();
-            setCommentCount(prev => prev - 1);
-
         },
         onError: (err) => {
             if (err.message === 'NF') {
