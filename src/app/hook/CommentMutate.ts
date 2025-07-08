@@ -1,9 +1,9 @@
 'use client';
 import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminState, Comment, memoCommentCount, userState } from "../state/PostState";
-import { addDoc, collection, doc, getDoc, increment, Timestamp, writeBatch } from "firebase/firestore";
+import { adminState, Comment, userState } from "../state/PostState";
+import { addDoc, collection, doc, getDoc, Timestamp, writeBatch } from "firebase/firestore";
 import { db } from "../DB/firebaseConfig";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 
 
 export interface Reply {
@@ -22,7 +22,6 @@ export function useAddComment(
 ) {
     const queryClient = useQueryClient();
     const user = useRecoilValue(userState); // 사용자 정보 훅
-    const setCommentCount = useSetRecoilState(memoCommentCount);
 
     return useMutation<Comment, Error, Comment>({
         mutationFn: async (newComment) => {
@@ -33,7 +32,6 @@ export function useAddComment(
                 createAt: Timestamp.now(),
             });
 
-            setCommentCount(prev => prev + 1);
             return {
                 ...newComment,
                 id: commentRef.id,
@@ -68,7 +66,6 @@ export function useAddReply(
 ) {
     const queryClient = useQueryClient();
     const user = useRecoilValue(userState); // 사용자 정보 훅
-    const setCommentCount = useSetRecoilState(memoCommentCount);
 
     return useMutation<Reply, Error, Reply>({
         mutationFn: async (reply) => {
@@ -79,7 +76,6 @@ export function useAddReply(
                 createAt: Timestamp.now(),
             });
 
-            setCommentCount(prev => prev + 1);
             return {
                 ...reply,
                 id: replyRef.id,
@@ -158,9 +154,6 @@ export function useDelComment(
             batch.delete(docRef);
 
             // 댓글 수 수정: 현재 댓글과 답글 수를 계산
-            const postRef = doc(db, 'posts', postId)
-            batch.update(postRef, { commentCount: increment(-1 - commentData.replyCount) });
-
             await batch.commit();
         },
         onError: (err) => {
