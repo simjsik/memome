@@ -65,7 +65,7 @@ margin : 0 auto;
         width: 49px;
         height: 49px;
         margin-right: 10px;
-        border: ${(props) => (props.notice ? `${props.theme.colors.error}` : `1px solid ${props.theme.colors.border}`)};
+        border: ${(props) => (props.notice ? `1px solid ${props.theme.colors.error}` : `1px solid ${props.theme.colors.border}`)};
         border-radius: 8px;
         background: ${({ theme }) => theme.colors.background};
         cursor: pointer;
@@ -76,7 +76,7 @@ margin : 0 auto;
             bottom: 4px;
             text-align: center;
             transform: translateX(-50%);
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             color : ${(props) => (props.notice ? `${props.theme.colors.error}` : `${props.theme.colors.text_tag}`)};
             font-family : var(--font-pretendard-medium);
         }
@@ -752,6 +752,7 @@ export default function PostMenu() {
     const [selectBgColor, setSelectedBgColor] = useState<string>('#ffffff');
     const [selectLineheight, setSelectedLineHeight] = useState<string>('1.5');
     const [selectAlign, setSelectedAlign] = useState<string>('left');
+
     const colorPallete = {
         color: [
             '#191919', '#999999', '#ffcdc0', '#ffe3c8', '#fff8b2', '#e3fdc8', '#c2f4db', '#bdfbfa', '#b0f1ff', '#9bdfff',
@@ -897,12 +898,13 @@ export default function PostMenu() {
     // 공지사항 글로 작성
     const handleCheckedNotice = () => {
         if (!isAdmin) return;
-        setCheckedNotice((prev) => !prev);
 
         if (!checkedNotice) {
-            setSelectedTag('공지사항')
+            setSelectedTag('공지사항');
+            setCheckedNotice(true);
         } else {
-            setSelectedTag('기타')
+            setSelectedTag('기타');
+            setCheckedNotice(false);
         }
     }
 
@@ -1416,37 +1418,39 @@ export default function PostMenu() {
                         </motion.div>
                     </button>
                     <div className='posting_top'>
-                        <motion.button
-                            variants={btnVariants(theme)}
-                            whileHover={checkedNotice ? "NtcHover" : "NtcOffHover"}
-                            whileTap={checkedNotice ? "NtcClick" : "NtcOffClick"}
-                            className='notice_btn' onClick={handleCheckedNotice}>
-                            {checkedNotice ?
-                                <>
-                                    <svg width="32" height="32" viewBox="0 8 40 40">
-                                        <g>
-                                            <path className='notice_path_01' d="M29.55,26.26,28.36,25a1.14,1.14,0,0,1-.3-.77V19.26a8.29,8.29,0,0,0-7-8.32,8.09,8.09,0,0,0-9.14,8v5.23a1.14,1.14,0,0,1-.3.77l-1.19,1.31a1.72,1.72,0,0,0,1.26,2.87H28.29A1.72,1.72,0,0,0,29.55,26.26Z" fill="none" stroke='#fa5741' strokeWidth={'2'} />
-                                            <path className='notice_path_02' d="M17.51,29.13a.34.34,0,0,0-.35.37,2.86,2.86,0,0,0,5.68,0,.34.34,0,0,0-.35-.37Z" fill="none" stroke='#fa5741' strokeWidth={'2'} />
-                                            <circle cx="20" cy="9.15" r="1.15" fill="none" stroke='#fa5741' strokeWidth={'2'} />
-                                            <rect width="32" height="32" fill="none" />
-                                        </g>
-                                    </svg>
-                                    <p>공지</p>
-                                </>
-                                :
-                                <>
-                                    <svg width="32" height="32" viewBox="0 8 40 40">
-                                        <g>
-                                            <path className='notice_path_01' d="M29.55,26.26,28.36,25a1.14,1.14,0,0,1-.3-.77V19.26a8.29,8.29,0,0,0-7-8.32,8.09,8.09,0,0,0-9.14,8v5.23a1.14,1.14,0,0,1-.3.77l-1.19,1.31a1.72,1.72,0,0,0,1.26,2.87H28.29A1.72,1.72,0,0,0,29.55,26.26Z" fill="none" stroke='#ccc' strokeWidth={'2'} />
-                                            <path className='notice_path_02' d="M17.51,29.13a.34.34,0,0,0-.35.37,2.86,2.86,0,0,0,5.68,0,.34.34,0,0,0-.35-.37Z" fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2'} />
-                                            <circle cx="20" cy="9.15" r="1.15" fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2'} />
-                                            <rect width="32" height="32" fill="none" />
-                                        </g>
-                                    </svg>
-                                    <p>공지</p>
-                                </>
-                            }
-                        </motion.button>
+                        {isAdmin &&
+                            <motion.button
+                                variants={btnVariants(theme)}
+                                whileHover={checkedNotice ? "NtcHover" : "NtcOffHover"}
+                                whileTap={checkedNotice ? "NtcClick" : "NtcOffClick"}
+                                className='notice_btn' onClick={handleCheckedNotice}>
+                                {checkedNotice ?
+                                    <>
+                                        <svg width="32" height="32" viewBox="0 8 40 40">
+                                            <g>
+                                                <path className='notice_path_01' d="M29.55,26.26,28.36,25a1.14,1.14,0,0,1-.3-.77V19.26a8.29,8.29,0,0,0-7-8.32,8.09,8.09,0,0,0-9.14,8v5.23a1.14,1.14,0,0,1-.3.77l-1.19,1.31a1.72,1.72,0,0,0,1.26,2.87H28.29A1.72,1.72,0,0,0,29.55,26.26Z" fill="none" stroke='#fa5741' strokeWidth={'2'} />
+                                                <path className='notice_path_02' d="M17.51,29.13a.34.34,0,0,0-.35.37,2.86,2.86,0,0,0,5.68,0,.34.34,0,0,0-.35-.37Z" fill="none" stroke='#fa5741' strokeWidth={'2'} />
+                                                <circle cx="20" cy="9.15" r="1.15" fill="none" stroke='#fa5741' strokeWidth={'2'} />
+                                                <rect width="32" height="32" fill="none" />
+                                            </g>
+                                        </svg>
+                                        <p>공지</p>
+                                    </>
+                                    :
+                                    <>
+                                        <svg width="32" height="32" viewBox="0 8 40 40">
+                                            <g>
+                                                <path className='notice_path_01' d="M29.55,26.26,28.36,25a1.14,1.14,0,0,1-.3-.77V19.26a8.29,8.29,0,0,0-7-8.32,8.09,8.09,0,0,0-9.14,8v5.23a1.14,1.14,0,0,1-.3.77l-1.19,1.31a1.72,1.72,0,0,0,1.26,2.87H28.29A1.72,1.72,0,0,0,29.55,26.26Z" fill="none" stroke='#ccc' strokeWidth={'2'} />
+                                                <path className='notice_path_02' d="M17.51,29.13a.34.34,0,0,0-.35.37,2.86,2.86,0,0,0,5.68,0,.34.34,0,0,0-.35-.37Z" fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2'} />
+                                                <circle cx="20" cy="9.15" r="1.15" fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2'} />
+                                                <rect width="32" height="32" fill="none" />
+                                            </g>
+                                        </svg>
+                                        <p>공지</p>
+                                    </>
+                                }
+                            </motion.button>
+                        }
                         {checkedNotice ?
                             <select ref={tagRef} className='tag_sel' defaultValue={'공지사항'}>
                                 <option value="공지사항">공지사항</option>
