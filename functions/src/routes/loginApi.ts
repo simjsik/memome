@@ -21,7 +21,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
         const uid = decodedToken.uid;
 
-        const userSession = {
+        let userSession = {
             uid: uid,
             name: decodedToken.name || "",
             photo: decodedToken.picture || "",
@@ -43,6 +43,13 @@ router.post('/login', async (req: Request, res: Response) => {
                     hasGuest: true,
                 }),
             });
+
+            userSession = {
+                        uid: uid,
+                        name: randomName,
+                        photo: "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg",
+                        email: '',
+            };
 
             if (!saveUserResponse?.ok) {
                 const errorData = await saveUserResponse?.json();
