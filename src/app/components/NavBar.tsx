@@ -21,9 +21,9 @@ height : 100%;
 background:${({ theme }) => theme.colors.background};
 
     .nav_wrap{
-        position: relative;
-        top: 50%;
-        transform: translateY(-50%);
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
     }
 
     .mb_status{
@@ -53,10 +53,11 @@ background:${({ theme }) => theme.colors.background};
         border-top: 1px solid ${({ theme }) => theme.colors.border};
 
         .nav_wrap{
-            display : flex;
-            position: relative;
-            top: 40%;
-            transform: translateY(-50%);
+            ul{
+                display : flex;
+                position: relative;
+                justify-content: space-around;
+            }
         }
 
         .mb_status{
