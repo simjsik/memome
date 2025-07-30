@@ -3,7 +3,7 @@
 
 import { startTransition, useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState, modalState, noticeList, noticeType, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
+import { DidYouLogin, hasGuestState, loginToggleState, modalState, noticeList, noticeType, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
 import { deleteDoc, doc } from "firebase/firestore";
 import { css, useTheme } from "@emotion/react";
@@ -156,6 +156,7 @@ margin-top : 20px;
             display: flex;
             flex: 0 0 50%;
             margin-top: 10px;
+            line-height : 40px;
         }
 
         .photo_update{
@@ -303,7 +304,7 @@ margin-top : 20px;
             }
 
             .photo_btn_wrap{
-                line-height : 52px;
+                line-height : 48px;
             }
 
             .user_photo_change_wrap .photo_update { 
@@ -505,19 +506,20 @@ margin-top : 20px;
 
 export default function UserProfile() {
     const theme = useTheme();
-    const [currentUser, setCurrentUser] = useRecoilState<userData>(userState)
-    const yourLogin = useRecoilValue(DidYouLogin)
-    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
+    const [currentUser, setCurrentUser] = useRecoilState<userData>(userState);
+    const yourLogin = useRecoilValue(DidYouLogin);
+    const hasGuest = useRecoilValue(hasGuestState);
+    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState);
     const setModal = useSetRecoilState<boolean>(modalState);
     const [noticeLists, setNoticeLists] = useRecoilState<noticeType[]>(noticeList);
-    const usageLimit = useRecoilValue<boolean>(UsageLimitState)
-    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
-    const [updateToggle, setUpdateToggle] = useState<boolean>(false)
-    const [updateUserName, setUpdateUserName] = useState<string | null>(null)
-    const [updateUserNameError, setUpdateUserNameError] = useState<string | null>(null)
-    const [updateUserPhoto, setUpdateUserPhoto] = useState<File | null>(null)
-    const [updateUserPhotoError, setUpdateUserPhotoError] = useState<string | null>(null)
-    const [updateUserPhotoPreview, setUpdateUserPhotoPreview] = useState<string | null>(currentUser.photo)
+    const usageLimit = useRecoilValue<boolean>(UsageLimitState);
+    const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle);
+    const [updateToggle, setUpdateToggle] = useState<boolean>(false);
+    const [updateUserName, setUpdateUserName] = useState<string | null>(null);
+    const [updateUserNameError, setUpdateUserNameError] = useState<string | null>(null);
+    const [updateUserPhoto, setUpdateUserPhoto] = useState<File | null>(null);
+    const [updateUserPhotoError, setUpdateUserPhotoError] = useState<string | null>(null);
+    const [updateUserPhotoPreview, setUpdateUserPhotoPreview] = useState<string | null>(currentUser.photo);
     const [loading, setLoading] = useState(false);
     const [alarmLoading, setAlarmLoading] = useState(false);
     const [routed, setRouted] = useState<boolean>(false);
@@ -540,6 +542,7 @@ export default function UserProfile() {
     // 프로필 사진 업데이트 시 로직
     const updateToProfile = async (image: File | null, name: string | null) => {
         if (currentUser) {
+            if (hasGuest) return alert('게스트 유저는 변경할 수 없습니다.');
             try {
                 setLoading(true);
 
@@ -652,10 +655,11 @@ export default function UserProfile() {
             setUpdateUserPhotoPreview(imageUrl)
             setUpdateUserPhoto(e.target.files[0]);
         }
-    }
+    };
 
     const handleResetPhoto = () => {
-        setUpdateUserPhotoPreview('https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744861940/%ED%94%84%EB%A1%9C%ED%95%84%EC%9A%A9_grt1en.png'); // 기본 이미지 URL 적용
+        if (currentUser.photo == 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg') return;
+        setUpdateUserPhotoPreview('https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg'); // 기본 이미지 URL 적용
         setUpdateUserPhoto(null);  // 선택된 파일 초기화
     };
 
@@ -675,17 +679,17 @@ export default function UserProfile() {
 
     const handleProfileReset = () => {
         if (currentUser && currentUser.name) {
-            setUpdateUserName(currentUser.name)
-            setUpdateUserPhoto(null)
-            setUpdateUserNameError(null)
-            setUpdateUserPhotoError(null)
-            setUpdateUserPhotoPreview(currentUser.photo)
+            setUpdateUserName(currentUser.name);
+            setUpdateUserPhoto(null);
+            setUpdateUserNameError(null);
+            setUpdateUserPhotoError(null);
+            setUpdateUserPhotoPreview(currentUser.photo);
         }
 
         if (updatePhotoRef.current) {
             updatePhotoRef.current.value = ''; // 선택된 사진 초기화
         }
-    }
+    };
 
     const noticeConfirm = async (noticeId: string) => {
         if (alarmLoading) {
@@ -733,7 +737,7 @@ export default function UserProfile() {
         } else {
             console.error('유저 확인 실패')
         }
-    }
+    };
 
     const handleUpdateToggle = () => {
         if (yourLogin && !usageLimit) {
@@ -745,7 +749,7 @@ export default function UserProfile() {
             setModal(true);
             return;
         }
-    }
+    };
 
     const handleMemoClick = () => {
         if (yourLogin && !usageLimit) {
@@ -763,17 +767,17 @@ export default function UserProfile() {
             setModal(true);
             return;
         }
-    }
+    };
 
     useEffect(() => {
         if (updateToggle && currentUser) {
             setUpdateUserName(currentUser.name)
         }
-    }, [updateToggle])
+    }, [updateToggle]);
 
     useEffect(() => {
         handleProfileReset();
-    }, [currentUser])
+    }, [currentUser]);
 
     return (
         <ProfileWrap>
@@ -839,7 +843,7 @@ export default function UserProfile() {
                                 {(updateUserName !== currentUser.name || Boolean(updateUserPhoto) || updateUserPhotoPreview !== currentUser.photo) &&
                                     <div className="update_btn_wrap">
                                         <p>저장하지 않은 변경 사항이 있습니다!</p>
-                                        <button className="reset_update_btn" onClick={handleProfileReset}>
+                                        <button className="reset_update_btn" onClick={(e) => { e.preventDefault(); handleProfileReset(); }}>
                                             되돌리기
                                         </button>
                                         {loading ?
@@ -873,10 +877,13 @@ export default function UserProfile() {
                                     border-radius : 50%;
                                 `}></div>
                                 <p>새 메모를 작성하세요</p>
-                                <motion.button
-                                    variants={btnVariants(theme)}
-                                    whileHover="otherHover"
-                                    whileTap="otherClick" className="memo_btn" onClick={handleMemoClick}>메모</motion.button>
+                                {hasGuest ?
+                                    <button className="memo_btn" css={css`color: #aaa`}>메모</button> :
+                                    <motion.button
+                                        variants={btnVariants(theme)}
+                                        whileHover="otherHover"
+                                        whileTap="otherClick" className="memo_btn" onClick={handleMemoClick}>메모</motion.button>
+                                }
                             </div>
                             <MyAlarmWrap className="my_alarm_wrap">
                                 <Swiper
