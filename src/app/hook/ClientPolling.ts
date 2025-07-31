@@ -17,11 +17,11 @@ const useUpdateChecker = () => {
                 const docRef = hasGuest ? doc(db, `guests/${currentUser.uid}/status/postUpdates`) : doc(db, `users/${currentUser.uid}/status/postUpdates`);
 
                 const docSnap = await getDoc(docRef);
+
                 if (docSnap.exists()) {
                     setHasUpdate(docSnap.data().hasUpdate || false);
-                } else {
-                    console.error('업데이트 확인 실패')
                 }
+
             } catch (error) {
                 console.error("Error fetching update status:", error);
             }
@@ -32,7 +32,7 @@ const useUpdateChecker = () => {
         fetchUpdateStatus(); // 컴포넌트 마운트 시 즉시 상태 확인
 
         return () => clearInterval(interval); // 컴포넌트 언마운트 시 인터벌 제거
-    }, [currentUser]);
+    }, [currentUser, hasGuest]);
 
     const clearUpdate = async () => {
         try {
@@ -53,11 +53,16 @@ const useUpdateChecker = () => {
                     }
                     throw new Error(`새 포스트 업데이트 실패 : ${errorDetails.message}`);
                 }
-                
-                const docRef = hasGuest ? doc(db, `guests/${userId}/status/postUpdates`) : doc(db, `users/${userId}/status/postUpdates`);
-                await updateDoc(docRef, { hasUpdate: false });
 
-                setHasUpdate(false);
+                const docRef = hasGuest ? doc(db, `guests/${userId}/status/postUpdates`) : doc(db, `users/${userId}/status/postUpdates`);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    await updateDoc(docRef, { hasUpdate: false });
+                    setHasUpdate(false);
+                } else {
+                    console.log('유저 업데이트 내역 없음');
+                }
             }
         } catch (error) {
             console.error("Error clearing update status:", error);
