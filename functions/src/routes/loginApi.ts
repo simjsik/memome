@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express, {Request, Response} from "express";
-import {adminAuth} from "../DB/firebaseAdminConfig";
+import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
 import jwt from 'jsonwebtoken';
 import {randomBytes} from "crypto";
 
@@ -20,41 +20,46 @@ router.post('/login', async (req: Request, res: Response) => {
         }
 
         const uid = decodedToken.uid;
-
-        let userSession = {
-            uid: uid,
-            name: decodedToken.name || "",
-            photo: decodedToken.picture || "",
-            email: decodedToken.email || "",
-        };
-
+        let userSession = null;
         const hasGuest = decodedToken.roles?.guest === true;
 
-        if (hasGuest) {
-            const randomName =
-            `Guest-${Math.random().toString(36).substring(2, 6)}`;
+        const userRef = hasGuest ?
+            adminDb.doc(`guests/${uid}`) :
+            adminDb.doc(`users/${uid}`);
 
+        const userSnapshot = await userRef.get();
+        const userData = userSnapshot.data();
+
+        console.log(userData, !userSnapshot.exists, '유저 정보');
+
+        if (userSnapshot.exists) {
+            userSession = {
+                uid: uid,
+                name: userData?.displayName || "",
+                photo: userData?.photoURL || "",
+            };
+        } else {
             const saveUserResponse = await fetch(`${API_URL}/saveUser`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
                     uid,
-                    displayName: randomName,
                     hasGuest: true,
                 }),
             });
-
-            userSession = {
-                        uid: uid,
-                        name: randomName,
-                        photo: "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg",
-                        email: '',
-            };
 
             if (!saveUserResponse?.ok) {
                 const errorData = await saveUserResponse?.json();
                 console.error("유저 저장 실패:", errorData.message);
                 return res.status(401).json({message: "유저 저장 실패."});
+            }
+
+            const response = await saveUserResponse.json();
+
+            console.log(response.userData, '게스트 유저 정보');
+
+            if (saveUserResponse.status === 200) {
+                userSession = response.userData;
             }
         }
 
@@ -73,6 +78,10 @@ router.post('/login', async (req: Request, res: Response) => {
         if (!secret) {
             console.error("JWT 비밀 키 확인 불가");
             return res.status(401).json({message: "JWT 비밀 키 확인 불가."});
+        }
+
+        if (!userSession) {
+            return res.status(400).json({message: "유저 정보 불러오기 실패"});
         }
 
         const userToken = jwt.sign({uid}, secret, {expiresIn: "1h"});

@@ -27,19 +27,26 @@ router.post('/saveUser', async (req: Request, res: Response) => {
 
         const userSnapshot = await userRef.get();
 
+        console.log(userSnapshot.exists, '유저 정보 확인 ( SaveUser API)');
+
         if (!userSnapshot.exists) {
-            const userData: newUser = {
+            const userData : newUser = {
                 displayName: displayName || randomName,
                 photoURL: "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg",
                 userId: uid,
             };
 
             await userRef.set(userData, {merge: true});
-        }
 
-        return res.status(200).json({
-            message: "유저 정보 저장",
-        });
+            return res.status(200).json({
+                message: "유저 정보 저장 성공",
+                userData,
+            });
+        } else {
+            return res.status(204).json({
+                message: "이미 존재하는 유저 정보",
+            });
+        }
     } catch (error) {
         if (error) {
             return res.status(403).json({message: "유저 정보 저장 실패" + error});

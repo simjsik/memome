@@ -58,7 +58,9 @@ router.post('/validate', async (req: Request, res: Response) => {
             }
 
             const hasGuest = decodedToken.roles?.guest === true;
+
             console.log(hasGuest, typeof(hasGuest), '( Validate API )');
+
             const userRef = hasGuest ?
             adminDb.collection('guests').doc(uid) :
             adminDb.collection('users').doc(uid);

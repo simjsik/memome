@@ -170,6 +170,7 @@ export default function LoginBox() {
                 console.error("알 수 없는 오류 유형:", error);
                 setLoginError("알 수 없는 오류");
             }
+            await signOut(auth);
         } finally {
             setIsLoading(false); // 무조건 실행
             setLoadingTag(null);
@@ -228,6 +229,7 @@ export default function LoginBox() {
                 console.error("알 수 없는 오류 유형:", error);
                 setLoginError("알 수 없는 오류");
             }
+            await signOut(auth);
         } finally {
             setIsLoading(false); // 무조건 실행
             setLoadingTag(null);
@@ -253,10 +255,9 @@ export default function LoginBox() {
 
                 const userCredential = await signInWithCustomToken(auth, token);
                 signUser = userCredential.user
-
                 idToken = await signUser.getIdToken();
 
-                data = await fetchGuestLogin(idToken);
+                data = await fetchGuestLogin(idToken, false);
             } else {
                 const userCredential = await signInAnonymously(auth);
                 signUser = userCredential.user
@@ -270,12 +271,13 @@ export default function LoginBox() {
                 signUser = userCredential.user
                 idToken = await guestCredential.user.getIdToken();
 
-                data = await fetchGuestLogin(idToken);
+                data = await fetchGuestLogin(idToken, true);
 
+                // Firebase Authentication의 프로필 업데이트
                 await updateProfile(signUser, {
                     displayName: data.name,
-                    photoURL: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg'
-                });
+                    photoURL: data.photo,
+                })
             }
 
             localStorage.setItem('guestUid', data.uid);
@@ -301,6 +303,7 @@ export default function LoginBox() {
                 console.error("알 수 없는 오류 유형:", error);
                 setLoginError("알 수 없는 오류");
             }
+            await signOut(auth);
         } finally {
             setIsLoading(false); // 무조건 실행
             setLoadingTag(null);

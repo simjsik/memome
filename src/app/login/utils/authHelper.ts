@@ -16,12 +16,12 @@ export const fetchCustomToken = async (guestUid: string) => {
     return (await response.json()).customToken;
 };
 
-export const fetchGuestLogin = async (idToken: string) => {
+export const fetchGuestLogin = async (idToken: string, newUser: boolean) => {
     const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
         credentials: "include",
-        body: JSON.stringify({ idToken }),
+        body: JSON.stringify({ idToken, newUser }),
     });
 
     if (!response.ok) {
@@ -33,6 +33,6 @@ export const fetchGuestLogin = async (idToken: string) => {
         }
         throw new Error(`게스트 로그인 실패 ${response.status}: ${errorData.message}`);
     }
-    
+
     return (await response.json()).user;
 };
