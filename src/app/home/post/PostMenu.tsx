@@ -1124,7 +1124,7 @@ export default function PostMenu() {
             if (file) processImageFile(file);
             if (!file) return;
         };
-    }
+    };
 
     const remToPxMap: Record<string, string> = {
         '0.625rem': '10px',
@@ -1261,7 +1261,7 @@ export default function PostMenu() {
         }
         localStorage.removeItem('unsavedPost');
         setConfirmed(false)
-    }
+    };
 
     useEffect(() => {
         if (!postingComplete) {
@@ -1298,7 +1298,7 @@ export default function PostMenu() {
                 }
             }
         }
-    }, [postTitle, posting])
+    }, [postTitle, posting]);
 
     useEffect(() => {
         return () => {
@@ -1342,7 +1342,7 @@ export default function PostMenu() {
         return () => {
             document.removeEventListener('mousedown', clickOutside);
         }
-    }, [])
+    }, []);
 
     // Function
     const SetModules = useMemo(

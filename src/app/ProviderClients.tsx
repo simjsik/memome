@@ -58,23 +58,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
             try {
                 if (user) {
                     const uid = user.uid
-                    const idToken = await user.getIdToken();
-
-                    // 서버로 ID 토큰 전송
-                    const loginResponse = await fetch(`/api/login`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
-                        credentials: "include",
-                        body: JSON.stringify({ idToken }),
-                    });
-
-                    if (!loginResponse.ok) {
-                        const errorData = await loginResponse.json();
-                        if (loginResponse.status === 403) {
-                            throw new Error(`CSRF 토큰 확인 불가 ${loginResponse.status}: ${errorData.message}`);
-                        }
-                        throw new Error(`서버 요청 에러 ${loginResponse.status}: ${errorData.message}`);
-                    }
 
                     const idTokenResult = await getIdTokenResult(user);
                     const claims = idTokenResult.claims as CustomClaims;
@@ -89,7 +72,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                         photo: user.photoURL as string
                     });
                     setHasLogin(true);
-                } else {
                 }
             } catch (error: unknown) {
                 if (error instanceof Error) {

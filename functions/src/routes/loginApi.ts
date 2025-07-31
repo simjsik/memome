@@ -56,10 +56,18 @@ router.post('/login', async (req: Request, res: Response) => {
 
             const response = await saveUserResponse.json();
 
-            console.log(response.userData, '게스트 유저 정보');
+            console.log(
+                response.userData,
+                saveUserResponse.status === 200,
+                '게스트 유저 정보'
+            );
 
             if (saveUserResponse.status === 200) {
-                userSession = response.userData;
+                userSession = {
+                    uid: uid,
+                    name: response.userData?.displayName,
+                    photo: response.userData?.photoURL,
+                };
             }
         }
 

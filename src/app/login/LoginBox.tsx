@@ -250,7 +250,13 @@ export default function LoginBox() {
             let signUser;
             let data;
 
+            if (guestUid === 'undefined') {
+                localStorage.removeItem('guestUid');
+                guestUid = null;
+            }
+
             if (guestUid) {
+                console.log('게스트 UID 있음')
                 const token = await fetchCustomToken(guestUid);
 
                 const userCredential = await signInWithCustomToken(auth, token);
@@ -259,6 +265,8 @@ export default function LoginBox() {
 
                 data = await fetchGuestLogin(idToken, false);
             } else {
+                console.log('게스트 UID 없음')
+
                 const userCredential = await signInAnonymously(auth);
                 signUser = userCredential.user
                 guestUid = signUser.uid
@@ -277,9 +285,9 @@ export default function LoginBox() {
                 await updateProfile(signUser, {
                     displayName: data.name,
                     photoURL: data.photo,
-                })
+                });
             }
-
+            console.log(data,'유저 정보')
             localStorage.setItem('guestUid', data.uid);
 
             setUser({

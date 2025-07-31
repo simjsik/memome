@@ -33,6 +33,8 @@ export const fetchGuestLogin = async (idToken: string, newUser: boolean) => {
         }
         throw new Error(`게스트 로그인 실패 ${response.status}: ${errorData.message}`);
     }
-
-    return (await response.json()).user;
+    
+    const data = await response.json()
+    const userData = data.user;
+    return userData;
 };

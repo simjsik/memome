@@ -27,7 +27,11 @@ router.post('/saveUser', async (req: Request, res: Response) => {
 
         const userSnapshot = await userRef.get();
 
-        console.log(userSnapshot.exists, '유저 정보 확인 ( SaveUser API)');
+        console.log(
+            userSnapshot.exists,
+            !userSnapshot.exists,
+            '유저 정보 확인 ( SaveUser API)'
+        );
 
         if (!userSnapshot.exists) {
             const userData : newUser = {
