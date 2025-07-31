@@ -271,7 +271,7 @@ export default function LoginBox() {
                 idToken = await guestCredential.user.getIdToken();
 
                 data = await fetchGuestLogin(idToken);
-                console.log(data, '게스트 정보')
+
                 await updateProfile(signUser, {
                     displayName: data.name,
                     photoURL: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg'
@@ -279,12 +279,14 @@ export default function LoginBox() {
             }
 
             localStorage.setItem('guestUid', data.uid);
+
             setUser({
                 name: data.name,
                 email: data.email,
                 photo: data.photo,
                 uid: data.uid,
-            })
+            });
+
             setHasLogin(true);
             await router.push('/home/main');
         } catch (error: unknown) {
