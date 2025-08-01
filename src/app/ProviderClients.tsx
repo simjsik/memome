@@ -12,7 +12,7 @@ import { usePostUpdateChecker } from "./hook/ClientPolling";
 import { useRouter } from "next/navigation";
 import { CacheProvider, ThemeProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
-import { getAuth, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
+import { getAuth, getIdTokenResult, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
 import GlobalLoadingWrap from "./components/GlobalLoading";
 import { darkTheme, lightTheme } from "./styled/theme";
 import GlobalStyles from "./styled/GlobalStyles";
@@ -33,6 +33,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const setAdmin = useSetRecoilState<boolean>(adminState);
     const setGuest = useSetRecoilState<boolean>(hasGuestState);
     const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState);
+    const [initializing, setInitializing] = useState(true);
     const currentUser = useRecoilValue(userState);
 
     const [loading, setLoading] = useRecoilState<boolean>(loadingState);
@@ -55,14 +56,57 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     useEffect(() => {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            try {
+            let handleRedirect = false;
+            if (initializing) {
+                console.log(user, '세션 유저 정보')
+
+                setInitializing(false);
                 if (user) {
                     const uid = user.uid
 
-                    const idTokenResult = await getIdTokenResult(user);
-                    const claims = idTokenResult.claims as CustomClaims;
-                    setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
-                    setGuest(!!claims.roles?.guest);
+                    let userDoc = await getDoc(doc(db, "users", uid));
+                    if (!userDoc.exists()) {
+                        userDoc = await getDoc(doc(db, "guests", uid));
+                        if (!userDoc.exists()) {
+                            console.error("유저 정보를 찾을 수 없습니다.");
+                            handleRedirect = true;
+                        };
+                    };
+
+                    if (handleRedirect) {
+                        const response = await fetch(`/api/logout`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+                            credentials: 'include',
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json()
+                            console.error('로그아웃 실패 :', errorData.message)
+                        };
+
+                        await signOut(auth);
+
+                        setUser({
+                            uid: null,
+                            email: null,
+                            name: null,
+                            photo: null
+                        });
+                        setHasLogin(false);
+                        setLoading(false);
+                        router.replace("/login");
+                        return;
+                    };
+
+                    if (!user.displayName?.trim()) {
+                        const docData = userDoc.data() as { displayName?: string; photoURL?: string };
+                        // Firebase Authentication의 프로필 업데이트
+                        await updateProfile(user, {
+                            displayName: docData.displayName,
+                            photoURL: docData.photoURL,
+                        });
+                    }
 
                     await setUser({
                         uid: uid,
@@ -71,36 +115,45 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                         photo: user.photoURL as string
                     });
                     setHasLogin(true);
-                }
-            } catch (error: unknown) {
-                if (error instanceof Error) {
-                    setUser({
-                        name: null,
-                        email: null,
-                        photo: null,
-                        uid: null, // uid는 빈 문자열로 초기화
-                    }); // 로그아웃 상태 처리
-                    setHasLogin(false);
-                    await auth.signOut();
-                    router.push('/login');
-                    throw error;
-                } else {
-                    console.error("알 수 없는 에러 유형:", error);
-                    setUser({
-                        name: null,
-                        email: null,
-                        photo: null,
-                        uid: null,
-                    });
-                    setHasLogin(false);
-                    await auth.signOut();
-                    router.push('/login');
-                    throw new Error("알 수 없는 에러가 발생했습니다.");
-                }
-            } finally {
+                    setLoading(false);
+
+                    const idTokenResult = await getIdTokenResult(user);
+                    const claims = idTokenResult.claims as CustomClaims;
+                    setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
+                    setGuest(!!claims.roles?.guest);
+
+                    setLoading(false);
+                };
+            };
+
+            if (!user) {
+                const response = await fetch(`/api/logout`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json()
+                    console.error('로그아웃 실패 :', errorData.message)
+                };
+
+                await signOut(auth);
+
+                setUser({
+                    uid: null,
+                    email: null,
+                    name: null,
+                    photo: null
+                });
+                setHasLogin(false);
                 setLoading(false);
-            }
+                await router.replace("/login");
+
+                return;
+            };
         });
+
         return () => unsubscribe();
     }, [router]);
 
