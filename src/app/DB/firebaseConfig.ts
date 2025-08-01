@@ -18,8 +18,8 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
+
 const app = initializeApp(firebaseConfig); // Firebase 초기화
 export const storage = getStorage(app);
 export const auth = getAuth(app);          // Firebase Auth 인스턴스
 export const db = getFirestore(app);       // Firestore 인스턴스
-
