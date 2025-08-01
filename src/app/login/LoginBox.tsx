@@ -234,7 +234,6 @@ export default function LoginBox() {
 
             let guestUid = localStorage.getItem("guestUid");
             let idToken;
-            let signUser;
             let data;
 
             if (guestUid === 'undefined') {
@@ -245,10 +244,11 @@ export default function LoginBox() {
             if (guestUid) {
                 const token = await fetchCustomToken(guestUid);
 
-                const userCredential = await signInWithCustomToken(auth, token);
-                signUser = userCredential.user
+                const { user: signUser } = await signInWithCustomToken(auth, token);
                 idToken = await signUser.getIdToken();
-
+                if (!idToken) {
+                    throw new Error('유저 정보 초기화. 다시 시도해주세요.');
+                }
                 data = await fetchGuestLogin(idToken, false);
             } else {
 
