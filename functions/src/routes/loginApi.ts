@@ -28,15 +28,14 @@ router.post('/login', async (req: Request, res: Response) => {
             adminDb.doc(`users/${uid}`);
 
         const userSnapshot = await userRef.get();
-        const userData = userSnapshot.data();
-
-        console.log(userData, !userSnapshot.exists, '유저 정보');
 
         if (userSnapshot.exists) {
+            const userData = userSnapshot.data();
+
             userSession = {
                 uid: uid,
-                name: userData?.displayName || "",
-                photo: userData?.photoURL || "",
+                name: userData?.displayName,
+                photo: userData?.photoURL,
             };
         } else {
             const saveUserResponse = await fetch(`${API_URL}/saveUser`, {
@@ -54,19 +53,13 @@ router.post('/login', async (req: Request, res: Response) => {
                 return res.status(401).json({message: "유저 저장 실패."});
             }
 
-            const response = await saveUserResponse.json();
-
-            console.log(
-                response.userData,
-                saveUserResponse.status === 200,
-                '게스트 유저 정보'
-            );
+            const {userData: response} = await saveUserResponse.json();
 
             if (saveUserResponse.status === 200) {
                 userSession = {
                     uid: uid,
-                    name: response.userData?.displayName,
-                    photo: response.userData?.photoURL,
+                    name: response.displayName,
+                    photo: response.photoURL,
                 };
             }
         }
@@ -88,7 +81,7 @@ router.post('/login', async (req: Request, res: Response) => {
             return res.status(401).json({message: "JWT 비밀 키 확인 불가."});
         }
 
-        if (!userSession) {
+        if (!userSession || !userSession.name) {
             return res.status(400).json({message: "유저 정보 불러오기 실패"});
         }
 

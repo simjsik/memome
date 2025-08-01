@@ -165,6 +165,7 @@ export default function LoginBox() {
                 console.error("알 수 없는 오류 유형:", error);
                 setLoginError("알 수 없는 오류");
             }
+            setIsLoading(false);
             await signOut(auth);
         }
     }
@@ -220,6 +221,7 @@ export default function LoginBox() {
                 console.error("알 수 없는 오류 유형:", error);
                 setLoginError("알 수 없는 오류");
             }
+            setIsLoading(false);
             await signOut(auth);
         }
     };
@@ -246,12 +248,13 @@ export default function LoginBox() {
 
                 const { user: signUser } = await signInWithCustomToken(auth, token);
                 idToken = await signUser.getIdToken();
+                
                 if (!idToken) {
                     throw new Error('유저 정보 초기화. 다시 시도해주세요.');
                 }
+
                 data = await fetchGuestLogin(idToken, false);
             } else {
-
                 const { user: anonUser } = await signInAnonymously(auth);
                 const customToken = await fetchCustomToken(anonUser.uid);
 
@@ -290,6 +293,7 @@ export default function LoginBox() {
                 console.error("알 수 없는 오류 유형:", error);
                 setLoginError("알 수 없는 오류");
             }
+            setIsLoading(false);
             await signOut(auth);
         }
     }
