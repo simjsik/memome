@@ -64,7 +64,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                     setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
                     setGuest(!!claims.roles?.guest);
 
-                    console.log(user, '자동 로그인 유저명')
                     await setUser({
                         uid: uid,
                         email: user.email,
