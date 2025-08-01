@@ -687,7 +687,7 @@ width: 100%;
     height: 32px;
     border: 1px solid ${({ theme }) => theme.colors.border};
     background: ${({ theme }) => theme.colors.background};
-    margin: 8px 0px;
+    margin: 8px 0px 0px 10px;
     cursor : pointer;
   }
 
@@ -716,29 +716,30 @@ width: 100%;
   }
 
   .reply_input_wrap{
-  position: relative;
+    position: relative;
+    margin-top: 10px;
+    
+    .comment_upload_btn{
+      width : 68px;
+      height : 48px;
+      border  : 1px solid ${({ theme }) => theme.colors.border};
+      background-color: ${({ theme }) => theme.colors.background};
+      cursor : pointer;
+      font-size : 0.75rem;
+    }
 
-  .comment_upload_btn{
-    width : 68px;
-    height : 48px;
-    border  : 1px solid ${({ theme }) => theme.colors.border};
-    background-color: ${({ theme }) => theme.colors.background};
-    cursor : pointer;
-    font-size : 0.75rem;
-  }
-
-  .comment_input{
-    width: calc(100% - 20px);
-    max-width: calc(100% - 20px);
-    min-width : calc(100% - 20px);
-    max-height : 220px;
-    min-height : 56px;
-    outline: none;
-    border: 1px solid ${({ theme }) => theme.colors.border};
-    padding: 10px;
-    font-family: var(--font-pretendard-medium);
-    font-size : 0.75rem;
-  }
+    .comment_input{
+      width: calc(100% - 20px);
+      max-width: calc(100% - 20px);
+      min-width : calc(100% - 20px);
+      max-height : 220px;
+      min-height : 56px;
+      outline: none;
+      border: 1px solid ${({ theme }) => theme.colors.border};
+      padding: 10px;
+      font-family: var(--font-pretendard-medium);
+      font-size : 0.75rem;
+    }
 }
 
 @media (max-width : 480px){
