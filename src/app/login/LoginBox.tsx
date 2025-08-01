@@ -1,9 +1,9 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { css, useTheme } from "@emotion/react";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { DidYouLogin, loginToggleState, modalState, userData, userState } from "../state/PostState";
+import { autoLoginState, DidYouLogin, userData, userState } from "../state/PostState";
 import {
     CreateButton,
     GoogleButton,
@@ -74,18 +74,15 @@ export default function LoginBox() {
     const theme = useTheme();
     const setUser = useSetRecoilState<userData>(userState)
 
-    const [loginToggle, setLoginToggle] = useRecoilState<boolean>(loginToggleState)
-    const [hasLogin, setHasLogin] = useRecoilState<boolean>(DidYouLogin)
-    const [modal, setModal] = useRecoilState<boolean>(modalState);
+    const setHasLogin = useSetRecoilState<boolean>(DidYouLogin)
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [loadingTag, setLoadingTag] = useState<string | null>(null);
-    const [hasAutoLogin, setHasAutoLogin] = useState<boolean>(false);
+    const [hasAutoLogin, setHasAutoLogin] = useRecoilState<boolean>(autoLoginState);
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loginError, setLoginError] = useState<string | null>(null);
 
-    const modalRef = useRef<HTMLDivElement>(null);
     // State
     const auths = getAuth();
     const router = useRouter();
@@ -123,9 +120,7 @@ export default function LoginBox() {
             setIsLoading(true);
             setLoadingTag('Login');
 
-            await setPersistence(auth, hasAutoLogin ? browserLocalPersistence : browserSessionPersistence);
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const signUser = userCredential.user
+            const { user: signUser } = await signInWithEmailAndPassword(auth, email, password);
             const idToken = await signUser.getIdToken();
 
             if (!signUser.emailVerified) {
@@ -171,9 +166,6 @@ export default function LoginBox() {
                 setLoginError("알 수 없는 오류");
             }
             await signOut(auth);
-        } finally {
-            setIsLoading(false); // 무조건 실행
-            setLoadingTag(null);
         }
     }
 
@@ -186,10 +178,9 @@ export default function LoginBox() {
             setLoadingTag('Google');
 
             // Google 로그인 팝업
-            await setPersistence(auth, hasAutoLogin ? browserLocalPersistence : browserSessionPersistence);
             const provider = new GoogleAuthProvider();
-            const userCredential = await signInWithPopup(auths, provider);
-            const googleToken = await userCredential.user.getIdToken();
+            const { user: popupUser } = await signInWithPopup(auths, provider);
+            const googleToken = await popupUser.getIdToken();
             // userCredential를 전부 보내주면 보안 상 문제가 생김. ( 최소 권한 원칙 )
 
             // 서버로 ID 토큰 전송
@@ -230,9 +221,6 @@ export default function LoginBox() {
                 setLoginError("알 수 없는 오류");
             }
             await signOut(auth);
-        } finally {
-            setIsLoading(false); // 무조건 실행
-            setLoadingTag(null);
         }
     };
 
@@ -244,7 +232,6 @@ export default function LoginBox() {
             setIsLoading(true);
             setLoadingTag('Guest');
 
-            await setPersistence(auth, hasAutoLogin ? browserLocalPersistence : browserSessionPersistence);
             let guestUid = localStorage.getItem("guestUid");
             let idToken;
             let signUser;
@@ -267,27 +254,22 @@ export default function LoginBox() {
             } else {
                 console.log('게스트 UID 없음')
 
-                const userCredential = await signInAnonymously(auth);
-                signUser = userCredential.user
-                guestUid = signUser.uid
+                const { user: anonUser } = await signInAnonymously(auth);
+                const customToken = await fetchCustomToken(anonUser.uid);
 
-                await auth.signOut(); // 🔥 세션 무효화
+                const { user: guestUser } = await signInWithCustomToken(auth, customToken);
 
-                const customToken = await fetchCustomToken(guestUid);
-
-                const guestCredential = await signInWithCustomToken(auth, customToken);
-                signUser = userCredential.user
-                idToken = await guestCredential.user.getIdToken();
+                idToken = await guestUser.getIdToken();
 
                 data = await fetchGuestLogin(idToken, true);
 
                 // Firebase Authentication의 프로필 업데이트
-                await updateProfile(signUser, {
+                await updateProfile(guestUser, {
                     displayName: data.name,
                     photoURL: data.photo,
                 });
             }
-            console.log(data,'유저 정보')
+            console.log(data, '유저 정보')
             localStorage.setItem('guestUid', data.uid);
 
             setUser({
@@ -312,44 +294,34 @@ export default function LoginBox() {
                 setLoginError("알 수 없는 오류");
             }
             await signOut(auth);
-        } finally {
-            setIsLoading(false); // 무조건 실행
-            setLoadingTag(null);
         }
     }
 
-    // ESC 키 및 배경 클릭 핸들러
-    const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape' && modal && loginToggle) {
-            setModal(false);
-            setLoginToggle(false);
-        }
+    const handleAutoLoginToggle = (checked: boolean) => {
+        // 1) 상태 저장
+        setHasAutoLogin(checked);
+        localStorage.setItem("hasAutoLogin", String(checked));
+
+        // 2) persistence 재설정
+        setPersistence(
+            auth,
+            checked ? browserLocalPersistence : browserSessionPersistence
+        ).catch(err => console.error("Persistence 재설정 실패:", err));
     };
 
-    const handleBackgroundClick = (e: MouseEvent) => {
-        if (modalRef.current && !modalRef.current.contains(e.target as Node) && modal && loginToggle) {
-            setModal(false);
-            setLoginToggle(false);
-        }
-    };
-
-    // Mount/Unmount 상태 감지 및 이벤트 등록
     useEffect(() => {
-        if (!hasLogin) {
-            setModal(true); // 모달이 열릴 때 modal 상태 true로 설정
-            document.addEventListener('keydown', handleKeyDown);
-            document.addEventListener('mousedown', handleBackgroundClick);
-        }
-        return () => {
-            setModal(false); // 모달이 닫힐 때 modal 상태 false로 설정
-            setEmail('')
-            setPassword('')
+        const hasAutoLogin = localStorage.getItem("hasAutoLogin") === "true";
+        console.log(hasAutoLogin, '자동 로그인 값')
 
-            setLoginError(null)
-            document.removeEventListener('keydown', handleKeyDown);
-            document.removeEventListener('mousedown', handleBackgroundClick);
-        };
-    }, [hasLogin]);
+        setHasAutoLogin(hasAutoLogin);
+
+        setPersistence(
+            auth,
+            hasAutoLogin ? browserLocalPersistence : browserSessionPersistence
+        ).catch((err) => {
+            console.error("Firebase persistence 설정 실패:", err);
+        });
+    }, []);
 
     // Function
     const GoogleLoginBtn = motion(GoogleButton);
@@ -399,7 +371,7 @@ export default function LoginBox() {
                             <div className="auto_login_btn">
                                 {
                                     hasAutoLogin ?
-                                        <button className="auto_on" onClick={() => setHasAutoLogin((prev) => !prev)}>
+                                        <button className="auto_on" onClick={() => handleAutoLoginToggle(false)}>
                                             <div className="auto_on_icon">
                                                 <Image
                                                     src={'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746267045/%EC%9E%90%EB%8F%99%EB%A1%9C%EA%B7%B8%EC%9D%B8%EC%B2%B4%ED%81%AC_gaqgly.svg'}
@@ -412,7 +384,7 @@ export default function LoginBox() {
                                             </div>
                                         </button>
                                         :
-                                        <button className="auto_off" onClick={() => setHasAutoLogin((prev) => !prev)}></button>
+                                        <button className="auto_off" onClick={() => handleAutoLoginToggle(true)}></button>
                                 }
                                 <p>자동 로그인</p>
                             </div>

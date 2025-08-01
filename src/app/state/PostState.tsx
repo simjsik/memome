@@ -258,3 +258,8 @@ export const nonceState = atom<string>({
     default: ''
 })
 
+export const autoLoginState = atom<boolean>({
+    key: 'autoLoginState',
+    default: false,
+})
+
