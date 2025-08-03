@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client"
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { PretendardBold, PretendardLight, PretendardMedium } from "@/app/styled/FontsComponets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -12,7 +12,7 @@ import { usePostUpdateChecker } from "./hook/ClientPolling";
 import { useRouter } from "next/navigation";
 import { CacheProvider, ThemeProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
-import { getAuth, getIdTokenResult, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
+import { getAuth, getIdTokenResult, onAuthStateChanged, updateProfile } from "firebase/auth";
 import GlobalLoadingWrap from "./components/GlobalLoading";
 import { darkTheme, lightTheme } from "./styled/theme";
 import GlobalStyles from "./styled/GlobalStyles";
@@ -33,9 +33,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const setAdmin = useSetRecoilState<boolean>(adminState);
     const setGuest = useSetRecoilState<boolean>(hasGuestState);
     const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState);
-    const initializing = useRef(true);
     const currentUser = useRecoilValue(userState);
-
     const [loading, setLoading] = useRecoilState<boolean>(loadingState);
     const router = useRouter();
 
@@ -55,51 +53,18 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const auth = getAuth();
-        let handleRedirect = false;
-
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (initializing.current) {
-                initializing.current = false;
-
+            try {
                 if (user) {
                     const uid = user.uid
+                    const idTokenResult = await getIdTokenResult(user);
+                    const claims = idTokenResult.claims as CustomClaims;
 
-                    let userDoc = await getDoc(doc(db, "users", uid));
+                    const userDoc = claims.roles?.guest ? await getDoc(doc(db, "users", uid)) : await getDoc(doc(db, "guests", uid));
                     if (!userDoc.exists()) {
-                        userDoc = await getDoc(doc(db, "guests", uid));
-                        if (!userDoc.exists()) {
-                            console.error("유저 정보를 찾을 수 없습니다.");
-                            handleRedirect = true;
-                        };
+                        console.error("유저 정보를 찾을 수 없습니다.");
                     };
 
-                    if (handleRedirect) {
-                        const response = await fetch(`/api/logout`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
-                            credentials: 'include',
-                        });
-
-                        if (!response.ok) {
-                            const errorData = await response.json()
-                            console.error('로그아웃 실패 :', errorData.message)
-                        };
-
-                        await signOut(auth);
-
-                        setUser({
-                            uid: null,
-                            email: null,
-                            name: null,
-                            photo: null
-                        });
-                        setHasLogin(false);
-                        setLoading(false);
-                        router.replace("/login");
-                        return;
-                    };
-
-                    // Firebase Authentication의 프로필 업데이트
                     if (!user.displayName?.trim()) {
                         const docData = userDoc.data() as { displayName?: string; photoURL?: string };
                         await updateProfile(user, {
@@ -108,6 +73,9 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                         });
                     }
 
+                    setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
+                    setGuest(!!claims.roles?.guest);
+
                     await setUser({
                         uid: uid,
                         email: user.email,
@@ -115,47 +83,59 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                         photo: user.photoURL as string
                     });
                     setHasLogin(true);
-                    setLoading(false);
+                }
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    setUser({
+                        name: null,
+                        email: null,
+                        photo: null,
+                        uid: null, // uid는 빈 문자열로 초기화
+                    }); // 로그아웃 상태 처리
 
-                    const idTokenResult = await getIdTokenResult(user);
-                    const claims = idTokenResult.claims as CustomClaims;
-                    setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
-                    setGuest(!!claims.roles?.guest);
+                    const response = await fetch(`/api/logout`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+                        credentials: 'include',
+                    });
 
-                    setLoading(false);
-                };
-            };
+                    if (!response.ok) {
+                        const errorData = await response.json()
+                        console.error('로그아웃 실패 :', errorData.message)
+                    };
+                    setHasLogin(false);
+                    await auth.signOut();
+                    router.push('/login');
+                    throw error;
+                } else {
+                    console.error("알 수 없는 에러 유형:", error);
+                    setUser({
+                        name: null,
+                        email: null,
+                        photo: null,
+                        uid: null,
+                    });
+                    setHasLogin(false);
+                    const response = await fetch(`/api/logout`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+                        credentials: 'include',
+                    });
 
-            if (!user) {
-                const response = await fetch(`/api/logout`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
-                    credentials: 'include',
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json()
-                    console.error('로그아웃 실패 :', errorData.message)
-                };
-
-                await signOut(auth);
-
-                setUser({
-                    uid: null,
-                    email: null,
-                    name: null,
-                    photo: null
-                });
-                setHasLogin(false);
+                    if (!response.ok) {
+                        const errorData = await response.json()
+                        console.error('로그아웃 실패 :', errorData.message)
+                    };
+                    await auth.signOut();
+                    router.push('/login');
+                    throw new Error("알 수 없는 에러가 발생했습니다.");
+                }
+            } finally {
                 setLoading(false);
-                router.replace("/login");
-
-                return;
-            };
+            }
         });
-
         return () => unsubscribe();
-    }, [router, initializing]);
+    }, [router]);
 
     useEffect(() => {
         loadBookmarks(currentUser.uid as string);
