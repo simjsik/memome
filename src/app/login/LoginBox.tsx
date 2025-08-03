@@ -3,17 +3,6 @@
 import { useEffect, useState } from "react";
 import { css, useTheme } from "@emotion/react";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { autoLoginState, DidYouLogin, userData, userState } from "../state/PostState";
-import {
-    CreateButton,
-    GoogleButton,
-    GuestButton,
-    LoginButton,
-    LoginButtonWrap,
-    LoginInput,
-    LoginInputWrap,
-    OtherLoginWrap
-} from "../styled/LoginComponents";
 import { browserLocalPersistence, browserSessionPersistence, getAuth, GoogleAuthProvider, setPersistence, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile } from "firebase/auth";
 import { LoginOr, LoginSpan } from "../styled/LoginStyle";
 import { usePathname, useRouter } from "next/navigation";
@@ -21,10 +10,12 @@ import { auth } from "../DB/firebaseConfig";
 import { BeatLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { btnVariants } from "../styled/motionVariant";
 import { fetchCustomToken, fetchGuestLogin } from "./utils/authHelper";
 import Image from "next/image";
 import { withTimeout } from "./utils/timeoutWrapper";
+import { autoLoginState, DidYouLogin, userData, userState } from "../state/PostState";
+import { CreateButton, GoogleButton, GuestButton, LoginButton, LoginButtonWrap, LoginInput, LoginInputWrap, OtherLoginWrap } from "../styled/LoginComponents";
+import { btnVariants } from "../styled/motionVariant";
 
 interface FirebaseError extends Error {
     code: string;
@@ -74,7 +65,6 @@ export const LogoBox = css`
 export default function LoginBox() {
     const theme = useTheme();
     const setUser = useSetRecoilState<userData>(userState)
-
     const setHasLogin = useSetRecoilState<boolean>(DidYouLogin)
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [loadingTag, setLoadingTag] = useState<string | null>(null);
@@ -283,7 +273,8 @@ export default function LoginBox() {
             });
 
             setHasLogin(true);
-            await router.push('/home/main');
+            router.replace('/home/main');
+            return;
         } catch (error: unknown) {
             // Firebase 에러 타입 보존
             if (isFirebaseError(error)) {
