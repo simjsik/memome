@@ -24,6 +24,7 @@ import Link from "next/link";
 import { btnVariants } from "../styled/motionVariant";
 import { fetchCustomToken, fetchGuestLogin } from "./utils/authHelper";
 import Image from "next/image";
+import { withTimeout } from "./utils/timeoutWrapper";
 
 interface FirebaseError extends Error {
     code: string;
@@ -247,22 +248,23 @@ export default function LoginBox() {
                 const token = await fetchCustomToken(guestUid);
 
                 const { user: signUser } = await signInWithCustomToken(auth, token);
-                idToken = await signUser.getIdToken();
-                
+
+                idToken = await withTimeout(signUser.getIdToken(), 8000);
+
                 if (!idToken) {
                     throw new Error('유저 정보 초기화. 다시 시도해주세요.');
                 }
 
-                data = await fetchGuestLogin(idToken, false);
+                data = await withTimeout(fetchGuestLogin(idToken, false), 8000);
             } else {
                 const { user: anonUser } = await signInAnonymously(auth);
-                const customToken = await fetchCustomToken(anonUser.uid);
+                const customToken = await withTimeout(fetchCustomToken(anonUser.uid), 8000);
 
                 const { user: guestUser } = await signInWithCustomToken(auth, customToken);
 
-                idToken = await guestUser.getIdToken();
+                idToken = await withTimeout(guestUser.getIdToken(), 8000);
 
-                data = await fetchGuestLogin(idToken, true);
+                data = await withTimeout(fetchGuestLogin(idToken, true), 8000);
 
                 // Firebase Authentication의 프로필 업데이트
                 await updateProfile(guestUser, {
@@ -270,6 +272,7 @@ export default function LoginBox() {
                     photoURL: data.photo,
                 });
             }
+
             localStorage.setItem('guestUid', data.uid);
 
             setUser({
@@ -289,9 +292,6 @@ export default function LoginBox() {
             } else if (error instanceof Error) {
                 console.error("일반 오류:", error);
                 setLoginError(error.message);
-            } else {
-                console.error("알 수 없는 오류 유형:", error);
-                setLoginError("알 수 없는 오류");
             }
             setIsLoading(false);
             await signOut(auth);
