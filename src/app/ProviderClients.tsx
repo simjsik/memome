@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client"
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { PretendardBold, PretendardLight, PretendardMedium } from "@/app/styled/FontsComponets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -33,7 +33,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const setAdmin = useSetRecoilState<boolean>(adminState);
     const setGuest = useSetRecoilState<boolean>(hasGuestState);
     const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState);
-    const [initializing, setInitializing] = useState(true);
+    const initializing = useRef(true);
     const currentUser = useRecoilValue(userState);
 
     const [loading, setLoading] = useRecoilState<boolean>(loadingState);
@@ -55,12 +55,12 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const auth = getAuth();
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            let handleRedirect = false;
-            if (initializing) {
-                console.log(user, '세션 유저 정보')
+        let handleRedirect = false;
 
-                setInitializing(false);
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (initializing.current) {
+                initializing.current = false;
+
                 if (user) {
                     const uid = user.uid
 
@@ -99,9 +99,9 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                         return;
                     };
 
+                    // Firebase Authentication의 프로필 업데이트
                     if (!user.displayName?.trim()) {
                         const docData = userDoc.data() as { displayName?: string; photoURL?: string };
-                        // Firebase Authentication의 프로필 업데이트
                         await updateProfile(user, {
                             displayName: docData.displayName,
                             photoURL: docData.photoURL,
@@ -148,14 +148,14 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                 });
                 setHasLogin(false);
                 setLoading(false);
-                await router.replace("/login");
+                router.replace("/login");
 
                 return;
             };
         });
 
         return () => unsubscribe();
-    }, [router]);
+    }, [router, initializing]);
 
     useEffect(() => {
         loadBookmarks(currentUser.uid as string);
