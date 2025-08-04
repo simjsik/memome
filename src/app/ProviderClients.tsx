@@ -32,22 +32,25 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const setHasLogin = useSetRecoilState(DidYouLogin);
     const setAdmin = useSetRecoilState<boolean>(adminState);
     const setGuest = useSetRecoilState<boolean>(hasGuestState);
-    const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState);
+    const setCurrentBookmark = useSetRecoilState<string[] | null>(bookMarkState);
     const currentUser = useRecoilValue(userState);
     const [loading, setLoading] = useRecoilState<boolean>(loadingState);
     const router = useRouter();
 
     const loadBookmarks = async (uid: string) => {
+        console.log(uid, '북마크 요청 UID')
         try {
             const bookmarks = await getDoc(doc(db, `users/${uid}/bookmarks/bookmarkId`));
             if (bookmarks.exists()) {
                 // 북마크 데이터가 있을 경우
                 const data = bookmarks.data() as { bookmarkId: string[] };
+                console.log(data.bookmarkId, '현재 유저 북마크')
+
                 setCurrentBookmark(data.bookmarkId); // Recoil 상태 업데이트
             }
         } catch (error) {
             console.error("북마크 데이터를 가져오는 중 오류 발생:", error);
-            setCurrentBookmark([]);
+            setCurrentBookmark(null);
         }
     }
 
@@ -56,7 +59,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
                 if (user) {
-                    const uid = user.uid
+                    const uid = user.uid;
                     const idTokenResult = await getIdTokenResult(user);
                     const claims = idTokenResult.claims as CustomClaims;
 
@@ -71,19 +74,19 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                             displayName: docData.displayName,
                             photoURL: docData.photoURL,
                         });
-                    }
+                    };
 
+                    loadBookmarks(uid as string);
                     setAdmin(!!claims.roles?.admin); // !!로 boolean 타입 강제 변환
                     setGuest(!!claims.roles?.guest);
-
-                    await setUser({
+                    setUser({
                         uid: uid,
                         email: user.email,
                         name: user.displayName,
                         photo: user.photoURL as string
                     });
                     setHasLogin(true);
-                }
+                };
             } catch (error: unknown) {
                 if (error instanceof Error) {
                     setUser({
@@ -138,12 +141,8 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     }, [router]);
 
     useEffect(() => {
-        loadBookmarks(currentUser.uid as string);
-    }, [currentUser])
-
-    useEffect(() => {
         clearUpdate();
-    }, [currentUser, router])
+    }, [currentUser, router]);
 
     if (loading) {
         return <GlobalLoadingWrap />;

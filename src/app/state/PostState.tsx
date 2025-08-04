@@ -119,9 +119,9 @@ export const noticeState = atom<PostData[]>({
 })
 
 // firebase에 저장된 북마크 데이터
-export const bookMarkState = atom<string[]>({
+export const bookMarkState = atom<string[] | null>({
     key: 'bookMarkState',
-    default: []
+    default: null
 })
 
 // 북마크 페이지 데이터

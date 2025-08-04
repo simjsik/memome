@@ -21,7 +21,7 @@ import LoadLoading from "@/app/components/LoadLoading";
 import Image from "next/image";
 
 export default function Bookmark() {
-    const currentBookmark = useRecoilValue<string[]>(bookMarkState)
+    const currentBookmark = useRecoilValue<string[] | null>(bookMarkState)
     const currentUser = useRecoilValue<userData>(userState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [loading, setLoading] = useRecoilState(loadingState);
@@ -37,13 +37,11 @@ export default function Bookmark() {
         data: bookmarks,
         fetchNextPage,
         hasNextPage,
-        refetch,
         isLoading: firstLoading,
         isFetching: dataLoading,
         isError,  // 에러 상태
         // error,    // 에러 메시지
     } = useInfiniteQuery({
-        retry: false,
         queryKey: ['bookmarks', currentUser?.uid],
         queryFn: async ({ pageParam = 0 }) => {
             try {
@@ -53,18 +51,27 @@ export default function Bookmark() {
                     credentials: "include",
                     body: JSON.stringify({ uid }),
                 });
-
                 if (!validateResponse.ok) {
                     const errorDetails = await validateResponse.json();
                     throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
                 }
 
-                return fetchBookmarks(
+                if (!currentBookmark) return;
+
+                const bookmarkData = fetchBookmarks(
                     currentUser.uid as string,
                     currentBookmark, // 전역 상태를 바로 사용
                     pageParam, // 시작 인덱스
-                    4, // 한 번 요청할 데이터 수
                 );
+
+                console.log(bookmarkData, currentBookmark, '북마크 데이터')
+
+                if (bookmarkData === undefined) {
+                    // undefined일 때 에러를 던져서 retry가 동작하도록 함
+                    throw new Error('데이터가 아직 준비되지 않음—재요청');
+                }
+
+                return bookmarkData;
             } catch (error) {
                 if (error instanceof Error) {
                     console.error("일반 오류 발생:", error.message);
@@ -78,6 +85,7 @@ export default function Bookmark() {
         getNextPageParam: (lastPage) => lastPage?.nextIndexData, // 다음 페이지 인덱스 반환
         staleTime: 5 * 60 * 1000, // 5분 동안 데이터 캐싱 유지
         initialPageParam: 0, // 초기 페이지 파라미터 설정
+        enabled: (!loading && Boolean(currentBookmark))
     });
 
     const bookmarkList = bookmarks?.pages.flatMap(page => page?.data) || [];
@@ -90,7 +98,7 @@ export default function Bookmark() {
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
-        if (usageLimit) return;
+        if (usageLimit || !currentBookmark) return;
 
         if (currentBookmark.length > 0 || (bookmarks && bookmarks.pages.length > 0)) {
             const observer = new IntersectionObserver(
@@ -115,14 +123,9 @@ export default function Bookmark() {
     }, [hasNextPage, fetchNextPage, currentBookmark, bookmarks]);
 
     useEffect(() => {
-        setLoading(false)
+        console.log('북마크 페이지 로딩 해제');
+        setLoading(false);
     }, [])
-
-    useEffect(() => {
-        if (currentBookmark.length > 0) {
-            refetch();
-        }
-    }, [currentBookmark])
 
     // 포스트 보기
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
@@ -136,7 +139,6 @@ export default function Bookmark() {
             });
         }, 0);
     }
-
 
     const handleUsernameClick = useHandleUsernameClick();
     return (

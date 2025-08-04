@@ -187,10 +187,12 @@ export const fetchBookmarks = async (
     userId: string,
     bookmarkIds: string[], // currentBookmark 배열
     startIdx: number, // 시작 인덱스
-    pageSize: number = 4 // 페이지당 데이터 수
 ) => {
+    console.log('북마크 반환 분기 0', bookmarkIds, userId, startIdx)
     if (bookmarkIds.length <= 0) return;
     try {
+        console.log('북마크 반환 분기 1')
+
         const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
             headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
@@ -208,8 +210,8 @@ export const fetchBookmarks = async (
                 throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
             }
         }
-
-        const postIds = bookmarkIds.slice(startIdx, startIdx + pageSize);
+        console.log('북마크 반환 분기 2')
+        const postIds = bookmarkIds.slice(startIdx, startIdx + 4);
 
         const postWithComment: PostData[] = (
             await Promise.all(
@@ -233,14 +235,14 @@ export const fetchBookmarks = async (
                 })
             )
         ).filter((post): post is PostData => post !== null);
-
+        console.log('북마크 반환 분기 3')
         // null 값 제거 및 타입 확인
         const validPosts = postWithComment.filter(
             (post): post is PostData => post !== null
         );
 
-        const nextIndex = startIdx + pageSize < bookmarkIds.length ? startIdx + pageSize : undefined;
-
+        const nextIndex = startIdx + 4 < bookmarkIds.length ? startIdx + 4 : undefined;
+        console.log(validPosts, '북마크 반환')
         return {
             data: validPosts,
             nextIndexData: nextIndex ? nextIndex : undefined,
