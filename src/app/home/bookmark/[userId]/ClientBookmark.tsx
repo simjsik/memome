@@ -56,22 +56,13 @@ export default function Bookmark() {
                     throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
                 }
 
-                if (!currentBookmark) return;
+                console.log(currentBookmark, '북마크 데이터')
 
-                const bookmarkData = fetchBookmarks(
+                return fetchBookmarks(
                     currentUser.uid as string,
-                    currentBookmark, // 전역 상태를 바로 사용
+                    currentBookmark as string[], // 전역 상태를 바로 사용
                     pageParam, // 시작 인덱스
                 );
-
-                console.log(bookmarkData, currentBookmark, '북마크 데이터')
-
-                if (bookmarkData === undefined) {
-                    // undefined일 때 에러를 던져서 retry가 동작하도록 함
-                    throw new Error('데이터가 아직 준비되지 않음—재요청');
-                }
-
-                return bookmarkData;
             } catch (error) {
                 if (error instanceof Error) {
                     console.error("일반 오류 발생:", error.message);
@@ -85,7 +76,7 @@ export default function Bookmark() {
         getNextPageParam: (lastPage) => lastPage?.nextIndexData, // 다음 페이지 인덱스 반환
         staleTime: 5 * 60 * 1000, // 5분 동안 데이터 캐싱 유지
         initialPageParam: 0, // 초기 페이지 파라미터 설정
-        enabled: (!loading && Boolean(currentBookmark))
+        enabled: (!loading && Boolean(currentBookmark) && currentBookmark?.length !== 0)
     });
 
     const bookmarkList = bookmarks?.pages.flatMap(page => page?.data) || [];

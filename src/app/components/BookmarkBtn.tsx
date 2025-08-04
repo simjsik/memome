@@ -50,7 +50,7 @@ interface PostId {
 }
 export default function BookmarkBtn({ postId }: PostId) {
     const [bookmarked, setBookmarked] = useState<boolean>(false)
-    const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
+    const [currentBookmark, setCurrentBookmark] = useRecoilState<string[] | null>(bookMarkState)
     const setUserBookmarks = useSetRecoilState<PostData[]>(userBookMarkState)
     const currentUser = useRecoilValue(userState)
     const theme = useTheme();
@@ -58,7 +58,8 @@ export default function BookmarkBtn({ postId }: PostId) {
 
     useEffect(() => {
         const checkBookmark = async () => {
-            const isBookmarked = currentBookmark.includes(postId);
+            const bookmarkList = currentBookmark ?? [];
+            const isBookmarked = bookmarkList.includes(postId);
 
             if (isBookmarked) {
                 setBookmarked(true)
@@ -80,8 +81,8 @@ export default function BookmarkBtn({ postId }: PostId) {
 
         if (currentUser) {
             const bookmarkRef = doc(db, `users/${currentUser.uid}/bookmarks/bookmarkId`);
-
-            const isBookmarked = currentBookmark.includes(postId);
+            const bookmarkList = currentBookmark ?? [];
+            const isBookmarked = bookmarkList.includes(postId);
 
             if (!isBookmarked) {
                 setBookmarked(true);
@@ -98,7 +99,7 @@ export default function BookmarkBtn({ postId }: PostId) {
                             throw new Error('알 수 없는 에러 - 북마크 추가 실패');
                         }
                     })
-                setCurrentBookmark((prev) => [...prev, postId]);
+                setCurrentBookmark((prev) => [...(prev ?? []), postId]);
             } else {
                 await updateDoc(bookmarkRef, {
                     bookmarkId: arrayRemove(postId),
@@ -106,7 +107,7 @@ export default function BookmarkBtn({ postId }: PostId) {
                 setBookmarked(false);
 
                 // 북마크 해제 후 북마크 state 업데이트
-                setCurrentBookmark((prev) => prev.filter((id) => id !== postId));
+                setCurrentBookmark((prev) => prev ? prev.filter((id) => id !== postId) : []);
 
                 // **userBookmarks에서 해당 포스트 제거**
                 setUserBookmarks((prev) =>

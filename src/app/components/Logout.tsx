@@ -63,7 +63,7 @@ const LogoutButton = styled(motion.button)`
 export default function Logout() {
     const setHasLogin = useSetRecoilState<boolean>(DidYouLogin)
     const [user, setUser] = useRecoilState<userData>(userState)
-    const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState)
+    const setCurrentBookmark = useSetRecoilState<string[] | null>(bookMarkState)
     const setUserCurrentBookmark = useSetRecoilState<PostData[]>(userBookMarkState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     // State
@@ -95,7 +95,7 @@ export default function Logout() {
                     photo: null,
                     uid: null, // uid는 빈 문자열로 초기화
                 }); // 로그아웃 상태로 초기화
-                setCurrentBookmark([])
+                setCurrentBookmark(null)
                 setUserCurrentBookmark([])
                 setHasLogin(false)
                 setLimitToggle(false)
