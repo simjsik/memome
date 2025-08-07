@@ -748,7 +748,7 @@ export default function PostMenu() {
     const [uploadLoading, setUploadLoading] = useState<boolean>(false);
     //  State
     const [toolToggle, setToolToggle] = useState<string>('');
-    const [selectFontSize, setSelectedFontSize] = useState<string>('14px');
+    const [selectFontSize, setSelectedFontSize] = useState<string>('16px');
     const [selectColor, setSelectedColor] = useState<string>('#191919');
     const [selectBgColor, setSelectedBgColor] = useState<string>('#ffffff');
     const [selectLineheight, setSelectedLineHeight] = useState<string>('1.5');
@@ -1220,7 +1220,7 @@ export default function PostMenu() {
                 const currentFormats = editor.getFormat(range);
 
                 const fontSizeRem = currentFormats.size as string;
-                const fontSizePx = remToPxMap[fontSizeRem] || '14px';
+                const fontSizePx = remToPxMap[fontSizeRem] || '16px';
 
                 setSelectedFontSize(fontSizePx); // 폰트 크기
                 setSelectedLineHeight(currentFormats.lineheight as string || '1'); // 줄 높이
