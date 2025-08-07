@@ -278,7 +278,8 @@ align-content: flex-start;
         background-size: cover;
         background-repeat: no-repeat;
         border : 1px solid ${({ theme }) => theme.colors.border};
-
+        overflow : hidden;
+        
         .post_pr_more{
           position: absolute;
           bottom: 10px;
