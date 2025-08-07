@@ -65,7 +65,8 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
                     const userDoc = claims.roles?.guest ? await getDoc(doc(db, "users", uid)) : await getDoc(doc(db, "guests", uid));
                     if (!userDoc.exists()) {
-                        console.error("유저 정보를 찾을 수 없습니다.");
+                        console.error("유저 정보를 찾을 수 없습니다.", uid, claims.roles?.guest);
+                        throw new Error("유저 문서 없음");
                     };
 
                     if (!user.displayName?.trim()) {
