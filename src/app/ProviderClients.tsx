@@ -56,17 +56,17 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const auth = getAuth();
+        const hasAutoLogin = localStorage.getItem("hasAutoLogin") === "true";
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
                 if (user) {
                     const uid = user.uid;
                     const idTokenResult = await getIdTokenResult(user);
                     const claims = idTokenResult.claims as CustomClaims;
-
-                    const userDoc = claims.roles?.guest ? await getDoc(doc(db, "users", uid)) : await getDoc(doc(db, "guests", uid));
+                    const userDoc = (claims.roles?.guest || !claims.roles?.guest) ? await getDoc(doc(db, "users", uid)) : await getDoc(doc(db, "guests", uid));
                     if (!userDoc.exists()) {
-                        console.error("유저 정보를 찾을 수 없습니다.", uid, claims.roles?.guest, user);
-                        throw new Error("유저 문서 없음");
+                        console.error("유저 정보를 찾을 수 없습니다.");
+                        throw new Error(`유저 정보 없음`);
                     };
 
                     if (!user.displayName?.trim()) {
@@ -87,6 +87,24 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                         photo: user.photoURL as string
                     });
                     setHasLogin(true);
+
+                    if (hasAutoLogin) {
+                        setLoading(true);
+                        const idToken = await user.getIdToken(true);
+
+                        const loginResponse = await fetch(`/api/login`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+                            credentials: "include",
+                            body: JSON.stringify({ idToken }),
+                        });
+
+                        if (!loginResponse.ok) {
+                            const errorData = await loginResponse.json();
+                            throw new Error(`로그인 시도 실패 ${loginResponse.status}: ${errorData.message}`);
+                        }
+                        router.replace('/home/main');
+                    }
                 };
             } catch (error: unknown) {
                 if (error instanceof Error) {
