@@ -63,7 +63,8 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                     const uid = user.uid;
                     const idTokenResult = await getIdTokenResult(user);
                     const claims = idTokenResult.claims as CustomClaims;
-                    const userDoc = (claims.roles?.guest || !claims.roles?.guest) ? await getDoc(doc(db, "users", uid)) : await getDoc(doc(db, "guests", uid));
+                    const userDoc = !claims.roles?.guest ? await getDoc(doc(db, "users", uid)) : await getDoc(doc(db, "guests", uid));
+
                     if (!userDoc.exists()) {
                         console.error("유저 정보를 찾을 수 없습니다.");
                         throw new Error(`유저 정보 없음`);
