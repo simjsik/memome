@@ -10,7 +10,7 @@ import { UserPostWrap } from "./userStyle";
 import { db } from "@/app/DB/firebaseConfig";
 import { deleteDoc, doc, getDoc, Timestamp } from "firebase/firestore";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
 import { fetchImageList, fetchPostList } from "@/app/utils/fetchPostData";
@@ -39,6 +39,7 @@ export default function UserClient({ user }: ClientUserProps) {
     const theme = useTheme();
     const isAdmin = useRecoilValue(adminState);
     const router = useRouter();
+    const pathName = usePathname();
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const [postTab, setPostTab] = useState<boolean>(true)
     const [dropToggle, setDropToggle] = useState<string>('')
@@ -254,6 +255,39 @@ export default function UserClient({ user }: ClientUserProps) {
             });
         }, 0);
     }
+
+    // 페이지 이동 시 스크롤 위치 저장
+    useEffect(() => {
+        // 페이지 진입 시 스크롤 위치 복원
+        const savedScroll = sessionStorage.getItem(`scroll-${pathName}`);
+
+        if (savedScroll) {
+            window.scrollTo(0, parseInt(savedScroll, 10));
+        }
+
+        // 페이지 이탈 시 스크롤 위치 저장
+        const saveScrollPosition = () => {
+            sessionStorage.setItem(`scroll-${pathName}`, window.scrollY.toString());
+            history.go(-1);
+        };
+
+        // 새로고침 및 창닫기 시 스크롤 위치 제거
+        const resetScrollPosition = () => {
+            sessionStorage.setItem(`scroll-${pathName}`, '0');
+        };
+
+
+        // 뒤로가기로 페이지 이탈 시 스크롤 위치 저장
+        window.addEventListener('popstate', saveScrollPosition);
+        window.addEventListener('beforeunload', resetScrollPosition);
+
+        // 클린업
+        return () => {
+            window.removeEventListener('beforeunload', resetScrollPosition);
+            window.removeEventListener('popstate', saveScrollPosition);
+        };
+    }, [pathName]);
+
 
     // 외부 클릭 시 드롭다운 닫기
     useOutsideClick(dropdownRef, () => {
