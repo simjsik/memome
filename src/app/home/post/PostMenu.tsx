@@ -233,6 +233,7 @@ margin : 0 auto;
         min-height: calc(100vh - 231px);
         overflow: visible;
         padding: 0px 20px;
+        font-size : 1rem;
     }
 
 

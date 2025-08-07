@@ -32,6 +32,10 @@ border-right : 1px solid ${({ theme }) => theme.colors.border};
     font-size: 0.875rem;
 }
 
+.ql-editor{
+    font-size : 1rem;
+}
+
 .post_category{
     font-size : 0.875rem;
     color: ${({ theme }) => theme.colors.text_tag};
@@ -92,21 +96,22 @@ img {
 }
 
 .post_menu_wrap{
-height : 32px;
-display : flex;
-justify-content : space-between;
+    height : 32px;
+    display : flex;
+    justify-content : space-between;
 }
+
 .comment_toggle_btn{
-width : 60px;
-height : 32px;
-border : 1px solid ${({ theme }) => theme.colors.border};
-background : none;
+    width : 60px;
+    height : 32px;
+    border : 1px solid ${({ theme }) => theme.colors.border};
+    background : none;
 }
 
 .comment_dlt_btn{
-width: 24px;
-height : 24px;
-background : red;
+    width: 24px;
+    height : 24px;
+    background : red;
 }
 
     @media (max-width: 480px) {
