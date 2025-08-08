@@ -170,10 +170,7 @@ margin : 0 auto;
         font-size: 1rem;
         color: #fff;
         cursor: pointer;
-        -webkit-writing-mode: vertical-rl;
-        -ms-writing-mode: tb-rl;
-        writing-mode: vertical-rl;
-        font-family: 'var(--font-pretendard-medium)';
+        font-family: var(--font-pretendard-medium);
         text-align: center;
     }
     .go_main_btn{
@@ -236,7 +233,9 @@ margin : 0 auto;
         font-size : 1rem;
     }
 
-
+    .ql-tooltip{
+        z-index : 1;
+    }
     // 커스텀 도구
     .custom_toolbar_wrap{
         position: absolute;
