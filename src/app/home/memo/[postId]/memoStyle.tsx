@@ -34,6 +34,11 @@ border-right : 1px solid ${({ theme }) => theme.colors.border};
 
 .ql-editor{
     font-size : 1rem;
+
+    a{
+        color : #0b57d0;
+        text-decoration: underline;
+    }
 }
 
 .post_category{
