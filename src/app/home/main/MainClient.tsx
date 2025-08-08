@@ -349,9 +349,9 @@ export default function MainHome() {
                     >
                       <svg viewBox="0 0 40 40">
                         <g>
-                          <path css={css`stroke : ${theme.colors.text}; stroke-width: 0.5;`} d="M12.57,21.5a1.5,1.5,0,0,0,0-3,1.5,1.5,0,0,0,0,3Z" />
-                          <path css={css`stroke : ${theme.colors.text}; stroke-width: 0.5;`} d="M20,21.5a1.5,1.5,0,0,0,0-3,1.5,1.5,0,0,0,0,3Z" />
-                          <path css={css`stroke : ${theme.colors.text}; stroke-width: 0.5;`} d="M27.43,21.5a1.5,1.5,0,0,0,0-3,1.5,1.5,0,0,0,0,3Z" />
+                          <path css={css`fill: ${theme.colors.text}; stroke : ${theme.colors.text}; stroke-width: 0.5;`} d="M12.57,21.5a1.5,1.5,0,0,0,0-3,1.5,1.5,0,0,0,0,3Z" />
+                          <path css={css`fill: ${theme.colors.text}; stroke : ${theme.colors.text}; stroke-width: 0.5;`} d="M20,21.5a1.5,1.5,0,0,0,0-3,1.5,1.5,0,0,0,0,3Z" />
+                          <path css={css`fill: ${theme.colors.text}; stroke : ${theme.colors.text}; stroke-width: 0.5;`} d="M27.43,21.5a1.5,1.5,0,0,0,0-3,1.5,1.5,0,0,0,0,3Z" />
                         </g>
                       </svg>
                       {dropToggle === post.id &&
