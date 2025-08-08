@@ -145,6 +145,7 @@ align-content: flex-start;
       // 포스트 제목
       .post_title{
         border-bottom: none;
+        font-size : 1.25rem;
       }
 
       .notice_tag{
@@ -259,6 +260,11 @@ align-content: flex-start;
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
+        }
+
+        a{
+          color : #0b57d0;
+          text-decoration: underline;
         }
       }
 
