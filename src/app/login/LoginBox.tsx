@@ -16,6 +16,7 @@ import { withTimeout } from "./utils/timeoutWrapper";
 import { autoLoginState, DidYouLogin, userData, userState } from "../state/PostState";
 import { CreateButton, GoogleButton, GuestButton, LoginButton, LoginButtonWrap, LoginInput, LoginInputWrap, OtherLoginWrap } from "../styled/LoginComponents";
 import { btnVariants } from "../styled/motionVariant";
+import useAuthSync from "../hook/AuthSyncHook";
 
 interface FirebaseError extends Error {
     code: string;
@@ -76,6 +77,8 @@ export default function LoginBox() {
 
     // State
     const auths = getAuth();
+    const authSync = useAuthSync();
+
     const router = useRouter();
     const pathName = usePathname();
     const firebaseErrorMessages: Record<string, string> = {
@@ -302,17 +305,27 @@ export default function LoginBox() {
     };
 
     useEffect(() => {
-        const hasAutoLogin = localStorage.getItem("hasAutoLogin") === "true";
+        const sync = async () => {
+            const hasAutoLogin = localStorage.getItem("hasAutoLogin") === "true";
 
-        setHasAutoLogin(hasAutoLogin);
+            if (hasAutoLogin) {
+                await authSync();
+            }
 
-        setPersistence(
-            auth,
-            hasAutoLogin ? browserLocalPersistence : browserSessionPersistence
-        ).catch((err) => {
-            console.error("Firebase persistence 설정 실패:", err);
-        });
-    }, []);
+            setHasAutoLogin(hasAutoLogin);
+
+            try {
+                setPersistence(
+                    auth,
+                    hasAutoLogin ? browserLocalPersistence : browserSessionPersistence
+                )
+            } catch (err) {
+                console.error("Firebase persistence 설정 실패:", err);
+            }
+        }
+
+        sync();
+    }, [authSync]);
 
     // Function
     const GoogleLoginBtn = motion(GoogleButton);

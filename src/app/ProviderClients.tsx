@@ -36,7 +36,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const currentUser = useRecoilValue(userState);
     const [loading, setLoading] = useRecoilState<boolean>(loadingState);
     const router = useRouter();
-
+    
     const loadBookmarks = async (uid: string) => {
         console.log(uid, '북마크 요청 UID')
         try {
@@ -56,7 +56,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const auth = getAuth();
-        const hasAutoLogin = localStorage.getItem("hasAutoLogin") === "true";
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             try {
                 if (user) {
@@ -88,24 +87,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
                         photo: user.photoURL as string
                     });
                     setHasLogin(true);
-
-                    if (hasAutoLogin) {
-                        setLoading(true);
-                        const idToken = await user.getIdToken(true);
-
-                        const loginResponse = await fetch(`/api/login`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
-                            credentials: "include",
-                            body: JSON.stringify({ idToken }),
-                        });
-
-                        if (!loginResponse.ok) {
-                            const errorData = await loginResponse.json();
-                            throw new Error(`로그인 시도 실패 ${loginResponse.status}: ${errorData.message}`);
-                        }
-                        router.replace('/home/main');
-                    }
                 };
             } catch (error: unknown) {
                 if (error instanceof Error) {
