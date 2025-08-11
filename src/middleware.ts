@@ -43,6 +43,8 @@ export async function middleware(req: NextRequest) {
     res.headers.set(
         'Content-Security-Policy',
         `style-src 'self' 'nonce-${nonce}' 'unsafe-hashes' \
+        'sha256-zftXtTiozi4NqMeYxJ/wAFRaIWOAejKFqNh1+Wk12Vk=' \
+        'sha256-qvMP7yOij/NZIxJAiADWYVZbdIihexbXVxKbFj6T2MI=' \
         'sha256-otva1f6wkDzV9WurEmTw97pTGspFB6xN+csaPY1e4zI=' \
         'sha256-57GCXobV9ZrfnnzAWcz//WfzeGNfevTKdsoxtI25AZQ=' \
         'sha256-eXQbyB8YxZkWD5epgriI5Aoh333fjv618WjVSFU6Fbg=' \
