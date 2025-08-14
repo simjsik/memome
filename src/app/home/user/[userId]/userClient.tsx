@@ -347,7 +347,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                                         className='post_drop_menu_btn'
                                                         aria-label='포스트 옵션 더보기'
                                                         css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
-                                                        onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
+                                                        onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id as string)); }}
                                                     >
                                                         {dropToggle === post.id &&
                                                             <div>
@@ -356,7 +356,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                                                         <motion.button
                                                                             variants={btnVariants(theme)}
                                                                             whileHover="otherHover"
-                                                                            onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</motion.button>
+                                                                            onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id as string); }} className='post_dlt_btn'>게시글 삭제</motion.button>
                                                                     </li>
                                                                 </ul>
                                                             </div>

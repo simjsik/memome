@@ -4,7 +4,7 @@ import { atom, atomFamily } from "recoil"
 export interface PostData {
     tag: string;
     title: string;
-    id: string;
+    id?: string;
     userId: string;
     content: string;
     images?: string[] | undefined;
@@ -90,13 +90,13 @@ export const UsageLimitToggle = atom<boolean>({
 })
 
 // 저장안된 포스트 작성 내용
-export const PostingState = atom<string>({
+export const PostingState = atom<string | null>({
     key: 'PostingState',
-    default: ''
+    default: null
 })
-export const PostTitleState = atom<string>({
+export const PostTitleState = atom<string | null>({
     key: 'PostTitleState',
-    default: ''
+    default: null
 })
 export const ImageUrlsState = atom<string[]>({
     key: 'ImageUrlsState',

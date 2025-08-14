@@ -345,7 +345,7 @@ export default function MainHome() {
                       whileTap="iconWrapClick"
                       className='post_drop_menu_btn'
                       aria-label='포스트 옵션 더보기'
-                      onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id)); }}
+                      onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDropToggle((prev) => (prev === post.id ? '' : post.id as string)); }}
                     >
                       <svg viewBox="0 0 40 40">
                         <g>
@@ -361,7 +361,7 @@ export default function MainHome() {
                               <motion.button
                                 variants={btnVariants(theme)}
                                 whileHover="otherHover"
-                                onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id); }} className='post_dlt_btn'>게시글 삭제</motion.button>
+                                onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id as string); }} className='post_dlt_btn'>게시글 삭제</motion.button>
                             </li>
                           </ul>
                         </div>
@@ -370,7 +370,7 @@ export default function MainHome() {
                   </div>
                 </div>
                 {/* 포스트 내용 */}
-                <div className='post_content_wrap' onClick={(event) => { event.preventDefault(); handlePostClick(post.id); }}>
+                <div className='post_content_wrap' onClick={(event) => { event.preventDefault(); handlePostClick(post.id as string); }}>
                   {/* 포스트 제목 */}
                   < div className='post_title_wrap' >
                     <span className='post_tag'>[{post.tag}]</span>
@@ -413,7 +413,7 @@ export default function MainHome() {
                       </motion.button>
                       <p>{post.commentCount}</p>
                     </div>
-                    <BookmarkBtn postId={post.id}></BookmarkBtn>
+                    <BookmarkBtn postId={post.id as string}></BookmarkBtn>
                   </div>
                 </div>
               </motion.article>
