@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { ChangeEvent, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { adminState, DidYouLogin, ImageUrlsState, loadingState, loginToggleState, modalState, PostData, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
+import { adminState, ImageUrlsState, loadingState, PostData, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
@@ -725,18 +725,15 @@ export default function PostMenu() {
     const quillRef = useRef<ReactQuill | null>(null); // Quill 인스턴스 접근을 위한 ref 설정
     const tagRef = useRef<HTMLSelectElement>(null); // Quill 인스턴스 접근을 위한 ref 설정
     const styleToolRef = useRef<HTMLDivElement>(null); // Quill 인스턴스 접근을 위한 ref 설정
-    const yourLogin = useRecoilValue(DidYouLogin)
     const isAdmin = useRecoilValue(adminState)
-    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState)
-    const setModal = useSetRecoilState<boolean>(modalState);
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const currentUser = useRecoilValue(userState)
     const [storageLoad, setStorageLoad] = useRecoilState<boolean>(storageLoadState);
 
     const [postingComplete, setPostingComplete] = useState<boolean>(false);
-    const [postTitle, setPostTitle] = useRecoilState<string>(PostTitleState);
-    const [posting, setPosting] = useRecoilState<string>(PostingState);
+    const [postTitle, setPostTitle] = useRecoilState<string | null>(PostTitleState);
+    const [posting, setPosting] = useRecoilState<string | null>(PostingState);
     const [imageUrls, setImageUrls] = useRecoilState<string[]>(ImageUrlsState);
     const [selectTag, setSelectedTag] = useRecoilState<string>(SelectTagState);
     const [titleError, setTitleError] = useState<string>('');
@@ -929,15 +926,15 @@ export default function PostMenu() {
         return doc.body.textContent || '';
     }
 
-    const postingText = useMemo(() => extractPlainText(posting), [posting]);
+    const postingText = useMemo(() => extractPlainText(posting as string), [posting]);
 
     // 글 작성 중 떠나면 저장
     const handleLeavePosting = () => {
-        if (postingText.length > 0) {
+        if (posting) {
             const unsavedPost = {
                 tag: selectTag,
-                title: postTitle,
-                content: posting,
+                title: postTitle as string,
+                content: posting as string,
                 date: new Date(),
                 images: imageUrls
             }
@@ -977,22 +974,35 @@ export default function PostMenu() {
             return;
         }
         // 사용자 인증 확인
-        if (!yourLogin || usageLimit) {
-            if (usageLimit) {
-                setLimitToggle(true);
-                setModal(true);
-            }
-            if (!yourLogin) {
-                setLoginToggle(true);
-                setModal(true);
-            }
-            return;
+        if (usageLimit) {
+            return setLimitToggle(true);
         }
 
-        setUploadLoading(true);
+        if (currentUser) {
+            const MAX_IMG_COUNT = 4;
+            const title_limit_count = 20;
+            const content_limit_count = 2500;
+            const uid = currentUser.uid;
 
-        if (postTitle && posting && currentUser) {
-            const uid = currentUser.uid
+            if (!postTitle) return alert('제목을 입력해주세요.');
+
+            if (!posting) return alert('본문을 작성해주세요.');
+
+            if (imageUrls.length > MAX_IMG_COUNT) {
+                alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 업로드 가능합니다.`);
+                return;
+            };
+            if (postTitle.length > title_limit_count) {
+                alert(`제목을 20자 이내로 작성해 주세요.`);
+                return;
+            };
+            if (postingText.length > content_limit_count) {
+                alert(`최대 2500자의 내용만 작성 가능합니다.`);
+                return;
+            };
+
+            setUploadLoading(true);
+
             try {
                 const validateResponse = await fetch('/api/validate', {
                     method: 'POST',
@@ -1006,51 +1016,84 @@ export default function PostMenu() {
                     throw new Error(`유저 검증 실패: ${errorDetails.message}`);
                 }
 
-                const MAX_IMG_COUNT = 4
-                const title_limit_count = 20
-                const content_limit_count = 2500
-
-                if (imageUrls.length > MAX_IMG_COUNT) {
-                    alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 업로드 가능합니다.`)
-                    return;
-                }
-                if (postTitle.length > title_limit_count) {
-                    alert(`제목을 20자 이내로 작성해 주세요.`)
-                    return;
-                }
-                if (postingText.length > content_limit_count) {
-                    alert(`최대 2500자의 내용만 작성 가능합니다.`)
-                    return;
-                }
-
                 // 업로드된 이미지 URL을 추적하기 위한 Map 생성
                 const uploadedImageUrls = new Map<string, string>();
 
-                // imageUrls 최적화 및 업로드
-                const optImageUrls = await Promise.all(
-                    imageUrls.map(async (image: string) => {
-                        const cloudinaryUrl = await uploadImgCdn(image);
-                        uploadedImageUrls.set(image, cloudinaryUrl.imgUrl); // 업로드된 URL을 Map에 저장
-                        return cloudinaryUrl.imgUrl;
-                    })
-                );
+                const imageUploadPromises = imageUrls.map(async (imgSrc: string) => {
+                    // 이미 CDN URL로 보이는 경우(이미 업로드된 상태)에는 그대로 사용
+                    if (uploadedImageUrls.has(imgSrc)) {
+                        return { original: imgSrc, success: true, cdnUrl: uploadedImageUrls.get(imgSrc) };
+                    }
 
-                // content 내 이미지 URL을 최적화된 URL로 교체
-                const optContentUrls = await uploadContentImgCdn(posting, uploadedImageUrls);
+                    if (imgSrc.startsWith('data:')) {
+                        try {
+                            const res = await uploadImgCdn(imgSrc);
+                            uploadedImageUrls.set(imgSrc, res.imgUrl);
+                            return { original: imgSrc, success: true, cdnUrl: res.imgUrl };
+                        } catch (error: unknown) {
+                            const msg = error instanceof Error ? error.message : String(error);
+                            return { original: imgSrc, success: false, error: msg };
+                        }
+                    }
 
-                // Firestore에 데이터 추가 (Admin SDK 사용)
-                let newPost = {
+                    if (/^https?:\/\//i.test(imgSrc) && imgSrc.includes('cloudinary')) {
+                        uploadedImageUrls.set(imgSrc, imgSrc);
+                        return { original: imgSrc, success: true, cdnUrl: imgSrc };
+                    };
+
+                    // uploadImgCdn이 실패하면 에러 반환
+                    try {
+                        const res = await uploadImgCdn(imgSrc);
+                        uploadedImageUrls.set(imgSrc, res.imgUrl);
+                        return { original: imgSrc, success: true, cdnUrl: res.imgUrl };
+                    } catch (error: unknown) {
+                        const msg = error instanceof Error ? error.message : String(error);
+                        return { original: imgSrc, success: false, error: msg };
+                    }
+                })
+
+                const imageUploadResults = await Promise.allSettled(imageUploadPromises);
+
+                const failedImageUploads = imageUploadResults
+                    .map((r) => (r.status === 'fulfilled' ? r.value : null))
+                    .filter(Boolean)
+                    .filter((v) => !v?.success);
+
+                if (failedImageUploads.length > 0) {
+                    //업로드 실패 시 포스트 전체 중단
+                    console.error('이미지 업로드 실패 항목:', failedImageUploads);
+                    alert('업로드에 실패했습니다. 다시 시도해주세요. : 이미지 업로드 실패.');
+                    return;
+                }
+
+                const { 
+                    content: optimizedContent,
+                    results: contentUploadResults
+                } = await uploadContentImgCdn(posting, uploadedImageUrls, { retry: 3, timeoutMs: 15000 });
+
+                // contentUploadResults에서 실패 항목 확인
+                const failedContentUploads = (contentUploadResults ?? []).filter((r) => !r.success);
+                if (failedContentUploads.length > 0) {
+                    console.error('본문 이미지 업로드 실패:', failedContentUploads);
+                    alert('이미지 업로드에 일부 실패했습니다.');
+                    return;
+                }
+
+                // 3) Firestore에 저장 (images: optImageUrls)
+                const optImageUrls = Array.from(imageUrls).map((orig) => uploadedImageUrls.get(orig)!).filter(Boolean);
+
+                let newPost: PostData = {
                     tag: selectTag,
                     title: postTitle,
-                    userId: uid as string, // uid로 사용자 ID 사용
-                    displayName: currentUser.name as string,
-                    photoURL: currentUser.photo as string,
-                    content: optContentUrls,
-                    images: optImageUrls.length > 0 ? optImageUrls : false,
+                    userId: currentUser.uid as string,
+                    displayName: currentUser.name ?? '',
+                    photoURL: currentUser.photo ?? '',
+                    content: optimizedContent,
+                    images: optImageUrls.length ? optImageUrls : undefined,
                     createAt: Timestamp.now(),
                     commentCount: 0,
                     notice: checkedNotice,
-                } as PostData
+                };
 
                 const postRef = await addDoc(collection(db, "posts"), newPost);
 
@@ -1068,10 +1111,6 @@ export default function PostMenu() {
             } finally {
                 setUploadLoading(false)
             }
-        } else if (postTitle === '') {
-            alert('제목을 입력해주세요.');
-        } else if (posting === '') {
-            alert('본문을 작성해주세요.');
         }
     }
 
@@ -1265,14 +1304,14 @@ export default function PostMenu() {
 
     useEffect(() => {
         if (!postingComplete) {
-            if (/\S/.test(posting) || /\S/.test(postTitle)) {
+            if (/\S/.test(posting as string) || /\S/.test(postTitle as string)) {
 
                 const handleBeforeUnload = () => {
                     if (postingText.length > 0) {
                         const unsavedPost = {
                             tag: selectTag,
-                            title: postTitle,
-                            content: posting,
+                            title: postTitle as string,
+                            content: posting as string,
                             date: new Date(),
                             images: imageUrls
                         }
@@ -1309,8 +1348,8 @@ export default function PostMenu() {
                 if (postingText.length > 0) {
                     const unsavedPost = {
                         tag: selectTag,
-                        title: postTitle,
-                        content: posting,
+                        title: postTitle as string,
+                        content: posting as string,
                         date: new Date(),
                         images: imageUrls
                     }
@@ -1464,13 +1503,13 @@ export default function PostMenu() {
                             </select>
                         }
                         <div className='title_input_wrap'>
-                            <input className='title_input' type="text" placeholder='제목' value={postTitle} onChange={handlePostingTitle} />
+                            <input className='title_input' type="text" placeholder='제목' value={postTitle as string} onChange={handlePostingTitle} />
                             <div className='title_input_value'>
-                                <p>{postTitle.slice(0, title_limit_count)}</p>
-                                <p css={css`color: ${theme.colors.error}`}>{postTitle.slice(title_limit_count)}</p>
+                                <p>{postTitle?.slice(0, title_limit_count)}</p>
+                                <p css={css`color: ${theme.colors.error}`}>{postTitle?.slice(title_limit_count)}</p>
                             </div>
-                            <span className='title_limit'>{postTitle.length} / 20</span>
-                            {postTitle.length > 20 &&
+                            <span className='title_limit'>{postTitle?.length} / 20</span>
+                            {postTitle && postTitle?.length > 20 &&
                                 <p className='title_error'>{titleError}</p>
                             }
                         </div>
@@ -1784,7 +1823,7 @@ export default function PostMenu() {
                         </div>
                     </div>
                     <div className='ql_content'>
-                        <ReactQuill ref={quillRef} formats={formats} value={posting} onChange={handlePostingEditor} modules={SetModules} />
+                        <ReactQuill ref={quillRef} formats={formats} value={posting as string} onChange={handlePostingEditor} modules={SetModules} />
                     </div>
                     <p>{postingText.length}/ 2500</p>
 
