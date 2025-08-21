@@ -1020,12 +1020,11 @@ export default function PostMenu() {
                 const uploadedImageUrls = new Map<string, string>();
 
                 const imageUploadPromises = imageUrls.map(async (imgSrc: string) => {
-                    // 이미 CDN URL로 보이는 경우(이미 업로드된 상태)에는 그대로 사용
-                    if (uploadedImageUrls.has(imgSrc)) {
-                        return { original: imgSrc, success: true, cdnUrl: uploadedImageUrls.get(imgSrc) };
-                    }
+                    const needUpload = uploadedImageUrls.has(imgSrc)! && (/^https?:\/\//i.test(imgSrc) && imgSrc.includes('cloudinary'));
 
-                    if (imgSrc.startsWith('data:')) {
+                    if (needUpload) {
+                        return { original: imgSrc, success: true, cdnUrl: uploadedImageUrls.get(imgSrc) };
+                    } else {
                         try {
                             const res = await uploadImgCdn(imgSrc);
                             uploadedImageUrls.set(imgSrc, res.imgUrl);
@@ -1035,22 +1034,7 @@ export default function PostMenu() {
                             return { original: imgSrc, success: false, error: msg };
                         }
                     }
-
-                    if (/^https?:\/\//i.test(imgSrc) && imgSrc.includes('cloudinary')) {
-                        uploadedImageUrls.set(imgSrc, imgSrc);
-                        return { original: imgSrc, success: true, cdnUrl: imgSrc };
-                    };
-
-                    // uploadImgCdn이 실패하면 에러 반환
-                    try {
-                        const res = await uploadImgCdn(imgSrc);
-                        uploadedImageUrls.set(imgSrc, res.imgUrl);
-                        return { original: imgSrc, success: true, cdnUrl: res.imgUrl };
-                    } catch (error: unknown) {
-                        const msg = error instanceof Error ? error.message : String(error);
-                        return { original: imgSrc, success: false, error: msg };
-                    }
-                })
+                });
 
                 const imageUploadResults = await Promise.allSettled(imageUploadPromises);
 
@@ -1066,10 +1050,10 @@ export default function PostMenu() {
                     return;
                 }
 
-                const { 
+                const {
                     content: optimizedContent,
                     results: contentUploadResults
-                } = await uploadContentImgCdn(posting, uploadedImageUrls, { retry: 3, timeoutMs: 15000 });
+                } = await uploadContentImgCdn(posting, uploadedImageUrls);
 
                 // contentUploadResults에서 실패 항목 확인
                 const failedContentUploads = (contentUploadResults ?? []).filter((r) => !r.success);
@@ -1080,7 +1064,7 @@ export default function PostMenu() {
                 }
 
                 // 3) Firestore에 저장 (images: optImageUrls)
-                const optImageUrls = Array.from(imageUrls).map((orig) => uploadedImageUrls.get(orig)!).filter(Boolean);
+                const optImageUrls = Array.from(imageUrls).map((original) => uploadedImageUrls.get(original) ?? undefined).filter(Boolean) as string[];
 
                 let newPost: PostData = {
                     tag: selectTag,
@@ -1106,8 +1090,9 @@ export default function PostMenu() {
 
                 setPostingComplete(true);
                 router.push('/home/main');
-            } catch (error) {
-                alert('포스팅에 실패하였습니다: ' + error);
+            } catch (error: unknown) {
+                const msg = error instanceof Error ? error.message : JSON.stringify(error);
+                alert('포스팅에 실패하였습니다: ' + msg);
             } finally {
                 setUploadLoading(false)
             }
