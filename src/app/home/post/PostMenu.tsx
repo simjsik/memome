@@ -1016,68 +1016,78 @@ export default function PostMenu() {
                     throw new Error(`유저 검증 실패: ${errorDetails.message}`);
                 }
 
-                // 업로드된 이미지 URL을 추적하기 위한 Map 생성
-                const uploadedImageUrls = new Map<string, string>();
-
-                const imageUploadPromises = imageUrls.map(async (imgSrc: string) => {
-                    const needUpload = uploadedImageUrls.has(imgSrc)! && (/^https?:\/\//i.test(imgSrc) && imgSrc.includes('cloudinary'));
-
-                    if (needUpload) {
-                        return { original: imgSrc, success: true, cdnUrl: uploadedImageUrls.get(imgSrc) };
-                    } else {
-                        try {
-                            const res = await uploadImgCdn(imgSrc);
-                            uploadedImageUrls.set(imgSrc, res.imgUrl);
-                            return { original: imgSrc, success: true, cdnUrl: res.imgUrl };
-                        } catch (error: unknown) {
-                            const msg = error instanceof Error ? error.message : String(error);
-                            return { original: imgSrc, success: false, error: msg };
-                        }
-                    }
-                });
-
-                const imageUploadResults = await Promise.allSettled(imageUploadPromises);
-
-                const failedImageUploads = imageUploadResults
-                    .map((r) => (r.status === 'fulfilled' ? r.value : null))
-                    .filter(Boolean)
-                    .filter((v) => !v?.success);
-
-                if (failedImageUploads.length > 0) {
-                    //업로드 실패 시 포스트 전체 중단
-                    console.error('이미지 업로드 실패 항목:', failedImageUploads);
-                    alert('업로드에 실패했습니다. 다시 시도해주세요. : 이미지 업로드 실패.');
-                    return;
-                }
-
-                const {
-                    content: optimizedContent,
-                    results: contentUploadResults
-                } = await uploadContentImgCdn(posting, uploadedImageUrls);
-
-                // contentUploadResults에서 실패 항목 확인
-                const failedContentUploads = (contentUploadResults ?? []).filter((r) => !r.success);
-                if (failedContentUploads.length > 0) {
-                    console.error('본문 이미지 업로드 실패:', failedContentUploads);
-                    alert('이미지 업로드에 일부 실패했습니다.');
-                    return;
-                }
-
-                // 3) Firestore에 저장 (images: optImageUrls)
-                const optImageUrls = Array.from(imageUrls).map((original) => uploadedImageUrls.get(original) ?? undefined).filter(Boolean) as string[];
-
                 let newPost: PostData = {
                     tag: selectTag,
                     title: postTitle,
                     userId: currentUser.uid as string,
-                    displayName: currentUser.name ?? '',
-                    photoURL: currentUser.photo ?? '',
-                    content: optimizedContent,
-                    images: optImageUrls.length ? optImageUrls : undefined,
+                    content: posting,
                     createAt: Timestamp.now(),
                     commentCount: 0,
                     notice: checkedNotice,
                 };
+
+                if (imageUrls.length > 0) {
+                    // 업로드된 이미지 URL을 추적하기 위한 Map 생성
+                    const uploadedImageUrls = new Map<string, string>();
+
+                    const imageUploadPromises = imageUrls.map(async (imgSrc: string) => {
+                        const needUpload = uploadedImageUrls.has(imgSrc)! && (/^https?:\/\//i.test(imgSrc) && imgSrc.includes('cloudinary'));
+
+                        if (needUpload) {
+                            return { original: imgSrc, success: true, cdnUrl: uploadedImageUrls.get(imgSrc) };
+                        } else {
+                            try {
+                                const res = await uploadImgCdn(imgSrc);
+                                uploadedImageUrls.set(imgSrc, res.imgUrl);
+                                return { original: imgSrc, success: true, cdnUrl: res.imgUrl };
+                            } catch (error: unknown) {
+                                const msg = error instanceof Error ? error.message : String(error);
+                                return { original: imgSrc, success: false, error: msg };
+                            }
+                        }
+                    });
+
+                    const imageUploadResults = await Promise.allSettled(imageUploadPromises);
+
+                    const failedImageUploads = imageUploadResults
+                        .map((r) => (r.status === 'fulfilled' ? r.value : null))
+                        .filter(Boolean)
+                        .filter((v) => !v?.success);
+
+                    if (failedImageUploads.length > 0) {
+                        //업로드 실패 시 포스트 전체 중단
+                        console.error('이미지 업로드 실패 항목:', failedImageUploads);
+                        alert('업로드에 실패했습니다. 다시 시도해주세요. : 이미지 업로드 실패.');
+                        return;
+                    }
+
+                    const {
+                        content: optimizedContent,
+                        results: contentUploadResults
+                    } = await uploadContentImgCdn(posting, uploadedImageUrls);
+
+                    // contentUploadResults에서 실패 항목 확인
+                    const failedContentUploads = (contentUploadResults ?? []).filter((r) => !r.success);
+                    if (failedContentUploads.length > 0) {
+                        console.error('포스트 이미지 교체 실패:', failedContentUploads);
+                        alert('이미지 업로드에 일부 실패했습니다.');
+                        return;
+                    }
+
+                    // 3) Firestore에 저장 (images: optImageUrls)
+                    const optImageUrls = Array.from(imageUrls).map((original) => uploadedImageUrls.get(original) ?? undefined).filter(Boolean) as string[];
+
+                    newPost = {
+                        tag: selectTag,
+                        title: postTitle,
+                        userId: currentUser.uid as string,
+                        content: optimizedContent,
+                        images: optImageUrls,
+                        createAt: Timestamp.now(),
+                        commentCount: 0,
+                        notice: checkedNotice,
+                    };
+                }
 
                 const postRef = await addDoc(collection(db, "posts"), newPost);
 

@@ -378,7 +378,7 @@ export default function MainHome() {
                   </div>
                   <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml((post.content)) }}></div>
                   {/* 이미지 */}
-                  {(post.images && post.images.length > 0) && (
+                  {post.images && (
                     <div className='post_pr_img_wrap'>
                       <div className='post_pr_img'>
                         <Image
