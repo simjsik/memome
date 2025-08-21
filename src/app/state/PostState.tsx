@@ -7,12 +7,12 @@ export interface PostData {
     id?: string;
     userId: string;
     content: string;
-    images?: string[] | undefined;
+    images?: string[];
     createAt: Timestamp;
     commentCount: number,
     notice: boolean,
-    displayName: string,
-    photoURL: string | null,
+    displayName?: string,
+    photoURL?: string,
     objectID?: string,
 }
 
@@ -32,7 +32,7 @@ export interface unsavedPostData {
 export interface userData {
     name: string | null;
     email: string | null;
-    photo: string | null;
+    photo: string;
     uid: string | null;
 }
 
@@ -154,7 +154,7 @@ export const userState = atom<userData>({
     default: {
         name: null,
         email: null,
-        photo: null,
+        photo: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
         uid: null,
     },
 })
