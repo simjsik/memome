@@ -28,7 +28,7 @@ export const cleanHtml = (content: string, maxBlocks = 2) => {
         allowedAttributes: {
             a: ["href", "target", "rel"], // 링크 속성만 허용
             img: ["src", "style"],
-            span: ["style", "class", "contenteditable"],
+            span: ["style", "class",],
             div: ["style", "data-language", "class", "spellcheck"],
             li: ["data-list"],
             p: ["style"],
@@ -37,7 +37,7 @@ export const cleanHtml = (content: string, maxBlocks = 2) => {
         },
         allowedSchemes: ["http", "https"], // http, https 링크만 허용
         allowedSchemesByTag: {
-            img: ["http", "https", "data"], // img 태그의 src 속성에서 http, https, data 허용
+            img: ["http", "https", "data:image/png", "data:image/jpeg", "data:image/webp"], // img 태그의 src 속성에서 http, https, data 허용
         },
         allowedStyles: {
             '*': {
@@ -61,7 +61,7 @@ export const SSRcleanHtml = (content: string) => {
         allowedAttributes: {
             a: ["href", "target", "rel"], // 링크 속성만 허용
             img: ["src", "style"],
-            span: ["style", "class", "contenteditable"],
+            span: ["style", "class",],
             div: ["style", "data-language", "class", "spellcheck"],
             li: ["data-list"],
             p: ["style"],
@@ -70,7 +70,7 @@ export const SSRcleanHtml = (content: string) => {
         },
         allowedSchemes: ["http", "https"], // http, https 링크만 허용
         allowedSchemesByTag: {
-            img: ["http", "https", "data"], // img 태그의 src 속성에서 http, https, data 허용
+            img: ["http", "https", "data"]
         },
         allowedStyles: {
             '*': {
@@ -81,6 +81,27 @@ export const SSRcleanHtml = (content: string) => {
                 'background-color': [/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, /^rgb\((\d{1,3},\s?){2}\d{1,3}\)$/],
                 'font-size': [/^\d+(\.\d+)?(px|em|rem|%)$/],
                 'line-height': [/^\d+(\.\d+)?$/]
+            }
+        },
+        transformTags: {
+            'a': (tagName, attribs) => {
+                // target이 _blank이면 rel noopener 추가
+                if (attribs.target === '_blank') {
+                    attribs.rel = (attribs.rel ? attribs.rel + ' ' : '') + 'noopener noreferrer';
+                }
+                return { tagName, attribs };
+            },
+            'img': (tagName, attribs) => {
+                const src = attribs.src || '';
+                // data:이면 안전한 MIME 유형만 허용
+                if (src.startsWith('data:')) {
+                    // 허용하는 data MIME만 통과 (png/jpeg/webp)
+                    if (!/^data:image\/(png|jpeg|jpg|webp);base64,/.test(src)) {
+                        // 허용하지 않으면 빈 이미지 또는 제거
+                        return { tagName: 'img', attribs: { src: '' } };
+                    }
+                }
+                return { tagName, attribs };
             }
         }
     });
