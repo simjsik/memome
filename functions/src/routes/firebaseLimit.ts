@@ -1,6 +1,6 @@
 import express, {Request, Response} from "express";
 import cookieParser from "cookie-parser";
-import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
+import {adminDb} from "../DB/firebaseAdminConfig";
 
 const router = express.Router();
 const app = express();
@@ -8,31 +8,12 @@ app.use(cookieParser());
 
 router.post('/limit', async (req: Request, res: Response) => {
     const {userId} = req.body;
-    const authToken = req.cookies.authToken;
-    console.log(authToken?.slice(0, 8), userId, "유저 토큰 및 UID ( Limit API )");
 
     if (!userId) {
         return res.status(403).json({error: '유저가 없습니다.'});
     }
 
-    if (!authToken) {
-        return res.status(403).json({error: '유저 토큰이 유효하지 않습니다.'});
-    }
-    const decodedToken = await adminAuth.verifyIdToken(authToken);
-
-    if (!decodedToken) {
-        console.log("유저 토큰 검증 실패.");
-        return res.status(403).json({
-            message: "ID 토큰이 유효하지 않거나 만료되었습니다.",
-        });
-    }
-
-    const hasGuest = decodedToken.roles?.guest === true;
-
-    let limitCount = 80;
-    if (hasGuest) {
-        limitCount = 40;
-    }
+    const limitCount = 80;
 
     const currentTime = new Date();
     const today = currentTime.toISOString().split('T')[0]; // 오늘 날짜

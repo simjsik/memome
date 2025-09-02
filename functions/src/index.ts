@@ -13,7 +13,6 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import {onRequest} from "firebase-functions/v2/https";
 import setCsrfTokenRouter from "./routes/setCsrfToken";
-import validateRouter from "./routes/validateAuthToken";
 import loginRouter from "./routes/loginApi";
 import logoutRouter from "./routes/logoutApi";
 import saveUserRouter from "./routes/saveUserApi";
@@ -265,7 +264,6 @@ export const setGoogleUser = functions.auth
       displayName: displayName || '',
       email: email || '',
       photoURL: photoURL || '',
-      uid: uid,
     });
   }
 });
@@ -291,8 +289,6 @@ app.use(cookieParser());
 
 app.get('/', (req : Request, res : Response) => {
     try {
-        console.log('Hello world received a request.');
-
         const target = process.env.TARGET || 'World';
         res.status(200).send(`Hello ${target}!\n`);
     } catch (error) {
@@ -301,7 +297,6 @@ app.get('/', (req : Request, res : Response) => {
 });
 
 app.use('/', setCsrfTokenRouter);
-app.use('/', validateRouter);
 app.use('/', loginRouter);
 app.use('/', logoutRouter);
 app.use('/', saveUserRouter);

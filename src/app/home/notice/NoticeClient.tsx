@@ -62,17 +62,6 @@ export default function ClientNotice() {
         queryKey: ['notices'],
         queryFn: async ({ pageParam }) => {
             try {
-                const validateResponse = await fetch(`/api/validate`, {
-                    method: "POST",
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ uid }),
-                });
-                if (!validateResponse.ok) {
-                    const errorDetails = await validateResponse.json();
-                    throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-                }
-
                 return fetchNoticePosts(uid as string, pageParam);
             } catch (error) {
                 if (error instanceof Error) {

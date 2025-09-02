@@ -553,20 +553,6 @@ export default function UserProfile() {
                     // 받아온 image인자가 File 타입이기 때문에 Cloudinary에 저장을 위해 base64로 변경
                     const base64Image = await fileToBase64(image);
 
-                    const validateResponse = await fetch(`/api/validate`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: "include",
-                        body: JSON.stringify({ uid }),
-                    });
-                    if (!validateResponse.ok) {
-                        const errorDetails = await validateResponse.json();
-                        throw new Error(`유저 검증 실패: ${errorDetails.message}`);
-                    }
-
-                    // 변경된 이미지가 있을 시 업데이트
                     if (base64Image) {
                         // 받아온 image인자가 File 타입이기 때문에 Cloudinary에 저장을 위해 base64로 변경
                         const cdnImg = await uploadImgCdn(base64Image)
@@ -701,19 +687,6 @@ export default function UserProfile() {
                 const uid = currentUser.uid
 
                 // 유저 검증
-                const ValidateResponse = await fetch(`/api/validate`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ uid }),
-                });
-
-                if (!ValidateResponse.ok) {
-                    const errorData = await ValidateResponse.json()
-                    throw new Error('유저 확인 중 오류가 발생했습니다.', errorData.message);
-                }
-
                 const noticeDoc = await doc(db, `users/${uid}/noticeList/${noticeId}`);
 
                 if (!noticeDoc) {

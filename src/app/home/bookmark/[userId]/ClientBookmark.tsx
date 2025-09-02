@@ -31,8 +31,6 @@ export default function Bookmark() {
     const theme = useTheme();
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
 
-    const uid = currentUser.uid
-
     const {
         data: bookmarks,
         fetchNextPage,
@@ -45,19 +43,6 @@ export default function Bookmark() {
         queryKey: ['bookmarks', currentUser?.uid],
         queryFn: async ({ pageParam = 0 }) => {
             try {
-                const validateResponse = await fetch(`/api/validate`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ uid }),
-                });
-                if (!validateResponse.ok) {
-                    const errorDetails = await validateResponse.json();
-                    throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-                }
-
-                console.log(currentBookmark, '북마크 데이터')
-
                 return fetchBookmarks(
                     currentUser.uid as string,
                     currentBookmark as string[], // 전역 상태를 바로 사용

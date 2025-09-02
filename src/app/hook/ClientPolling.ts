@@ -39,21 +39,6 @@ const useUpdateChecker = () => {
             if (currentUser.uid) {
                 const userId = currentUser.uid
 
-                const validateResponse = await fetch(`/api/validate`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ uid: userId }),
-                });
-
-                if (!validateResponse.ok) {
-                    const errorDetails = await validateResponse.json();
-                    if (validateResponse.status === 403) {
-                        throw new Error(`새 포스트 업데이트 실패 : ${errorDetails.message}`);
-                    }
-                    throw new Error(`새 포스트 업데이트 실패 : ${errorDetails.message}`);
-                }
-
                 const docRef = hasGuest ? doc(db, `guests/${userId}/status/postUpdates`) : doc(db, `users/${userId}/status/postUpdates`);
                 const docSnap = await getDoc(docRef);
 

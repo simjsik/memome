@@ -251,17 +251,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
         queryKey: ['comments', post],
         queryFn: async ({ pageParam }) => {
             try {
-                const validateResponse = await fetch(`/api/validate`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ uid: user.uid }),
-                });
-                if (!validateResponse.ok) {
-                    const errorDetails = await validateResponse.json();
-                    throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-                }
-
                 return await fetchComments(user.uid as string, post, pageParam);
             } catch (error: unknown) {
                 if (error instanceof Error) {
@@ -327,7 +316,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
     const handleAddComment = async (parentId: string | null = null, commentId: string) => {
         if (user) {
             const text = parentId ? replyText : commentText;
-            const uid = user.uid;
 
             if (!text.trim()) {
                 alert(parentId ? '답글을 입력해주세요.' : '댓글을 입력해주세요.');
@@ -335,19 +323,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
             }
 
             try {
-                const validateResponse = await fetch(`/api/validate`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ uid }),
-                });
-
-                if (!validateResponse?.ok) {
-                    const errorData = await validateResponse?.json();
-                    console.error("Server-to-server error:", errorData.message);
-                    throw new Error('유저 검증 실패')
-                }
-
                 const commentData =
                     {
                         parentId,
@@ -386,7 +361,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
     const handleAddReply = async (parentId: string, commentId: string) => {
         if (user) {
             const text = replyText;
-            const uid = user.uid;
 
             if (!text.trim()) {
                 alert('답글을 입력해주세요.');
@@ -394,19 +368,6 @@ export default function MemoStatus({ post }: ClientPostProps) {
             }
 
             try {
-                const validateResponse = await fetch(`/api/validate`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ uid }),
-                });
-
-                if (!validateResponse?.ok) {
-                    const errorData = await validateResponse?.json();
-                    console.error("Server-to-server error:", errorData.message);
-                    throw new Error('유저 검증 실패')
-                }
-
                 const commentData =
                     {
                         parentId,

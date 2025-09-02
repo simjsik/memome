@@ -92,6 +92,7 @@ export default function MainHome() {
       setStorageLoad(false);
     }
 
+    localStorage.removeItem('authInProgress')
     // 컴포넌트 언마운트 시 이벤트 제거
     return () => {
       sockets.off("new-notice");
@@ -156,17 +157,6 @@ export default function MainHome() {
     queryKey: ['posts'],
     queryFn: async ({ pageParam }) => {
       try {
-        const validateResponse = await fetch(`/api/validate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ uid }),
-        });
-        if (!validateResponse.ok) {
-          const errorDetails = await validateResponse.json();
-          throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-        }
-
         return await fetchPosts(uid as string, pageParam, 8);
       } catch (error: unknown) {
         if (error instanceof Error) {
@@ -420,7 +410,7 @@ export default function MainHome() {
             </>
           ))
           }
-          <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`} />
+          <div ref={observerLoadRef} css={css`height: 1px; display: ${(dataLoading || firstLoading || isError) ? "none" : "block"};`} />
           {(!loading && dataLoading) && <LoadingWrap />}
           {isError &&
             <NoMorePost id='post_error' aria-live='polite' role='status'>

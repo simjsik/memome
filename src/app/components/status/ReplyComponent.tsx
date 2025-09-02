@@ -47,17 +47,6 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
         queryFn: async ({ pageParam }) => {
             try {
                 setDataLoading(true);
-                const validateResponse = await fetch(`/api/validate`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ uid: user.uid }),
-                });
-
-                if (!validateResponse.ok) {
-                    const errorDetails = await validateResponse.json();
-                    throw new Error(`답글 요청 실패: ${errorDetails.message}`);
-                }
 
                 return fetchReplies(
                     user.uid as string,
@@ -96,7 +85,6 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
     const handleAddReply = async (parentId: string, commentId: string) => {
         if (user) {
             const text = replyText;
-            const uid = user.uid;
 
             if (!text.trim()) {
                 alert('답글을 입력해주세요.');
@@ -104,19 +92,6 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
             }
 
             try {
-                const validateResponse = await fetch(`/api/validate`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ uid }),
-                });
-
-                if (!validateResponse?.ok) {
-                    const errorData = await validateResponse?.json();
-                    console.error("Server-to-server error:", errorData.message);
-                    throw new Error('유저 검증 실패')
-                }
-
                 const commentData =
                     {
                         parentId,

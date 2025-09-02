@@ -982,7 +982,6 @@ export default function PostMenu() {
             const MAX_IMG_COUNT = 4;
             const title_limit_count = 20;
             const content_limit_count = 2500;
-            const uid = currentUser.uid;
 
             if (!postTitle) return alert('제목을 입력해주세요.');
 
@@ -1004,18 +1003,6 @@ export default function PostMenu() {
             setUploadLoading(true);
 
             try {
-                const validateResponse = await fetch('/api/validate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: "include",
-                    body: JSON.stringify({ uid }),
-                });
-
-                if (!validateResponse.ok) {
-                    const errorDetails = await validateResponse.json();
-                    throw new Error(`유저 검증 실패: ${errorDetails.message}`);
-                }
-
                 let newPost: PostData = {
                     tag: selectTag,
                     title: postTitle,

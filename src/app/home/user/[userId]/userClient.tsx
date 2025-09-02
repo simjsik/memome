@@ -73,17 +73,6 @@ export default function UserClient({ user }: ClientUserProps) {
         queryFn: async ({ pageParam }) => {
             try {
                 const userId = currentUser.uid
-                const validateResponse = await fetch(`/api/validate`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ userId }),
-                });
-                if (!validateResponse.ok) {
-                    const errorDetails = await validateResponse.json();
-                    throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-                }
-
                 return fetchPostList(userId as string, uid as string, pageParam);
             } catch (error) {
                 if (error instanceof Error) {
@@ -120,17 +109,6 @@ export default function UserClient({ user }: ClientUserProps) {
         queryFn: async ({ pageParam }) => {
             try {
                 const userId = currentUser.uid
-                const validateResponse = await fetch(`/api/validate`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ userId }),
-                });
-                if (!validateResponse.ok) {
-                    const errorDetails = await validateResponse.json();
-                    throw new Error(`포스트 요청 실패: ${errorDetails.message}`);
-                }
-
                 return fetchImageList(userId as string, uid as string, pageParam);
             } catch (error) {
                 if (error instanceof Error) {

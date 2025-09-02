@@ -7,10 +7,20 @@ import {randomBytes} from "crypto";
 
 const router = express.Router();
 
-const API_URL = process.env.API_URL;
-const secret = process.env.JWT_SECRET;
+const SECRET = process.env.JWT_SECRET;
+const CSRF_SECRET = process.env.CSRF_SECRET;
+const ACCESS_EXPIRES_MS = 60 * 60 * 1000;
+
+export interface newUser {
+    displayName: string | null;
+    photoURL: string;
+    userId: string;
+}
 
 router.post('/login', async (req: Request, res: Response) => {
+    const clientOrigin = req.headers["Project-Host"] || req.headers.origin;
+    const isProduction = clientOrigin?.includes("memome-delta.vercel.app");
+
     try {
         const {idToken} = await req.body;
 
@@ -20,7 +30,6 @@ router.post('/login', async (req: Request, res: Response) => {
         }
 
         const uid = decodedToken.uid;
-        let userSession = null;
         const hasGuest = decodedToken.roles?.guest === true;
 
         const userRef = hasGuest ?
@@ -28,73 +37,47 @@ router.post('/login', async (req: Request, res: Response) => {
             adminDb.doc(`users/${uid}`);
 
         const userSnapshot = await userRef.get();
+        const userDoc = userSnapshot.data();
 
-        if (userSnapshot.exists) {
-            const userData = userSnapshot.data();
+        let userData : newUser = {
+            displayName: userDoc?.displayName,
+            photoURL: userDoc?.photoURL,
+            userId: userDoc?.userId,
+        };
 
-            userSession = {
-                uid: uid,
-                name: userData?.displayName,
-                photo: userData?.photoURL,
+        if (!userSnapshot.exists) {
+            const randomName = hasGuest ?
+            `Guest-${Math.random().toString(36).substring(2, 10)}` :
+            `user-${Math.random().toString(36).substring(2, 10)}`;
+
+            userData = {
+                displayName: randomName,
+                photoURL: "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg",
+                userId: uid,
             };
-        } else {
-            const saveUserResponse = await fetch(`${API_URL}/saveUser`, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({
-                    uid,
-                    hasGuest: true,
-                }),
-            });
 
-            if (!saveUserResponse?.ok) {
-                const errorData = await saveUserResponse?.json();
-                console.error("유저 저장 실패:", errorData.message);
-                return res.status(401).json({message: "유저 저장 실패."});
-            }
-
-            const {userData: response} = await saveUserResponse.json();
-
-            if (saveUserResponse.status === 200) {
-                userSession = {
-                    uid: uid,
-                    name: response.displayName,
-                    photo: response.photoURL,
-                };
-            }
+            await userRef.set(userData, {merge: true});
         }
 
-        const tokenResponse = await fetch(`${API_URL}/validate`, {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({idToken}),
-        });
-
-        if (!tokenResponse?.ok) {
-            const errorData = await tokenResponse?.json();
-            console.error("토큰 인증 실패:", errorData.message);
-            return res.status(401).json({message: "토큰 인증 실패."});
-        }
-
-        if (!secret) {
+        if (!SECRET || !CSRF_SECRET) {
             console.error("JWT 비밀 키 확인 불가");
             return res.status(401).json({message: "JWT 비밀 키 확인 불가."});
         }
 
-        if (!userSession || !userSession.name) {
-            return res.status(400).json({message: "유저 정보 불러오기 실패"});
-        }
+        const jti = randomBytes(16).toString('hex');
 
-        const userToken = jwt.sign({uid}, secret, {expiresIn: "1h"});
+        const payload = {uid, jti};
 
-        const csrfToken = randomBytes(32).toString("hex");
+        const userToken = jwt.sign(payload, SECRET, {expiresIn: '1h'});
+        const csrfToken = jwt.sign(
+            {...payload, nonce: randomBytes(32).toString("hex")},
+            CSRF_SECRET,
+            {expiresIn: '1h'},
+        );
 
-        const clientOrigin = req.headers["Project-Host"] || req.headers.origin;
-        const isProduction = clientOrigin?.includes("memome-delta.vercel.app");
 
         const cookieOptions = {
             domain: isProduction ? "memome-delta.vercel.app" : undefined,
-            httpOnly: true,
             secure: isProduction,
             sameSite: "lax" as const,
             path: "/",
@@ -102,23 +85,25 @@ router.post('/login', async (req: Request, res: Response) => {
         };
 
         return res
-        .cookie("csrfToken", csrfToken, cookieOptions)
-        .cookie("authToken", idToken, cookieOptions)
-        .cookie("userToken", userToken, cookieOptions)
+        .cookie("csrfToken", csrfToken, {
+            ...cookieOptions, httpOnly: false, maxAge: ACCESS_EXPIRES_MS,
+        })
+        .cookie("userToken", userToken, {
+            ...cookieOptions, httpOnly: true, maxAge: ACCESS_EXPIRES_MS,
+        })
         .status(200)
         .json({
             message: "로그인 성공.",
-            uid,
-            user: userSession,
+            userData,
         });
     } catch (error) {
         console.error("Login error:", error);
         if (error === "auth/user-not-found") {
-            return res.status(404).json({message: "User not found"});
+            return res.status(404).json({message: "유저 확인 불가"});
         } else if (error === "auth/wrong-password") {
-            return res.status(400).json({message: "Incorrect password"});
+            return res.status(400).json({message: "잘못된 비밀번호"});
         }
-        return res.status(500).json({message: "Login failed"});
+        return res.status(500).json({message: "로그인 시도 실패"});
     }
 });
 
