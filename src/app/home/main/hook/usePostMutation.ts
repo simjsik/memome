@@ -47,14 +47,14 @@ export function useAddUpdatePost() {
                                 });
                             } else {
                                 userCache.set(postData.userId, {
-                                    nickname: "Unknown",
+                                    nickname: "존재하지 않는 유저",
                                     photo: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
                                 });
                             }
                         }
 
                         // 매핑된 유저 정보 추가
-                        const userData = userCache.get(postData.userId) || { nickname: "Unknown", photo: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg' };
+                        const userData = userCache.get(postData.userId) || { nickname: "존재하지 않는 유저", photo: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg' };
                         postData.displayName = userData.nickname;
                         postData.photoURL = userData.photo as string;
 
