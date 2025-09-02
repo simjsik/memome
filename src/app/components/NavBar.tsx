@@ -189,8 +189,8 @@ export default function NavBar() {
     const usageLimit = useRecoilValue<boolean>(UsageLimitState);
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle);
     const [hasGuest, setHasGuest] = useRecoilState(hasGuestState);
-    const postTitle = useRecoilValue<string>(PostTitleState);
-    const posting = useRecoilValue<string>(PostingState);
+    const postTitle = useRecoilValue<string | null>(PostTitleState);
+    const posting = useRecoilValue<string | null>(PostingState);
     const imageUrls = useRecoilValue<string[]>(ImageUrlsState);
     const selectTag = useRecoilValue<string>(SelectTagState);
     const setMobileStatus = useSetRecoilState<boolean>(statusState);
@@ -225,8 +225,8 @@ export default function NavBar() {
 
             const unsavedPost = {
                 tag: selectTag,
-                title: postTitle,
-                content: posting,
+                title: postTitle ? postTitle : '',
+                content: posting ? posting : '',
                 date: new Date(),
                 images: imageUrls
             }
