@@ -15,11 +15,9 @@ export const useAuthSync = () => {
 
     const authSync = useCallback(async () => {
         setLoading(true);
-
         try {
             const user = auth.currentUser
             if (user) {
-                const uid = user.uid
                 const idToken = await user.getIdToken();
                 const loginResponse = await fetch(`/api/login`, {
                     method: "POST",
@@ -32,16 +30,7 @@ export const useAuthSync = () => {
                     const errorData = await loginResponse.json();
                     throw new Error(`로그인 시도 실패 ${loginResponse.status}: ${errorData.message}`);
                 }
-
-                setUser({
-                    uid: uid,
-                    email: user.email,
-                    name: user.displayName,
-                    photo: user.photoURL as string
-                });
-
                 setHasLogin(true);
-
                 router.replace('/home/main');
             }
         } catch (error: unknown) {
@@ -49,8 +38,8 @@ export const useAuthSync = () => {
                 setUser({
                     name: null,
                     email: null,
-                    photo: null,
-                    uid: null, // uid는 빈 문자열로 초기화
+                    photo: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
+                    uid: null,
                 }); // 로그아웃 상태 처리
 
                 const response = await fetch(`/api/logout`, {
@@ -72,9 +61,9 @@ export const useAuthSync = () => {
                 setUser({
                     name: null,
                     email: null,
-                    photo: null,
+                    photo: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
                     uid: null,
-                });
+                }); // 로그아웃 상태 처리
                 setHasLogin(false);
                 const response = await fetch(`/api/logout`, {
                     method: "POST",

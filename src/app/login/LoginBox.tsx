@@ -119,11 +119,10 @@ export default function LoginBox() {
 
             if (!signUser.emailVerified) {
                 setLoginError('인증되지 않은 계정입니다. 이메일을 확인해주세요.');
-                // 2) 로그인 상태(임시로 남아있는 세션)를 제거
                 await signOut(auth);
                 return;
             }
-            // 서버로 ID 토큰 전송
+
             const loginResponse = await fetch(`/api/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
@@ -136,19 +135,18 @@ export default function LoginBox() {
                 throw new Error(`로그인 시도 실패 ${loginResponse.status}: ${errorData.message}`);
             }
 
-            const data = await loginResponse.json();
-            const { uid, user } = data;
+            const { userData: data } = await loginResponse.json();
+            localStorage.setItem('authInProgress', JSON.stringify({ ts: Date.now(), uid: data.userId }));
 
             setUser({
-                name: user.name,
-                email: user.email,
-                photo: user.photo,
-                uid: uid,
-            })
+                name: data.displayName,
+                email: data.email,
+                photo: data.photoURL,
+                uid: data.userId,
+            });
             setHasLogin(true);
             await router.push('/home/main');
         } catch (error: unknown) {
-            // Firebase 에러 타입 보존
             if (isFirebaseError(error)) {
                 console.error("Firebase 오류:", error.code, error.message);
                 setLoginError(firebaseErrorMessages[error.code] ?? "Firebase 오류 발생");
@@ -169,6 +167,8 @@ export default function LoginBox() {
         setLoginError(null);
 
         try {
+            sessionStorage.setItem('authInProgress', JSON.stringify({ ts: Date.now() }))
+
             setIsLoading(true);
             setLoadingTag('Google');
 
@@ -177,7 +177,6 @@ export default function LoginBox() {
             const { user: popupUser } = await signInWithPopup(auths, provider);
             const googleToken = await popupUser.getIdToken();
             // userCredential를 전부 보내주면 보안 상 문제가 생김. ( 최소 권한 원칙 )
-
             // 서버로 ID 토큰 전송
             const googleResponse = await fetch("/api/login", {
                 method: "POST",
@@ -192,15 +191,16 @@ export default function LoginBox() {
                 throw new Error(`로그인 시도 실패 ${googleResponse.status}: ${errorData.message}`);
             }
 
-            const data = await googleResponse.json();
-            const { uid, user } = data;
+            const { userData: data } = await googleResponse.json();
+            localStorage.setItem('authInProgress', JSON.stringify({ ts: Date.now(), uid: data.userId }))
 
             setUser({
-                name: user.name,
-                email: user.email,
-                photo: user.photo,
-                uid: uid,
-            })
+                name: data.displayName,
+                email: data.email,
+                photo: data.photoURL,
+                uid: data.userId,
+            });
+
             setHasLogin(true);
             await router.push('/home/main');
         } catch (error: unknown) {
@@ -217,13 +217,14 @@ export default function LoginBox() {
             }
             setIsLoading(false);
             await signOut(auth);
+        } finally {
+            sessionStorage.removeItem('authInProgress');
         }
     };
 
     const handleGuestLogin = async () => {
         if (isLoading) return;
         setLoginError(null);
-
         try {
             setIsLoading(true);
             setLoadingTag('Guest');
@@ -238,6 +239,8 @@ export default function LoginBox() {
             }
 
             if (guestUid) {
+                localStorage.setItem('authInProgress', JSON.stringify({ ts: Date.now(), uid: guestUid }))
+
                 const token = await fetchCustomToken(guestUid);
 
                 const { user: signUser } = await signInWithCustomToken(auth, token);
@@ -261,18 +264,18 @@ export default function LoginBox() {
 
                 // Firebase Authentication의 프로필 업데이트
                 await updateProfile(guestUser, {
-                    displayName: data.name,
-                    photoURL: data.photo,
+                    displayName: data.displayName,
+                    photoURL: data.photoURL,
                 });
             }
-
-            localStorage.setItem('guestUid', data.uid);
+            localStorage.setItem('guestUid', data.userId);
+            localStorage.setItem('authInProgress', JSON.stringify({ ts: Date.now(), uid: data.userId }))
 
             setUser({
-                name: data.name,
+                name: data.displayName,
                 email: data.email,
-                photo: data.photo,
-                uid: data.uid,
+                photo: data.photoURL,
+                uid: data.userId,
             });
 
             setHasLogin(true);
@@ -313,19 +316,10 @@ export default function LoginBox() {
             }
 
             setHasAutoLogin(hasAutoLogin);
-
-            try {
-                setPersistence(
-                    auth,
-                    hasAutoLogin ? browserLocalPersistence : browserSessionPersistence
-                )
-            } catch (err) {
-                console.error("Firebase persistence 설정 실패:", err);
-            }
         }
 
         sync();
-    }, [authSync]);
+    }, []);
 
     // Function
     const GoogleLoginBtn = motion(GoogleButton);

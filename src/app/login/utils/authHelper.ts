@@ -35,6 +35,6 @@ export const fetchGuestLogin = async (idToken: string, newUser: boolean) => {
     }
     
     const data = await response.json()
-    const userData = data.user;
+    const userData = data.userData;
     return userData;
 };
