@@ -111,8 +111,8 @@ export default function UsageLimit() {
                 setUser({
                     name: null,
                     email: null,
-                    photo: null,
-                    uid: '', // uid는 빈 문자열로 초기화
+                    photo: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
+                    uid: null, // uid는 빈 문자열로 초기화
                 }); // 로그아웃 상태로 초기화
                 setCurrentBookmark([])
                 setUserCurrentBookmark([])
