@@ -43,20 +43,20 @@ export function useAddUpdatePost() {
                                 const userData = userDoc.data() as { displayName: string; photoURL: string | null };
                                 userCache.set(postData.userId, {
                                     nickname: userData.displayName,
-                                    photo: userData.photoURL || null,
+                                    photo: userData.photoURL || 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
                                 });
                             } else {
                                 userCache.set(postData.userId, {
                                     nickname: "Unknown",
-                                    photo: null,
+                                    photo: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
                                 });
                             }
                         }
 
                         // 매핑된 유저 정보 추가
-                        const userData = userCache.get(postData.userId) || { nickname: "Unknown", photo: null };
+                        const userData = userCache.get(postData.userId) || { nickname: "Unknown", photo: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg' };
                         postData.displayName = userData.nickname;
-                        postData.photoURL = userData.photo;
+                        postData.photoURL = userData.photo as string;
 
                         return postData;
                     })
