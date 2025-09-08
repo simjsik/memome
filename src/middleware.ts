@@ -229,13 +229,9 @@ const connectSrc = [
     "https://securetoken.googleapis.com"
 ];
 
-async function verifyJwt(token: string, secret: string) {
-    try {
-        const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
-        return payload as JWTPayload;
-    } catch {
-        return null;
-    }
+async function verifyJwt(token: string, secret: string): Promise<JWTPayload> {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+    return payload as JWTPayload;
 }
 
 // 1) 인증·리다이렉트 로직 (기존 코드)
@@ -243,10 +239,7 @@ export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
     const method = (req.method || "GET").toUpperCase();
 
-    if (
-        // prefix 일치 (접두사)
-        PASS_PATH.some(prefix => pathname.startsWith(prefix))
-    ) {
+    if (PASS_PATH.some(prefix => pathname.startsWith(prefix))) {
         return NextResponse.next();
     }
 
@@ -271,24 +264,72 @@ export async function middleware(req: NextRequest) {
         }
     }
 
-    const userPayload = await verifyJwt(userToken, ACCESS_SECRET);
+    let userPayload: JWTPayload | null = null;
 
-    if (!userPayload?.uid || !userPayload?.jti) {
-        const clearHeaders = {
-            "Set-Cookie": [
-                `userToken=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`,
-                `csrfToken=; Path=/; Max-Age=0; SameSite=Lax`
-            ].join(", ")
-        };
+    try {
+        userPayload = await verifyJwt(userToken, ACCESS_SECRET);
 
-        if (pathname.startsWith("/api/")) {
-            return new NextResponse(JSON.stringify({ message: "만료 또는 인증되지 않은 토큰입니다." }), {
+        if (!userPayload) {
+            // 예외 처리: 이 지점에 도달하면 원래 의도와 다름
+            return new NextResponse(JSON.stringify({ message: '유효하지 않은 토큰' }), {
                 status: 401,
-                headers: { "content-type": "application/json", ...clearHeaders }
+                headers: { 'content-type': 'application/json' }
+            });
+        }
+
+        if (!userPayload?.uid || !userPayload?.jti) {
+            const clearCookies: string[] = [
+                'userToken=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax',
+                'csrfToken=; Path=/; Max-Age=0; SameSite=Lax'
+            ];
+
+            const headers = new Headers();
+            headers.set("content-type", "application/json");
+            headers.append("set-cookie", clearCookies[0]);
+            headers.append("set-cookie", clearCookies[1]);
+
+            if (pathname.startsWith("/api/")) {
+                return new NextResponse(JSON.stringify({ message: "유효하지 않은 토큰 : User" }), {
+                    status: 401,
+                    headers
+                });
+            } else {
+                const url = req.nextUrl.clone(); url.pathname = "/login";
+                return NextResponse.redirect(url, { headers });
+            }
+        }
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            const errName = error?.name ?? error?.message ?? '';
+            const isExpired = /expire/i.test(String(errName)) || /expired/i.test(String(errName));
+
+            if (isExpired) {
+                // 페이지 거부
+                if (!pathname.startsWith('/api/')) {
+                    const url = req.nextUrl.clone();
+                    url.pathname = '/api/refresh';
+                    url.searchParams.set('next', req.nextUrl.pathname + req.nextUrl.search);
+                    return NextResponse.redirect(url);
+                }
+
+                // api 거부
+                return new NextResponse(JSON.stringify({ message: 'token_expired', needRefresh: true }), {
+                    status: 401,
+                    headers: { 'content-type': 'application/json' },
+                });
+            }
+        }
+
+        // 외 인증 불가
+        if (pathname.startsWith('/api/')) {
+            return new NextResponse(JSON.stringify({ message: '유효하지 않은 토큰 : User' }), {
+                status: 401,
+                headers: { 'content-type': 'application/json' },
             });
         } else {
-            const url = req.nextUrl.clone(); url.pathname = "/login";
-            return NextResponse.redirect(url, { headers: clearHeaders });
+            const url = req.nextUrl.clone();
+            url.pathname = '/login';
+            return NextResponse.redirect(url);
         }
     }
 
@@ -296,29 +337,35 @@ export async function middleware(req: NextRequest) {
 
     if (csrfValidate) {
         const headerCsrf = req.headers.get("x-csrf-token") ?? undefined;
-        const csrfToken = headerCsrf ?? csrfCookie;
+        const csrfToken = headerCsrf;
 
         if (!csrfToken) {
             return new NextResponse(JSON.stringify({ message: "CSRF 토큰 확인 불가" }), { status: 403, headers: { "content-type": "application/json" } });
         }
 
-        const csrfPayload = await verifyJwt(csrfToken, CSRF_SECRET);
-        if (!csrfPayload?.uid || !csrfPayload?.jti) {
-            return new NextResponse(JSON.stringify({ message: "유효하지 않은 토큰" }), { status: 403, headers: { "content-type": "application/json" } });
+        if (!csrfCookie || csrfToken !== csrfCookie) {
+            return new NextResponse(JSON.stringify({ message: "유효하지 않은 토큰 : CSRF" }), { status: 403, headers: { "content-type": "application/json" } });
         }
 
-        if (String(csrfPayload.uid) !== String(userPayload.uid) || String(csrfPayload.jti) !== String(userPayload.jti)) {
-            return new NextResponse(JSON.stringify({ message: "토큰 키 불일치" }), { status: 403, headers: { "content-type": "application/json" } });
+        try {
+            const csrfPayload = await verifyJwt(csrfToken, CSRF_SECRET);
+            if (!csrfPayload?.uid || !csrfPayload?.jti) {
+                return new NextResponse(JSON.stringify({ message: "유효하지 않은 토큰 : CSRF" }), { status: 403, headers: { "content-type": "application/json" } });
+            }
+
+            if (String(csrfPayload.uid) !== String(userPayload.uid) || String(csrfPayload.jti) !== String(userPayload.jti)) {
+                return new NextResponse(JSON.stringify({ message: "토큰 키 불일치 : CSRF" }), { status: 403, headers: { "content-type": "application/json" } });
+            }
+        } catch (error: unknown) {
+            return new NextResponse(JSON.stringify({ message: "CSRF 검증 실패", detail: String(error) }), {
+                status: 403,
+                headers: { "content-type": "application/json" },
+            });
         }
-
-        const requestHeaders = new Headers(req.headers);
-        requestHeaders.set("x-user-uid", String(userPayload.uid));
-        requestHeaders.set("x-user-jti", String(userPayload.jti));
-
-        return NextResponse.next({ request: { headers: requestHeaders } });
     }
-    const requestHeaders = new Headers(req.headers);
 
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("x-user-uid", String(userPayload!.uid));
     requestHeaders.set('x-csp-nonce', nonce); // 요청헤더 
 
     const res = NextResponse.next({
@@ -343,8 +390,6 @@ export async function middleware(req: NextRequest) {
     ];
 
     const csp = directives.join('; ');
-
-
 
     // 추가 보안 헤더도 응답에 설정
     res.headers.set('x-csp-nonce', nonce);

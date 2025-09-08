@@ -12,7 +12,7 @@ import express, {Request, Response} from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import {onRequest} from "firebase-functions/v2/https";
-import setCsrfTokenRouter from "./routes/setCsrfToken";
+import refreshTokenRouter from "./routes/refreshToken";
 import loginRouter from "./routes/loginApi";
 import logoutRouter from "./routes/logoutApi";
 import saveUserRouter from "./routes/saveUserApi";
@@ -296,7 +296,7 @@ app.get('/', (req : Request, res : Response) => {
     }
 });
 
-app.use('/', setCsrfTokenRouter);
+app.use('/', refreshTokenRouter);
 app.use('/', loginRouter);
 app.use('/', logoutRouter);
 app.use('/', saveUserRouter);

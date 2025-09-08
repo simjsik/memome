@@ -46,6 +46,7 @@ const useUpdateChecker = () => {
                     await updateDoc(docRef, { hasUpdate: false });
                     setHasUpdate(false);
                 } else {
+                    setHasUpdate(false);
                     console.log('유저 업데이트 내역 없음');
                 }
             }

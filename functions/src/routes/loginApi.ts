@@ -3,13 +3,15 @@ dotenv.config();
 import express, {Request, Response} from "express";
 import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
 import jwt from 'jsonwebtoken';
-import {randomBytes} from "crypto";
+import {createHash, randomBytes} from "crypto";
 
 const router = express.Router();
 
 const SECRET = process.env.JWT_SECRET;
 const CSRF_SECRET = process.env.CSRF_SECRET;
 const ACCESS_EXPIRES_MS = 60 * 60 * 1000;
+const REFRESH_EXPIRES_DAYS = 30;
+const REFRESH_MAX_AGE_MS = REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000;
 
 export interface newUser {
     displayName: string | null;
@@ -75,22 +77,81 @@ router.post('/login', async (req: Request, res: Response) => {
             {expiresIn: '1h'},
         );
 
+        const refreshId = randomBytes(32).toString('hex');
+        const refreshHash =
+        createHash('sha256').update(refreshId).digest('hex');
 
-        const cookieOptions = {
+        const sessionId = randomBytes(32).toString('hex');
+        const sessionHash =
+        createHash('sha256').update(sessionId).digest('hex');
+
+        const now = Date.now();
+        const expiresAt = now + REFRESH_MAX_AGE_MS;
+
+        const refreshDocRef =
+        adminDb.doc(`refreshTokens/${uid}/session/${sessionHash}`);
+        const sessionDocRef =
+        adminDb.doc(`sessions/${sessionHash}`);
+
+        await refreshDocRef.set({
+            uid,
+            createdAt: now,
+            lastAt: now,
+            currentHash: refreshHash,
+            prevHash: null,
+            expiresAt,
+            revoked: false,
+            userAgent: req.headers['user-agent'] ?? null,
+            ip: (req.headers['x-forwarded-for'] ??
+                req.socket.remoteAddress) as string | undefined,
+        }, {merge: true});
+
+        await sessionDocRef.set({
+            uid,
+            sessionHash,
+            expiresAt,
+            createdAt: now,
+        }, {merge: true});
+
+        const cookieUser = {
+            httpOnly: true,
             domain: isProduction ? "memome-delta.vercel.app" : undefined,
             secure: isProduction,
             sameSite: "lax" as const,
             path: "/",
-            maxAge: 3600 * 1000,
+            maxAge: ACCESS_EXPIRES_MS,
+        };
+
+        const cookieCsrf = {
+            httpOnly: false,
+            domain: isProduction ? "memome-delta.vercel.app" : undefined,
+            secure: isProduction,
+            sameSite: "lax" as const,
+            path: "/",
+            maxAge: ACCESS_EXPIRES_MS,
+        };
+
+        const cookieRefresh = {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'lax' as const,
+            path: '/',
+            maxAge: REFRESH_MAX_AGE_MS,
+        };
+
+        const cookieSession = {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'lax' as const,
+            path: '/',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         };
 
         return res
-        .cookie("csrfToken", csrfToken, {
-            ...cookieOptions, httpOnly: false, maxAge: ACCESS_EXPIRES_MS,
-        })
-        .cookie("userToken", userToken, {
-            ...cookieOptions, httpOnly: true, maxAge: ACCESS_EXPIRES_MS,
-        })
+        .cookie("userToken", userToken, cookieUser)
+        .cookie("csrfToken", csrfToken, cookieCsrf)
+        .cookie("refreshToken", refreshId, cookieRefresh)
+        .cookie("sessionID", sessionId, cookieSession)
         .status(200)
         .json({
             message: "로그인 성공.",

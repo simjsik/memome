@@ -7,7 +7,7 @@ const app = express();
 app.use(cookieParser());
 
 router.post('/limit', async (req: Request, res: Response) => {
-    const {userId} = req.body;
+    const userId = req.headers['x-user-uid'];
 
     if (!userId) {
         return res.status(403).json({error: '유저가 없습니다.'});

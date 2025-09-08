@@ -18,18 +18,6 @@ export const useAuthSync = () => {
         try {
             const user = auth.currentUser
             if (user) {
-                const idToken = await user.getIdToken();
-                const loginResponse = await fetch(`/api/login`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
-                    credentials: "include",
-                    body: JSON.stringify({ idToken }),
-                });
-
-                if (!loginResponse.ok) {
-                    const errorData = await loginResponse.json();
-                    throw new Error(`로그인 시도 실패 ${loginResponse.status}: ${errorData.message}`);
-                }
                 setHasLogin(true);
                 router.replace('/home/main');
             }
