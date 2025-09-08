@@ -6,6 +6,9 @@ import { Reply } from "../hook/CommentMutate";
 // 1) 모듈 레벨에서 사용자 정보 캐시 선언 (한 번만 초기화됨)
 const userCache = new Map<string, { displayName: string; photoURL: string }>();
 
+const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+
 async function getCachedUserInfo(userId: string) {
     if (userCache.has(userId)) {
         // 이미 한 번 읽은 값이 있으면 바로 리턴
@@ -33,16 +36,18 @@ async function getCachedUserInfo(userId: string) {
 
 // 일반 포스트 무한 스크롤 로직
 export const fetchPosts = async (
-    userId: string,
     pageParam: Timestamp | undefined,
     pageSize: number,
 ) => {
     try {
         const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            headers: {
+                'Content-Type': 'application/json',
+                'Project-Host': window.location.origin,
+                'x-csrf-token': csrfValue
+            },
             credentials: "include",
-            body: JSON.stringify({ userId }),
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
@@ -103,22 +108,24 @@ export const fetchPosts = async (
                 : undefined,
         };
     } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("포스트 요청 실패:", error);
         throw error;
     }
 }
 
 // 공지사항 포스트 무한 스크롤 로직
 export const fetchNoticePosts = async (
-    userId: string,
     pageParam: Timestamp | undefined,
 ) => {
     try {
         const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            headers: {
+                'Content-Type': 'application/json',
+                'Project-Host': window.location.origin,
+                'x-csrf-token': csrfValue
+            },
             credentials: "include",
-            body: JSON.stringify({ userId }),
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
@@ -177,27 +184,26 @@ export const fetchNoticePosts = async (
                 : undefined,
         };
     } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("공지사항 데이터 요청 실패:", error);
         throw error;
     }
 }
 
 // 북마크 무한 스크롤 로직
 export const fetchBookmarks = async (
-    userId: string,
     bookmarkIds: string[], // currentBookmark 배열
     startIdx: number, // 시작 인덱스
 ) => {
-    console.log('북마크 반환 분기 0', bookmarkIds, userId, startIdx)
     if (bookmarkIds.length <= 0) return;
     try {
-        console.log('북마크 반환 분기 1')
-
         const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            headers: {
+                'Content-Type': 'application/json',
+                'Project-Host': window.location.origin,
+                'x-csrf-token': csrfValue
+            },
             credentials: "include",
-            body: JSON.stringify({ userId }),
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
@@ -210,7 +216,6 @@ export const fetchBookmarks = async (
                 throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
             }
         }
-        console.log('북마크 반환 분기 2')
         const postIds = bookmarkIds.slice(startIdx, startIdx + 4);
 
         const postWithComment: PostData[] = (
@@ -235,26 +240,24 @@ export const fetchBookmarks = async (
                 })
             )
         ).filter((post): post is PostData => post !== null);
-        console.log('북마크 반환 분기 3')
         // null 값 제거 및 타입 확인
         const validPosts = postWithComment.filter(
             (post): post is PostData => post !== null
         );
 
         const nextIndex = startIdx + 4 < bookmarkIds.length ? startIdx + 4 : undefined;
-        console.log(validPosts, '북마크 반환')
         return {
             data: validPosts,
             nextIndexData: nextIndex ? nextIndex : undefined,
         };
     } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("북마크 요청 실패", error);
         throw error;
     }
 }
 
 // 포스트의 댓글
-export const fetchComments = async (userId: string, postId: string, pageParam: Timestamp | undefined) => {
+export const fetchComments = async (postId: string, pageParam: Timestamp | undefined) => {
     try {
         if (!postId || postId === "undefined") {
             console.error('존재하지 않는 포스트입니다.')
@@ -263,9 +266,12 @@ export const fetchComments = async (userId: string, postId: string, pageParam: T
 
         const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            headers: {
+                'Content-Type': 'application/json',
+                'Project-Host': window.location.origin,
+                'x-csrf-token': csrfValue
+            },
             credentials: "include",
-            body: JSON.stringify({ userId }),
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
@@ -334,13 +340,13 @@ export const fetchComments = async (userId: string, postId: string, pageParam: T
         if (error instanceof Error) {
             console.error('댓글 데이터 반환 실패:', error.message);
         } else {
-            console.error('Unexpected error:', error);
+            console.error('알 수 없는 에러:', error);
         }
         throw error;
     }
 };
 
-export const fetchReplies = async (userId: string, postId: string, commentId: string, pageParam: Timestamp | undefined) => {
+export const fetchReplies = async (postId: string, commentId: string, pageParam: Timestamp | undefined) => {
     try {
         if (!postId || postId === "undefined") {
             console.error('존재하지 않는 포스트입니다.')
@@ -349,9 +355,12 @@ export const fetchReplies = async (userId: string, postId: string, commentId: st
 
         const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            headers: {
+                'Content-Type': 'application/json',
+                'Project-Host': window.location.origin,
+                'x-csrf-token': csrfValue
+            },
             credentials: "include",
-            body: JSON.stringify({ userId }),
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
@@ -428,16 +437,18 @@ export const fetchReplies = async (userId: string, postId: string, commentId: st
 };
 
 export const fetchPostList = async (
-    userId: string,
     profileUid: string,
     pageParam: Timestamp | undefined,
 ) => {
     try {
         const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            headers: {
+                'Content-Type': 'application/json',
+                'Project-Host': window.location.origin,
+                'x-csrf-token': csrfValue
+            },
             credentials: "include",
-            body: JSON.stringify({ userId }),
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
@@ -513,22 +524,24 @@ export const fetchPostList = async (
                 : undefined,
         };
     } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("포스트 요청 실패:", error);
         throw error;
     };
 };
 
 export const fetchImageList = async (
-    userId: string,
     profileUid: string,
     pageParam: Timestamp | undefined,
 ) => {
     try {
         const LimitResponse = await fetch(`/api/limit`, {
             method: 'POST',
-            headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
+            headers: {
+                'Content-Type': 'application/json',
+                'Project-Host': window.location.origin,
+                'x-csrf-token': csrfValue
+            },
             credentials: "include",
-            body: JSON.stringify({ userId }),
         });
         const limitData = await LimitResponse.json();
         if (!LimitResponse.ok) {
@@ -590,7 +603,7 @@ export const fetchImageList = async (
                 : undefined,
         };
     } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("포스트 요청 실패:", error);
         throw error;
     };
 };

@@ -60,7 +60,6 @@ export default function MainHome() {
   const [routePostId, setRoutePostId] = useState<string | null>(null);
   // 웹소켓 연결---------------------------------------------------------------------------------
   const socketRef = useRef<Socket | null>(null);
-  const uid = currentUser.uid
 
   useEffect(() => {
     // 설정 해주지 않으면 popstate 이벤트가 실행 안됨.
@@ -157,7 +156,7 @@ export default function MainHome() {
     queryKey: ['posts'],
     queryFn: async ({ pageParam }) => {
       try {
-        return await fetchPosts(uid as string, pageParam, 8);
+        return await fetchPosts(pageParam, 8);
       } catch (error: unknown) {
         if (error instanceof Error) {
           console.error("일반 오류 발생:", error.message);

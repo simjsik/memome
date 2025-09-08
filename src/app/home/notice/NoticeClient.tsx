@@ -2,7 +2,7 @@
 "use client";
 
 import { fetchNoticePosts } from "@/app/utils/fetchPostData";
-import { DidYouLogin, loadingState, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
+import { DidYouLogin, loadingState, loginToggleState, modalState, PostData, UsageLimitState, UsageLimitToggle } from "@/app/state/PostState";
 import { NoMorePost, PostWrap, } from "@/app/styled/PostComponents";
 import { css, useTheme } from "@emotion/react";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
@@ -35,13 +35,11 @@ export default function ClientNotice() {
     // 포스트 스테이트
 
     // 현재 로그인 한 유저
-    const currentUser = useRecoilValue(userState)
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const router = useRouter();
     const pathName = usePathname();
     const observerLoadRef = useRef(null);
-    const uid = currentUser.uid
 
     // 무한 스크롤 로직
     const {
@@ -62,7 +60,7 @@ export default function ClientNotice() {
         queryKey: ['notices'],
         queryFn: async ({ pageParam }) => {
             try {
-                return fetchNoticePosts(uid as string, pageParam);
+                return fetchNoticePosts(pageParam);
             } catch (error) {
                 if (error instanceof Error) {
                     console.error("일반 오류 발생:", error.message);

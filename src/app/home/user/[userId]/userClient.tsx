@@ -72,8 +72,7 @@ export default function UserClient({ user }: ClientUserProps) {
         queryKey: ['postList', uid as string],
         queryFn: async ({ pageParam }) => {
             try {
-                const userId = currentUser.uid
-                return fetchPostList(userId as string, uid as string, pageParam);
+                return fetchPostList(uid as string, pageParam);
             } catch (error) {
                 if (error instanceof Error) {
                     console.error("일반 오류 발생:", error.message);
@@ -108,8 +107,7 @@ export default function UserClient({ user }: ClientUserProps) {
         queryKey: ['ImagePostList', uid as string],
         queryFn: async ({ pageParam }) => {
             try {
-                const userId = currentUser.uid
-                return fetchImageList(userId as string, uid as string, pageParam);
+                return fetchImageList(uid as string, pageParam);
             } catch (error) {
                 if (error instanceof Error) {
                     console.error("일반 오류 발생:", error.message);

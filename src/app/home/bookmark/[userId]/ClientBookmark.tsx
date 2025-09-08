@@ -44,7 +44,6 @@ export default function Bookmark() {
         queryFn: async ({ pageParam = 0 }) => {
             try {
                 return fetchBookmarks(
-                    currentUser.uid as string,
                     currentBookmark as string[], // 전역 상태를 바로 사용
                     pageParam, // 시작 인덱스
                 );
