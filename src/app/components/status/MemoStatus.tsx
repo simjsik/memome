@@ -251,7 +251,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
         queryKey: ['comments', post],
         queryFn: async ({ pageParam }) => {
             try {
-                return await fetchComments(user.uid as string, post, pageParam);
+                return await fetchComments(post, pageParam);
             } catch (error: unknown) {
                 if (error instanceof Error) {
                     console.error("일반 오류 발생:", error.message);
