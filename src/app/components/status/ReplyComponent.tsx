@@ -49,7 +49,6 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                 setDataLoading(true);
 
                 return fetchReplies(
-                    user.uid as string,
                     postId,
                     commentId,
                     pageParam, // 시작 인덱스
