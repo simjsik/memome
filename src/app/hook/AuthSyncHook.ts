@@ -4,9 +4,10 @@ import { useSetRecoilState } from "recoil";
 import { DidYouLogin, loadingState, userState } from "../state/PostState";
 import { useRouter } from "next/navigation";
 import { getAuth } from "firebase/auth";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 export const useAuthSync = () => {
+    const isRefreshingRef = useRef(false);
     const setUser = useSetRecoilState(userState);
     const setHasLogin = useSetRecoilState(DidYouLogin);
     const setLoading = useSetRecoilState<boolean>(loadingState);
@@ -14,13 +15,39 @@ export const useAuthSync = () => {
     const router = useRouter();
 
     const authSync = useCallback(async () => {
+        if (isRefreshingRef.current) return;
+        isRefreshingRef.current = true;
         setLoading(true);
+
         try {
+            const refresh = document.cookie.split('; ').find(c => c?.startsWith('refreshCsrfToken='))?.split('=')[1];
+            const refreshfValue = refresh ? decodeURIComponent(refresh) : '';
+
             const user = auth.currentUser
             if (user) {
+                const response = await fetch(`/api/refresh`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin, 'x-refresh-csrf': refreshfValue },
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json()
+                    console.error('동기화 실패 :', errorData.message)
+                    throw new Error(errorData.message)
+                };
+
+                setUser({
+                    name: user.displayName,
+                    email: user.email,
+                    photo: user.photoURL || 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
+                    uid: user.uid,
+                });
+
                 setHasLogin(true);
                 router.replace('/home/main');
             }
+            return;
         } catch (error: unknown) {
             if (error instanceof Error) {
                 setUser({
@@ -68,6 +95,7 @@ export const useAuthSync = () => {
                 throw new Error("알 수 없는 에러가 발생했습니다.");
             }
         } finally {
+            isRefreshingRef.current = false;
             setLoading(false);
         }
     }, []);
