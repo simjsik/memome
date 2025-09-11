@@ -2,7 +2,6 @@ import {Request, Response, Router} from "express";
 import {createHash, randomBytes, timingSafeEqual} from "crypto";
 import {adminDb} from "../DB/firebaseAdminConfig";
 import jwt from 'jsonwebtoken';
-import {Timestamp} from "firebase-admin/firestore";
 
 const router = Router();
 
@@ -29,19 +28,16 @@ export async function revokeSessionsTx(
     tx.update(doc.ref,
         {
             revoked: true,
-            revokedAt: Timestamp,
+            revokedAt: Date.now(),
          });
 
-    const tokenRef = adminDb.doc(`refreshTokens/${uid}/${sessionHash}`);
+    const tokenRef = adminDb.doc(`refreshTokens/${uid}/session/${sessionHash}`);
     tx.set(tokenRef,
         {
             revoked: true,
-            revokedAt: Timestamp,
+            revokedAt: Date.now(),
         },
         {merge: true});
-
-    const idxRef = adminDb.doc(`sessionIndex/${sessionHash}`);
-    tx.delete(idxRef);
   }
 }
 
@@ -50,8 +46,8 @@ router.post('/refresh', async (req : Request, res: Response) => {
     const isProduction = clientOrigin?.includes("memome-delta.vercel.app");
 
     try {
-        const refreshToken = req.cookies.get('refreshToken')?.value;
-        const sessionId = req.cookies.get('sessionID')?.value;
+        const refreshToken = req.cookies.refreshToken;
+        const sessionId = req.cookies.session;
 
         if (!refreshToken || !sessionId) {
             return res.status(401).json({error: '토큰 또는 세션 확인 불가.'});
@@ -65,21 +61,20 @@ router.post('/refresh', async (req : Request, res: Response) => {
         const sessionSnap = await sessionDocRef.get();
 
         if (!sessionSnap.exists) {
-            // 세션이 DB에 없음 (무효화되었거나 잘못된 sessionId)
-            throw new Error("세션 확인 불가.");
+            return res.status(401).json({error: '세션 확인 불가'});
         }
 
         const session = sessionSnap.data();
         if (!session) {
-            return res.status(401).json({error: '세션 확인 불가.'});
+            return res.status(401).json({error: '세션 확인 불가'});
         }
 
         if (
             session.expiresAt && Date.now() >
              new Date(session.expiresAt).getTime()
-        ) return res.status(401).json({error: '세션 만료.'});
+        ) return res.status(401).json({error: '세션 만료'});
 
-        if (session.revoked) return res.status(401).json({error: "세션 무효 됨."});
+        if (session.revoked) return res.status(401).json({error: "세션 무효 됨"});
 
         const uid = session.uid;
 
@@ -97,7 +92,7 @@ router.post('/refresh', async (req : Request, res: Response) => {
 
         if (!SECRET || !CSRF_SECRET) {
             console.error("JWT 비밀 키 확인 불가");
-            return res.status(401).json({message: "JWT 비밀 키 확인 불가."});
+            return res.status(401).json({message: "JWT 비밀 키 확인 불가"});
         }
 
         const jti = randomBytes(16).toString('hex');
@@ -111,12 +106,12 @@ router.post('/refresh', async (req : Request, res: Response) => {
         await adminDb.runTransaction(async (tx) => {
             const tokenSnap = await tx.get(tokenDocRef);
             if (!tokenSnap.exists) {
-                return res.status(401).json({error: '갱신 토큰 확인 불가.'});
+                throw Error('갱신 토큰 확인 불가');
             }
 
             const tokenData = tokenSnap.data();
             if (!tokenData) {
-                return res.status(401).json({error: '갱신 토큰 확인 불가.'});
+                throw Error('갱신 토큰 확인 불가');
             }
             const currentHashHex: string = tokenData.currentHash;
             const prevHashHex: string | undefined = tokenData.prevHash;
@@ -133,7 +128,7 @@ router.post('/refresh', async (req : Request, res: Response) => {
                         tx.update(tokenDocRef, {
                             prevHash: currentHashHex ?? null,
                             currentHash: newRefreshHash,
-                            lastAt: Timestamp,
+                            lastAt: now,
                             expiresAt: newExpiresAt,
                             userAgent: req.headers["user-agent"] ?? null,
                             ip: (req.headers["x-forwarded-for"] ??
@@ -142,6 +137,8 @@ router.post('/refresh', async (req : Request, res: Response) => {
                         });
                         return; // 성공
                 }
+            } else {
+                throw new Error("갱신 토큰 확인 불가");
             }
 
             if (prevHashHex) {
@@ -149,18 +146,27 @@ router.post('/refresh', async (req : Request, res: Response) => {
                 if (presentedBuf.length === prevBuf.length &&
                      timingSafeEqual(presentedBuf, prevBuf)) {
                         await revokeSessionsTx(tx, uid);
-                        throw new Error("갱신 토큰 재사용 감지.");
+                        throw new Error("갱신 토큰 재사용 감지");
                 }
             }
 
-            throw new Error("유효하지 않은 갱신 토큰.");
+            throw new Error("유효하지 않은 갱신 토큰");
         });
 
         const refreshUserToken = jwt.sign(payload, SECRET, {expiresIn: '1h'});
         const refreshCsrfToken = jwt.sign(
-            {...payload, nonce: randomBytes(32).toString("hex")},
+            {...payload, nonce: randomBytes(32).toString("hex"), type: 'csrf'},
             CSRF_SECRET,
             {expiresIn: '1h'},
+        );
+        const refreshRfToken = jwt.sign(
+            {
+                ...payload,
+                nonce: randomBytes(32).toString("hex"),
+                type: 'refresh',
+            },
+            CSRF_SECRET,
+            {expiresIn: '30d'},
         );
 
         const cookieUser = {
@@ -181,6 +187,15 @@ router.post('/refresh', async (req : Request, res: Response) => {
             maxAge: ACCESS_EXPIRES_MS,
         };
 
+        const cookieRefreshCsrf = {
+            httpOnly: false,
+            domain: isProduction ? "memome-delta.vercel.app" : undefined,
+            secure: isProduction,
+            sameSite: "lax" as const,
+            path: "/",
+            maxAge: REFRESH_MAX_AGE_MS,
+        };
+
         const cookieRefresh = {
         httpOnly: true,
         secure: isProduction,
@@ -193,20 +208,21 @@ router.post('/refresh', async (req : Request, res: Response) => {
         .cookie("userToken", refreshUserToken, cookieUser)
         .cookie("csrfToken", refreshCsrfToken, cookieCsrf)
         .cookie("refreshToken", newRefreshId, cookieRefresh)
+        .cookie("refreshCsrfToken", refreshRfToken, cookieRefreshCsrf)
         .status(200)
         .json({message: '토큰 갱신 완료'});
     } catch (error : unknown) {
+        console.error("갱신 에러:", error);
         if (error instanceof Error) {
-            if (error.message === "갱신 토큰 확인 불가." ||
-                error.message === "유효하지 않은 갱신 토큰.") {
-                return res.status(401).json({message: "갱신 토큰 무효"});
+            if (error.message === "갱신 토큰 확인 불가" ||
+                error.message === "유효하지 않은 갱신 토큰") {
+                return res.status(401).json({message: "갱신 토큰이 유효하지 않음"});
             }
             if (error.message === "갱신 토큰 재사용 감지.") {
                 return res.status(401).json({message: "토큰 재사용 - 모든 세션 제거"});
             }
         }
-        console.error("갱신 에러:", error);
-        return res.status(500).json({message: "토큰 갱신 실패", error});
+        return res.status(500).json({message: "토큰 갱신 실패"});
     }
 });
 

@@ -28,7 +28,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
         const decodedToken = await adminAuth.verifyIdToken(idToken);
         if (!decodedToken) {
-            return res.status(401).json({message: "계정 토큰이 올바르지 않습니다."});
+            return res.status(401).json({message: "계정 토큰이 올바르지 않습니다"});
         }
 
         const uid = decodedToken.uid;
@@ -63,7 +63,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
         if (!SECRET || !CSRF_SECRET) {
             console.error("JWT 비밀 키 확인 불가");
-            return res.status(401).json({message: "JWT 비밀 키 확인 불가."});
+            return res.status(401).json({message: "JWT 비밀 키 확인 불가"});
         }
 
         const jti = randomBytes(16).toString('hex');
@@ -72,9 +72,18 @@ router.post('/login', async (req: Request, res: Response) => {
 
         const userToken = jwt.sign(payload, SECRET, {expiresIn: '1h'});
         const csrfToken = jwt.sign(
-            {...payload, nonce: randomBytes(32).toString("hex")},
+            {...payload, nonce: randomBytes(32).toString("hex"), type: 'csrf'},
             CSRF_SECRET,
             {expiresIn: '1h'},
+        );
+        const refreshCsrfToken = jwt.sign(
+            {
+                ...payload,
+                nonce: randomBytes(32).toString("hex"),
+                type: 'refresh',
+            },
+            CSRF_SECRET,
+            {expiresIn: '30d'},
         );
 
         const refreshId = randomBytes(32).toString('hex');
@@ -131,6 +140,15 @@ router.post('/login', async (req: Request, res: Response) => {
             maxAge: ACCESS_EXPIRES_MS,
         };
 
+        const cookieRefreshCsrf = {
+            httpOnly: false,
+            domain: isProduction ? "memome-delta.vercel.app" : undefined,
+            secure: isProduction,
+            sameSite: "lax" as const,
+            path: "/",
+            maxAge: REFRESH_MAX_AGE_MS,
+        };
+
         const cookieRefresh = {
             httpOnly: true,
             secure: isProduction,
@@ -144,24 +162,27 @@ router.post('/login', async (req: Request, res: Response) => {
             secure: isProduction,
             sameSite: 'lax' as const,
             path: '/',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            maxAge: REFRESH_MAX_AGE_MS,
         };
 
         return res
         .cookie("userToken", userToken, cookieUser)
         .cookie("csrfToken", csrfToken, cookieCsrf)
         .cookie("refreshToken", refreshId, cookieRefresh)
-        .cookie("sessionID", sessionId, cookieSession)
+        .cookie("refreshCsrfToken", refreshCsrfToken, cookieRefreshCsrf)
+        .cookie("session", sessionId, cookieSession)
         .status(200)
         .json({
             message: "로그인 성공.",
             userData,
         });
     } catch (error) {
-        console.error("Login error:", error);
+        console.error("로그인 실패:", error);
         if (error === "auth/user-not-found") {
+            console.error(error);
             return res.status(404).json({message: "유저 확인 불가"});
         } else if (error === "auth/wrong-password") {
+            console.error(error);
             return res.status(400).json({message: "잘못된 비밀번호"});
         }
         return res.status(500).json({message: "로그인 시도 실패"});
