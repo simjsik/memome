@@ -22,7 +22,7 @@ async function getCachedUserInfo(userId: string) {
         userDoc = await getDoc(doc(db, "guests", userId));
     }
 
-    const userData = userDoc.data() || { displayName: '', photoURL: '' };
+    const userData = userDoc.data() || { displayName: 'Unknown User', photoURL: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg' };
 
     const user = {
         displayName: userData.displayName,
@@ -87,10 +87,8 @@ export const fetchPosts = async (
 
         const postWithComment: PostData[] = await Promise.all(
             postSnapshot.docs.map(async (document) => {
-                // 포스트 가져오기
                 const postData = { id: document.id, ...document.data() } as PostData;
 
-                // 포스트 데이터에 유저 이름 매핑하기
                 const userData = await getCachedUserInfo(postData.userId);
                 postData.displayName = userData.displayName;
                 postData.photoURL = userData.photoURL;
@@ -164,10 +162,8 @@ export const fetchNoticePosts = async (
 
         const postWithComment: PostData[] = await Promise.all(
             postSnapshot.docs.map(async (document) => {
-                // 포스트 가져오기
                 const postData = { id: document.id, ...document.data() } as PostData;
 
-                // 포스트 데이터에 유저 이름 매핑하기
                 const userData = await getCachedUserInfo(postData.userId);
                 postData.displayName = userData.displayName;
                 postData.photoURL = userData.photoURL;
@@ -221,7 +217,6 @@ export const fetchBookmarks = async (
         const postWithComment: PostData[] = (
             await Promise.all(
                 postIds.map(async (postId: string) => {
-                    // 포스트 가져오기
                     const postRef = doc(db, "posts", postId);
                     const postSnap = await getDoc(postRef);
 
@@ -229,8 +224,7 @@ export const fetchBookmarks = async (
 
                     const postData = postSnap.data()
 
-                    postData.id = postSnap.id; // 문서 ID를 추가
-                    // 포스트 데이터에 유저 이름 매핑하기
+                    postData.id = postSnap.id;
                     const userData = await getCachedUserInfo(postData.userId);
 
                     postData.displayName = userData.displayName;
@@ -489,10 +483,8 @@ export const fetchPostList = async (
 
         const postWithComment: PostData[] = await Promise.all(
             postlistSnapshot.docs.map(async (document) => {
-                // 포스트 가져오기
                 const postData = { id: document.id, ...document.data() } as PostData;
 
-                // 댓글 개수 가져오기
                 const commentRef = collection(db, 'posts', document.id, 'comments');
                 const commentSnapshot = await getDocs(commentRef);
                 postData.commentCount = commentSnapshot.size;

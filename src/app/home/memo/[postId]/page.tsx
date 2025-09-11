@@ -124,7 +124,7 @@ export default async function MemoPage({ params }: MemoPageProps) {
     const userDocRef = adminDb.collection("users").doc(userId); // DocumentReference 생성
     const userDoc = await userDocRef.get(); // 문서 데이터 가져오기
 
-    const userData = userDoc.exists ? userDoc.data() : { displayName: "unknown", photoURL: null } // .data() 호출 필요
+    const userData = userDoc.exists ? userDoc.data() : { displayName: "Unknown User", photoURL: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg' }
 
     // Function
     return (
