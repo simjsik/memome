@@ -8,15 +8,27 @@ const app = express();
 app.use(cookieParser());
 
 router.post('/logout', async (req: Request, res: Response) => {
+    const clientOrigin = req.headers["Project-Host"] || req.headers.origin;
+    const isProduction = clientOrigin?.includes("memome-delta.vercel.app");
+
     try {
-        const sessionId = req.cookies.get('sessionID')?.value;
+        const sessionId = req.cookies.session;
+
+        const cookieOptions = {
+            domain: isProduction ? "memome-delta.vercel.app" : undefined,
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: "lax" as const,
+            path: "/",
+        };
 
         if (!sessionId) {
-            res.clearCookie("csrfToken");
-            res.clearCookie("userToken");
-            res.clearCookie('refreshToken');
-            res.clearCookie("sessionID");
-            return res.status(200).json({message: '로그아웃 처리 완료'});
+            res.clearCookie("csrfToken", cookieOptions);
+            res.clearCookie("userToken", cookieOptions);
+            res.clearCookie('refreshToken', cookieOptions);
+            res.clearCookie('refreshCsrfToken', cookieOptions);
+            res.clearCookie("session", cookieOptions);
+            return res.status(200).json({success: true, mseaage: '로그아웃 완료'});
         }
 
         const sessionHash =
@@ -34,7 +46,7 @@ router.post('/logout', async (req: Request, res: Response) => {
             const uid = session.uid as string;
             if (!uid) {
                 tx.delete(sessionDocRef);
-                const idxRef = adminDb.doc(`sessionIndex/${sessionHash}`);
+                const idxRef = adminDb.doc(`sessions/${sessionHash}`);
                 tx.delete(idxRef);
                 return;
             }
@@ -42,24 +54,25 @@ router.post('/logout', async (req: Request, res: Response) => {
             tx.delete(sessionDocRef);
 
             const tokenRef =
-            adminDb.doc(`refreshTokens/${uid}/sessions/${sessionHash}`);
+            adminDb.doc(`refreshTokens/${uid}/session/${sessionHash}`);
             tx.delete(tokenRef);
 
-            const idxRef = adminDb.doc(`sessionIndex/${sessionHash}`);
+            const idxRef = adminDb.doc(`sessions/${sessionHash}`);
             tx.delete(idxRef);
-            });
+        });
 
         // httpOnly 쿠키 삭제
         res.clearCookie("csrfToken");
         res.clearCookie("userToken");
         res.clearCookie('refreshToken');
-        res.clearCookie("sessionID");
-        return res.status(200).json({success: true});
+        res.clearCookie('refreshCsrfToken');
+        res.clearCookie("session");
+        return res.status(200).json({success: true, mseaage: '로그아웃 완료'});
     } catch (error) {
-        console.error("Error logging out:", error);
+        console.error("로그아웃 실패 : ", error);
         return res.status(500).json({
             success: false,
-            message: error || "Logout failed",
+            message: "로그아웃에 실패 했습니다.",
          });
     }
 });
