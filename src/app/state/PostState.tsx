@@ -1,13 +1,19 @@
 import { Timestamp } from "firebase/firestore";
 import { atom, atomFamily } from "recoil"
 
+export interface ImageUrls {
+    key?: string;
+    localSrc?: string;
+}
+
 export interface PostData {
     tag: string;
     title: string;
     id?: string;
     userId: string;
     content: string;
-    images?: string[];
+    thumbnail?: ImageUrls;
+    images: boolean;
     createAt: Timestamp;
     commentCount: number,
     notice: boolean,
@@ -25,7 +31,7 @@ export interface unsavedPostData {
     tag: string;
     title: string;
     content: string;
-    images?: string[] | false;
+    images?: ImageUrls[];
     date: Date;
 }
 
@@ -89,36 +95,40 @@ export const UsageLimitToggle = atom<boolean>({
     default: false
 })
 
-// 저장안된 포스트 작성 내용
-export const PostingState = atom<string | null>({
-    key: 'PostingState',
-    default: null
-})
 export const PostTitleState = atom<string | null>({
     key: 'PostTitleState',
     default: null
 })
-export const ImageUrlsState = atom<string[]>({
-    key: 'ImageUrlsState',
-    default: []
+
+export const PostContentState = atom<string | null>({
+    key: 'PostContentState',
+    default: null
 })
-export const SelectTagState = atom<string>({
-    key: 'SelectTagState',
+
+export const PostTagState = atom<string>({
+    key: 'PostTagState',
     default: '기타'
 })
 
-// firebase에 저장된 포스트 데이터
+// 저장안된 포스트 작성 내용
+export const ImageUrlsState = atom<ImageUrls[]>({
+    key: 'ImageUrlsState',
+    default: []
+})
+
+// 포스트 데이터
 export const PostState = atom<PostData[]>({
     key: 'PostState',
     default: []
 })
-// firebase에 저장된 공지사항 데이터
+
+// 공지사항 데이터
 export const noticeState = atom<PostData[]>({
     key: 'noticeState',
     default: []
 })
 
-// firebase에 저장된 북마크 데이터
+// 북마크 데이터
 export const bookMarkState = atom<string[] | null>({
     key: 'bookMarkState',
     default: null
@@ -130,13 +140,11 @@ export const userBookMarkState = atom<PostData[]>({
     default: []
 })
 
-// 로그인 유무 확인
 export const DidYouLogin = atom<boolean>({
     key: 'DidYouLogin',
     default: false
 })
 
-// 로그인 유무 확인
 export const hasGuestState = atom<boolean>({
     key: 'hasGuestState',
     default: false

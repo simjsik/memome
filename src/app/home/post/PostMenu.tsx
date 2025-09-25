@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { ChangeEvent, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { adminState, ImageUrlsState, loadingState, PostData, PostingState, PostTitleState, SelectTagState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
+import { adminState, ImageUrls, ImageUrlsState, loadingState, PostContentState, PostTagState, PostTitleState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
@@ -9,17 +9,15 @@ import { css, useTheme } from '@emotion/react';
 import QuillResizeImage from 'quill-resize-image';
 import ReactQuill, { Quill } from 'react-quill-new';
 import Block from 'quill/blots/block';
-import Delta from 'quill-delta';
 import styled from '@emotion/styled';
-import { addDoc, collection, Timestamp } from 'firebase/firestore';
 import { StyleAttributor } from 'parchment';
-import { db } from '@/app/DB/firebaseConfig';
 import { saveUnsavedPost } from '@/app/utils/saveUnsavedPost';
-import { uploadContentImgCdn, uploadImgCdn } from '@/app/utils/uploadCdn';
 import { btnVariants } from '@/app/styled/motionVariant';
 import { MoonLoader } from 'react-spinners';
 import { useAddNewPost } from './hook/useNewPostMutation';
 import { formatDate } from '@/app/utils/formatDate';
+import { useImageInputs } from './hook/useImageInputs';
+import { useImageGuard } from './hook/useImageGuard';
 
 const QuillStyle = styled.div<{ notice: boolean }>`
 position: relative;
@@ -722,9 +720,9 @@ export default function PostMenu() {
     const pathname = usePathname();
     const prevPathname = useRef<string>(pathname) as MutableRefObject<string>;
 
-    const quillRef = useRef<ReactQuill | null>(null); // Quill 인스턴스 접근을 위한 ref 설정
-    const tagRef = useRef<HTMLSelectElement>(null); // Quill 인스턴스 접근을 위한 ref 설정
-    const styleToolRef = useRef<HTMLDivElement>(null); // Quill 인스턴스 접근을 위한 ref 설정
+    const quillRef = useRef<ReactQuill | null>(null);
+    const tagRef = useRef<HTMLSelectElement>(null);
+    const styleToolRef = useRef<HTMLDivElement>(null);
     const isAdmin = useRecoilValue(adminState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
@@ -733,9 +731,8 @@ export default function PostMenu() {
 
     const [postingComplete, setPostingComplete] = useState<boolean>(false);
     const [postTitle, setPostTitle] = useRecoilState<string | null>(PostTitleState);
-    const [posting, setPosting] = useRecoilState<string | null>(PostingState);
-    const [imageUrls, setImageUrls] = useRecoilState<string[]>(ImageUrlsState);
-    const [selectTag, setSelectedTag] = useRecoilState<string>(SelectTagState);
+    const [posting, setPosting] = useRecoilState<string | null>(PostContentState);
+    const [selectTag, setSelectedTag] = useRecoilState<string>(PostTagState);
     const [titleError, setTitleError] = useState<string>('');
     const [postDate, setPostDate] = useState<string>('');
     const [confirmed, setConfirmed] = useState<boolean>(false);
@@ -967,22 +964,18 @@ export default function PostMenu() {
     }
 
     const { mutate: fetchUpdateNewPost } = useAddNewPost(checkedNotice);
+    const [imageUrls, setImageUrls] = useRecoilState<ImageUrls[]>(ImageUrlsState);
 
     // 포스팅 업로드
-    const uploadThisPost = async () => {
-        if (uploadLoading) {
-            return;
-        }
-        // 사용자 인증 확인
-        if (usageLimit) {
-            return setLimitToggle(true);
-        }
+    const uploadPost = async () => {
+        if (uploadLoading) return;
+        if (usageLimit) return setLimitToggle(true);
+
+        const MAX_IMG_COUNT = 4;
+        const title_limit_count = 20;
+        const content_limit_count = 2500;
 
         if (currentUser) {
-            const MAX_IMG_COUNT = 4;
-            const title_limit_count = 20;
-            const content_limit_count = 2500;
-
             if (!postTitle) return alert('제목을 입력해주세요.');
 
             if (!posting) return alert('본문을 작성해주세요.');
@@ -1000,96 +993,57 @@ export default function PostMenu() {
                 return;
             };
 
-            setUploadLoading(true);
-
             try {
-                let newPost: PostData = {
-                    tag: selectTag,
-                    title: postTitle,
+                setUploadLoading(true);
+
+                const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+                const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+
+                const post = ({
                     userId: currentUser.uid as string,
+                    displayName: currentUser.name,
+                    photoUrl: currentUser.photo,
+                    title: postTitle,
                     content: posting,
-                    createAt: Timestamp.now(),
-                    commentCount: 0,
+                    tag: selectTag,
                     notice: checkedNotice,
-                };
+                    imageUrls: imageUrls.length > 0 ? imageUrls : null,
+                })
 
-                if (imageUrls.length > 0) {
-                    // 업로드된 이미지 URL을 추적하기 위한 Map 생성
-                    const uploadedImageUrls = new Map<string, string>();
+                const PostResponse = await fetch(`/api/posting`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Project-Host': window.location.origin,
+                        'x-csrf-token': csrfValue
+                    },
+                    body: JSON.stringify(post),
+                    credentials: "include",
+                });
 
-                    const imageUploadPromises = imageUrls.map(async (imgSrc: string) => {
-                        const needUpload = uploadedImageUrls.has(imgSrc)! && (/^https?:\/\//i.test(imgSrc) && imgSrc.includes('cloudinary'));
-
-                        if (needUpload) {
-                            return { original: imgSrc, success: true, cdnUrl: uploadedImageUrls.get(imgSrc) };
-                        } else {
-                            try {
-                                const res = await uploadImgCdn(imgSrc);
-                                uploadedImageUrls.set(imgSrc, res.imgUrl);
-                                return { original: imgSrc, success: true, cdnUrl: res.imgUrl };
-                            } catch (error: unknown) {
-                                const msg = error instanceof Error ? error.message : String(error);
-                                return { original: imgSrc, success: false, error: msg };
-                            }
-                        }
-                    });
-
-                    const imageUploadResults = await Promise.allSettled(imageUploadPromises);
-
-                    const failedImageUploads = imageUploadResults
-                        .map((r) => (r.status === 'fulfilled' ? r.value : null))
-                        .filter(Boolean)
-                        .filter((v) => !v?.success);
-
-                    if (failedImageUploads.length > 0) {
-                        //업로드 실패 시 포스트 전체 중단
-                        console.error('이미지 업로드 실패 항목:', failedImageUploads);
-                        alert('업로드에 실패했습니다. 다시 시도해주세요. : 이미지 업로드 실패.');
-                        return;
-                    }
-
-                    const {
-                        content: optimizedContent,
-                        results: contentUploadResults
-                    } = await uploadContentImgCdn(posting, uploadedImageUrls);
-
-                    // contentUploadResults에서 실패 항목 확인
-                    const failedContentUploads = (contentUploadResults ?? []).filter((r) => !r.success);
-                    if (failedContentUploads.length > 0) {
-                        console.error('포스트 이미지 교체 실패:', failedContentUploads);
-                        alert('이미지 업로드에 일부 실패했습니다.');
-                        return;
-                    }
-
-                    // 3) Firestore에 저장 (images: optImageUrls)
-                    const optImageUrls = Array.from(imageUrls).map((original) => uploadedImageUrls.get(original) ?? undefined).filter(Boolean) as string[];
-
-                    newPost = {
-                        tag: selectTag,
-                        title: postTitle,
-                        userId: currentUser.uid as string,
-                        content: optimizedContent,
-                        images: optImageUrls,
-                        createAt: Timestamp.now(),
-                        commentCount: 0,
-                        notice: checkedNotice,
-                    };
+                if (!PostResponse.ok) {
+                    throw new Error(`포스트 업로드 실패 : ${PostResponse.status}`);
                 }
 
-                const postRef = await addDoc(collection(db, "posts"), newPost);
+                const postData = await PostResponse.json();
 
-                newPost = {
-                    ...newPost,
-                    id: postRef.id,
+                if (postData) {
+                    // 서버에서 업데이트 정보를 받으면 호출
+                    if (fetchUpdateNewPost && postData.post) {
+                        await fetchUpdateNewPost(postData.post);
+                    }
                 }
-
-                fetchUpdateNewPost(newPost);
 
                 setPostingComplete(true);
                 router.push('/home/main');
             } catch (error: unknown) {
-                const msg = error instanceof Error ? error.message : JSON.stringify(error);
-                alert('포스팅에 실패하였습니다: ' + msg);
+                if (error instanceof Error) {
+                    console.error("포스트 업로드 실패 : ", error.message);
+                    alert('포스트 업로드에 실패했습니다. 다시 시도해주세요');
+                } else {
+                    console.error("알 수 없는 에러 유형 : ", error);
+                    alert('포스트 업로드에 실패했습니다. 다시 시도해주세요');
+                }
             } finally {
                 setUploadLoading(false)
             }
@@ -1097,56 +1051,197 @@ export default function PostMenu() {
     }
 
     // 이미지 최대 크기
-    const MAX_IMG_SIZE = 2 * 1024 * 1024;
+    const MAX_IMG_SIZE = 5 * 1024 * 1024;
     // 이미지 최대 수
     const MAX_IMG_COUNT = 4;
 
     const alertedRef = useRef(false);
 
     // 공통 이미지 처리 함수
-    const processImageFile = useCallback((file: File) => {
-        const currentImages = quillRef.current?.getEditor().root.querySelectorAll('img');
-        if (currentImages && currentImages.length > MAX_IMG_COUNT) {
+    const processImageFile = useCallback(async (file: File) => {
+        const editor = quillRef.current?.getEditor();
+        if (!editor) return;
+
+        const editorRoot = editor.root;
+        const currentImages = Array.from(editorRoot.querySelectorAll('img'));
+
+        // 이미지 수 제한
+        if (currentImages.length >= MAX_IMG_COUNT) {
             alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 업로드 가능합니다.`);
             alertedRef.current = true;
             return;
         }
+        // 이미지 크기 제한
         if (file.size > MAX_IMG_SIZE) {
-            alert("이미지 크기는 최대 2MB까지 허용됩니다.");
+            alert("이미지 크기는 최대 5MB까지 허용됩니다.");
             return;
         }
 
         // 이미지 URL 생성하여 Quill 에디터에 삽입
-        const reader = new FileReader();
-        reader.onload = () => {
-            const imageUrl = reader.result as string;
-            const editor = quillRef.current?.getEditor();
-            const range = editor?.getSelection();
-            if (range) {
-                editor?.insertEmbed(range.index, 'image', imageUrl);
+        const readDataUrl = (file: File): Promise<string> =>
+            new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result));
+                reader.onerror = () => reject(new Error('이미지 읽기 실패'));
+                reader.readAsDataURL(file);
+            });
+
+        let imageUrl: string;
+
+        try {
+            imageUrl = await readDataUrl(file);
+        } catch (error) {
+            console.error('리더 에러', error);
+            alert('이미지 입력에 실패했습니다. 다시 시도해주세요.');
+            throw error; // 상위에서 처리하도록 예외를 던짐(선택)
+        }
+
+        // 커서 위치 없으면 맨끝에 추가
+        const range = editor.getSelection();
+        const insertIndex = (range && typeof range.index === 'number') ? range.index : editor.getLength();
+        editor.insertEmbed(insertIndex, 'image', imageUrl);
+
+        const currentSrcsAfterInsert = Array.from(editorRoot.querySelectorAll('img')).map(i => (i as HTMLImageElement).src);
+        setImageUrls((prev) => {
+            const prevMap = new Map<string, ImageUrls>();
+            for (const imgs of prev) {
+                if (imgs.localSrc) prevMap.set(imgs.localSrc, imgs);
             }
-            // imageUrls 상태에 URL 추가
-            if (!imageUrls.includes(imageUrl)) {
-                setImageUrls((prev) => [...prev, imageUrl]);
-            }
-        };
-        reader.readAsDataURL(file);
-    }, [imageUrls, MAX_IMG_COUNT, MAX_IMG_SIZE]);
+
+            const merged: ImageUrls[] = currentSrcsAfterInsert.map(src => {
+                // 기존 재사용
+                const existing = prevMap.get(src);
+                if (existing) return existing;
+                // 없으면 localSrc만 채운 객체 생성
+                return { localSrc: src };
+            });
+
+            return merged;
+        })
+
+        if (currentSrcsAfterInsert.length < MAX_IMG_COUNT) {
+            alertedRef.current = false;
+        }
+
+        return;
+    }, [setImageUrls, alertedRef]);
 
     // 이미지 삽입 시 이미지 배열 관리
-    const imageHandler = async () => { // Quill 이미지 입력 시 imagesUrls 상태에 추가.
+    const imageHandler = useCallback(async () => { // Quill 도구로 이미지 입력 시
+        const editor = quillRef.current?.getEditor();
+        if (!editor) return;
+
         const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
+
+        input.type = 'file';
+        input.accept = 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml';
+        input.multiple = true;
+
         input.click();
 
-        input.onchange = async () => { // 이미지 업로드 시 크기, 수 제한
-            const file = input.files?.[0];
-            if (file) processImageFile(file);
-            if (!file) return;
-        };
-    };
+        input.onchange = async () => {
+            try {
+                const files = Array.from(input.files ?? []);
+                input.value = '';
 
+                // 현재 이미지 검사
+                const editor = quillRef.current?.getEditor();
+                const editorRoot = editor?.root;
+                const currentCount = editorRoot ? editorRoot.querySelectorAll('img').length : imageUrls.length;
+                const available = Math.max(0, MAX_IMG_COUNT - currentCount);
+
+                if (available <= 0) {
+                    alert(`이미지는 최대 ${MAX_IMG_COUNT}개까지 등록할 수 있습니다.`);
+                    return;
+                }
+
+                // 처리 가능한 수만 입력 허용
+                const toProcess = files.slice(0, available);
+                if (files.length > available) {
+                    alert(`${files.length - available}개의 파일은 최대 이미지 수(${MAX_IMG_COUNT})를 초과하여 제외됩니다.`);
+                }
+
+                const validFiles: File[] = [];
+                const skippedReasons: string[] = [];
+                toProcess.forEach((file) => {
+                    // 타입 검사
+                    if (!file.type || !file.type.startsWith('image/')) {
+                        skippedReasons.push(`${file.name}: 지원되지 않는 파일 타입`);
+                        return;
+                    }
+
+                    // 크기 검사
+                    if (file.size > MAX_IMG_SIZE) {
+                        skippedReasons.push(`${file.name}: 파일 크기 초과 (${Math.round(file.size / 1024)} KB)`);
+                        return;
+                    }
+
+                    validFiles.push(file);
+                });
+
+                if (skippedReasons.length > 0) {
+                    alert(`허용되지 않는 이미지 파일이 있습니다. :\n- ${skippedReasons.join('\n- ')}`);
+                }
+
+                if (validFiles.length === 0) return;
+
+                const concurrency = 1; // 상황에 따라 1~3 권장
+                const results: Array<{ file: File; ok: boolean; error?: unknown }> = [];
+
+                let idx = 0;
+                const worker = async () => {
+                    while (true) {
+                        const i = idx++;
+                        if (i >= validFiles.length) break;
+                        const file = validFiles[i];
+                        try {
+                            // processImageFile는 이미 내부에서 DOM 동기화 및 상태 갱신을 수행함
+                            await processImageFile(file);
+                            results.push({ file, ok: true });
+                        } catch (err) {
+                            console.error('processImageFile error', err);
+                            results.push({ file, ok: false, error: err });
+                        }
+                    }
+                };
+
+                // 시작
+                const workers = Array.from({ length: Math.min(concurrency, validFiles.length) }).map(() => worker());
+                await Promise.all(workers);
+
+                // 요약 결과 처리
+                const failed = results.filter(r => !r.ok);
+                if (failed.length > 0) {
+                    alert(`${failed.length}개의 이미지 처리에 실패했습니다. 다시 시도해 주세요.`);
+                } else {
+                }
+            } finally {
+                input.onchange = null;
+            }
+        };
+    }, [processImageFile, quillRef, MAX_IMG_COUNT, MAX_IMG_SIZE]);
+
+    useImageInputs({
+        ref: quillRef,
+        quillLoaded,
+        storageLoad,
+        alertedRef,
+        processImageFile,
+        MAX_IMG_COUNT,
+        MAX_IMG_SIZE,
+    });
+
+    useImageGuard({
+        ref: quillRef,
+        quillLoaded,
+        storageLoad,
+        setImageUrls,
+        alertedRef,
+        MAX_IMG_COUNT,
+        MAX_IMG_SIZE,
+    });
+
+    // 도구 반영
     const remToPxMap: Record<string, string> = {
         '0.625rem': '10px',
         '0.75rem': '12px',
@@ -1156,81 +1251,10 @@ export default function PostMenu() {
         '1.25rem': '20px',
         '1.375rem': '22px',
     };
-
-    // 이미지 최대 수 제한 로직
     useEffect(() => {
         if (!quillLoaded) return;
         const editor = quillRef.current?.getEditor();
         if (!editor) return;
-        const editorRoot = editor.root;
-
-        // 2) 알림 중복 방지 플래그
-        editor.clipboard.matchers = editor.clipboard.matchers.filter(
-            ([nodeName]) => nodeName !== 'IMG'
-        );
-
-        // // 이미지 제한 처리
-        editor.clipboard.addMatcher('IMG', (node: Node, delta: Delta) => {
-            if (storageLoad) return delta;
-
-            const imgTags = Array.from(editor.root.querySelectorAll('img'));
-
-            // 이미지 개수 초과 제한
-            if (imgTags.length >= MAX_IMG_COUNT) {
-                alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 추가할 수 있습니다.`);
-                alertedRef.current = true;
-                return new Delta(); // 빈 Delta 반환 (추가 제한)
-            }
-
-            // 기본 동작 유지
-            return delta;
-        });
-
-        // 붙여넣기 처리
-        const handlePaste = (e: ClipboardEvent) => {
-            const items = e.clipboardData?.items;
-            if (!items) return;
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                if (item.type.startsWith('image/')) {
-                    e.preventDefault(); // 기본 이미지 붙여넣기 방지
-                    const file = item.getAsFile()!;
-                    processImageFile(file);
-                }
-            }
-        };
-
-        // 드래그&드롭 처리
-        const handleDrop = (e: DragEvent) => {
-            e.preventDefault();
-            const files = e.dataTransfer?.files;
-            if (!files || files.length === 0) return;
-
-            Array.from(files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    processImageFile(file);
-                }
-            });
-        };
-
-        // 텍스트 변경 이벤트: 이미지 개수 실시간 확인
-        const handleImageLimit = () => {
-            if (storageLoad) return;
-
-            const imgTags = Array.from(editor.root.querySelectorAll('img'));
-            const currentImageUrls = imgTags.map((img) => (img as HTMLImageElement).src);
-
-            // 이미지 개수 초과 시 초과 이미지를 삭제
-            if (currentImageUrls.length > MAX_IMG_COUNT) {
-                // **초과된 이미지만 삭제 (Quill의 이미지 삽입 후 동작)**
-                imgTags.slice(MAX_IMG_COUNT).forEach((img) => img.remove());
-
-                alert(`최대 ${MAX_IMG_COUNT}개의 이미지만 업로드 가능합니다.`);
-                return;
-            }
-            const imgs = Array.from(imgTags).map(img => img.src);
-            setImageUrls(prev => prev.filter(url => imgs.includes(url)));
-        };
 
         // 텍스트 커서 및 선택 범위 변경 시 도구에 반영
         const handleCursorChange = () => {
@@ -1251,18 +1275,11 @@ export default function PostMenu() {
         };
 
         // Quill 이벤트 등록
-        editor.on('text-change', handleImageLimit);
         editor.on('selection-change', handleCursorChange);
-        editorRoot.addEventListener('paste', handlePaste, true);
-        editorRoot.addEventListener('drop', handleDrop, true);
         return () => {
-            editor.clipboard.matchers = editor.clipboard.matchers.filter(matcher => matcher[0] !== 'IMG');
             editor.off('selection-change', handleCursorChange);
-            editor.off('text-change', handleImageLimit);
-            editorRoot.removeEventListener('paste', handlePaste, true);
-            editorRoot.removeEventListener('drop', handleDrop, true);
         };
-    }, [quillRef, storageLoad, quillLoaded, processImageFile]);
+    }, [quillRef, quillLoaded]);
 
     // 포스트 내용 로드
     const handleLoadPost = (loaded: boolean) => {
@@ -1809,7 +1826,7 @@ export default function PostMenu() {
                     </div>
                     <p>{postingText.length}/ 2500</p>
 
-                    {uploadLoading ? <button className='post_btn'><MoonLoader color="#0087ff" size={8} /></button> : <motion.button variants={btnVariants(theme)} whileHover="loginHover" className='post_btn' onClick={uploadThisPost}>발행</motion.button>}
+                    {uploadLoading ? <button className='post_btn'><MoonLoader color="#0087ff" size={8} /></button> : <motion.button variants={btnVariants(theme)} whileHover="loginHover" className='post_btn' onClick={uploadPost}>발행</motion.button>}
                 </div >
             </QuillStyle >
             {
