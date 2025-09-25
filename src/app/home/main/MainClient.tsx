@@ -367,15 +367,15 @@ export default function MainHome() {
                   </div>
                   <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml((post.content)) }}></div>
                   {/* 이미지 */}
-                  {post.images && (
+                  {post.thumbnail && (
                     <div className='post_pr_img_wrap'>
                       <div className='post_pr_img'>
                         <Image
-                          src={post.images[0]}
+                          src={post.thumbnail as string}
                           alt="포스트 이미지"
                           fill
-                          style={{ objectFit: 'cover' }} />
-                        {post.images.length > 1 &&
+                          css={css`object-fit: cover`} />
+                        {post.images &&
                           <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
                         }
                       </div>
@@ -430,7 +430,7 @@ export default function MainHome() {
                     <Image src={`https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966548/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_fahwir.svg`}
                       alt="전체 포스트 확인 완료"
                       fill
-                      style={{ objectFit: 'cover' }}
+                      css={css`object-fit: cover`}
                     ></Image>
                   </div>
                   <p>모두 확인했습니다.</p>
@@ -442,7 +442,7 @@ export default function MainHome() {
                     <Image src={`https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966543/%EB%A9%94%EB%AA%A8%EC%97%86%EC%96%B4_d0sm6q.svg`}
                       alt="포스트 없음"
                       fill
-                      style={{ objectFit: 'cover' }}
+                      css={css`object-fit: cover`}
                     ></Image>
                   </div>
                   <p>메모가 없습니다.</p>

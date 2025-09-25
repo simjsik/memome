@@ -49,15 +49,13 @@ export const fetchPosts = async (
             },
             credentials: "include",
         });
-        const limitData = await LimitResponse.json();
+
         if (!LimitResponse.ok) {
             if (LimitResponse.status === 400) {
                 throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
             }
             if (LimitResponse.status === 403) {
                 throw new Error('데이터를 요청할 수 없습니다.');
-            } else {
-                throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
             }
         }
 

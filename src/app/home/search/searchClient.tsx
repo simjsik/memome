@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
-
+import Image from 'next/image';
 import { useSearchParams } from "next/navigation";
 import { InstantSearch, SearchBox, useInfiniteHits, useSearchBox } from "react-instantsearch";
 import { SearchBoxWrap } from "./SearchStyle";
@@ -191,10 +191,15 @@ function PostHit({ hit }: { hit: PostData }) {
                         </div>
                         <div className='post_text' dangerouslySetInnerHTML={{ __html: cleanHtml(hit.content) }}></div>
                         {/* 이미지 */}
-                        {(hit.images && hit.images.length > 0) && (
+                        {hit.thumbnail && (
                             <div className='post_pr_img_wrap'>
-                                <div className='post_pr_img' css={css`background-image : url(${hit.images[0]});`}>
-                                    {hit.images.length > 1 &&
+                                <div className='post_pr_img'>
+                                    <Image
+                                        src={hit.thumbnail as string}
+                                        alt="포스트 이미지"
+                                        fill
+                                        css={css`object-fit: cover`} />
+                                    {hit.images &&
                                         <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
                                     }
                                 </div>
