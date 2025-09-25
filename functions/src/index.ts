@@ -6,8 +6,6 @@ import {
   onDocumentDeleted,
 } from "firebase-functions/v2/firestore";
 import * as functions from 'firebase-functions/v1';
-import {initializeApp} from "firebase-admin/app";
-initializeApp();
 import express, {Request, Response} from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -18,7 +16,7 @@ import logoutRouter from "./routes/logoutApi";
 import saveUserRouter from "./routes/saveUserApi";
 import limitRouter from "./routes/firebaseLimit";
 import updateProfileRouter from "./routes/updateProfile";
-import uploadCdnImageRouter from "./routes/uploadCdnImage";
+import uploadCdnImageRouter from "./routes/uploadPost";
 import createCustomTokenRouter from "./routes/createCustomToken";
 import {adminDb} from "./DB/firebaseAdminConfig";
 import {UserRecord} from "firebase-admin/auth";

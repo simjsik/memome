@@ -31,5 +31,7 @@ module.exports = {
     "indent": "off",
     "linebreak-style": ["error", "windows"],
     "new-cap": "off",
+    "max-len": ["error", { "code": 150 }],
+    "object-curly-spacing": "off",
   },
 };

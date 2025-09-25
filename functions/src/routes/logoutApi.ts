@@ -43,7 +43,7 @@ router.post('/logout', async (req: Request, res: Response) => {
                 return;
             }
             const session = snap.data()!;
-            const uid = session.uid as string;
+            const uid = session.uid;
             if (!uid) {
                 tx.delete(sessionDocRef);
                 const idxRef = adminDb.doc(`sessions/${sessionHash}`);
