@@ -1,10 +1,11 @@
 import { v2 as cloudinary } from "cloudinary";
 import crypto from "crypto"; // SHA-1 해시 생성용
 import express, { Request, Response } from "express";
-import { cloudinaryUrl, imageCheck } from "../utils/imgMiBf";
 import * as cheerio from 'cheerio';
 import { Timestamp } from "firebase-admin/firestore";
 import { adminDb } from "../DB/firebaseAdminConfig";
+import admin from 'firebase-admin';
+import { cloudinaryUrl, imageCheck } from "./post/utils/imgMiBf";
 
 // Cloudinary 설정
 cloudinary.config({
@@ -37,6 +38,7 @@ type PostType = {
     content: string;
     tag: string;
     notice: boolean;
+    public: boolean;
     thumbnail?: string | null;
     imageUrls?: ImageType[] | null;
     createAt: Timestamp,
@@ -44,12 +46,17 @@ type PostType = {
 };
 
 
-router.post('/posting', async (req: Request, res: Response) => {
+router.post('/posting/cdn', async (req: Request, res: Response) => {
     const { default: pLimit } = await import('p-limit');
+    const uid = req.headers['x-user-uid'];
+
+    if (!uid || typeof uid !== 'string') {
+        return res.status(401).json({ message: '인증 정보가 없습니다.' });
+    }
 
     // 포스트
     const post = req.body as unknown as PostType;
-
+    const { hasGuest } = req.body;
     const imageUrls = post.imageUrls;
     try {
         let finalContent = post.content;
@@ -133,7 +140,7 @@ router.post('/posting', async (req: Request, res: Response) => {
 
             // CDN 이미지 확인
             const limit = pLimit(3);
-            const tasks = Array.from(uniqueHash.entries()).map(([hash, rep]) =>
+            const tasks = Array.from(uniqueHash.entries()).map(([hash, rep]) => // rep : buffer, mime
                 limit(async () => {
                     const publicId = `meloudy_imgs/${hash}`;
 
@@ -273,6 +280,8 @@ router.post('/posting', async (req: Request, res: Response) => {
             finalContent = $('body').html() ?? '';
         }
 
+        const createAt = admin.firestore.Timestamp.now();
+
         const finalPost: PostType = {
             tag: post.tag,
             title: post.title,
@@ -281,13 +290,29 @@ router.post('/posting', async (req: Request, res: Response) => {
             photoUrl: post.photoUrl,
             content: finalContent,
             thumbnail: finalUrl.length ? finalUrl[0].url : null,
-            createAt: Timestamp.now(),
+            createAt: createAt,
             commentCount: 0,
             notice: post.notice,
+            public: post.public,
         };
 
-        const docRef = await adminDb.collection("posts").add(finalPost);
-        const postId = docRef.id;
+        const feedRef = adminDb.doc("postFeed/main");
+        const postRef = adminDb.collection("posts").doc();
+        const userRef = hasGuest ? adminDb.doc(`guests/${uid}/status/postUpdates`) : adminDb.doc(`users/${uid}/status/postUpdates`);
+
+        await adminDb.runTransaction(async (tx) => {
+            const feedSnap = await tx.get(feedRef);
+            const feed = feedSnap.data();
+
+            tx.set(postRef, finalPost);
+            tx.set(userRef, { lastSeenAt: createAt }, { merge: true });
+
+            if (!feed?.updatedAt || feed.updatedAt.toMillis() <= createAt.toMillis()) {
+                tx.set(feedRef, { updatedAt: createAt }, { merge: true });
+            }
+        });
+
+        const postId = postRef.id;
 
         const toClientPost = {
             ...finalPost,

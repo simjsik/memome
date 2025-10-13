@@ -1,9 +1,10 @@
 import dotenv from "dotenv";
 dotenv.config();
-import express, {Request, Response} from "express";
-import {adminAuth, adminDb} from "../DB/firebaseAdminConfig";
+import express, { Request, Response } from "express";
+import { adminAuth, adminDb } from "../DB/firebaseAdminConfig";
 import jwt from 'jsonwebtoken';
-import {createHash, randomBytes} from "crypto";
+import { createHash, randomBytes } from "crypto";
+import { Timestamp } from "firebase-admin/firestore";
 
 const router = express.Router();
 
@@ -20,107 +21,119 @@ export interface newUser {
 }
 
 router.post('/login', async (req: Request, res: Response) => {
-    const clientOrigin = req.headers["Project-Host"] || req.headers.origin;
+    const clientOrigin = req.headers["project-host"] || req.headers.origin;
     const isProduction = clientOrigin?.includes("memome-delta.vercel.app");
 
     try {
-        const {idToken} = await req.body;
+        const { idToken } = req.body;
 
         const decodedToken = await adminAuth.verifyIdToken(idToken);
         if (!decodedToken) {
-            return res.status(401).json({message: "계정 토큰이 올바르지 않습니다"});
+            return res.status(401).json({ mseaage: '계정 토큰이 올바르지 않습니다' });
         }
 
         const uid = decodedToken.uid;
         const hasGuest = decodedToken.roles?.guest === true;
+        const admin = decodedToken.roles?.admin === true;
 
-        const userRef = hasGuest ?
-            adminDb.doc(`guests/${uid}`) :
-            adminDb.doc(`users/${uid}`);
+        const userData: newUser = await adminDb.runTransaction<newUser>(async (tx) => {
+            const userRef = hasGuest ?
+                adminDb.doc(`guests/${uid}`) :
+                adminDb.doc(`users/${uid}`);
 
-        const userSnapshot = await userRef.get();
-        const userDoc = userSnapshot.data();
+            const userSnapshot = await tx.get(userRef);
+            const userDoc = userSnapshot.data();
 
-        let userData : newUser = {
-            displayName: userDoc?.displayName,
-            photoURL: userDoc?.photoURL,
-            userId: userDoc?.userId,
-        };
-
-        if (!userSnapshot.exists) {
-            const randomName = hasGuest ?
-            `Guest-${Math.random().toString(36).substring(2, 10)}` :
-            `user-${Math.random().toString(36).substring(2, 10)}`;
-
-            userData = {
-                displayName: randomName,
-                photoURL: "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg",
-                userId: uid,
+            let user: newUser = {
+                displayName: userDoc?.displayName,
+                photoURL: userDoc?.photoURL,
+                userId: userDoc?.userId,
             };
 
-            await userRef.set(userData, {merge: true});
-        }
+            if (!userSnapshot.exists) {
+                const randomName = hasGuest ?
+                    `Guest-${Math.random().toString(36).substring(2, 10)}` :
+                    `user-${Math.random().toString(36).substring(2, 10)}`;
+
+                user = {
+                    displayName: randomName,
+                    photoURL:
+                        "https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg",
+                    userId: uid,
+                };
+
+                tx.set(userRef, user);
+            }
+            return user;
+        });
 
         if (!SECRET || !CSRF_SECRET) {
             console.error("JWT 비밀 키 확인 불가");
-            return res.status(401).json({message: "JWT 비밀 키 확인 불가"});
+            return res.status(401).json({ message: "JWT 비밀 키 확인 불가" });
         }
 
         const jti = randomBytes(16).toString('hex');
 
-        const payload = {uid, jti};
+        const payload = { uid, jti };
 
-        const userToken = jwt.sign(payload, SECRET, {expiresIn: '1h'});
+        const userToken = jwt.sign({ ...payload, admin }, SECRET, { expiresIn: '1h' });
         const csrfToken = jwt.sign(
-            {...payload, nonce: randomBytes(32).toString("hex"), type: 'csrf'},
+            { ...payload, nonce: randomBytes(32).toString("hex"), type: 'csrf' },
             CSRF_SECRET,
-            {expiresIn: '1h'},
-        );
-        const refreshCsrfToken = jwt.sign(
-            {
-                ...payload,
-                nonce: randomBytes(32).toString("hex"),
-                type: 'refresh',
-            },
-            CSRF_SECRET,
-            {expiresIn: '30d'},
+            { expiresIn: '1h' },
         );
 
         const refreshId = randomBytes(32).toString('hex');
         const refreshHash =
-        createHash('sha256').update(refreshId).digest('hex');
+            createHash('sha256').update(refreshId).digest('hex');
 
         const sessionId = randomBytes(32).toString('hex');
         const sessionHash =
-        createHash('sha256').update(sessionId).digest('hex');
-
-        const now = Date.now();
-        const expiresAt = now + REFRESH_MAX_AGE_MS;
+            createHash('sha256').update(sessionId).digest('hex');
 
         const refreshDocRef =
-        adminDb.doc(`refreshTokens/${uid}/session/${sessionHash}`);
+            adminDb.doc(`refreshTokens/${uid}/session/${sessionHash}`);
         const sessionDocRef =
-        adminDb.doc(`sessions/${sessionHash}`);
+            adminDb.doc(`sessions/${sessionHash}`);
 
-        await refreshDocRef.set({
-            uid,
-            createdAt: now,
-            lastAt: now,
-            currentHash: refreshHash,
-            prevHash: null,
-            expiresAt,
-            revoked: false,
-            userAgent: req.headers['user-agent'] ?? null,
-            ip: (req.headers['x-forwarded-for'] ??
-                req.socket.remoteAddress) as string | undefined,
-        }, {merge: true});
+        await adminDb.runTransaction(async (tx) => {
+            const now = Timestamp.now();
+            const expiresAt = Timestamp.fromMillis(Date.now() + REFRESH_MAX_AGE_MS);
 
-        await sessionDocRef.set({
-            uid,
-            sessionHash,
-            expiresAt,
-            createdAt: now,
-        }, {merge: true});
+            tx.set(refreshDocRef, {
+                uid,
+                createdAt: now,
+                lastAt: now,
+                currentHash: refreshHash,
+                prevHash: null,
+                expiresAt,
+                revoked: false,
+                userAgent: req.headers['user-agent'] ?? null,
+                ip: (req.headers['x-forwarded-for'] ??
+                    req.socket.remoteAddress) as string | undefined,
+            }, { merge: true });
+
+            tx.set(sessionDocRef, {
+                uid,
+                sessionHash,
+                expiresAt,
+                createdAt: now,
+                guest: hasGuest,
+                revoked: false,
+                lastAt: now,
+            }, { merge: true });
+        });
+
+        const refreshCsrfToken = jwt.sign(
+            {
+                ...payload,
+                sid: sessionHash,
+                nonce: randomBytes(32).toString("hex"),
+                type: 'refresh',
+            },
+            CSRF_SECRET,
+            { expiresIn: '30d' },
+        );
 
         const cookieUser = {
             httpOnly: true,
@@ -166,26 +179,26 @@ router.post('/login', async (req: Request, res: Response) => {
         };
 
         return res
-        .cookie("userToken", userToken, cookieUser)
-        .cookie("csrfToken", csrfToken, cookieCsrf)
-        .cookie("refreshToken", refreshId, cookieRefresh)
-        .cookie("refreshCsrfToken", refreshCsrfToken, cookieRefreshCsrf)
-        .cookie("session", sessionId, cookieSession)
-        .status(200)
-        .json({
-            message: "로그인 성공.",
-            userData,
-        });
+            .cookie("userToken", userToken, cookieUser)
+            .cookie("csrfToken", csrfToken, cookieCsrf)
+            .cookie("refreshToken", refreshId, cookieRefresh)
+            .cookie("refreshCsrfToken", refreshCsrfToken, cookieRefreshCsrf)
+            .cookie("session", sessionId, cookieSession)
+            .status(200)
+            .json({
+                message: "로그인 성공.",
+                userData,
+            });
     } catch (error) {
         console.error("로그인 실패:", error);
         if (error === "auth/user-not-found") {
             console.error(error);
-            return res.status(404).json({message: "유저 확인 불가"});
+            return res.status(404).json({ message: "유저 확인 불가" });
         } else if (error === "auth/wrong-password") {
             console.error(error);
-            return res.status(400).json({message: "잘못된 비밀번호"});
+            return res.status(400).json({ message: "잘못된 비밀번호" });
         }
-        return res.status(500).json({message: "로그인 시도 실패"});
+        return res.status(500).json({ message: "로그인 시도 실패" });
     }
 });
 
