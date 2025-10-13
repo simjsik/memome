@@ -1,32 +1,61 @@
-import { Timestamp } from "firebase/firestore";
+type LiveTimestamp = { toDate(): Date };
+type JsonTs = { seconds: number; nanoseconds?: number };
+type AdminJsonTs = { _seconds: number; _nanoseconds?: number };
 
-export const formatDate = (createAt: Timestamp | Date | string | number): string => {
-    const date: Date =
-        createAt instanceof Timestamp
-            ? createAt.toDate()
-            : new Date(createAt);
+type TimestampInput = LiveTimestamp | JsonTs | AdminJsonTs | Date | string;
 
-    const now = new Date();
-    const befMs = now.getTime() - date.getTime();
+const isDate = (date: unknown): date is Date =>
+    date instanceof Date ||
+    (typeof date === 'object' && date !== null && Object.prototype.toString.call(date) === '[object Date]');
 
-    const befHour = befMs / (1000 * 60 * 60);
 
-    const befDay = befMs / (1000 * 60 * 24);
+const isIsoString = (date: unknown): date is string =>
+    typeof date === 'string' && !Number.isNaN(Date.parse(date));
 
-    if (befHour < 24) {
-        // 0시간 방지
-        const hours = Math.max(Math.round(befHour), 1);
-        return `${hours}시간 전`;
-    }
+const hasToDate = (date: unknown): date is LiveTimestamp =>
+    typeof date === 'object' &&
+    date !== null &&
+    'toDate' in (date as Record<string, unknown>) &&
+    typeof (date as { toDate: unknown }).toDate === 'function';
 
-    if (befDay < 7) {
-        const days = Math.max(Math.round(befDay), 1);
-        return `${days}일 전`;
-    }
+const isJsonTs = (date: unknown): date is JsonTs =>
+    typeof date === 'object' &&
+    date !== null &&
+    typeof (date as Record<string, unknown>).seconds === 'number' &&
+    (
+        (date as Record<string, unknown>).nanoseconds === undefined ||
+        typeof (date as Record<string, unknown>).nanoseconds === 'number'
+    );
 
-    return date.toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-    })
-}
+const isAdminJsonTs = (date: unknown): date is AdminJsonTs =>
+    typeof date === 'object' &&
+    date !== null &&
+    typeof (date as Record<string, unknown>)._seconds === 'number' &&
+    (
+        (date as Record<string, unknown>)._nanoseconds === undefined ||
+        typeof (date as Record<string, unknown>)._nanoseconds === 'number'
+    );
+
+const tsToDate = (date: TimestampInput): Date => {
+    if (isDate(date)) return date;
+    if (hasToDate(date)) return date.toDate();
+    if (isJsonTs(date)) return new Date(date.seconds * 1000 + Math.floor((date.nanoseconds ?? 0) / 1e6));
+    if (isAdminJsonTs(date)) return new Date(date._seconds * 1000 + Math.floor((date._nanoseconds ?? 0) / 1e6));
+    if (isIsoString(date)) return new Date(date);
+    return new Date(NaN);
+};
+
+export const formatDate = (createAt: TimestampInput): string => {
+    const date = tsToDate(createAt);
+    const time = date.getTime();
+    if (Number.isNaN(time)) return '-';
+
+    const diffMs = Date.now() - time;
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    if (hours < 24) return `${Math.max(hours, 1)}시간 전`;
+
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (days < 7) return `${Math.max(days, 1)}일 전`;
+
+    return date.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+};

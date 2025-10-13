@@ -1,9 +1,7 @@
 'use client';
 import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminState, PostData, userState } from '../../../state/PostState';
-import { deleteDoc, doc, getDoc, Timestamp } from "firebase/firestore";
-import { db } from "@/app/DB/firebaseConfig";
-import { useRecoilValue } from "recoil";
+import { PostData } from '../../../state/PostState';
+import { Timestamp } from "firebase/firestore";
 
 export function useAddNewPost(checkedNotice: boolean) {
     const queryClient = useQueryClient();
@@ -54,36 +52,33 @@ export function useAddNewPost(checkedNotice: boolean) {
 
 export function useDelPost() {
     const queryClient = useQueryClient();
-    const user = useRecoilValue(userState);
-    const ADMIN = useRecoilValue(adminState);
 
     return useMutation<void, Error, string>({
         mutationFn: async (postId: string) => {
-            // 게시글 존재 확인
-            const postDoc = await getDoc(doc(db, 'posts', postId));
-            if (!postDoc.exists()) {
-                throw new Error("NF") // NOT FOUND
+            const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+            const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+
+            const deleteResponse = await fetch(`/api/post/delete`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Project-Host': window.location.origin,
+                    'x-csrf-token': csrfValue
+                },
+                body: JSON.stringify({ postId }),
+                credentials: "include",
+            });
+
+            if (!deleteResponse.ok) {
+                throw new Error('게시글 삭제 실패'); // FORBIDDEN
             }
-
-            const postOwnerId = postDoc.data()?.userId;
-
-            if (user.uid !== postOwnerId && !ADMIN) {
-                throw new Error('FB'); // FORBIDDEN
-            }
-
-            await deleteDoc(doc(db, 'posts', postId));
         },
         onError: (err) => {
-            if (err.message === 'NF') {
-                alert('해당 게시글을 찾을 수 없습니다.')
-            } else if (err.message === 'FB') {
-                alert('삭제 권한이 없습니다.');
-            } else {
-                alert('게시글 삭제에 실패했습니다.');
-            };
-            return
+            console.log('게시글 삭제 실패 :' + err)
+            alert('게시글 삭제에 실패했습니다.');
+            return;
         },
-        onMutate: (postId) => {
+        onSuccess: (postId) => {
             ['posts', 'notices', 'bookmarks'].forEach((key) => {
                 queryClient.setQueryData<InfiniteData<{ data: PostData[]; nextPage: Timestamp | undefined }>>(
                     [key], (old) => {
@@ -105,8 +100,6 @@ export function useDelPost() {
                     }
                 );
             });
-        },
-        onSuccess: () => {
             alert('삭제되었습니다');
         },
     });

@@ -1,85 +1,61 @@
 'use client';
 import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PostData } from '../../../state/PostState';
-import { collection, doc, getDoc, getDocs, orderBy, query, startAfter, Timestamp, where } from "firebase/firestore";
-import { db } from "../../../DB/firebaseConfig";
-import { usePostUpdateChecker } from "../../../hook/ClientPolling"
+import { Timestamp } from "firebase/firestore";
 
-export function useAddUpdatePost() {
+export function useAddUpdatePost(options?: { onAcknowledge?: () => void }) {
     const queryClient = useQueryClient();
-    const { clearUpdate } = usePostUpdateChecker();
 
     return useMutation<PostData[], Error, void>({
         mutationFn: async () => {
             // firebase에 추가
             try {
+                const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+                const csrfValue = csrf ? decodeURIComponent(csrf) : '';
 
                 const cached = queryClient.getQueryData<InfiniteData<{ data: PostData[], nextPage?: Timestamp }>>(['posts']);
-                const newest = cached?.pages?.[0]?.data?.[0]?.createAt;  // Timestamp
+                const newest = cached?.pages?.[0]?.data?.[0]?.createAt?.toMillis() ?? null;
+                const newestId = cached?.pages?.[0]?.data?.[0]?.id ?? null;
 
-                const postsRef = collection(db, "posts");
+                const response = await fetch(`/api/update/post`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Project-Host': window.location.origin,
+                        'x-csrf-token': csrfValue
+                    },
+                    body: JSON.stringify({ newest, newestId }),
+                    credentials: "include",
+                });
 
-                const postsQuery = query(
-                    postsRef,
-                    where('notice', '==', false),
-                    orderBy('createAt', 'asc'),
-                    startAfter(newest) // 마지막 시간 이후
-                );
+                if (!response.ok) {
+                    // 상태별 메시지
+                    if (response.status === 429) throw new Error('요청 한도를 초과했어요.');
+                    if (response.status === 403) throw new Error('유저 인증이 필요합니다.');
+                    const msg = await response.text().catch(() => '');
+                    throw new Error(msg || `요청 실패 (${response.status})`);
+                }
 
-                const querySnapshot = await getDocs(postsQuery);
-
-                const userCache = new Map<string, { nickname: string; photo: string | null }>();
-
-                const updatePostlist = await Promise.all(
-                    querySnapshot.docs.map(async (docs) => {
-                        const postData = { id: docs.id, ...docs.data() } as PostData;
-
-                        // 유저 정보 캐싱 및 가져오기
-                        if (!userCache.has(postData.userId)) {
-                            const userDocRef = doc(db, "users", postData.userId);
-                            const userDoc = await getDoc(userDocRef);
-
-                            if (userDoc.exists()) {
-                                const userData = userDoc.data() as { displayName: string; photoURL: string | null };
-                                userCache.set(postData.userId, {
-                                    nickname: userData.displayName,
-                                    photo: userData.photoURL || 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
-                                });
-                            } else {
-                                userCache.set(postData.userId, {
-                                    nickname: "존재하지 않는 유저",
-                                    photo: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
-                                });
-                            }
-                        }
-
-                        // 매핑된 유저 정보 추가
-                        const userData = userCache.get(postData.userId) || { nickname: "존재하지 않는 유저", photo: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg' };
-                        postData.displayName = userData.nickname;
-                        postData.photoURL = userData.photo as string;
-
-                        return postData;
-                    })
-                );
-
-                clearUpdate();
+                const { data: updatePostlist } = await response.json();
 
                 return updatePostlist
                 // 업데이트 플래그 초기화
-
             } catch (error) {
                 console.error("Error fetching new posts:", error);
                 throw error;
             }
         },
         onSuccess: (updatesPost: PostData[]) => {
+            if (updatesPost.length === 0) {
+                options?.onAcknowledge?.();
+                return;
+            }
             queryClient.setQueryData<InfiniteData<{ data: PostData[]; nextPage: Timestamp | undefined }>>(
                 ['posts'], (old) => {
                     if (!old) return old;
 
                     const firstPage = old.pages[0];
                     const restPage = old.pages.slice(1);
-
                     return {
                         ...old,
                         pages: [
@@ -93,6 +69,10 @@ export function useAddUpdatePost() {
                     };
                 }
             );
+            options?.onAcknowledge?.();
         },
+        onError: (err) => {
+            console.error('포스트 갱신 실패:', err);
+        }
     });
 }

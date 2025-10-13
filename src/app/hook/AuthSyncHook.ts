@@ -25,10 +25,12 @@ export const useAuthSync = () => {
 
             const user = auth.currentUser
             if (user) {
+                const idToken = await user?.getIdToken();
                 const response = await fetch(`/api/refresh`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin, 'x-refresh-csrf': refreshfValue },
                     credentials: 'include',
+                    body: JSON.stringify(idToken)
                 });
 
                 if (!response.ok) {

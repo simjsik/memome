@@ -17,6 +17,7 @@ export interface PostData {
     createAt: Timestamp;
     commentCount: number,
     notice: boolean,
+    public: boolean,
     displayName?: string,
     photoURL?: string,
     objectID?: string,
@@ -33,6 +34,7 @@ export interface unsavedPostData {
     content: string;
     images?: ImageUrls[];
     date: Date;
+    public: boolean;
 }
 
 export interface userData {
@@ -108,6 +110,11 @@ export const PostContentState = atom<string | null>({
 export const PostTagState = atom<string>({
     key: 'PostTagState',
     default: '기타'
+})
+
+export const PostPublicState = atom<boolean>({
+    key: 'PostPublicState',
+    default: true,
 })
 
 // 저장안된 포스트 작성 내용

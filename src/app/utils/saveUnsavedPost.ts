@@ -11,6 +11,7 @@ export const saveUnsavedPost = (postData: unsavedPostData) => {
             content: postData.content,
             date: new Date(),
             images: postData.images,
+            public: postData.public,
         };
         localStorage.setItem('unsavedPost', JSON.stringify(unsavedPost));
     }

@@ -5,6 +5,14 @@ function generateNonce(): string {
     return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
 }
 
+async function sha256Hex(input: string): Promise<string> {
+    const data = new TextEncoder().encode(input);
+    const buf = await crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(buf))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+}
+
 const ACCESS_SECRET = process.env.JWT_SECRET || '';
 const CSRF_SECRET = process.env.CSRF_SECRET || '';
 const PASS_PATH = [
@@ -253,16 +261,30 @@ export async function middleware(req: NextRequest) {
 
     if (isRefresh) {
         const headerRefreshCsrf = req.headers.get('x-refresh-csrf') ?? undefined;
-
         if (!headerRefreshCsrf) {
             return new NextResponse(JSON.stringify({ message: "갱신 토큰 확인 불가" }), { status: 403, headers: { "content-type": "application/json" } });
         }
 
         try {
             refreshPayload = await verifyJwt(headerRefreshCsrf, CSRF_SECRET);
-
             if (!refreshPayload?.uid || !refreshPayload?.jti) {
                 return new NextResponse(JSON.stringify({ message: "유효하지 않은 토큰 : Refresh 1" }), { status: 403, headers: { "content-type": "application/json" } });
+            }
+
+            const session = req.cookies.get('session')?.value;
+            if (!session) {
+                return new NextResponse(JSON.stringify({ message: "세션 확인 불가 : Refresh" }), { status: 403 });
+            }
+
+            const sessionHash = (await sha256Hex(session)).toLowerCase();
+            const sidFromToken = String(refreshPayload.sid ?? "").toLowerCase();
+
+            if (!sidFromToken) {
+                return new NextResponse(JSON.stringify({ message: "토큰 시드 누락 : Refresh" }), { status: 403, headers: { "content-type": "application/json" } });
+            }
+
+            if (sessionHash !== sidFromToken) {
+                return new NextResponse(JSON.stringify({ message: "세션 불일치(Refresh CSRF)" }), { status: 403, headers: { "content-type": "application/json" } });
             }
 
             if (refreshPayload.type !== 'refresh') {

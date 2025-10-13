@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import { ChangeEvent, MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { adminState, ImageUrls, ImageUrlsState, loadingState, PostContentState, PostTagState, PostTitleState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
+import { adminState, ImageUrls, ImageUrlsState, loadingState, PostContentState, PostPublicState, PostTagState, PostTitleState, storageLoadState, UsageLimitState, UsageLimitToggle, userState } from '../../state/PostState';
 import { useRecoilState, useRecoilValue, useSetRecoilState, } from 'recoil';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from "framer-motion";
@@ -13,13 +13,13 @@ import styled from '@emotion/styled';
 import { StyleAttributor } from 'parchment';
 import { saveUnsavedPost } from '@/app/utils/saveUnsavedPost';
 import { btnVariants } from '@/app/styled/motionVariant';
-import { MoonLoader } from 'react-spinners';
 import { useAddNewPost } from './hook/useNewPostMutation';
 import { formatDate } from '@/app/utils/formatDate';
 import { useImageInputs } from './hook/useImageInputs';
 import { useImageGuard } from './hook/useImageGuard';
+import LoadingWrap from '@/app/components/LoadingWrap';
 
-const QuillStyle = styled.div<{ notice: boolean }>`
+const QuillStyle = styled.div<{ notice: boolean, public: boolean }>`
 position: relative;
 width : 860px;
 padding : 20px 0px 0px;
@@ -80,8 +80,15 @@ margin : 0 auto;
         }
     }
 
+    .post_btn{
+        position: absolute;
+        z-index: 1;
+        top: 24px;
+        right: -63px;
+    }
+
     .tag_sel{
-        flex : 1 0 25%;
+        flex : 1 0 15%;
         margin-right : 10px;
         padding : 0px 12px;
         outline : none;
@@ -170,6 +177,33 @@ margin : 0 auto;
         cursor: pointer;
         font-family: var(--font-pretendard-medium);
         text-align: center;
+    }
+
+    .public_btn{
+        position: absolute;
+        z-index: 1;
+        top: 96px;
+        right: -58px;
+        background: ${({ theme }) => theme.colors.primary};
+        width: 49px;
+        height: 49px;
+        margin-right: 10px;
+        border: ${(props) => (!props.public ? `1px solid ${props.theme.colors.error}` : `1px solid ${props.theme.colors.border}`)};
+        border-left:${({ theme }) => theme.colors.background};
+        border-radius: 0px 8px 8px 0px;
+        background: ${({ theme }) => theme.colors.background};
+        cursor: pointer;
+
+        p{
+            position: absolute;
+            left : 50%;
+            bottom: 4px;
+            text-align: center;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color : ${(props) => (!props.public ? `${props.theme.colors.error}` : `${props.theme.colors.text_tag}`)};
+            font-family : var(--font-pretendard-medium);
+        }
     }
     .go_main_btn{
         position: absolute;
@@ -733,6 +767,7 @@ export default function PostMenu() {
     const [postTitle, setPostTitle] = useRecoilState<string | null>(PostTitleState);
     const [posting, setPosting] = useRecoilState<string | null>(PostContentState);
     const [selectTag, setSelectedTag] = useRecoilState<string>(PostTagState);
+    const [checkedPrivate, setPrivate] = useRecoilState<boolean>(PostPublicState);
     const [titleError, setTitleError] = useState<string>('');
     const [postDate, setPostDate] = useState<string>('');
     const [confirmed, setConfirmed] = useState<boolean>(false);
@@ -902,6 +937,14 @@ export default function PostMenu() {
         }
     }
 
+    const handleCheckedPrivate = () => {
+        if (checkedPrivate) {
+            setPrivate(false);
+        } else {
+            setPrivate(true);
+        }
+    }
+
     const handleSelectTag = (e: ChangeEvent<HTMLSelectElement>) => {
         setSelectedTag(e.target.value);
     }
@@ -933,7 +976,8 @@ export default function PostMenu() {
                 title: postTitle as string,
                 content: posting as string,
                 date: new Date(),
-                images: imageUrls
+                images: imageUrls,
+                public: checkedPrivate
             }
 
             saveUnsavedPost(unsavedPost)
@@ -1006,6 +1050,7 @@ export default function PostMenu() {
                     title: postTitle,
                     content: posting,
                     tag: selectTag,
+                    public: checkedPrivate,
                     notice: checkedNotice,
                     imageUrls: imageUrls.length > 0 ? imageUrls : null,
                 })
@@ -1045,7 +1090,7 @@ export default function PostMenu() {
                     alert('포스트 업로드에 실패했습니다. 다시 시도해주세요');
                 }
             } finally {
-                setUploadLoading(false)
+                setUploadLoading(false);
             }
         }
     }
@@ -1290,11 +1335,13 @@ export default function PostMenu() {
             if (savedData.image) {
                 setImageUrls(savedData.image);
             }
+            setPrivate(savedData.public);
             setStorageLoad(false); // 로드 후 제한
         } else {
             setPostTitle('');
             setPosting('');
-            setImageUrls([])
+            setImageUrls([]);
+            setPrivate(false);
             setStorageLoad(false); // 로드 후 제한
         }
         localStorage.removeItem('unsavedPost');
@@ -1312,7 +1359,8 @@ export default function PostMenu() {
                             title: postTitle as string,
                             content: posting as string,
                             date: new Date(),
-                            images: imageUrls
+                            images: imageUrls,
+                            public: checkedPrivate
                         }
 
                         saveUnsavedPost(unsavedPost)
@@ -1350,7 +1398,8 @@ export default function PostMenu() {
                         title: postTitle as string,
                         content: posting as string,
                         date: new Date(),
-                        images: imageUrls
+                        images: imageUrls,
+                        public: checkedPrivate
                     }
 
                     saveUnsavedPost(unsavedPost)
@@ -1439,7 +1488,7 @@ export default function PostMenu() {
 
     return (
         <>
-            <QuillStyle notice={checkedNotice}>
+            <QuillStyle notice={checkedNotice} public={checkedPrivate}>
                 <div className='quill_wrap'>
                     <button className='go_main_btn' onClick={handleLeavePosting}>
                         <motion.div
@@ -1826,7 +1875,41 @@ export default function PostMenu() {
                     </div>
                     <p>{postingText.length}/ 2500</p>
 
-                    {uploadLoading ? <button className='post_btn'><MoonLoader color="#0087ff" size={8} /></button> : <motion.button variants={btnVariants(theme)} whileHover="loginHover" className='post_btn' onClick={uploadPost}>발행</motion.button>}
+                    {uploadLoading ?
+                        <button className='post_btn'><LoadingWrap /></button>
+                        :
+                        <motion.button variants={btnVariants(theme)} whileHover="loginHover" className='post_btn' onClick={uploadPost}>발행</motion.button>
+                    }
+                    <motion.button
+                        variants={btnVariants(theme)}
+                        whileHover={checkedPrivate ? "NtcHover" : "NtcOffHover"}
+                        whileTap={checkedPrivate ? "NtcClick" : "NtcOffClick"}
+                        className='public_btn' onClick={handleCheckedPrivate}>
+                        {checkedPrivate ?
+                            <>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40">
+                                    <g>
+                                        <rect width="36" height="36" fill="none" />
+                                        <path css={css`fill : ${theme.colors.icon_off}; stroke: ${theme.colors.icon_off}`} d="M21.57678,24.32535a2.01015,2.01015,0,1,0-3.208,1.60584l-.56543,1.77838a.3.3,0,0,0,.28589.391h2.95459a.30015.30015,0,0,0,.28613-.391l-.56543-1.77838A2.00072,2.00072,0,0,0,21.57678,24.32535Z" />
+                                        <path css={css`fill : ${theme.colors.icon_off}; stroke: ${theme.colors.icon_off}`} strokeWidth={'0.5'} d="M24.76039,16.89108a2.50281,2.50281,0,0,1,2.5,2.5v8.60583a2.50281,2.50281,0,0,1-2.5,2.5H14.37281a2.50281,2.50281,0,0,1-2.5-2.5V19.39108a2.50281,2.50281,0,0,1,2.5-2.5H24.76039m0-1.5H14.37281a4,4,0,0,0-4,4v8.60583a4,4,0,0,0,4,4H24.76039a3.99993,3.99993,0,0,0,4-4V19.39108a3.99994,3.99994,0,0,0-4-4Z" />
+                                        <path css={css`fill : ${theme.colors.icon_off}; stroke: ${theme.colors.icon_off}`} strokeWidth={'0.5'} d="M21.64882,9.50308a2.55566,2.55566,0,0,1,2.55273,2.55281V15.3464H14.887V12.05589a2.55577,2.55577,0,0,1,2.55286-2.55281h4.209m0-1.5h-4.209A4.05287,4.05287,0,0,0,13.387,12.05589V16.8464H25.70155V12.05589a4.05275,4.05275,0,0,0-4.05273-4.05281Z" />
+                                    </g>
+                                </svg>
+                            </>
+                            :
+                            <>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40">
+                                    <g>
+                                        <rect width="36" height="36" fill="none" />
+                                        <path fill='#fa5741' stroke='none' d="M21.57678,24.32535a2.01015,2.01015,0,1,0-3.208,1.60584l-.56543,1.77838a.3.3,0,0,0,.28589.391h2.95459a.30015.30015,0,0,0,.28613-.391l-.56543-1.77838A2.00072,2.00072,0,0,0,21.57678,24.32535Z" />
+                                        <path fill='#fa5741' stroke='#fa5741' strokeWidth={'0.5'} d="M24.76039,16.89108a2.50281,2.50281,0,0,1,2.5,2.5v8.60583a2.50281,2.50281,0,0,1-2.5,2.5H14.37281a2.50281,2.50281,0,0,1-2.5-2.5V19.39108a2.50281,2.50281,0,0,1,2.5-2.5H24.76039m0-1.5H14.37281a4,4,0,0,0-4,4v8.60583a4,4,0,0,0,4,4H24.76039a3.99993,3.99993,0,0,0,4-4V19.39108a3.99994,3.99994,0,0,0-4-4Z" />
+                                        <path fill='#fa5741' stroke='#fa5741' strokeWidth={'0.5'} d="M21.64882,9.50308a2.55566,2.55566,0,0,1,2.55273,2.55281V15.3464H14.887V12.05589a2.55577,2.55577,0,0,1,2.55286-2.55281h4.209m0-1.5h-4.209A4.05287,4.05287,0,0,0,13.387,12.05589V16.8464H25.70155V12.05589a4.05275,4.05275,0,0,0-4.05273-4.05281Z" />
+                                    </g>
+                                </svg>
+
+                            </>
+                        }
+                    </motion.button>
                 </div >
             </QuillStyle >
             {

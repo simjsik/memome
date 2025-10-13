@@ -8,7 +8,6 @@ import "./globals.css";
 import { adminState, bookMarkState, DidYouLogin, hasGuestState, loadingState, userState } from "./state/PostState";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./DB/firebaseConfig";
-import { usePostUpdateChecker } from "./hook/ClientPolling";
 import { useRouter } from "next/navigation";
 import { CacheProvider, ThemeProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
@@ -16,6 +15,7 @@ import { getAuth, getIdTokenResult, onAuthStateChanged, updateProfile } from "fi
 import GlobalLoadingWrap from "./components/GlobalLoading";
 import { darkTheme, lightTheme } from "./styled/theme";
 import GlobalStyles from "./styled/GlobalStyles";
+import { usePostUpdateChecker } from "./hook/ClientPolling";
 
 const queryClient = new QueryClient();
 
@@ -26,8 +26,8 @@ interface CustomClaims {
     };
 }
 
+
 function InitializeLoginComponent({ children }: { children: ReactNode }) {
-    const { clearUpdate } = usePostUpdateChecker();
     const setUser = useSetRecoilState(userState);
     const setHasLogin = useSetRecoilState(DidYouLogin);
     const setAdmin = useSetRecoilState<boolean>(adminState);
@@ -36,6 +36,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const currentUser = useRecoilValue(userState);
     const [loading, setLoading] = useRecoilState<boolean>(loadingState);
     const router = useRouter();
+    usePostUpdateChecker();
 
     const loadBookmarks = async (uid: string) => {
         try {
@@ -183,10 +184,6 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
         });
         return () => unsubscribe();
     }, []);
-
-    useEffect(() => {
-        clearUpdate();
-    }, [currentUser, router]);
 
     if (loading) {
         return <GlobalLoadingWrap />;

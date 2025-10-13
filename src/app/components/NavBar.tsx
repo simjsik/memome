@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
-import { DidYouLogin, hasGuestState, ImageUrls, ImageUrlsState, loginToggleState, newNoticeState, PostContentState, PostTagState, PostTitleState, statusState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
+import { DidYouLogin, hasGuestState, ImageUrls, ImageUrlsState, loginToggleState, newNoticeState, PostContentState, PostPublicState, PostTagState, PostTitleState, statusState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css, useTheme } from '@emotion/react';
 import { saveUnsavedPost } from '../utils/saveUnsavedPost';
@@ -190,6 +190,7 @@ export default function NavBar() {
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle);
     const [hasGuest, setHasGuest] = useRecoilState(hasGuestState);
     const postTitle = useRecoilValue<string | null>(PostTitleState);
+    const checkedPrivate = useRecoilValue<boolean>(PostPublicState);
     const posting = useRecoilValue<string | null>(PostContentState);
     const imageUrls = useRecoilValue<ImageUrls[]>(ImageUrlsState);
     const selectTag = useRecoilValue<string>(PostTagState);
@@ -228,7 +229,8 @@ export default function NavBar() {
                 title: postTitle ? postTitle : '',
                 content: posting ? posting : '',
                 date: new Date(),
-                images: imageUrls
+                images: imageUrls,
+                public: checkedPrivate,
             }
 
             saveUnsavedPost(unsavedPost)

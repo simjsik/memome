@@ -6,7 +6,6 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { DidYouLogin, loadingState, loginToggleState, modalState, newNoticeState, noticeList, noticeType, PostData, storageLoadState, UsageLimitState, UsageLimitToggle, userData, userState } from '../../state/PostState';
 import { usePathname, useRouter } from 'next/navigation';
 import { css, useTheme } from '@emotion/react';
-import { Timestamp, } from 'firebase/firestore';
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 import { motion } from "framer-motion";
 
@@ -15,7 +14,6 @@ import socket from '@/app/utils/websocket';
 import { Socket } from 'socket.io-client';
 import { usePostUpdateChecker } from '@/app/hook/ClientPolling';
 import BookmarkBtn from '@/app/components/BookmarkBtn';
-import { fetchPosts } from '@/app/utils/fetchPostData';
 import { NewPostBtn, NoMorePost, PostWrap } from '@/app/styled/PostComponents';
 import LoadingWrap from '@/app/components/LoadingWrap';
 import { useHandleUsernameClick } from '@/app/utils/handleClick';
@@ -146,17 +144,40 @@ export default function MainHome() {
     isError,
     error,
   } = useInfiniteQuery<
-    { data: PostData[]; nextPage: Timestamp | undefined }, // TQueryFnData
+    { data: PostData[]; nextPage: string | undefined }, // TQueryFnData
     Error, // TError
-    InfiniteData<{ data: PostData[]; nextPage: Timestamp | undefined }>,// TData
+    InfiniteData<{ data: PostData[]; nextPage: string | undefined }>,// TData
     string[], // TQueryKey
-    Timestamp | undefined // TPageParam
+    string | undefined // TPageParam
   >({
     retry: false, // 재시도 방지
     queryKey: ['posts'],
     queryFn: async ({ pageParam }) => {
       try {
-        return await fetchPosts(pageParam, 8);
+        const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+        const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+
+        const response = await fetch(`/api/post`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Project-Host': window.location.origin,
+            'x-csrf-token': csrfValue
+          },
+          body: JSON.stringify({ pageParam, pageSize: 8 }),
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          // 상태별 메시지
+          if (response.status === 429) throw new Error('요청 한도를 초과했어요.');
+          if (response.status === 403) throw new Error('유저 인증이 필요합니다.');
+          const msg = await response.text().catch(() => '');
+          throw new Error(msg || `요청 실패 (${response.status})`);
+        }
+
+        const data = await response.json();
+        return data
       } catch (error: unknown) {
         if (error instanceof Error) {
           console.error("일반 오류 발생:", error.message);
@@ -167,7 +188,7 @@ export default function MainHome() {
         }
       }
     },
-    getNextPageParam: (lastPage) => lastPage.nextPage,
+    getNextPageParam: (lastPage) => lastPage.nextPage || undefined,
     staleTime: 5 * 60 * 1000,
     initialPageParam: undefined,
   });
@@ -278,13 +299,15 @@ export default function MainHome() {
     handledeletePost(postId)
   }
 
+  const { hasUpdate, setHasUpdate } = usePostUpdateChecker();
+
   // 버튼 클릭 시 새 데이터 로드
-  const { mutate: fetchUpdatePost, isPending: isAddUpdatePost } = useAddUpdatePost();
+  const { mutate: fetchUpdatePost, isPending: isAddUpdatePost } = useAddUpdatePost({ onAcknowledge: () => setHasUpdate(false) });
+
   const handleUpdateClick = () => {
     fetchUpdatePost();
   };
 
-  const { hasUpdate } = usePostUpdateChecker();
   const handleUsernameClick = useHandleUsernameClick();
   return (
     <>
