@@ -545,9 +545,12 @@ export default function UserProfile() {
             if (hasGuest) return alert('게스트 유저는 변경할 수 없습니다.');
             try {
                 setLoading(true);
+                const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+                const csrfValue = csrf ? decodeURIComponent(csrf) : '';
 
                 let profileImageUrl = currentUser.photo
                 let userProfileDate
+
                 const uid = currentUser.uid
                 if (image) {
                     // 받아온 image인자가 File 타입이기 때문에 Cloudinary에 저장을 위해 base64로 변경
@@ -566,9 +569,10 @@ export default function UserProfile() {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'x-csrf-token': csrfValue,
                         },
                         credentials: "include",
-                        body: JSON.stringify({ uid, image: profileImageUrl, name }),
+                        body: JSON.stringify({ image: profileImageUrl, name }),
                     });
 
                     if (!UpdateResponse.ok) {
@@ -593,9 +597,10 @@ export default function UserProfile() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'x-csrf-token': csrfValue,
                     },
                     credentials: "include",
-                    body: JSON.stringify({ uid, image: profileImageUrl, name }),
+                    body: JSON.stringify({ image: profileImageUrl, name }),
                 });
 
                 if (!UpdateResponse.ok) {
