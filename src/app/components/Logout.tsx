@@ -63,7 +63,7 @@ const LogoutButton = styled(motion.button)`
 export default function Logout() {
     const setHasLogin = useSetRecoilState<boolean>(DidYouLogin)
     const [user, setUser] = useRecoilState<userData>(userState)
-    const setCurrentBookmark = useSetRecoilState<string[] | null>(bookMarkState)
+    const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState)
     const setUserCurrentBookmark = useSetRecoilState<PostData[]>(userBookMarkState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
     // State
@@ -95,7 +95,7 @@ export default function Logout() {
                     photo: 'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
                     uid: null, // uid는 빈 문자열로 초기화
                 }); // 로그아웃 상태로 초기화
-                setCurrentBookmark(null)
+                setCurrentBookmark([])
                 setUserCurrentBookmark([])
                 setHasLogin(false)
                 setLimitToggle(false)

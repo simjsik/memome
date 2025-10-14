@@ -75,7 +75,7 @@ export default function UsageLimit() {
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const [limitToggle, setLimitToggle] = useRecoilState<boolean>(UsageLimitToggle)
     const setModal = useSetRecoilState<boolean>(modalState);
-    const setCurrentBookmark = useSetRecoilState<string[] | null>(bookMarkState)
+    const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState)
     const setUserCurrentBookmark = useSetRecoilState<PostData[]>(userBookMarkState)
 
     const router = useRouter();
