@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import "./globals.css";
 import { adminState, bookMarkState, DidYouLogin, hasGuestState, loadingState, userState } from "./state/PostState";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "./DB/firebaseConfig";
 import { useRouter } from "next/navigation";
 import { CacheProvider, ThemeProvider } from "@emotion/react";
@@ -32,7 +32,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const setHasLogin = useSetRecoilState(DidYouLogin);
     const setAdmin = useSetRecoilState<boolean>(adminState);
     const setGuest = useSetRecoilState<boolean>(hasGuestState);
-    const setCurrentBookmark = useSetRecoilState<string[] | null>(bookMarkState);
+    const setCurrentBookmark = useSetRecoilState<string[]>(bookMarkState);
     const currentUser = useRecoilValue(userState);
     const [loading, setLoading] = useRecoilState<boolean>(loadingState);
     const router = useRouter();
@@ -40,16 +40,14 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
     const loadBookmarks = async (uid: string) => {
         try {
-            const bookmarks = await getDoc(doc(db, `users/${uid}/bookmarks/bookmarkId`));
-            if (bookmarks.exists()) {
-                // 북마크 데이터가 있을 경우
-                const data = bookmarks.data() as { bookmarkId: string[] };
+            const bookmarkRef = collection(db, 'users', `${uid}`, 'bookmarks');
+            const bookmarkSnap = await getDocs(bookmarkRef);
+            const bookmarkIds = bookmarkSnap.docs.map(d => d.id);
 
-                setCurrentBookmark(data.bookmarkId); // Recoil 상태 업데이트
-            }
+            setCurrentBookmark(bookmarkIds); // Recoil 상태 업데이트
         } catch (error) {
             console.error("북마크 데이터를 가져오는 중 오류 발생:", error);
-            setCurrentBookmark(null);
+            setCurrentBookmark([]);
         }
     }
 

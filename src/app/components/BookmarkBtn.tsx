@@ -2,12 +2,11 @@
 "use client";
 import styled from "@emotion/styled";
 import { db } from "../DB/firebaseConfig";
-import { arrayRemove, arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
+import { deleteDoc, doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { BookmarkCache, bookMarkState, PostData, userBookMarkState, userState } from "../state/PostState";
 import { useQueryClient } from "@tanstack/react-query";
-import { FirebaseError } from "firebase/app";
 import { motion } from "framer-motion";
 import { btnVariants } from "../styled/motionVariant";
 import { css, Theme, useTheme } from "@emotion/react";
@@ -50,7 +49,7 @@ interface PostId {
 }
 export default function BookmarkBtn({ postId }: PostId) {
     const [bookmarked, setBookmarked] = useState<boolean>(false)
-    const [currentBookmark, setCurrentBookmark] = useRecoilState<string[] | null>(bookMarkState)
+    const [currentBookmark, setCurrentBookmark] = useRecoilState<string[]>(bookMarkState)
     const setUserBookmarks = useSetRecoilState<PostData[]>(userBookMarkState)
     const currentUser = useRecoilValue(userState)
     const theme = useTheme();
@@ -80,30 +79,23 @@ export default function BookmarkBtn({ postId }: PostId) {
         }
 
         if (currentUser) {
-            const bookmarkRef = doc(db, `users/${currentUser.uid}/bookmarks/bookmarkId`);
+            const bookmarkRef = doc(db, 'users', `${currentUser.uid}`, 'bookmarks', `${postId}`);
             const bookmarkList = currentBookmark ?? [];
             const isBookmarked = bookmarkList.includes(postId);
 
             if (!isBookmarked) {
                 setBookmarked(true);
-                await updateDoc(bookmarkRef,
+                await setDoc(bookmarkRef,
                     {
-                        bookmarkId: arrayUnion(postId),
-                    }).catch(async (error) => {
-                        if (error instanceof FirebaseError && error.code === 'not-found') {
-                            await setDoc(bookmarkRef, { bookmarkId: [postId] });
-                        } else if (error instanceof FirebaseError) {
-                            throw new Error(error.message + ' - 북마크 추가 실패');
-                        } else {
-                            // FirebaseError가 아닌 경우
-                            throw new Error('알 수 없는 에러 - 북마크 추가 실패');
-                        }
-                    })
+                        postId,
+                        bookmarkedAt: serverTimestamp()
+                    }, { merge: true })
                 setCurrentBookmark((prev) => [...(prev ?? []), postId]);
+
+                // 캐싱된 데이터를 수동으로 업데이트
+                await queryClient.invalidateQueries({ queryKey: ['bookmarks', currentUser.uid], exact: true });
             } else {
-                await updateDoc(bookmarkRef, {
-                    bookmarkId: arrayRemove(postId),
-                }); // 배열 형태일 때 현재 포스트 id 삭제.
+                await deleteDoc(bookmarkRef); // 배열 형태일 때 현재 포스트 id 삭제.
                 setBookmarked(false);
 
                 // 북마크 해제 후 북마크 state 업데이트
@@ -114,7 +106,6 @@ export default function BookmarkBtn({ postId }: PostId) {
                     prev.filter((post) => post.id !== postId)
                 );
 
-                // 캐싱된 데이터를 수동으로 업데이트
                 queryClient.setQueryData<BookmarkCache>(['bookmarks', currentUser.uid], (oldData) => {
                     if (!oldData) return oldData;
 

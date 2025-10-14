@@ -1,11 +1,10 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
-import { fetchBookmarks } from "@/app/utils/fetchPostData";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
-import { bookMarkState, loadingState, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
+import { bookMarkState, loadingState, PostData, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
 import { css, useTheme } from "@emotion/react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { Timestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useRef, useState } from "react";
@@ -21,7 +20,7 @@ import LoadLoading from "@/app/components/LoadLoading";
 import Image from "next/image";
 
 export default function Bookmark() {
-    const currentBookmark = useRecoilValue<string[] | null>(bookMarkState)
+    const currentBookmark = useRecoilValue<string[]>(bookMarkState)
     const currentUser = useRecoilValue<userData>(userState)
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [loading, setLoading] = useRecoilState(loadingState);
@@ -37,17 +36,45 @@ export default function Bookmark() {
         hasNextPage,
         isLoading: firstLoading,
         isFetching: dataLoading,
-        isError,  // 에러 상태
-        // error,    // 에러 메시지
-    } = useInfiniteQuery({
-        queryKey: ['bookmarks', currentUser?.uid],
+        isError,
+    } = useInfiniteQuery<
+        { data: PostData[]; nextPage: number | undefined }, // TQueryFnData
+        Error, // TError
+        InfiniteData<{ data: PostData[]; nextPage: number | undefined }>,// TData
+        string[], // TQueryKey
+        number | undefined // TPageParam
+    >({
+        queryKey: ['bookmarks', currentUser?.uid as string],
         queryFn: async ({ pageParam = 0 }) => {
             try {
-                return fetchBookmarks(
-                    currentBookmark as string[], // 전역 상태를 바로 사용
-                    pageParam, // 시작 인덱스
-                );
-            } catch (error) {
+                const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+                const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+
+                const response = await fetch(`/api/post/bookmark`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Project-Host': window.location.origin,
+                        'x-csrf-token': csrfValue
+                    },
+                    body: JSON.stringify({ bookmarkId: currentBookmark, pageParam, pageSize: 4 }),
+                    credentials: "include",
+                });
+
+                if (!response.ok) {
+                    // 상태별 메시지
+                    if (response.status === 429) {
+                        setUsageLimit(true);
+                        throw new Error('요청 한도를 초과했어요.')
+                    };
+                    if (response.status === 403) throw new Error('유저 인증이 필요합니다.');
+                    const msg = await response.text().catch(() => '');
+                    throw new Error(msg || `요청 실패 (${response.status})`);
+                }
+
+                const data = await response.json();
+                return data
+            } catch (error: unknown) {
                 if (error instanceof Error) {
                     console.error("일반 오류 발생:", error.message);
                     throw error;
@@ -57,17 +84,17 @@ export default function Bookmark() {
                 }
             }
         },
-        getNextPageParam: (lastPage) => lastPage?.nextIndexData, // 다음 페이지 인덱스 반환
+        getNextPageParam: (lastPage) => lastPage.nextPage || undefined, // 다음 페이지 인덱스 반환
         staleTime: 5 * 60 * 1000, // 5분 동안 데이터 캐싱 유지
         initialPageParam: 0, // 초기 페이지 파라미터 설정
-        enabled: (!loading && Boolean(currentBookmark) && currentBookmark?.length !== 0)
+        enabled: (!loading && currentBookmark.length > 0)
     });
 
     const bookmarkList = bookmarks?.pages.flatMap(page => page?.data) || [];
 
     useEffect(() => {
         if (isError) {
-            setUsageLimit(true);
+            // setUsageLimit(true);
         }
     }, [isError])
 
@@ -98,7 +125,6 @@ export default function Bookmark() {
     }, [hasNextPage, fetchNextPage, currentBookmark, bookmarks]);
 
     useEffect(() => {
-        console.log('북마크 페이지 로딩 해제');
         setLoading(false);
     }, [])
 
