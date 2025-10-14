@@ -53,7 +53,7 @@ export function useAddNewPost(checkedNotice: boolean) {
 export function useDelPost() {
     const queryClient = useQueryClient();
 
-    return useMutation<void, Error, string>({
+    return useMutation<string, Error, string>({
         mutationFn: async (postId: string) => {
             const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
             const csrfValue = csrf ? decodeURIComponent(csrf) : '';
@@ -72,6 +72,8 @@ export function useDelPost() {
             if (!deleteResponse.ok) {
                 throw new Error('게시글 삭제 실패'); // FORBIDDEN
             }
+
+            return postId;
         },
         onError: (err) => {
             console.log('게시글 삭제 실패 :' + err)
