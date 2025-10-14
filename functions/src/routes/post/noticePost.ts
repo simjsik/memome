@@ -9,7 +9,7 @@ import { postConverter, PostData } from "./utils/postType";
 
 const router = express.Router();
 
-router.post('/post', async (req: Request, res: Response) => {
+router.post('/post/notice', async (req: Request, res: Response) => {
     try {
         // 사용량 제한
         const user = req.get('x-user-uid');
@@ -32,11 +32,11 @@ router.post('/post', async (req: Request, res: Response) => {
         const postRef = adminDb.collection('posts').withConverter(postConverter);
 
         let firstQuery = postRef
-            .where('notice', '==', false)
+            .where('notice', '==', true)
             .where(Filter.or(
                 Filter.where('public', '==', true),
                 Filter.where('userId', '==', user),
-            ))
+            )) // 둘 중 하나라도 참이면 OK
             .orderBy('createAt', 'desc')
             .orderBy(admin.firestore.FieldPath.documentId(), 'desc')
             .limit(ps + 1); // 필요한 수 만큼 데이터 가져오기
@@ -74,7 +74,7 @@ router.post('/post', async (req: Request, res: Response) => {
             };
 
             let secondQuery = postRef
-                .where('notice', '==', false)
+                .where('notice', '==', true)
                 .where('public', '==', true)
                 .orderBy('createAt', 'desc')
                 .orderBy(admin.firestore.FieldPath.documentId(), 'desc')

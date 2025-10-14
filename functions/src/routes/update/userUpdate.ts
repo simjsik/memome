@@ -2,8 +2,8 @@ import express, { Request, Response } from "express";
 import { adminDb } from "../../DB/firebaseAdminConfig";
 import admin from 'firebase-admin';
 import { getCachedUserBatch } from "../post/utils/getCachedUser";
-import { postConverter, PostData } from "../post/mainPost";
 import { extractUniqueUserIds } from "../post/utils/getUserId";
+import { postConverter, PostData } from "../post/utils/postType";
 
 const router = express.Router();
 

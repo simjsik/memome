@@ -6,7 +6,8 @@ const router = express.Router();
 
 router.delete('/post/delete', async (req: Request, res: Response) => {
     const { postId } = req.body;
-    const uid = req.headers['x-user-uid'];
+    const user = req.headers['x-user-uid'];
+    const admin = req.headers['x-user-admin'];
 
     try {
         const prefix = `meloudy_imgs/post/${postId}/`;
@@ -20,7 +21,7 @@ router.delete('/post/delete', async (req: Request, res: Response) => {
 
         const postData = postSnap.data();
 
-        if (postData?.userId !== uid) {
+        if (postData?.userId !== user && !admin) {
             throw new Error('작성자 불일치');
         }
 

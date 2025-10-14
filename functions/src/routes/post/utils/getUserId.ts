@@ -1,4 +1,4 @@
-import { PostData } from "../mainPost";
+import { PostData } from "./postType";
 
 /**
  * @param {postDoc<PostData>} postDoc
@@ -10,4 +10,14 @@ export function extractUniqueUserIds(
     const userId = Array.from(new Set(postDoc.map((d) => d.data().userId)));
 
     return userId;
+}
+
+/**
+ * @param {postDoc<PostData>} posts
+ * @return {userId<string[]>}
+ */
+export function extractUniqueUserIdsFromPosts(posts: PostData[]): string[] {
+    return Array.from(
+        new Set(posts.map((p) => p.userId).filter((v): v is string => typeof v === 'string' && v.length > 0))
+    );
 }

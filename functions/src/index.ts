@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { getFirestore, Timestamp, FieldValue } from "firebase-admin/firestore";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import {
   onDocumentCreated,
   onDocumentDeleted,
@@ -19,23 +19,11 @@ import uploadPostRouter from "./routes/post/uploadPost";
 import deletePostRouter from "./routes/post/deletePost";
 import createCustomTokenRouter from "./routes/createCustomToken";
 import fetchPostRouter from "./routes/post/mainPost";
+import fetchNoticeRouter from "./routes/post/noticePost";
+import fetchBookmarkRouter from "./routes/post/bookmarkPost";
 import { adminDb } from "./DB/firebaseAdminConfig";
 import { UserRecord } from "firebase-admin/auth";
-
-
-export interface PostData {
-  tag: string;
-  title: string;
-  id: string;
-  userId: string;
-  content: string;
-  images?: string[] | false;
-  createAt: Timestamp;
-  commentCount: number,
-  notice: boolean,
-  displayName: string,
-  PhotoURL: string | null,
-}
+import { PostData } from "./routes/post/utils/postType";
 
 const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL;
 
@@ -271,6 +259,8 @@ app.use('/', uploadPostRouter);
 app.use('/', deletePostRouter);
 
 app.use('/', fetchPostRouter);
+app.use('/', fetchNoticeRouter);
+app.use('/', fetchBookmarkRouter);
 
 // Firebase Functions로 배포
 export const ApiRouter = onRequest(app);
