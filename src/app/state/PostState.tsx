@@ -136,9 +136,9 @@ export const noticeState = atom<PostData[]>({
 })
 
 // 북마크 데이터
-export const bookMarkState = atom<string[] | null>({
+export const bookMarkState = atom<string[]>({
     key: 'bookMarkState',
-    default: null
+    default: []
 })
 
 // 북마크 페이지 데이터
