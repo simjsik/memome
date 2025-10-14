@@ -30,7 +30,7 @@ export const useAuthSync = () => {
                     method: "POST",
                     headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin, 'x-refresh-csrf': refreshfValue },
                     credentials: 'include',
-                    body: JSON.stringify(idToken)
+                    body: JSON.stringify({ idToken })
                 });
 
                 if (!response.ok) {
