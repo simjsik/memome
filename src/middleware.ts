@@ -433,6 +433,7 @@ export async function middleware(req: NextRequest) {
         requestHeaders.set("x-refresh-csrf", String(refreshPayload!.uid));
     } else {
         requestHeaders.set("x-user-uid", String(userPayload!.uid));
+        requestHeaders.set("x-user-admin", String(userPayload!.admin));
     }
     requestHeaders.set('x-csp-nonce', nonce); // 요청헤더 
 
