@@ -52,43 +52,9 @@ router.post('/post/notice', async (req: Request, res: Response) => {
 
         const postSnap = await firstQuery.get();
 
-        let postDoc = postSnap.docs.slice(0, Math.min(postSnap.docs.length, ps));
+        const postDoc = postSnap.docs.slice(0, Math.min(postSnap.docs.length, ps));
 
-        const hasMore1 = postSnap.docs.length > ps;
-
-        let hasMore2 = false;
-
-        // 부족한 수 보강
-        if (postDoc.length < ps && postDoc.length > 0) {
-            const last = postDoc[postDoc.length - 1];
-
-            const remaining = ps - postDoc.length;
-
-            const lastAt = last.data();
-            const lastCursor = {
-                id: last.id,
-                createAt: {
-                    seconds: lastAt.createAt.seconds,
-                    nanoseconds: lastAt.createAt.nanoseconds,
-                },
-            };
-
-            let secondQuery = postRef
-                .where('notice', '==', true)
-                .where('public', '==', true)
-                .orderBy('createAt', 'desc')
-                .orderBy(admin.firestore.FieldPath.documentId(), 'desc')
-                .limit(remaining + 1); // 버퍼 적용
-
-            const lastTs = lastAt.createAt as admin.firestore.Timestamp;
-            secondQuery = secondQuery.startAfter(lastTs, lastCursor.id);
-
-            const moreSnap = await secondQuery.get();
-
-            postDoc = [...postDoc, ...moreSnap.docs];
-            postDoc = postDoc.slice(0, ps);
-            hasMore2 = moreSnap.docs.length > (remaining);
-        }
+        const hasMore = postSnap.docs.length > ps;
 
         const userId = extractUniqueUserIds(postDoc);
         const profileMap = await getCachedUserBatch(userId);
@@ -109,13 +75,12 @@ router.post('/post/notice', async (req: Request, res: Response) => {
             };
         });
 
-        const hasNext = hasMore2 || (hasMore1 && postDoc.length >= ps);
         const lastVisible = postWithUser ? postWithUser.at(-1) : null; // 마지막 문서
 
         return res.json({
             message: "포스트 요청 성공",
             data: postWithUser,
-            nextPage: hasNext && lastVisible ?
+            nextPage: hasMore && lastVisible ?
                 { id: lastVisible.id, createAt: lastVisible.createAt as Timestamp } : undefined,
         });
     } catch (error) {

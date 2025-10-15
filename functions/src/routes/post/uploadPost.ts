@@ -35,6 +35,7 @@ type PostType = {
     notice: boolean;
     public: boolean;
     thumbnail?: string | null;
+    hasImage?: boolean;
     imageUrls?: ImageType[] | null;
     createAt: Timestamp,
     commentCount: number,
@@ -183,6 +184,7 @@ router.post('/posting', async (req: Request, res: Response) => {
             photoUrl: post.photoUrl,
             content: finalContent,
             thumbnail: finalUrl.length ? finalUrl[0].url : null,
+            hasImage: finalUrl.length ? true : false,
             createAt: createAt,
             commentCount: 0,
             notice: post.notice,

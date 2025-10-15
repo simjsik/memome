@@ -21,6 +21,7 @@ import createCustomTokenRouter from "./routes/createCustomToken";
 import fetchPostRouter from "./routes/post/mainPost";
 import fetchNoticeRouter from "./routes/post/noticePost";
 import fetchBookmarkRouter from "./routes/post/bookmarkPost";
+import fetchUserPostRouter from "./routes/post/userPost";
 import { adminDb } from "./DB/firebaseAdminConfig";
 import { UserRecord } from "firebase-admin/auth";
 import { PostData } from "./routes/post/utils/postType";
@@ -212,9 +213,10 @@ export const setGoogleUser = functions.auth.user().onCreate(async (user: UserRec
   // 필드가 없을 때만 생성
   if (!userSnap.exists) {
     await userRef.set({
-      displayName: displayName || '',
-      email: email || '',
-      photoURL: photoURL || '',
+      displayName: displayName,
+      email: email,
+      photoURL: photoURL ||
+        'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
     });
   }
 });
@@ -261,6 +263,7 @@ app.use('/', deletePostRouter);
 app.use('/', fetchPostRouter);
 app.use('/', fetchNoticeRouter);
 app.use('/', fetchBookmarkRouter);
+app.use('/', fetchUserPostRouter);
 
 // Firebase Functions로 배포
 export const ApiRouter = onRequest(app);

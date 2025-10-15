@@ -9,7 +9,7 @@ import { postConverter, PostData } from "./utils/postType";
 
 const router = express.Router();
 
-router.post('/post', async (req: Request, res: Response) => {
+router.post('/post/user', async (req: Request, res: Response) => {
     try {
         // 사용량 제한
         const user = req.get('x-user-uid');
@@ -25,21 +25,26 @@ router.post('/post', async (req: Request, res: Response) => {
         }
 
         // 포스트 요청
-        const { pageParam, pageSize } = req.body;
+        const { pageUid, imageOnly, pageParam, pageSize } = req.body;
 
         const ps = Math.min(Math.max(Number(pageSize) || 10, 1), 50);
 
         const postRef = adminDb.collection('posts').withConverter(postConverter);
 
         let firstQuery = postRef
-            .where('notice', '==', false)
+            .where('userId', '==', pageUid)
             .where(Filter.or(
                 Filter.where('public', '==', true),
                 Filter.where('userId', '==', user),
-            ))
-            .orderBy('createAt', 'desc')
-            .orderBy(admin.firestore.FieldPath.documentId(), 'desc')
-            .limit(ps + 1); // 필요한 수 만큼 데이터 가져오기
+            ));
+
+        if (imageOnly) {
+            firstQuery = firstQuery.where('hasImage', '==', true);
+        }
+
+        firstQuery = firstQuery.orderBy('createAt', 'desc')
+            .orderBy(admin.firestore.FieldPath.documentId(), 'desc') // 항상 마지막
+            .limit(ps + 1);
 
         if (pageParam) {
             const setCursor = new admin.firestore.Timestamp(
