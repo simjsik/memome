@@ -413,27 +413,6 @@ export const fetchPostList = async (
     pageParam: Timestamp | undefined,
 ) => {
     try {
-        const LimitResponse = await fetch(`/api/limit`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Project-Host': window.location.origin,
-                'x-csrf-token': csrfValue
-            },
-            credentials: "include",
-        });
-        const limitData = await LimitResponse.json();
-        if (!LimitResponse.ok) {
-            if (LimitResponse.status === 400) {
-                throw new Error('사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.');
-            }
-            if (LimitResponse.status === 403) {
-                throw new Error('데이터를 요청할 수 없습니다.');
-            } else {
-                throw new Error(limitData.message || '데이터 요청에 실패했습니다.');
-            }
-        }
-
         const startAfterParam = pageParam
             ?
             new Timestamp(pageParam.seconds, pageParam.nanoseconds)// 변환
