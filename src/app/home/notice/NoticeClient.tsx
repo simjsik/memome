@@ -271,7 +271,7 @@ export default function ClientNotice() {
                                                 alt="포스트 이미지"
                                                 fill
                                                 css={css`object-fit: cover`} />
-                                            {post.images &&
+                                            {post.hasImage &&
                                                 <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
                                             }
                                         </div>

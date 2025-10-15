@@ -1,19 +1,17 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { adminState, ImagePostData, loadingState, PostData, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
+import { ImagePostData, loadingState, PostData, UsageLimitState, UsageLimitToggle, userData, userState } from "@/app/state/PostState";
 import { css, useTheme } from "@emotion/react";
 import { motion } from "framer-motion";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { startTransition, useEffect, useRef, useState } from "react";
 import { UserPostWrap } from "./userStyle";
-import { db } from "@/app/DB/firebaseConfig";
-import { deleteDoc, doc, getDoc, Timestamp } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { usePathname, useRouter } from "next/navigation";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
-import { fetchImageList, fetchPostList } from "@/app/utils/fetchPostData";
 import LoadingWrap from "@/app/components/LoadingWrap";
 import { btnVariants } from "@/app/styled/motionVariant";
 import { formatDate } from "@/app/utils/formatDate";
@@ -21,6 +19,7 @@ import useOutsideClick from "@/app/hook/OutsideClickHook";
 import { cleanHtml } from "@/app/utils/CleanHtml";
 import LoadLoading from "@/app/components/LoadLoading";
 import Image from "next/image";
+import { useDelPost } from "../../post/hook/useNewPostMutation";
 
 interface ClientUserProps {
     user: userData,
@@ -37,7 +36,6 @@ interface FetchImageListResponse {
 
 export default function UserClient({ user }: ClientUserProps) {
     const theme = useTheme();
-    const isAdmin = useRecoilValue(adminState);
     const router = useRouter();
     const pathName = usePathname();
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
@@ -71,17 +69,30 @@ export default function UserClient({ user }: ClientUserProps) {
         retry: false,
         queryKey: ['postList', uid as string],
         queryFn: async ({ pageParam }) => {
-            try {
-                return fetchPostList(uid as string, pageParam);
-            } catch (error) {
-                if (error instanceof Error) {
-                    console.error("일반 오류 발생:", error.message);
-                    throw error;
-                } else {
-                    console.error("알 수 없는 에러 유형:", error);
-                    throw new Error("알 수 없는 에러가 발생했습니다.");
-                }
+            const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+            const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+
+            const response = await fetch(`/api/post/user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Project-Host': window.location.origin,
+                    'x-csrf-token': csrfValue
+                },
+                body: JSON.stringify({ pageUid: uid, imageOnly: false, pageParam, pageSize: 8 }),
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                // 상태별 메시지
+                if (response.status === 429) throw new Error('요청 한도를 초과했어요.');
+                if (response.status === 403) throw new Error('유저 인증이 필요합니다.');
+                const msg = await response.text().catch(() => '');
+                throw new Error(msg || `요청 실패 (${response.status})`);
             }
+
+            const data = await response.json();
+            return data
         },
         getNextPageParam: (lastPage) => lastPage.nextPage,
         staleTime: 5 * 60 * 1000,
@@ -106,17 +117,31 @@ export default function UserClient({ user }: ClientUserProps) {
         enabled: !postTab,
         queryKey: ['ImagePostList', uid as string],
         queryFn: async ({ pageParam }) => {
-            try {
-                return fetchImageList(uid as string, pageParam);
-            } catch (error) {
-                if (error instanceof Error) {
-                    console.error("일반 오류 발생:", error.message);
-                    throw error;
-                } else {
-                    console.error("알 수 없는 에러 유형:", error);
-                    throw new Error("알 수 없는 에러가 발생했습니다.");
-                }
+            const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+            const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+
+            const response = await fetch(`/api/post/user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Project-Host': window.location.origin,
+                    'x-csrf-token': csrfValue
+                },
+
+                body: JSON.stringify({ pageUid: uid, imageOnly: true, pageParam, pageSize: 8 }),
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                // 상태별 메시지
+                if (response.status === 429) throw new Error('요청 한도를 초과했어요.');
+                if (response.status === 403) throw new Error('유저 인증이 필요합니다.');
+                const msg = await response.text().catch(() => '');
+                throw new Error(msg || `요청 실패 (${response.status})`);
             }
+
+            const data = await response.json();
+            return data
         },
         getNextPageParam: (lastPage) => lastPage.nextPage,
         staleTime: 5 * 60 * 1000,
@@ -192,32 +217,11 @@ export default function UserClient({ user }: ClientUserProps) {
         setLoading(false); // 초기 로딩 해제
     }, [])
 
-    // 포스트 삭제
+    const { mutate: handledeletePost } = useDelPost();
     const deletePost = async (postId: string) => {
-        try {
-            // 게시글 존재 확인
-            const postDoc = await getDoc(doc(db, 'posts', postId));
-            if (!postDoc.exists()) {
-                alert('해당 게시글을 찾을 수 없습니다.')
-                return;
-            }
-
-            const postOwnerId = postDoc.data()?.userId;
-
-            // 삭제 권한 확인
-            if (currentUser.uid === postOwnerId || isAdmin) {
-                const confirmed = confirm('게시글을 삭제 하시겠습니까?')
-                if (!confirmed) return;
-
-                await deleteDoc(doc(db, 'posts', postId));
-                alert('게시글이 삭제 되었습니다.');
-            } else {
-                alert('게시글 삭제 권한이 없습니다.');
-            }
-        } catch (error) {
-            console.error('게시글 삭제 중 오류가 발생했습니다.' + error)
-            alert('게시글 삭제 중 오류가 발생했습니다.')
-        }
+        const confirmed = confirm('게시글을 삭제 하시겠습니까?')
+        if (!confirmed) return;
+        handledeletePost(postId)
     }
 
     const handlePostClick = (postId: string) => { // 해당 포스터 페이지 이동
@@ -367,7 +371,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                                             alt="포스트 이미지"
                                                             fill
                                                             css={css`object-fit: cover`} />
-                                                        {post.images &&
+                                                        {post.hasImage &&
                                                             <div className='post_pr_more' css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
                                                         }
                                                     </div>
@@ -414,7 +418,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                 </NoMorePost>
                             }
                             {
-                                (!hasNextPage && !loading && !postLoading) &&
+                                (!hasNextPage && !loading && !postLoading && !postError) &&
                                 <>
                                     {
                                         (userPostList.length === 0 && !loading) ?
@@ -474,7 +478,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                 </NoMorePost>
                             }
                             {
-                                (!hasNextPage && !loading && !imageLoading) &&
+                                (!hasNextPage && !loading && !imageLoading && !imageError) &&
                                 <>
                                     {
                                         (userImageList.length === 0 && !loading) ?
