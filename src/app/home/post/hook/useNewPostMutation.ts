@@ -1,5 +1,5 @@
 'use client';
-import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PostData } from '../../../state/PostState';
 import { Timestamp } from "firebase/firestore";
 
@@ -50,8 +50,52 @@ export function useAddNewPost(checkedNotice: boolean) {
     });
 }
 
+
+
 export function useDelPost() {
     const queryClient = useQueryClient();
+
+    type PageParam = { data: PostData[]; nextPage: Timestamp | undefined };
+    type InfData = InfiniteData<PageParam>;
+
+    const removePostFromInfinite = (
+        old: InfData | undefined,
+        postId: string,
+    ): InfData | undefined => {
+        if (!old) return old;
+        const updatedPages = old.pages.map((page) => ({
+            data: page.data.filter((post) => post.id !== postId),
+            nextPage: page.nextPage,
+        })); // 각 페이지 별로 돌면서 일치하는 포스트 삭제
+
+        const keptIdx: number[] = [];
+
+        const compactedPages = updatedPages.filter((page, i) => {
+            const keep = page.data.length > 0;
+            if (keep) keptIdx.push(i);
+            return keep;
+        });
+
+        const compactedPageParams = old.pageParams.filter((_, i) =>
+            keptIdx.includes(i)
+        );
+
+        return { pages: compactedPages, pageParams: compactedPageParams };
+    };
+
+    const patchAllByPrefix = (
+        prefix: QueryKey,
+        updater: (old: InfData | undefined) => InfData | undefined
+    ) => {
+        const targets = queryClient.getQueriesData<InfData>({
+            queryKey: prefix,
+            exact: false,
+        });
+
+        targets.forEach(([queryKey]) => {
+            queryClient.setQueryData<InfData>(queryKey, updater);
+        });
+    };
 
     return useMutation<string, Error, string>({
         mutationFn: async (postId: string) => {
@@ -81,27 +125,18 @@ export function useDelPost() {
             return;
         },
         onSuccess: (postId) => {
-            ['posts', 'notices', 'bookmarks'].forEach((key) => {
-                queryClient.setQueryData<InfiniteData<{ data: PostData[]; nextPage: Timestamp | undefined }>>(
-                    [key], (old) => {
-                        if (!old) return old;
+            const updater = (old?: InfData) => removePostFromInfinite(old, postId);
 
-                        // 모든 페이지 순회하며 post.id === postId 인 항목만 걸러내기
-                        const updatedPages = old.pages.map((page) => ({
-                            data: page.data.filter((post) => post.id !== postId),
-                            nextPage: page.nextPage,
-                        }));
+            const prefixes: QueryKey[] = [
+                ['posts'],
+                ['notices'],
+                ['bookmarks'],
+                ['postList'],
+                ['ImagePostList'],
+            ];
 
-                        // 빈 페이지는 제거하거나, 빈 배열을 유지할지 결정
-                        const filteredPages = updatedPages.filter((page) => page.data.length > 0);
+            prefixes.forEach((p) => patchAllByPrefix(p, updater));
 
-                        return {
-                            pages: filteredPages,
-                            pageParams: old.pageParams, // 커서는 그대로 유지
-                        };
-                    }
-                );
-            });
             alert('삭제되었습니다');
         },
     });

@@ -13,7 +13,7 @@ export interface PostData {
     userId: string;
     content: string;
     thumbnail?: ImageUrls;
-    images: boolean;
+    hasImage?: boolean;
     createAt: Timestamp;
     commentCount: number,
     notice: boolean,
