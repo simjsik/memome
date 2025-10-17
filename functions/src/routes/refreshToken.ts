@@ -169,13 +169,14 @@ router.post('/refresh', async (req: Request, res: Response) => {
         const payload = { uid, jti };
 
         const admin = decodedToken.roles?.admin === true;
+        const hasGuest = decodedToken.roles?.hasGuest === true;
 
         if (!SECRET || !CSRF_SECRET) {
             console.error("JWT 비밀 키 확인 불가");
             return res.status(401).json({ message: "JWT 비밀 키 확인 불가" });
         }
 
-        const refreshUserToken = jwt.sign({ ...payload, admin }, SECRET, { expiresIn: '1h' });
+        const refreshUserToken = jwt.sign({ ...payload, admin, hasGuest }, SECRET, { expiresIn: '1h' });
         const refreshCsrfToken = jwt.sign(
             { ...payload, nonce: randomBytes(32).toString("hex"), type: 'csrf' },
             CSRF_SECRET,

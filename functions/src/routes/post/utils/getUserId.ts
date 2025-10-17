@@ -1,11 +1,11 @@
-import { PostData } from "./postType";
+import { fromPostData } from "./postType";
 
 /**
  * @param {postDoc<PostData>} postDoc
  * @return {userId<string[]>}
  */
 export function extractUniqueUserIds(
-    postDoc: FirebaseFirestore.QueryDocumentSnapshot<PostData>[]
+    postDoc: FirebaseFirestore.QueryDocumentSnapshot<fromPostData>[]
 ): string[] {
     const userId = Array.from(new Set(postDoc.map((d) => d.data().userId)));
 
@@ -16,7 +16,7 @@ export function extractUniqueUserIds(
  * @param {postDoc<PostData>} posts
  * @return {userId<string[]>}
  */
-export function extractUniqueUserIdsFromPosts(posts: PostData[]): string[] {
+export function extractUniqueUserIdsFromPosts(posts: fromPostData[]): string[] {
     return Array.from(
         new Set(posts.map((p) => p.userId).filter((v): v is string => typeof v === 'string' && v.length > 0))
     );

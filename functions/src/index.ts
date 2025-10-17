@@ -18,13 +18,14 @@ import updateProfileRouter from "./routes/updateProfile";
 import uploadPostRouter from "./routes/post/uploadPost";
 import deletePostRouter from "./routes/post/deletePost";
 import createCustomTokenRouter from "./routes/createCustomToken";
+import fetchNewPostRouter from "./routes/update/userUpdate";
 import fetchPostRouter from "./routes/post/mainPost";
 import fetchNoticeRouter from "./routes/post/noticePost";
 import fetchBookmarkRouter from "./routes/post/bookmarkPost";
 import fetchUserPostRouter from "./routes/post/userPost";
 import { adminDb } from "./DB/firebaseAdminConfig";
 import { UserRecord } from "firebase-admin/auth";
-import { PostData } from "./routes/post/utils/postType";
+import { fromPostData } from "./routes/post/utils/postType";
 
 const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL;
 
@@ -35,7 +36,7 @@ const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL;
  * @param {any} postData - 포스트 데이터 (title, notice 등 포함)
  * @return {Promise<void>} - 알림 전송 작업의 완료 여부
  */
-async function sendNotice(postId: string, postData: PostData) {
+async function sendNotice(postId: string, postData: fromPostData) {
   try {
     const response = await fetch(`${SOCKET_SERVER_URL}/notice`, {
       method: "POST",
@@ -156,7 +157,7 @@ export const setHasUpdateFlag = onDocumentCreated("posts/{postId}", async (event
   const authorUser = postData.userId;
 
   if (postData.notice) {
-    await sendNotice(postId, postData as PostData);
+    await sendNotice(postId, postData as fromPostData);
     try {
       const batch = db.batch();
 
@@ -260,6 +261,7 @@ app.use('/', updateProfileRouter);
 app.use('/', uploadPostRouter);
 app.use('/', deletePostRouter);
 
+app.use('/', fetchNewPostRouter);
 app.use('/', fetchPostRouter);
 app.use('/', fetchNoticeRouter);
 app.use('/', fetchBookmarkRouter);

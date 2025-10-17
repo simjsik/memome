@@ -3,20 +3,21 @@ import { adminDb } from "../../DB/firebaseAdminConfig";
 import admin from 'firebase-admin';
 import { getCachedUserBatch } from "../post/utils/getCachedUser";
 import { extractUniqueUserIds } from "../post/utils/getUserId";
-import { postConverter, PostData } from "../post/utils/postType";
+import { postConverter, toPostData } from "../post/utils/postType";
 
 const router = express.Router();
 
 router.post('/update/post', async (req: Request, res: Response) => {
-    const { newest, newestId, hasGuest } = req.body;
+    const { newest, newestId } = req.body;
     const uid = req.headers['x-user-uid'];
+    const hasGuest = req.headers['x-user-guest'];
 
     if (!uid || typeof uid !== 'string') {
         return res.status(401).json({ message: '인증 정보가 없습니다.' });
     }
 
     try {
-        const docRef = hasGuest ? adminDb.doc(`guests/${uid}/status/postUpdates`) : adminDb.doc(`users/${uid}/status/postUpdates`);
+        const docRef = hasGuest === 'true' ? adminDb.doc(`guests/${uid}/status/postUpdates`) : adminDb.doc(`users/${uid}/status/postUpdates`);
 
         const postRef = adminDb.collection('posts').withConverter(postConverter);
 
@@ -34,19 +35,19 @@ router.post('/update/post', async (req: Request, res: Response) => {
                 tx.set(docRef, { lastSeenAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
             });
 
-            return res.json({
+            return res.status(201).json({
                 message: "새 포스트 없음",
                 data: [],
             });
         }
 
         const querySnapshot = await postsQuery.get();
-        if (!querySnapshot.empty) {
+        if (querySnapshot.empty) {
             await adminDb.runTransaction(async (tx) => {
                 tx.set(docRef, { lastSeenAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
             });
 
-            return res.json({
+            return res.status(201).json({
                 message: "새 포스트 없음",
                 data: [],
             });
@@ -57,7 +58,7 @@ router.post('/update/post', async (req: Request, res: Response) => {
         const userId = extractUniqueUserIds(postDoc);
         const profileMap = await getCachedUserBatch(userId);
 
-        const ascPosts: PostData[] = postDoc.map((document) => {
+        const ascPosts: toPostData[] = postDoc.map((document) => {
             const postData = document.data();
             const profile = profileMap.get(postData.userId) ?? {
                 displayName: "Unknown User",
@@ -70,6 +71,7 @@ router.post('/update/post', async (req: Request, res: Response) => {
                 ...postData,
                 displayName: profile.displayName,
                 photoURL: profile.photoURL,
+                createAt: postData.createAt.toMillis(),
             };
         });
 
@@ -79,7 +81,7 @@ router.post('/update/post', async (req: Request, res: Response) => {
             tx.set(docRef, { lastSeenAt: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
         });
 
-        return res.json({
+        return res.status(200).json({
             message: "포스트 요청 성공",
             data: postWithUser,
         });
@@ -88,3 +90,5 @@ router.post('/update/post', async (req: Request, res: Response) => {
         return res.status(500).json({ message: "포스트 요청 실패" });
     }
 });
+
+export default router;

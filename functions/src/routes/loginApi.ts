@@ -76,7 +76,7 @@ router.post('/login', async (req: Request, res: Response) => {
 
         const payload = { uid, jti };
 
-        const userToken = jwt.sign({ ...payload, admin }, SECRET, { expiresIn: '1h' });
+        const userToken = jwt.sign({ ...payload, admin, hasGuest }, SECRET, { expiresIn: '1h' });
         const csrfToken = jwt.sign(
             { ...payload, nonce: randomBytes(32).toString("hex"), type: 'csrf' },
             CSRF_SECRET,

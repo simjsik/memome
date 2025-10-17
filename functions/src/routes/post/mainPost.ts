@@ -5,7 +5,7 @@ import admin from 'firebase-admin';
 import { getCachedUserBatch } from "./utils/getCachedUser";
 import { extractUniqueUserIds } from "./utils/getUserId";
 import { usageLimit } from "./utils/useageLimit";
-import { postConverter, PostData } from "./utils/postType";
+import { postConverter, toPostData } from "./utils/postType";
 
 const router = express.Router();
 
@@ -42,10 +42,7 @@ router.post('/post', async (req: Request, res: Response) => {
             .limit(ps + 1); // 필요한 수 만큼 데이터 가져오기
 
         if (pageParam) {
-            const setCursor = new admin.firestore.Timestamp(
-                pageParam.createAt.seconds,
-                pageParam.createAt.nanoseconds
-            );
+            const setCursor = Timestamp.fromMillis(pageParam.createAt);
 
             firstQuery = firstQuery.startAfter(setCursor, pageParam.id);
         }
@@ -59,7 +56,7 @@ router.post('/post', async (req: Request, res: Response) => {
         const userId = extractUniqueUserIds(postDoc);
         const profileMap = await getCachedUserBatch(userId);
 
-        const postWithUser: PostData[] = postDoc.map((document) => {
+        const postWithUser: toPostData[] = postDoc.map((document) => {
             const postData = document.data();
             const profile = profileMap.get(postData.userId) ?? {
                 displayName: "Unknown User",
@@ -67,21 +64,23 @@ router.post('/post', async (req: Request, res: Response) => {
                     'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
             };
 
+
             return {
                 id: document.id,
                 ...postData,
                 displayName: profile.displayName,
                 photoURL: profile.photoURL,
+                createAt: postData.createAt.toMillis(),
             };
         });
 
         const lastVisible = postWithUser ? postWithUser.at(-1) : null; // 마지막 문서
 
-        return res.json({
+        return res.status(200).json({
             message: "포스트 요청 성공",
             data: postWithUser,
             nextPage: hasMore && lastVisible ?
-                { id: lastVisible.id, createAt: lastVisible.createAt as Timestamp } : undefined,
+                { id: lastVisible.id, createAt: lastVisible.createAt as number } : undefined,
         });
     } catch (error) {
         console.error("포스트 요청 실패:", error);

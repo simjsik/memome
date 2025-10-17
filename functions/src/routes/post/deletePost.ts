@@ -16,13 +16,17 @@ router.delete('/post/delete', async (req: Request, res: Response) => {
         const postSnap = await postRef.get();
 
         if (!postSnap.exists) {
-            throw new Error('존재하지 않는 포스트');
+            return res.status(404).json({
+                message: "존재하지 않는 포스트입니다",
+            });
         }
 
         const postData = postSnap.data();
 
-        if (postData?.userId !== user && !admin) {
-            throw new Error('작성자 불일치');
+        if (postData?.userId !== user && admin !== 'true') {
+            return res.status(403).json({
+                message: "삭제 권한이 없습니다",
+            });
         }
 
         if (postData?.thumbnail) {

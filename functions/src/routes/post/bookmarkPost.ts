@@ -3,7 +3,7 @@ import { adminDb } from "../../DB/firebaseAdminConfig";
 import admin from 'firebase-admin';
 import { getCachedUserBatch } from "./utils/getCachedUser";
 import { extractUniqueUserIdsFromPosts } from "./utils/getUserId";
-import { postConverter, PostData } from "./utils/postType";
+import { fromPostData, postConverter, toPostData } from "./utils/postType";
 import { usageLimit } from "./utils/useageLimit";
 
 const router = express.Router();
@@ -33,7 +33,7 @@ router.post('/post/bookmark', async (req: Request, res: Response) => {
             .orderBy('bookmarkedAt', 'desc')
             .orderBy(admin.firestore.FieldPath.documentId(), 'desc');
 
-        const results: PostData[] = [];
+        const results: fromPostData[] = [];
 
         let totalExamined = 0;
         let hasMoreBookmarks = true;
@@ -64,7 +64,7 @@ router.post('/post/bookmark', async (req: Request, res: Response) => {
                     const s = map.get(id);
                     if (!s || !s.exists) continue;
 
-                    const data = s.data() as PostData;
+                    const data = s.data() as fromPostData;
 
                     // 5) 가시성 필터: 공지 제외 + 공개 or 내 글
                     if (!(data.public === true || data.userId === user)) continue;
@@ -82,7 +82,8 @@ router.post('/post/bookmark', async (req: Request, res: Response) => {
         const userId = extractUniqueUserIdsFromPosts(results);
         const profileMap = await getCachedUserBatch(userId);
 
-        const postWithUser: PostData[] = results.map((post) => {
+        const postWithUser: toPostData[] = results.map((post) => {
+            const createAt = post.createAt;
             const profile = profileMap.get(post.userId) ?? {
                 displayName: "Unknown User",
                 photoURL:
@@ -93,12 +94,13 @@ router.post('/post/bookmark', async (req: Request, res: Response) => {
                 ...post,
                 displayName: profile.displayName,
                 photoURL: profile.photoURL,
+                createAt: createAt.toMillis(),
             };
         });
 
         const lastVisible = postWithUser ? postWithUser.at(-1) : null; // 마지막 문서
 
-        return res.json({
+        return res.status(200).json({
             message: "포스트 요청 성공",
             data: postWithUser,
             nextPage: hasMoreBookmarks && lastVisible ? bookmarkId.length + postWithUser.length : undefined,
