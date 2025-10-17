@@ -17,7 +17,6 @@ const useUpdateChecker = () => {
                 if (polling) return;
 
                 if (!currentUser.uid) return setHasUpdate(false);
-                console.log('폴링중')
 
                 polling = true;
 

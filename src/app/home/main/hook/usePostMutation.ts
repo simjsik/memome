@@ -14,7 +14,8 @@ export function useAddUpdatePost(options?: { onAcknowledge?: () => void }) {
                 const csrfValue = csrf ? decodeURIComponent(csrf) : '';
 
                 const cached = queryClient.getQueryData<InfiniteData<{ data: PostData[], nextPage?: Timestamp }>>(['posts']);
-                const newest = cached?.pages?.[0]?.data?.[0]?.createAt?.toMillis() ?? null;
+
+                const newest = cached?.pages?.[0]?.data?.[0]?.createAt;
                 const newestId = cached?.pages?.[0]?.data?.[0]?.id ?? null;
 
                 const response = await fetch(`/api/update/post`, {
@@ -36,9 +37,9 @@ export function useAddUpdatePost(options?: { onAcknowledge?: () => void }) {
                     throw new Error(msg || `요청 실패 (${response.status})`);
                 }
 
-                const { data: updatePostlist } = await response.json();
+                const { data: postWithUser } = await response.json();
 
-                return updatePostlist
+                return postWithUser
                 // 업데이트 플래그 초기화
             } catch (error) {
                 console.error("Error fetching new posts:", error);
