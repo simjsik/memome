@@ -434,6 +434,7 @@ export async function middleware(req: NextRequest) {
     } else {
         requestHeaders.set("x-user-uid", String(userPayload!.uid));
         requestHeaders.set("x-user-admin", String(userPayload!.admin));
+        if (userPayload!.hasGuest === true) requestHeaders.set('x-user-guest', String(userPayload!.hasGuest));
     }
     requestHeaders.set('x-csp-nonce', nonce); // 요청헤더 
 
