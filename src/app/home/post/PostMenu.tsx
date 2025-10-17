@@ -767,9 +767,9 @@ export default function PostMenu() {
     const [postTitle, setPostTitle] = useRecoilState<string | null>(PostTitleState);
     const [posting, setPosting] = useRecoilState<string | null>(PostContentState);
     const [selectTag, setSelectedTag] = useRecoilState<string>(PostTagState);
-    const [checkedPrivate, setPrivate] = useRecoilState<boolean>(PostPublicState);
+    const [checkedPublic, setPublic] = useRecoilState<boolean>(PostPublicState);
     const [titleError, setTitleError] = useState<string>('');
-    const [postDate, setPostDate] = useState<string>('');
+    const [postDate, setPostDate] = useState<number>(0);
     const [confirmed, setConfirmed] = useState<boolean>(false);
     const [checkedNotice, setCheckedNotice] = useState<boolean>(false);
     const setLoading = useSetRecoilState<boolean>(loadingState);
@@ -937,11 +937,11 @@ export default function PostMenu() {
         }
     }
 
-    const handleCheckedPrivate = () => {
-        if (checkedPrivate) {
-            setPrivate(false);
+    const handleCheckedPublic = () => {
+        if (checkedPublic) {
+            setPublic(false);
         } else {
-            setPrivate(true);
+            setPublic(true);
         }
     }
 
@@ -975,9 +975,9 @@ export default function PostMenu() {
                 tag: selectTag,
                 title: postTitle as string,
                 content: posting as string,
-                date: new Date(),
+                date: Date.now(),
                 images: imageUrls,
-                public: checkedPrivate
+                public: checkedPublic
             }
 
             saveUnsavedPost(unsavedPost)
@@ -1050,7 +1050,7 @@ export default function PostMenu() {
                     title: postTitle,
                     content: posting,
                     tag: selectTag,
-                    public: checkedPrivate,
+                    public: checkedPublic,
                     notice: checkedNotice,
                     imageUrls: imageUrls.length > 0 ? imageUrls : null,
                 })
@@ -1296,6 +1296,7 @@ export default function PostMenu() {
         '1.25rem': '20px',
         '1.375rem': '22px',
     };
+
     useEffect(() => {
         if (!quillLoaded) return;
         const editor = quillRef.current?.getEditor();
@@ -1335,13 +1336,13 @@ export default function PostMenu() {
             if (savedData.image) {
                 setImageUrls(savedData.image);
             }
-            setPrivate(savedData.public);
+            setPublic(savedData.public);
             setStorageLoad(false); // 로드 후 제한
         } else {
             setPostTitle('');
             setPosting('');
             setImageUrls([]);
-            setPrivate(false);
+            setPublic(false);
             setStorageLoad(false); // 로드 후 제한
         }
         localStorage.removeItem('unsavedPost');
@@ -1358,9 +1359,9 @@ export default function PostMenu() {
                             tag: selectTag,
                             title: postTitle as string,
                             content: posting as string,
-                            date: new Date(),
+                            date: Date.now(),
                             images: imageUrls,
-                            public: checkedPrivate
+                            public: checkedPublic
                         }
 
                         saveUnsavedPost(unsavedPost)
@@ -1397,9 +1398,9 @@ export default function PostMenu() {
                         tag: selectTag,
                         title: postTitle as string,
                         content: posting as string,
-                        date: new Date(),
+                        date: Date.now(),
                         images: imageUrls,
-                        public: checkedPrivate
+                        public: checkedPublic
                     }
 
                     saveUnsavedPost(unsavedPost)
@@ -1413,7 +1414,7 @@ export default function PostMenu() {
         const savedData = JSON.parse(localStorage.getItem('unsavedPost')!);
         setImageUrls([])
         if (savedData) {
-            setPostDate(savedData.date)
+            setPostDate(Number(savedData.date));
         }
         if (savedData) setConfirmed(true);
 
@@ -1488,7 +1489,7 @@ export default function PostMenu() {
 
     return (
         <>
-            <QuillStyle notice={checkedNotice} public={checkedPrivate}>
+            <QuillStyle notice={checkedNotice} public={checkedPublic}>
                 <div className='quill_wrap'>
                     <button className='go_main_btn' onClick={handleLeavePosting}>
                         <motion.div
@@ -1882,10 +1883,10 @@ export default function PostMenu() {
                     }
                     <motion.button
                         variants={btnVariants(theme)}
-                        whileHover={checkedPrivate ? "NtcHover" : "NtcOffHover"}
-                        whileTap={checkedPrivate ? "NtcClick" : "NtcOffClick"}
-                        className='public_btn' onClick={handleCheckedPrivate}>
-                        {checkedPrivate ?
+                        whileHover={checkedPublic ? "NtcHover" : "NtcOffHover"}
+                        whileTap={checkedPublic ? "NtcClick" : "NtcOffClick"}
+                        className='public_btn' onClick={handleCheckedPublic}>
+                        {checkedPublic ?
                             <>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40">
                                     <g>

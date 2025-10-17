@@ -14,7 +14,7 @@ export interface PostData {
     content: string;
     thumbnail?: ImageUrls;
     hasImage?: boolean;
-    createAt: Timestamp;
+    createAt: number;
     commentCount: number,
     notice: boolean,
     public: boolean,
@@ -33,7 +33,7 @@ export interface unsavedPostData {
     title: string;
     content: string;
     images?: ImageUrls[];
-    date: Date;
+    date: number;
     public: boolean;
 }
 

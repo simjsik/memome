@@ -9,7 +9,7 @@ export const saveUnsavedPost = (postData: unsavedPostData) => {
             tag: postData.tag,
             title: postData.title,
             content: postData.content,
-            date: new Date(),
+            date: Date.now(),
             images: postData.images,
             public: postData.public,
         };

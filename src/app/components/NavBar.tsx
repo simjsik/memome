@@ -190,7 +190,7 @@ export default function NavBar() {
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle);
     const [hasGuest, setHasGuest] = useRecoilState(hasGuestState);
     const postTitle = useRecoilValue<string | null>(PostTitleState);
-    const checkedPrivate = useRecoilValue<boolean>(PostPublicState);
+    const checkedPublic = useRecoilValue<boolean>(PostPublicState);
     const posting = useRecoilValue<string | null>(PostContentState);
     const imageUrls = useRecoilValue<ImageUrls[]>(ImageUrlsState);
     const selectTag = useRecoilValue<string>(PostTagState);
@@ -228,9 +228,9 @@ export default function NavBar() {
                 tag: selectTag,
                 title: postTitle ? postTitle : '',
                 content: posting ? posting : '',
-                date: new Date(),
+                date: Date.now(),
                 images: imageUrls,
-                public: checkedPrivate,
+                public: checkedPublic,
             }
 
             saveUnsavedPost(unsavedPost)
