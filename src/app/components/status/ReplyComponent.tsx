@@ -1,16 +1,14 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { Reply, useAddReply, useDelReply } from "@/app/hook/CommentMutate";
-import { repliesToggleState, UsageLimitState, userState } from "@/app/state/PostState";
+import { useAddReply, useDelComment } from "@/app/hook/CommentMutate";
+import { Comment, repliesToggleState, UsageLimitState, userState } from "@/app/state/PostState";
 import { formatDate } from "@/app/utils/formatDate";
 import { css } from "@emotion/react";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import LoadingWrap from "../LoadingWrap";
-import { fetchReplies } from "@/app/utils/fetchPostData";
-import { Timestamp } from "firebase/firestore";
 
 interface ReplyProps {
     postId: string;
@@ -22,9 +20,6 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
     const [replyText, setReplyText] = useState<string>('')
     const [activeReply, setActiveReply] = useState<string | null>(null); // 활성화된 답글 ID
     const [repliesToggle, setReplieToggle] = useRecoilState(repliesToggleState(commentId));
-
-    const [dataLoading, setDataLoading] = useState<boolean>(false);
-
     const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
 
     const {
@@ -36,34 +31,39 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
         isError,  // 에러 상태
         error,    // 에러 메시지
     } = useInfiniteQuery<
-        { data: Reply[]; nextPage: Timestamp | undefined }, // TQueryFnData
+        { data: Comment[]; nextPage: number | undefined }, // TQueryFnData
         Error, // TError
-        InfiniteData<{ data: Reply[]; nextPage: Timestamp | undefined }>,
+        InfiniteData<{ data: Comment[]; nextPage: number | undefined }>,
         string[], // TQueryKey
-        Timestamp | undefined // TPageParam
+        number | undefined // TPageParam
     >({
         retry: false,
         queryKey: ['replies', postId, commentId],
         queryFn: async ({ pageParam }) => {
-            try {
-                setDataLoading(true);
+            const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+            const csrfValue = csrf ? decodeURIComponent(csrf) : '';
 
-                return fetchReplies(
-                    postId,
-                    commentId,
-                    pageParam, // 시작 인덱스
-                );
-            } catch (error) {
-                if (error instanceof Error) {
-                    console.error("일반 오류 발생:", error.message);
-                    throw error;
-                } else {
-                    console.error("알 수 없는 에러 유형:", error);
-                    throw new Error("알 수 없는 에러가 발생했습니다.");
-                }
-            } finally {
-                setDataLoading(false);
+            const response = await fetch(`/api/post/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Project-Host': window.location.origin,
+                    'x-csrf-token': csrfValue
+                },
+                body: JSON.stringify({ pageParam, pageSize: 8, postId, commentId, needReply: true }),
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                // 상태별 메시지
+                if (response.status === 429) throw new Error('요청 한도를 초과했어요.');
+                if (response.status === 403) throw new Error('유저 인증이 필요합니다.');
+                const msg = await response.text().catch(() => '');
+                throw new Error(msg || `요청 실패 (${response.status})`);
             }
+
+            const data = await response.json();
+            return data
         },
         enabled: repliesToggle,
         getNextPageParam: (lastPage) => { return lastPage.data.length > 4 ? undefined : lastPage?.nextPage }, // 다음 페이지 인덱스 반환
@@ -91,14 +91,40 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
             }
 
             try {
-                const commentData =
-                    {
-                        parentId,
-                        replyId: commentId,
-                        commentText: text,
-                    } as Reply
+                const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+                const csrfValue = csrf ? decodeURIComponent(csrf) : '';
 
-                addReply(commentData);
+                const comment = {
+                    parentId,
+                    replyId: commentId,
+                    commentText: text,
+                    replyCount: 0,
+                } as Comment
+
+                const PostResponse = await fetch(`/api/comment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Project-Host': window.location.origin,
+                        'x-csrf-token': csrfValue
+                    },
+                    body: JSON.stringify({ comment, postId, reply: true }),
+                    credentials: "include",
+                });
+
+                if (!PostResponse.ok) {
+                    throw new Error(`포스트 업로드 실패 : ${PostResponse.status}`);
+                }
+
+                const commentData = await PostResponse.json();
+
+                if (commentData) {
+                    // 서버에서 업데이트 정보를 받으면 호출
+                    if (addReply && commentData.comment) {
+                        addReply(commentData.comment);
+                    }
+                }
+
                 setReplyText('');
                 setActiveReply(null);
             } catch (error) {
@@ -108,20 +134,12 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
         }
     }
 
-    const { mutate: delReply } = useDelReply(postId, commentId);
+    const { mutate: delComment } = useDelComment();
 
-    const handleDelReply = async (commentId: string) => {
-        if (user) {
-            const confirmed = confirm('댓글을 삭제 하시겠습니까?')
-            if (confirmed) {
-                try {
-                    delReply(commentId);
-                } catch (error) {
-                    console.error('댓글 삭제 중 오류 발생:', error);
-                    alert('댓글 삭제 중 오류가 발생했습니다.');
-                }
-            }
-        }
+    const handleDelReply = async (commentId: string, replyId: string) => {
+        const confirmed = confirm('댓글을 삭제 하시겠습니까?')
+        if (!confirmed) return;
+        delComment({ commentId, postId, replyId })
     }
 
     const toggleReply = (commentId: string) => {
@@ -155,15 +173,15 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                                         `}
                                     />
                                     <p className="memo_comment_user">{reply.displayName}</p>
-                                    <p className="memo_comment_uid">@{reply.uid.slice(0, 8)}...</p>
+                                    <p className="memo_comment_uid">@{reply.userId.slice(0, 8)}...</p>
                                     <button className="comment_delete_btn"
-                                        onClick={() => handleDelReply(reply.id)}>
+                                        onClick={() => handleDelReply(reply.parentId!, reply.id)}>
                                         <div className="comment_delete_icon"
                                             css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746003900/%EC%A7%80%EC%9B%8C%EB%B2%84%EB%A6%AC%EA%B8%B0_uiox61.svg)`}
                                         ></div>
                                     </button>
                                 </div>
-                                <span className="memo_reply_uid">@{reply.displayName}-{reply.uid.slice(0, 3)}...</span>
+                                <span className="memo_reply_uid">@{reply.displayName}-{reply.userId.slice(0, 3)}...</span>
                                 <p className="memo_reply">{reply.commentText}</p>
                                 <time className="memo_comment_date">{formatDate(reply.createAt)}</time>
                                 <button className="comment_reply_btn" onClick={() => toggleReply(reply.id)}>답글</button>
@@ -189,9 +207,9 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                     ))}
                 </>
             }
-            {dataLoading && <LoadingWrap />}
+            {isLoading && <LoadingWrap />}
             {((hasNextPage && repliesToggle) && !isFetchingNextPage) &&
-                <>{dataLoading ? <LoadingWrap /> : <button className="reply_more_btn" onClick={handleMoreReply}>더 보기</button>}</>
+                <>{isLoading ? <LoadingWrap /> : <button className="reply_more_btn" onClick={handleMoreReply}>더 보기</button>}</>
             }
         </>
     )

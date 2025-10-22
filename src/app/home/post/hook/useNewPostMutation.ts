@@ -1,7 +1,6 @@
 'use client';
 import { InfiniteData, QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PostData } from '../../../state/PostState';
-import { Timestamp } from "firebase/firestore";
 
 export function useAddNewPost(checkedNotice: boolean) {
     const queryClient = useQueryClient();
@@ -10,7 +9,7 @@ export function useAddNewPost(checkedNotice: boolean) {
         onMutate: async (newPost) => {
             const tag = checkedNotice ? 'notices' : 'posts';
 
-            queryClient.setQueryData<InfiniteData<{ data: PostData[]; nextPage: Timestamp | undefined }>>(
+            queryClient.setQueryData<InfiniteData<{ data: PostData[]; nextPage: number | undefined }>>(
                 [tag], (old) => {
                     if (!old) return old;
 
@@ -50,12 +49,10 @@ export function useAddNewPost(checkedNotice: boolean) {
     });
 }
 
-
-
 export function useDelPost() {
     const queryClient = useQueryClient();
 
-    type PageParam = { data: PostData[]; nextPage: Timestamp | undefined };
+    type PageParam = { data: PostData[]; nextPage: number | undefined };
     type InfData = InfiniteData<PageParam>;
 
     const removePostFromInfinite = (

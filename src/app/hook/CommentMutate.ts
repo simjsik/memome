@@ -1,48 +1,15 @@
 'use client';
 import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
-import { adminState, Comment, userState } from "../state/PostState";
-import { addDoc, collection, doc, getDoc, Timestamp, writeBatch } from "firebase/firestore";
-import { db } from "../DB/firebaseConfig";
-import { useRecoilValue } from "recoil";
-
-
-export interface Reply {
-    id: string;
-    replyId: string;
-    uid: string;
-    commentText: string;
-    createAt: Timestamp;
-    parentId: string | null;
-    displayName: string,
-    photoURL: string | null,
-}
+import { Comment } from "../state/PostState";
 
 export function useAddComment(
     postId: string,
 ) {
     const queryClient = useQueryClient();
-    const user = useRecoilValue(userState); // 사용자 정보 훅
 
     return useMutation<Comment, Error, Comment>({
-        mutationFn: async (newComment) => {
-            // firebase에 추가
-            const commentRef = await addDoc(collection(db, `posts/${postId}/comments`), {
-                ...newComment,
-                uid: user.uid,
-                createAt: Timestamp.now(),
-            });
-
-            return {
-                ...newComment,
-                id: commentRef.id,
-                uid: user.uid,
-                displayName: user.name,
-                photoURL: user.photo,
-                createAt: Timestamp.now(),
-            } as Comment;
-        },
-        onSuccess: (savedComment) => {
-            queryClient.setQueryData<InfiniteData<{ data: Comment[]; nextPage: Timestamp | undefined }>>(
+        onMutate: async (newComment) => {
+            queryClient.setQueryData<InfiniteData<{ data: Comment[]; nextPage: number | undefined }>>(
                 ['comments', postId],
                 (old) => {
                     if (!old) return old;
@@ -50,13 +17,22 @@ export function useAddComment(
                     return {
                         ...old,
                         pages: [
-                            { data: [...firstPage.data, savedComment], nextPage: firstPage.nextPage },
+                            { data: [...firstPage.data, newComment], nextPage: firstPage.nextPage },
                             ...rest,
                         ],
                         pageParams: old.pageParams,
                     };
                 }
             );
+        },
+        mutationFn: async (newComment: Comment) => {
+            try {
+                return newComment
+                // 업데이트 플래그 초기화
+            } catch (error) {
+                console.error("Error fetching new posts:", error);
+                throw error;
+            }
         },
     });
 }
@@ -65,36 +41,18 @@ export function useAddReply(
     postId: string,
 ) {
     const queryClient = useQueryClient();
-    const user = useRecoilValue(userState); // 사용자 정보 훅
 
-    return useMutation<Reply, Error, Reply>({
-        mutationFn: async (reply) => {
-            // firebase에 추가
-            const replyRef = await addDoc(collection(db, `posts/${postId}/comments/${reply.parentId}/reply`), {
-                ...reply,
-                uid: user.uid,
-                createAt: Timestamp.now(),
-            });
-
-            return {
-                ...reply,
-                id: replyRef.id,
-                uid: user.uid,
-                displayName: user.name,
-                photoURL: user.photo,
-                createAt: Timestamp.now(),
-            } as Reply;
-        },
-        onSuccess: (savedReply) => {
-            queryClient.setQueryData<InfiniteData<{ data: Reply[]; nextPage: Timestamp | undefined }>>(
-                ['replies', postId, savedReply.parentId],
+    return useMutation<Comment, Error, Comment>({
+        onMutate: async (newComment) => {
+            queryClient.setQueryData<InfiniteData<{ data: Comment[]; nextPage: number | undefined }>>(
+                ['replies', postId, newComment.parentId],
                 (old) => {
                     if (!old) return old;
                     const [firstPage, ...rest] = old.pages;
                     return {
                         ...old,
                         pages: [
-                            { data: [...firstPage.data, savedReply], nextPage: firstPage.nextPage },
+                            { data: [...firstPage.data, newComment], nextPage: firstPage.nextPage },
                             ...rest,
                         ],
                         pageParams: old.pageParams,
@@ -102,67 +60,13 @@ export function useAddReply(
                 }
             );
         },
-        onSettled: () => {
-            queryClient.invalidateQueries({
-                queryKey: ['comments', postId],
-            });
-        },
-    });
-}
-
-export function useDelComment(
-    postId: string,
-) {
-    const queryClient = useQueryClient();
-    const user = useRecoilValue(userState);
-    const ADMIN = useRecoilValue(adminState);
-
-    return useMutation<void, Error, string>({
-        onMutate: async (commentId) => {
-            queryClient.setQueryData<InfiniteData<{ data: Comment[], nextPage: Timestamp | undefined }>>(
-                ['comments', postId],
-                old => {
-                    if (!old) return old;
-                    return {
-                        ...old,
-                        pages: old.pages.map(p => ({
-                            ...p,
-                            data: p.data.filter(c => c.id !== commentId && c.parentId !== commentId)
-                        }))
-                    };
-                }
-            );
-        },
-        mutationFn: async (commentId) => {
-            const docRef = doc(db, 'posts', postId, 'comments', commentId);
-            const docSnapshot = await getDoc(docRef);
-            if (!docSnapshot.exists()) {
-                throw new Error("NF") // NOT FOUND
-            }
-            const commentData = docSnapshot.data();
-            const commentOwnerId = commentData.uid;
-
-            if (user.uid !== commentOwnerId &&!ADMIN) {
-                throw new Error('FB'); // FORBIDDEN
-            }
-
-            const confirmed = confirm('댓글을 삭제 하시겠습니까?')
-            if (!confirmed) return;
-
-            const batch = writeBatch(db);
-
-            batch.delete(docRef);
-
-            // 댓글 수 수정: 현재 댓글과 답글 수를 계산
-            await batch.commit();
-        },
-        onError: (err) => {
-            if (err.message === 'NF') {
-                return alert('해당 댓글을 찾을 수 없습니다.');
-            } else if (err.message === 'FB') {
-                return alert('삭제 권한이 없습니다.');
-            } else {
-                return alert('댓글 삭제에 실패했습니다.');
+        mutationFn: async (newComment) => {
+            try {
+                return newComment
+                // 업데이트 플래그 초기화
+            } catch (error) {
+                console.error("Error fetching new posts:", error);
+                throw error;
             }
         },
         onSettled: () => {
@@ -173,64 +77,80 @@ export function useDelComment(
     });
 }
 
-export function useDelReply(
-    postId: string,
-    parentId: string
-) {
+export function useDelComment() {
     const queryClient = useQueryClient();
-    const user = useRecoilValue(userState);
-    const ADMIN = useRecoilValue(adminState);
+    type PageParam = { data: Comment[]; nextPage: number | undefined };
+    type InfData = InfiniteData<PageParam>;
 
-    return useMutation<void, Error, string>({
-        onMutate: (replyId) => {
-            queryClient.setQueryData<InfiniteData<{ data: Reply[], nextPage: Timestamp | undefined }>>(
-                ['replies', postId, parentId],
-                old => {
-                    if (!old) return old;
-                    return {
-                        ...old,
-                        pages: old.pages.map(p => ({
-                            ...p,
-                            data: p.data.filter(r => r.id !== replyId)
-                        }))
-                    };
-                }
-            );
-        },
-        mutationFn: async (replyId) => {
-            const replyRef = doc(db, 'posts', postId, 'comments', parentId, 'reply', replyId);
-            const replySnap = await getDoc(replyRef);
-            if (!replySnap.exists()) {
-                throw new Error("NF") // NOT FOUND
+    const removeCompactInfinite = (
+        old: InfData | undefined,
+        targetId: string,
+    ): InfData | undefined => {
+        if (!old) return old;
+
+        const updatedPages = old.pages.map((page) => ({
+            data: page.data.filter((data) => data.id !== targetId),
+            nextPage: page.nextPage,
+        })); // 각 페이지 별로 돌면서 일치하는 포스트 제거
+
+        let lastNonEmptyIndex = -1;
+        for (let i = updatedPages.length - 1; i >= 0; i--) {
+            if (updatedPages[i].data.length > 0) {
+                lastNonEmptyIndex = i;
+                break // 데이터가 있는 첫 페이지 찾기.
             }
-            const replyData = replySnap.data();
-            const replyOwnerId = replyData.uid;
+        }
 
-            if (user.uid !== replyOwnerId && !ADMIN) {
-                throw new Error('FB'); // FORBIDDEN
-            }
+        const mappedPage = updatedPages.slice(0, lastNonEmptyIndex + 1);
+        const mappedParams = old.pageParams.slice(0, lastNonEmptyIndex + 1);
 
-            const batch = writeBatch(db);
-            batch.delete(replyRef);
+        return { pages: mappedPage, pageParams: mappedParams };
+    };
 
-            await batch.commit();
+    return useMutation<void, Error, { postId: string; commentId: string; replyId?: string }>({
+        mutationFn: async ({ postId, commentId, replyId }) => {
+            const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+            const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+
+            return replyId ? deleteReplyAPI(postId, commentId, replyId, csrfValue) :
+                deleteCommentAPI(postId, commentId, csrfValue);
         },
         onError: (err) => {
-            if (err.message === 'NF') {
-                return alert('해당 답글을 찾을 수 없습니다.');
-            } else if (err.message === 'FB') {
-                return alert('삭제 권한이 없습니다.');
-            } else {
-                return alert('답글 삭제에 실패했습니다.');
-            }
+            console.log('댓글 삭제 실패 :' + err);
+            alert('댓글 삭제에 실패했습니다.');
+            return;
         },
-        onSuccess: () => {
-            alert('삭제되었습니다');
-        },
-        onSettled: () => {
-            queryClient.invalidateQueries({
-                queryKey: ['comments', postId],
-            });
+        onSuccess: (_, { postId, commentId, replyId }) => {
+            const targetId = replyId ?? commentId;
+            const prefix = replyId ? ['replies', postId, commentId] : ['comments', postId];
+
+            queryClient.setQueriesData({ queryKey: prefix }, (old?: InfData) => removeCompactInfinite(old, targetId));
         },
     });
+}
+
+export async function deleteCommentAPI(postId: string, commentId: string, csrfValue: string) {
+    const res = await fetch(`/api/posts/${postId}/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Project-Host': window.location.origin,
+            'x-csrf-token': csrfValue
+        },
+        credentials: "include",
+    });
+    if (!res.ok) throw new Error('댓글 삭제 실패');
+}
+
+export async function deleteReplyAPI(postId: string, commentId: string, replyId: string, csrfValue: string) {
+    const res = await fetch(`/api/posts/${postId}/comments/${commentId}/replies/${replyId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Project-Host': window.location.origin,
+            'x-csrf-token': csrfValue
+        },
+        credentials: "include",
+    });
+    if (!res.ok) throw new Error('답글 삭제 실패');
 }

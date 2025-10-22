@@ -1044,9 +1044,6 @@ export default function PostMenu() {
                 const csrfValue = csrf ? decodeURIComponent(csrf) : '';
 
                 const post = ({
-                    userId: currentUser.uid as string,
-                    displayName: currentUser.name,
-                    photoUrl: currentUser.photo,
                     title: postTitle,
                     content: posting,
                     tag: selectTag,

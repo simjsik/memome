@@ -1,10 +1,9 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 
-import { checkUsageLimit } from "@/app/utils/checkUsageLimit";
-import { commentModalState, loadingState, memoCommentCount, UsageLimitState, userData, userState } from "@/app/state/PostState";
+import { commentModalState, memoCommentCount } from "@/app/state/PostState";
 import { useEffect } from "react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import { useMediaQuery } from "react-responsive";
 import styled from "@emotion/styled";
 import { motion } from "framer-motion";
@@ -24,10 +23,7 @@ const CommentToggle = styled(motion.button)`
     box-shadow: 0px 0px 10px #0000002b;
 `
 export default function Memo({ commentLength }: { commentLength: number }) {
-    const currentUser = useRecoilValue<userData | null>(userState)
     const setCommentLength = useSetRecoilState<number>(memoCommentCount)
-    const setUsageLimit = useSetRecoilState<boolean>(UsageLimitState)
-    const setLoading = useSetRecoilState<boolean>(loadingState);
     const isMobile = useMediaQuery({ maxWidth: 1200 });
     const setCommentOn = useSetRecoilState<boolean>(commentModalState);
     const theme = useTheme();
@@ -36,28 +32,6 @@ export default function Memo({ commentLength }: { commentLength: number }) {
     useEffect(() => {
         setCommentLength(commentLength);
     }, [commentLength])
-
-    // 사용량 확인
-    useEffect(() => {
-        if (currentUser) {
-            const checkLimit = async () => {
-                try {
-                    await checkUsageLimit(currentUser.uid as string);
-                } catch (err: unknown) {
-                    if (err instanceof Error) {
-                        if (err.message.includes('사용량 제한')) {
-                            setUsageLimit(true);
-                        } else {
-                            console.error('사용량을 불러오는 중 에러가 발생했습니다.');
-                        }
-                    }
-                }
-            }
-            checkLimit();
-        }
-        setLoading(false)
-    }, [])
-
     // Function
 
     return (

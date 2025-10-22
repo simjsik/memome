@@ -47,11 +47,11 @@ export interface userData {
 export interface Comment {
     id: string;
     replyId: string;
-    uid: string;
+    userId: string;
     commentText: string;
-    createAt: Timestamp;
+    createAt: number;
     parentId: string | null;
-    replyCount: number;
+    replyCount?: number;
     displayName: string;
     photoURL: string | null;
 }

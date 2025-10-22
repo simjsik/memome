@@ -3,26 +3,20 @@
 
 import { Comment, loadingState, UsageLimitState, UsageLimitToggle, userState } from "@/app/state/PostState";
 import styled from "@emotion/styled";
-import { Timestamp } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import BookmarkBtn from "../BookmarkBtn";
 import { NoMorePost, PostCommentInputStyle, PostCommentStyle } from "@/app/styled/PostComponents";
 import { css, useTheme } from "@emotion/react";
-import { fetchComments } from "@/app/utils/fetchPostData";
 import LoadingWrap from "../LoadingWrap";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
-import { Reply, useAddComment, useAddReply, useDelComment } from "@/app/hook/CommentMutate";
+import { useAddComment, useAddReply, useDelComment } from "@/app/hook/CommentMutate";
 import ReplyComponent from "./ReplyComponent";
 import { formatDate } from "@/app/utils/formatDate";
 import { motion } from "framer-motion";
 import { btnVariants } from "@/app/styled/motionVariant";
 import { useMediaQuery } from "react-responsive";
 import useOutsideClick from "@/app/hook/OutsideClickHook";
-
-interface ClientPostProps {
-    post: string;
-}
 
 const MemoBox = styled.div<{ btnStatus: boolean }>`
 position: relative;
@@ -214,7 +208,7 @@ overflow: hidden;
         
     }
 `
-export default function MemoStatus({ post }: ClientPostProps) {
+export default function MemoStatus(post: string) {
     const theme = useTheme();
     const [commentText, setCommentText] = useState<string>('');
     const [replyText, setReplyText] = useState<string>('');
@@ -241,26 +235,39 @@ export default function MemoStatus({ post }: ClientPostProps) {
         isError,
         error,
     } = useInfiniteQuery<
-        { data: Comment[]; nextPage: Timestamp | undefined }, // TQueryFnData
+        { data: Comment[]; nextPage: number | undefined }, // TQueryFnData
         Error, // TError
-        InfiniteData<{ data: Comment[]; nextPage: Timestamp | undefined }>,
+        InfiniteData<{ data: Comment[]; nextPage: number | undefined }>,
         string[], // TQueryKey
-        Timestamp | undefined // TPageParam
+        number | undefined // TPageParam
     >({
         retry: false, // 재시도 방지
         queryKey: ['comments', post],
         queryFn: async ({ pageParam }) => {
-            try {
-                return await fetchComments(post, pageParam);
-            } catch (error: unknown) {
-                if (error instanceof Error) {
-                    console.error("일반 오류 발생:", error.message);
-                    throw error;
-                } else {
-                    console.error("알 수 없는 에러 유형:", error);
-                    throw new Error("알 수 없는 에러가 발생했습니다.");
-                }
+            const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+            const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+
+            const response = await fetch(`/api/post/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Project-Host': window.location.origin,
+                    'x-csrf-token': csrfValue
+                },
+                body: JSON.stringify({ pageParam, pageSize: 8, postId: post }),
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                // 상태별 메시지
+                if (response.status === 429) throw new Error('요청 한도를 초과했어요.');
+                if (response.status === 403) throw new Error('유저 인증이 필요합니다.');
+                const msg = await response.text().catch(() => '');
+                throw new Error(msg || `요청 실패 (${response.status})`);
             }
+
+            const data = await response.json();
+            return data
         },
         getNextPageParam: (lastPage) => lastPage.nextPage,
         staleTime: 5 * 60 * 1000,
@@ -323,15 +330,39 @@ export default function MemoStatus({ post }: ClientPostProps) {
             }
 
             try {
-                const commentData =
-                    {
-                        parentId,
-                        replyId: commentId,
-                        commentText: text,
-                        replyCount: 0,
-                    } as Comment
+                const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+                const csrfValue = csrf ? decodeURIComponent(csrf) : '';
 
-                addComment(commentData);
+                const comment = {
+                    parentId,
+                    replyId: commentId,
+                    commentText: text,
+                    replyCount: 0,
+                } as Comment
+
+                const PostResponse = await fetch(`/api/comment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Project-Host': window.location.origin,
+                        'x-csrf-token': csrfValue
+                    },
+                    body: JSON.stringify({ comment, postId: post }),
+                    credentials: "include",
+                });
+
+                if (!PostResponse.ok) {
+                    throw new Error(`포스트 업로드 실패 : ${PostResponse.status}`);
+                }
+
+                const commentData = await PostResponse.json();
+
+                if (commentData) {
+                    // 서버에서 업데이트 정보를 받으면 호출
+                    if (addComment && commentData.comment) {
+                        addComment(commentData.comment);
+                    }
+                }
 
                 setCommentText('');
                 setReplyText('');
@@ -343,17 +374,12 @@ export default function MemoStatus({ post }: ClientPostProps) {
         }
     }
 
-    const { mutate: delComment, isPending: isDelComment } = useDelComment(post);
+    const { mutate: delComment, isPending: isDelComment } = useDelComment();
 
     const handleDelComment = async (commentId: string) => {
-        if (user) {
-            try {
-                delComment(commentId);
-            } catch (error) {
-                console.error('댓글 삭제 중 오류 발생:', error);
-                alert('댓글 삭제 중 오류가 발생했습니다.');
-            }
-        }
+        const confirmed = confirm('댓글을 삭제 하시겠습니까?')
+        if (!confirmed) return;
+        delComment({ commentId, postId: post });
     }
 
     const { mutate: addReply, isPending: isAddReply } = useAddReply(post);
@@ -368,15 +394,41 @@ export default function MemoStatus({ post }: ClientPostProps) {
             }
 
             try {
-                const commentData =
-                    {
-                        parentId,
-                        replyId: commentId,
-                        commentText: text,
-                    } as Reply
+                const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+                const csrfValue = csrf ? decodeURIComponent(csrf) : '';
 
-                addReply(commentData);
+                const comment = {
+                    parentId,
+                    replyId: commentId,
+                    commentText: text,
+                    replyCount: 0,
+                } as Comment
 
+                const PostResponse = await fetch(`/api/comment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Project-Host': window.location.origin,
+                        'x-csrf-token': csrfValue
+                    },
+                    body: JSON.stringify({ comment, postId: post, reply: true }),
+                    credentials: "include",
+                });
+
+                if (!PostResponse.ok) {
+                    throw new Error(`포스트 업로드 실패 : ${PostResponse.status}`);
+                }
+
+                const commentData = await PostResponse.json();
+
+                if (commentData) {
+                    // 서버에서 업데이트 정보를 받으면 호출
+                    if (addReply && commentData.comment) {
+                        addReply(commentData.comment);
+                    }
+                }
+
+                setCommentText('');
                 setReplyText('');
                 setActiveReply(null);
             } catch (error) {
@@ -412,7 +464,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                                 `}
                                 ></div>
                                 <p className="memo_comment_user">{comment.displayName}</p>
-                                <p className="memo_comment_uid">@{comment.uid.slice(0, 8)}...</p>
+                                <p className="memo_comment_uid">@{comment.userId.slice(0, 8)}...</p>
                                 <button className="comment_delete_btn"
                                     onClick={() => handleDelComment(comment.id)}>
                                     <div className="comment_delete_icon"
@@ -445,7 +497,7 @@ export default function MemoStatus({ post }: ClientPostProps) {
                                     </motion.button>
                                 </div>
                             )}
-                            {comment.replyCount > 0 &&
+                            {comment.replyCount && comment.replyCount > 0 &&
                                 <ReplyComponent postId={post} commentId={comment.id} />
                             }
                         </div>
