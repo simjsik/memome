@@ -5,6 +5,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import admin from 'firebase-admin';
 import { imageCheck } from "./utils/imgMiBf";
 import { adminDb } from "../../DB/firebaseAdminConfig";
+import { getCachedUserBatch } from "./utils/getCachedUser";
 
 // Cloudinary 설정
 cloudinary.config({
@@ -174,18 +175,24 @@ router.post('/posting', async (req: Request, res: Response) => {
             finalContent = $('body').html() ?? '';
         }
 
-        const createAt = admin.firestore.Timestamp.now();
+        const profiles = await getCachedUserBatch(uid);
+
+        const profile = profiles.get(uid) ?? {
+            displayName: "Unknown User",
+            photoURL:
+                'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg',
+        };
 
         const finalPost: PostType = {
             tag: post.tag,
             title: post.title,
             userId: uid,
-            displayName: post.displayName,
-            photoUrl: post.photoUrl,
+            displayName: profile.displayName,
+            photoUrl: profile.photoURL,
             content: finalContent,
             thumbnail: finalUrl.length ? finalUrl[0].url : null,
             hasImage: finalUrl.length ? true : false,
-            createAt: createAt,
+            createAt: admin.firestore.Timestamp.now(),
             commentCount: 0,
             notice: post.notice,
             public: post.public,
@@ -199,16 +206,17 @@ router.post('/posting', async (req: Request, res: Response) => {
             const feed = feedSnap.data();
 
             tx.set(postRef, finalPost);
-            tx.set(userRef, { lastSeenAt: createAt }, { merge: true });
+            tx.set(userRef, { lastSeenAt: finalPost.createAt }, { merge: true });
 
-            if (!feed?.updatedAt || feed.updatedAt.toMillis() <= createAt.toMillis()) {
-                tx.set(feedRef, { updatedAt: createAt }, { merge: true });
+            if (!feed?.updatedAt || feed.updatedAt.toMillis() <= finalPost.createAt.toMillis()) {
+                tx.set(feedRef, { updatedAt: finalPost.createAt }, { merge: true });
             }
         });
 
         const toClientPost = {
             ...finalPost,
             id: postId,
+            createAt: finalPost.createAt.toMillis(),
         };
 
         return res.status(200).json({ post: toClientPost });

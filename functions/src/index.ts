@@ -17,12 +17,15 @@ import saveUserRouter from "./routes/saveUserApi";
 import updateProfileRouter from "./routes/updateProfile";
 import uploadPostRouter from "./routes/post/uploadPost";
 import deletePostRouter from "./routes/post/deletePost";
+import uploadCommentRouter from "./routes/post/uploadComment";
 import createCustomTokenRouter from "./routes/createCustomToken";
 import fetchNewPostRouter from "./routes/update/userUpdate";
 import fetchPostRouter from "./routes/post/mainPost";
 import fetchNoticeRouter from "./routes/post/noticePost";
 import fetchBookmarkRouter from "./routes/post/bookmarkPost";
 import fetchUserPostRouter from "./routes/post/userPost";
+import fetchCommentRouter from "./routes/post/fetchComment";
+import deleteCommentRouter from "./routes/comment/deleteComment";
 import { adminDb } from "./DB/firebaseAdminConfig";
 import { UserRecord } from "firebase-admin/auth";
 import { fromPostData } from "./routes/post/utils/postType";
@@ -250,17 +253,29 @@ app.get('/', (req: Request, res: Response) => {
   }
 });
 
+// 유저
 app.use('/', refreshTokenRouter);
-
 app.use('/', loginRouter);
 app.use('/', logoutRouter);
 app.use('/', saveUserRouter);
 app.use('/', createCustomTokenRouter);
 
+// // 유저 관리
 app.use('/', updateProfileRouter);
+
+
+// 포스트 관리
+
+// // 댓글 작성 & 요청 & 삭제
+app.use('/', uploadCommentRouter);
+app.use('/', fetchCommentRouter);
+app.use('/', deleteCommentRouter);
+
+// // 포스트 작성 & 삭제
 app.use('/', uploadPostRouter);
 app.use('/', deletePostRouter);
 
+// // 포스트 요청
 app.use('/', fetchNewPostRouter);
 app.use('/', fetchPostRouter);
 app.use('/', fetchNoticeRouter);

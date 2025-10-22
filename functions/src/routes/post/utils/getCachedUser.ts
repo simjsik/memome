@@ -45,8 +45,13 @@ export async function getCachedUserInfo(userId: string) {
  * @param {userId<string[]>} userId
  * @return {result<string, Profile>} result
  */
-export async function getCachedUserBatch(userId: string[]) {
-    const unique = Array.from(new Set(userId)).filter(Boolean);
+export async function getCachedUserBatch(userId: string[] | string) {
+    const uids = (Array.isArray(userId) ? userId : [userId])
+        .filter((value): value is string => typeof value === 'string')
+        .map((value) => value.trim())
+        .filter((value) => value.length > 0);
+
+    const unique = Array.from(new Set(uids)).filter(Boolean);
 
     const result = new Map<string, Profile>();
     const needFetch: string[] = [];

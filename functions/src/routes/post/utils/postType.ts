@@ -39,8 +39,36 @@ export interface toPostData {
     objectID?: string,
 }
 
+export interface fromComment {
+    id?: string;
+    replyId: string;
+    userId: string;
+    commentText: string;
+    createAt: Timestamp;
+    parentId: string | null;
+    replyCount?: number;
+    displayName: string;
+    photoURL: string | null;
+}
+
+export interface toComment {
+    id?: string;
+    replyId: string;
+    userId: string;
+    commentText: string;
+    createAt: number;
+    parentId: string | null;
+    replyCount?: number;
+    displayName: string;
+    photoURL: string | null;
+}
 
 export const postConverter: FirebaseFirestore.FirestoreDataConverter<fromPostData> = {
     toFirestore: (p) => p,
     fromFirestore: (snap) => snap.data() as fromPostData,
+};
+
+export const commentConverter: FirebaseFirestore.FirestoreDataConverter<fromComment> = {
+    toFirestore: (p) => p,
+    fromFirestore: (snap) => snap.data() as fromComment,
 };
