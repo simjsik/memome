@@ -50,7 +50,7 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                     'Project-Host': window.location.origin,
                     'x-csrf-token': csrfValue
                 },
-                body: JSON.stringify({ pageParam, pageSize: 8, postId, commentId, needReply: true }),
+                body: JSON.stringify({ pageParam, pageSize: 3, postId, commentId, needReply: true }),
                 credentials: "include",
             });
 

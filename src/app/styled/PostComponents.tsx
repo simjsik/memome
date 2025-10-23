@@ -666,7 +666,7 @@ width: 100%;
     
     .user_profile{
       left : -32px;
-      line-height : 2rem;
+      line-height: 1.5rem;
     }
   }
 

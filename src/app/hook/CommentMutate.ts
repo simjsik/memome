@@ -2,6 +2,20 @@
 import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Comment } from "../state/PostState";
 
+type Result = {
+    kind: string;
+    postId: string;
+    commentId: string;
+    replyId: string;
+    tombstoned?: boolean;
+    deletedAt?: number;
+    deletedBy?: string;
+    hardDeleted?: boolean;
+    newReplyCount?: number;
+    parentTombstoned?: boolean;
+    parentHardDeleted?: boolean;
+}
+
 export function useAddComment(
     postId: string,
 ) {
@@ -105,9 +119,31 @@ export function useDelComment() {
         const mappedParams = old.pageParams.slice(0, lastNonEmptyIndex + 1);
 
         return { pages: mappedPage, pageParams: mappedParams };
-    };
+    }; // 하드 삭제
 
-    return useMutation<void, Error, { postId: string; commentId: string; replyId?: string }>({
+    const tombstoneInfinite = (
+        targetId: string,
+        postId: string,
+        result: Result
+    ): void => {
+        queryClient.setQueryData<InfData>(['comments', postId], (old) => {
+            if (!old) return old;
+            const pages = old.pages.map(page => ({
+                ...page,
+                data: page.data.map(
+                    comment => comment.id === targetId ? {
+                        ...comment,
+                        deleted: true,
+                        deletedAt: result.deletedAt,
+                        deletedBy: result.deletedBy
+                    } : comment
+                )
+            }));
+            return { ...old, pages }
+        })
+    }; // 소프트 삭제
+
+    return useMutation<Result, Error, { postId: string; commentId: string; replyId?: string }>({
         mutationFn: async ({ postId, commentId, replyId }) => {
             const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
             const csrfValue = csrf ? decodeURIComponent(csrf) : '';
@@ -120,11 +156,41 @@ export function useDelComment() {
             alert('댓글 삭제에 실패했습니다.');
             return;
         },
-        onSuccess: (_, { postId, commentId, replyId }) => {
+        onSuccess: (result, { postId, commentId, replyId }) => {
             const targetId = replyId ?? commentId;
             const prefix = replyId ? ['replies', postId, commentId] : ['comments', postId];
 
-            queryClient.setQueriesData({ queryKey: prefix }, (old?: InfData) => removeCompactInfinite(old, targetId));
+            if (result.kind === 'comment' && result.hardDeleted && !result.tombstoned) { // 댓글 하드 삭제
+                queryClient.setQueriesData({ queryKey: prefix }, (old?: InfData) => removeCompactInfinite(old, targetId));
+
+            } else if (result.kind === 'comment' && !result.hardDeleted && result.tombstoned) { // 댓글 소프트 삭제
+                tombstoneInfinite(targetId, postId, result);
+
+            } else if (result.kind === 'reply') { // 답글 삭제
+                queryClient.setQueriesData({ queryKey: prefix }, (old?: InfData) => removeCompactInfinite(old, targetId));
+
+                if (result.parentHardDeleted) { // 모든 답글이 삭제되서 댓글이 삭제 됐을 때
+                    queryClient.setQueriesData({ queryKey: ['comments', postId] }, (old?: InfData) => removeCompactInfinite(old, commentId));
+                } else { // 답글이 남아있을 때
+                    queryClient.setQueryData<InfData>(['comments', postId], (old) => {
+                        if (!old) return old;
+
+                        const pages = old.pages.map(p => ({
+                            ...p,
+                            data: p.data.map(comment => comment.id === commentId ? {
+                                ...comment,
+                                replyCount: result.newReplyCount as number,
+                            } : comment
+                            )
+                        }));
+
+                        return { ...old, pages };
+                    })
+                }
+            }
+
+            queryClient.invalidateQueries({ queryKey: ['replies', postId, commentId] });
+            queryClient.invalidateQueries({ queryKey: ['comments', postId] });
         },
     });
 }
@@ -140,10 +206,14 @@ export async function deleteCommentAPI(postId: string, commentId: string, csrfVa
         credentials: "include",
     });
     if (!res.ok) throw new Error('댓글 삭제 실패');
+
+    const { result } = await res.json();
+
+    return result
 }
 
 export async function deleteReplyAPI(postId: string, commentId: string, replyId: string, csrfValue: string) {
-    const res = await fetch(`/api/posts/${postId}/comments/${commentId}/replies/${replyId}`, {
+    const res = await fetch(`/api/posts/${postId}/comments/${commentId}/reply/${replyId}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -153,4 +223,8 @@ export async function deleteReplyAPI(postId: string, commentId: string, replyId:
         credentials: "include",
     });
     if (!res.ok) throw new Error('답글 삭제 실패');
+
+    const { result } = await res.json();
+
+    return result
 }

@@ -51,9 +51,12 @@ export interface Comment {
     commentText: string;
     createAt: number;
     parentId: string | null;
-    replyCount?: number;
+    replyCount: number;
     displayName: string;
     photoURL: string | null;
+    deleted?: boolean;
+    deletedAt?: number;
+    deletedBy?: string;
 }
 
 export interface memoList {

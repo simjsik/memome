@@ -64,6 +64,7 @@ router.post('/post/comments', async (req: Request, res: Response) => {
                 displayName: profile.displayName,
                 photoURL: profile.photoURL,
                 createAt: commentData.createAt.toMillis(),
+                deletedAt: commentData.deletedAt instanceof admin.firestore.Timestamp ? commentData.deletedAt.toMillis() : undefined,
             };
         });
 

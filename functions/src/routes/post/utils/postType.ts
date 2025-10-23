@@ -49,6 +49,9 @@ export interface fromComment {
     replyCount?: number;
     displayName: string;
     photoURL: string | null;
+    deleted?: boolean;
+    deletedAt?: Timestamp;
+    deletedBy?: string;
 }
 
 export interface toComment {
@@ -61,6 +64,9 @@ export interface toComment {
     replyCount?: number;
     displayName: string;
     photoURL: string | null;
+    deleted?: boolean;
+    deletedAt?: number;
+    deletedBy?: string;
 }
 
 export const postConverter: FirebaseFirestore.FirestoreDataConverter<fromPostData> = {

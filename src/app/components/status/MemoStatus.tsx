@@ -208,7 +208,11 @@ overflow: hidden;
         
     }
 `
-export default function MemoStatus(post: string) {
+
+type MemoStatusType = {
+    post: string,
+}
+export default function MemoStatus({ post }: MemoStatusType) {
     const theme = useTheme();
     const [commentText, setCommentText] = useState<string>('');
     const [replyText, setReplyText] = useState<string>('');
@@ -254,7 +258,7 @@ export default function MemoStatus(post: string) {
                     'Project-Host': window.location.origin,
                     'x-csrf-token': csrfValue
                 },
-                body: JSON.stringify({ pageParam, pageSize: 8, postId: post }),
+                body: JSON.stringify({ pageParam, pageSize: 3, postId: post }),
                 credentials: "include",
             });
 
@@ -456,51 +460,73 @@ export default function MemoStatus(post: string) {
             <div className="status_wrap" ref={containerRef}>
                 <PostCommentStyle>
                     {commentList.filter(comment => !comment.parentId).map(comment => (
-                        <div key={comment.id} className="memo_comment_wrap">
-                            <div className="user_profile">
-                                <div className="user_photo"
-                                    css={css`
+                        <>
+                            {
+                                comment.deleted ?
+                                    <div key={comment.id} className="memo_comment_wrap" >
+                                        <div className="user_profile">
+                                            <div className="user_photo"
+                                                css={css`
+                                                background-image : url('https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg')
+                                                `}
+                                            ></div>
+                                            <p className="memo_comment_user">Unknown User</p>
+                                            <p className="memo_comment_uid">@...</p>
+                                        </div>
+                                        <p className="memo_comment">삭제된 댓글 입니다.</p>
+                                        <time className="memo_comment_date">{formatDate(comment.createAt)}</time>
+                                        {comment.replyCount > 0 &&
+                                            <ReplyComponent postId={post} commentId={comment.id} />
+                                        }
+                                    </div>
+                                    :
+                                    <div key={comment.id} className="memo_comment_wrap" >
+                                        <div className="user_profile">
+                                            <div className="user_photo"
+                                                css={css`
                                                 background-image : url(${comment.photoURL})
                                                 `}
-                                ></div>
-                                <p className="memo_comment_user">{comment.displayName}</p>
-                                <p className="memo_comment_uid">@{comment.userId.slice(0, 8)}...</p>
-                                <button className="comment_delete_btn"
-                                    onClick={() => handleDelComment(comment.id)}>
-                                    <div className="comment_delete_icon"
-                                        css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746003900/%EC%A7%80%EC%9B%8C%EB%B2%84%EB%A6%AC%EA%B8%B0_uiox61.svg)`}
-                                    ></div>
-                                </button>
-                            </div>
-                            <p className="memo_comment">{comment.commentText}</p>
-                            <time className="memo_comment_date">{formatDate(comment.createAt)}</time>
-                            <motion.button variants={btnVariants(theme)}
-                                whileHover="otherHover"
-                                whileTap="otherClick"
-                                className="comment_reply_btn" onClick={() => toggleReply(comment.id)}>답글</motion.button>
-                            {activeReply === comment.id && (
-                                <div className="reply_input_wrap">
-                                    <textarea
-                                        className="comment_input"
-                                        placeholder="답글 입력"
-                                        value={replyText}
-                                        onChange={(e) => setReplyText(e.target.value)}
-                                    />
-                                    <motion.button
-                                        variants={btnVariants(theme)}
-                                        whileHover="otherHover"
-                                        whileTap="otherClick"
-                                        className="comment_upload_btn"
-                                        onClick={() => handleAddReply(comment.id, comment.id)}
-                                    >
-                                        등록
-                                    </motion.button>
-                                </div>
-                            )}
-                            {comment.replyCount && comment.replyCount > 0 &&
-                                <ReplyComponent postId={post} commentId={comment.id} />
+                                            ></div>
+                                            <p className="memo_comment_user">{comment.displayName}</p>
+                                            <p className="memo_comment_uid">@{comment.userId.slice(0, 8)}...</p>
+                                            <button className="comment_delete_btn"
+                                                onClick={() => handleDelComment(comment.id)}>
+                                                <div className="comment_delete_icon"
+                                                    css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746003900/%EC%A7%80%EC%9B%8C%EB%B2%84%EB%A6%AC%EA%B8%B0_uiox61.svg)`}
+                                                ></div>
+                                            </button>
+                                        </div>
+                                        <p className="memo_comment">{comment.commentText}</p>
+                                        <time className="memo_comment_date">{formatDate(comment.createAt)}</time>
+                                        <motion.button variants={btnVariants(theme)}
+                                            whileHover="otherHover"
+                                            whileTap="otherClick"
+                                            className="comment_reply_btn" onClick={() => toggleReply(comment.id)}>답글</motion.button>
+                                        {activeReply === comment.id && (
+                                            <div className="reply_input_wrap">
+                                                <textarea
+                                                    className="comment_input"
+                                                    placeholder="답글 입력"
+                                                    value={replyText}
+                                                    onChange={(e) => setReplyText(e.target.value)}
+                                                />
+                                                <motion.button
+                                                    variants={btnVariants(theme)}
+                                                    whileHover="otherHover"
+                                                    whileTap="otherClick"
+                                                    className="comment_upload_btn"
+                                                    onClick={() => handleAddReply(comment.id, comment.id)}
+                                                >
+                                                    등록
+                                                </motion.button>
+                                            </div>
+                                        )}
+                                        {comment.replyCount > 0 &&
+                                            <ReplyComponent postId={post} commentId={comment.id} />
+                                        }
+                                    </div>
                             }
-                        </div>
+                        </>
                     ))}
                     <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`} />
                     {(!loading && dataLoading && (isAddComment || isDelComment || isAddReply)) && <LoadingWrap />}
@@ -572,10 +598,9 @@ export default function MemoStatus(post: string) {
                                     className="comment_upload_btn" onClick={() => handleAddComment(null, 'comment')}>등록</motion.button>
                             </PostCommentInputStyle>
                         }
-
                     </div>
                 </PostCommentStyle>
-            </div>
+            </div >
         </MemoBox >
     )
 }
