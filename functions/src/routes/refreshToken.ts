@@ -53,11 +53,11 @@ router.post('/refresh', async (req: Request, res: Response) => {
 
         const decodedToken = await adminAuth.verifyIdToken(idToken);
         if (!decodedToken) {
-            return res.status(401).json({ mseaage: '계정 토큰이 올바르지 않습니다' });
+            return res.status(401).json({ mseaage: '권한 없음' });
         }
 
         if (!refreshToken || !sessionId) {
-            return res.status(401).json({ error: '토큰 또는 세션 확인 불가.' });
+            return res.status(404).json({ error: '토큰 또는 세션 확인 불가' });
         }
 
         const sessionHash =
@@ -69,19 +69,19 @@ router.post('/refresh', async (req: Request, res: Response) => {
             const sessionSnap = await tx.get(sessionDocRef);
 
             if (!sessionSnap.exists) {
-                throw new Error('세션 확인 불가');
+                throw new Error('NF');
             }
 
             const session = sessionSnap.data();
             if (!session) {
-                throw new Error('세션 확인 불가');
+                throw new Error('NF');
             }
 
             if (session.expiresAt &&
                 session.expiresAt.toMillis() <= Date.now()
-            ) throw new Error('세션 만료');
+            ) throw new Error('FB');
 
-            if (session.revoked) throw new Error('세션 무효 됨');
+            if (session.revoked) throw new Error('FB');
 
             const uid = session.uid;
 
@@ -93,7 +93,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
             const userDocRef = session.guest ? adminDb.doc(`guests/${uid}`) : adminDb.doc(`users/${uid}`);
             const userSnap = await tx.get(userDocRef);
             if (!userSnap.exists) {
-                throw new Error('유저 확인 불가');
+                throw new Error('NF');
             }
 
             const jti = randomBytes(16).toString('hex');
@@ -104,20 +104,20 @@ router.post('/refresh', async (req: Request, res: Response) => {
 
             const tokenSnap = await tx.get(tokenDocRef);
             if (!tokenSnap.exists) {
-                throw Error('갱신 토큰 확인 불가');
+                throw Error('NF');
             }
 
             const tokenData = tokenSnap.data();
             if (!tokenData) {
-                throw Error('갱신 토큰 확인 불가');
+                throw Error('NF');
             }
 
             if (tokenData.expiresAt &&
                 tokenData.expiresAt.toMillis() <= Date.now()) {
-                throw new Error('갱신 토큰 만료');
+                throw new Error('FB');
             }
 
-            if (tokenData.revoked) throw new Error('토큰 무효 됨');
+            if (tokenData.revoked) throw new Error('FB');
 
             const currentHashHex: string = tokenData.currentHash;
             const prevHashHex: string | undefined = tokenData.prevHash;
@@ -149,7 +149,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
                     return { uid, jti, newRefreshId }; // 성공
                 }
             } else {
-                throw new Error("갱신 토큰 확인 불가");
+                throw new Error("NF");
             }
 
             if (prevHashHex) {
@@ -157,11 +157,11 @@ router.post('/refresh', async (req: Request, res: Response) => {
                 if (presentedBuf.length === prevBuf.length &&
                     timingSafeEqual(presentedBuf, prevBuf)) {
                     await revokeSessionsTx(tx, uid);
-                    throw new Error("갱신 토큰 재사용 감지");
+                    throw new Error("FB");
                 }
             }
 
-            throw new Error("유효하지 않은 갱신 토큰");
+            throw new Error("FB");
         });
 
         const { uid, jti, newRefreshId } = transaction;
@@ -238,14 +238,11 @@ router.post('/refresh', async (req: Request, res: Response) => {
     } catch (error: unknown) {
         console.error("갱신 에러:", error);
         if (error instanceof Error) {
-            if (error.message === "갱신 토큰 확인 불가" || error.message === "유효하지 않은 갱신 토큰") {
-                return res.status(401).json({ message: "갱신 토큰이 유효하지 않음" });
+            if (error.message === "NF") {
+                return res.status(401).json({ message: "세션 또는 토큰을 찾을 수 없음" });
             }
-            if (error.message === "갱신 토큰 재사용 감지") {
-                return res.status(401).json({ message: "토큰 재사용 - 모든 세션 제거" });
-            }
-            if (error.message === "유저 확인 불가") {
-                return res.status(401).json({ message: "유저 확인 불가" });
+            if (error.message === "FB") {
+                return res.status(401).json({ message: "접근 불가" });
             }
         }
         return res.status(500).json({ message: "토큰 갱신 실패" });

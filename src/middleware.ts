@@ -429,9 +429,12 @@ export async function middleware(req: NextRequest) {
     }
 
     const requestHeaders = new Headers(req.headers);
-    requestHeaders.set("x-user-uid", String(userPayload!.uid));
-    if (userPayload!.admin === true) requestHeaders.set("x-user-admin", String(userPayload!.admin));
-    if (userPayload!.hasGuest === true) requestHeaders.set('x-user-guest', String(userPayload!.hasGuest));
+
+    if (!isRefresh) {
+        requestHeaders.set("x-user-uid", String(userPayload!.uid));
+        if (userPayload!.admin === true) requestHeaders.set("x-user-admin", String(userPayload!.admin));
+        if (userPayload!.hasGuest === true) requestHeaders.set('x-user-guest', String(userPayload!.hasGuest));
+    }
 
     const res = NextResponse.next({
         request: { headers: requestHeaders },       // 수정된 요청 헤더 사용
