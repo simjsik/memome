@@ -315,7 +315,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                                     @{post?.userId.slice(0, 6)}...
                                                 </span>
                                                 <time className='post_date'>
-                                                    · {formatDate(post?.createAt as Timestamp)}
+                                                    · {formatDate(post?.createAt)}
                                                 </time>
                                             </div>
                                             {user.uid === currentUser.uid &&
