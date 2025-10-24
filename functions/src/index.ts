@@ -80,13 +80,11 @@ export const setHasUpdateCommentFlag = onDocumentCreated(
 export const setHasDeleteCommentFlag = onDocumentDeleted(
   "posts/{postId}/comments/{commentId}",
   async (event) => {
-    const commentData = event.data?.data();
     const postId = event.params.postId; // 포스트 ID
-    const commentReplyCount = commentData?.replyCount; // 댓글 작성자 ID
     try {
       const postRef = await adminDb.collection("posts").doc(postId);
       await postRef.update({
-        commentCount: FieldValue.increment((-1) - (commentReplyCount)),
+        commentCount: FieldValue.increment(-1),
       });
     } catch (error) {
       console.error("업데이트 중 오류 발생:", error);

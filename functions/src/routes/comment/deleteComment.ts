@@ -109,6 +109,7 @@ async function deleteComment(req: Request, res: Response) {
                         parentHardDeleted: true,
                     };
                 }
+
                 return {
                     kind: "reply",
                     postId: postId,
