@@ -5,7 +5,6 @@ import { bookMarkState, loadingState, PostData, UsageLimitState, UsageLimitToggl
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
 import { css, useTheme } from "@emotion/react";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
-import { Timestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
@@ -173,7 +172,7 @@ export default function Bookmark() {
                                         @{post?.userId.slice(0, 6)}...
                                     </span>
                                     <time className='post_date'>
-                                        · {formatDate(post?.createAt as Timestamp)}
+                                        · {formatDate(post?.createAt)}
                                     </time>
                                 </div>
                                 <button
