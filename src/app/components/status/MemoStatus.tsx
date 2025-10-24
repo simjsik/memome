@@ -469,7 +469,7 @@ export default function MemoStatus({ post }: MemoStatusType) {
                                                 css={css`
                                                 background-image : url('https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746004773/%EA%B8%B0%EB%B3%B8%ED%94%84%EB%A1%9C%ED%95%84_juhrq3.svg')
                                                 `}
-                                            ></div>
+                                            />
                                             <p className="memo_comment_user">Unknown User</p>
                                             <p className="memo_comment_uid">@...</p>
                                         </div>
