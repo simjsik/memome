@@ -75,7 +75,7 @@ export interface noticeType {
     noticeId: string,
     noticeType: string,
     noticeText: string,
-    noticeAt: Timestamp,
+    noticeAt: number,
 }
 
 export interface BookmarkPage {
