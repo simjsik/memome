@@ -81,7 +81,7 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
 
     const { mutate: addReply } = useAddReply(postId);
 
-    const handleAddReply = async (parentId: string, commentId: string) => {
+    const handleAddReply = async (parentId: string, replyId: string) => {
         if (user) {
             const text = replyText;
 
@@ -90,47 +90,17 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                 return;
             }
 
-            try {
-                const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
-                const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+            const comment = {
+                parentId,
+                replyId,
+                commentText: text,
+                replyCount: 0,
+            } as Comment
+            console.log(comment, '답글 컴포넌트 측')
+            addReply(comment);
 
-                const comment = {
-                    parentId,
-                    replyId: commentId,
-                    commentText: text,
-                    replyCount: 0,
-                } as Comment
-
-                const PostResponse = await fetch(`/api/comment`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Project-Host': window.location.origin,
-                        'x-csrf-token': csrfValue
-                    },
-                    body: JSON.stringify({ comment, postId, reply: true }),
-                    credentials: "include",
-                });
-
-                if (!PostResponse.ok) {
-                    throw new Error(`포스트 업로드 실패 : ${PostResponse.status}`);
-                }
-
-                const commentData = await PostResponse.json();
-
-                if (commentData) {
-                    // 서버에서 업데이트 정보를 받으면 호출
-                    if (addReply && commentData.comment) {
-                        addReply(commentData.comment);
-                    }
-                }
-
-                setReplyText('');
-                setActiveReply(null);
-            } catch (error) {
-                console.error('댓글 추가 중 오류:', error);
-                alert('댓글 추가에 실패했습니다.');
-            }
+            setReplyText('');
+            setActiveReply(null);
         }
     }
 
@@ -173,7 +143,7 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                                         `}
                                     />
                                     <p className="memo_comment_user">{reply.displayName}</p>
-                                    <p className="memo_comment_uid">@{reply.userId.slice(0, 8)}...</p>
+                                    <p className="memo_comment_uid">@{reply.userId?.slice(0, 8)}...</p>
                                     <button className="comment_delete_btn"
                                         onClick={() => handleDelReply(reply.parentId!, reply.id)}>
                                         <div className="comment_delete_icon"
@@ -181,7 +151,7 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                                         ></div>
                                     </button>
                                 </div>
-                                <span className="memo_reply_uid">@{reply.displayName}-{reply.userId.slice(0, 3)}...</span>
+                                <span className="memo_reply_uid">@{reply.displayName}-{reply.userId?.slice(0, 3)}...</span>
                                 <p className="memo_reply">{reply.commentText}</p>
                                 <time className="memo_comment_date">{formatDate(reply.createAt)}</time>
                                 <button className="comment_reply_btn" onClick={() => toggleReply(reply.id)}>답글</button>

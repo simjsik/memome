@@ -1,6 +1,7 @@
 'use client';
 import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Comment } from "../state/PostState";
+import { Comment, userState } from "../state/PostState";
+import { useRecoilValue } from "recoil";
 
 type Result = {
     kind: string;
@@ -48,6 +49,9 @@ export function useAddComment(
                 throw error;
             }
         },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['comments', postId] });
+        },
     });
 }
 
@@ -55,38 +59,100 @@ export function useAddReply(
     postId: string,
 ) {
     const queryClient = useQueryClient();
+    type PageParam = { data: Comment[]; nextPage: number | undefined };
+    type InfData = InfiniteData<PageParam>;
+    const user = useRecoilValue(userState);
 
-    return useMutation<Comment, Error, Comment>({
-        onMutate: async (newComment) => {
-            queryClient.setQueryData<InfiniteData<{ data: Comment[]; nextPage: number | undefined }>>(
-                ['replies', postId, newComment.parentId],
+    return useMutation<Comment, Error, Comment, { prevReplies?: InfData; prevComments?: InfData; parentId: string }>({
+        onMutate: async (newReply) => {
+            const parentId = newReply.parentId!;
+
+            // 실패 시 백업 용
+            const prevReplies = queryClient.getQueryData<InfData>(['replies', postId, parentId]);
+            const prevComments = queryClient.getQueryData<InfData>(['comments', postId]);
+
+            const mappedUser = {
+                ...newReply,
+                userId: user.uid as string,
+                displayName: user.name as string,
+                photoURL: user.photo as string,
+                createAt: Date.now()
+            }
+
+            queryClient.setQueryData<InfData>(
+                ['replies', postId, newReply.parentId],
                 (old) => {
                     if (!old) return old;
                     const [firstPage, ...rest] = old.pages;
                     return {
                         ...old,
                         pages: [
-                            { data: [...firstPage.data, newComment], nextPage: firstPage.nextPage },
+                            {
+                                data: [...firstPage.data, mappedUser], nextPage: firstPage.nextPage
+                            },
                             ...rest,
                         ],
                         pageParams: old.pageParams,
                     };
                 }
             );
+
+            queryClient.setQueryData<InfData>(['comments', postId], (old) => {
+                if (!old) return old;
+
+                const pages = old.pages.map(p => ({
+                    ...p,
+                    data: p.data.map(comment =>
+                        comment.id === newReply.parentId ? {
+                            ...comment,
+                            replyCount: (comment.replyCount ?? 0) + 1
+                        } : comment
+                    )
+                }));
+                return { ...old, pages };
+            });
+
+            return { prevReplies, prevComments, parentId };
+
         },
-        mutationFn: async (newComment) => {
+        mutationFn: async (newReply) => {
             try {
-                return newComment
-                // 업데이트 플래그 초기화
+                const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+                const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+
+                const PostResponse = await fetch(`/api/comment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Project-Host': window.location.origin,
+                        'x-csrf-token': csrfValue
+                    },
+                    body: JSON.stringify({ comment: newReply, postId, reply: true }),
+                    credentials: "include",
+                });
+
+                if (!PostResponse.ok) {
+                    throw new Error(`댓글 업로드 실패 : ${PostResponse.status}`);
+                }
+
+                const replyData = await PostResponse.json();
+
+                return replyData as Comment
             } catch (error) {
-                console.error("Error fetching new posts:", error);
-                throw error;
+                console.error('댓글 추가 중 오류:', error);
+                alert('댓글 추가에 실패했습니다.');
+                throw new Error('댓글 추가 중 오류:' + error);
             }
         },
-        onSettled: () => {
-            queryClient.invalidateQueries({
-                queryKey: ['comments', postId],
-            });
+        onError: (_err, _vars, ctx) => {
+            if (!ctx) return;
+            queryClient.setQueryData(['replies', postId, ctx.parentId], ctx.prevReplies);
+            queryClient.setQueryData(['comments', postId], ctx.prevComments);
+        },
+        onSuccess: (reply) => {
+            const parentId = reply.parentId;
+            queryClient.invalidateQueries({ queryKey: ['comments', postId] });
+            queryClient.invalidateQueries({ queryKey: ['replies', postId, parentId] });
         },
     });
 }

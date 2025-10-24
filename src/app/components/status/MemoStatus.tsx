@@ -388,7 +388,7 @@ export default function MemoStatus({ post }: MemoStatusType) {
 
     const { mutate: addReply, isPending: isAddReply } = useAddReply(post);
 
-    const handleAddReply = async (parentId: string, commentId: string) => {
+    const handleAddReply = async (parentId: string, replyId: string) => {
         if (user) {
             const text = replyText;
 
@@ -397,48 +397,17 @@ export default function MemoStatus({ post }: MemoStatusType) {
                 return;
             }
 
-            try {
-                const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
-                const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+            const comment = {
+                parentId,
+                replyId: replyId,
+                commentText: text,
+                replyCount: 0,
+            } as Comment
 
-                const comment = {
-                    parentId,
-                    replyId: commentId,
-                    commentText: text,
-                    replyCount: 0,
-                } as Comment
+            addReply(comment);
 
-                const PostResponse = await fetch(`/api/comment`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Project-Host': window.location.origin,
-                        'x-csrf-token': csrfValue
-                    },
-                    body: JSON.stringify({ comment, postId: post, reply: true }),
-                    credentials: "include",
-                });
-
-                if (!PostResponse.ok) {
-                    throw new Error(`포스트 업로드 실패 : ${PostResponse.status}`);
-                }
-
-                const commentData = await PostResponse.json();
-
-                if (commentData) {
-                    // 서버에서 업데이트 정보를 받으면 호출
-                    if (addReply && commentData.comment) {
-                        addReply(commentData.comment);
-                    }
-                }
-
-                setCommentText('');
-                setReplyText('');
-                setActiveReply(null);
-            } catch (error) {
-                console.error('댓글 추가 중 오류:', error);
-                alert('댓글 추가에 실패했습니다.');
-            }
+            setReplyText('');
+            setActiveReply(null);
         }
     }
 

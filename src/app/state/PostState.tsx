@@ -53,7 +53,7 @@ export interface Comment {
     parentId: string | null;
     replyCount: number;
     displayName: string;
-    photoURL: string | null;
+    photoURL: string;
     deleted?: boolean;
     deletedAt?: number;
     deletedBy?: string;
@@ -232,6 +232,7 @@ export const repliesToggleState = atomFamily<boolean, string>({
     key: 'repliesToggleState',
     default: false,
 })
+
 // 새 공지사항 알림 토글
 export const newNoticeState = atom<boolean>({
     key: 'newNoticeState',
