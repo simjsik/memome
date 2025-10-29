@@ -802,7 +802,6 @@ export const MobileQuillStyle = styled.div<{ notice: boolean, public: boolean }>
 
             .quill {
                 height: 100%;
-                border-bottom: 1px solid ${({ theme }) => theme.colors.border};
                 border-radius : 4px;
             }
 
@@ -824,13 +823,14 @@ export const MobileQuillStyle = styled.div<{ notice: boolean, public: boolean }>
             #custom_toolbar{
                 position: relative;
                 width: 100%;
-                height: 32px;
+                height: 48px;
 
                 .ql_submit_wrap{
                     display: flex;
                 }
 
                 #toolbar{
+                    border : none;
                     border-top: 1px solid ${({ theme }) => theme.colors.border};
                     padding : 0;
                 }
