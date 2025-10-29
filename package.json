@@ -46,7 +46,7 @@
     "sanitize-html": "^2.14.0",
     "scheduler": "^0.25.0",
     "socket.io-client": "^4.8.1",
-    "swiper": "^11.1.15",
+    "swiper": "^11.2.10",
     "utf-8-validate": "^6.0.5"
   },
   "devDependencies": {

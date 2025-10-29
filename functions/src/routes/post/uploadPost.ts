@@ -198,7 +198,7 @@ router.post('/posting', async (req: Request, res: Response) => {
             public: post.public,
         };
 
-        const feedRef = adminDb.doc("postFeed/main");
+        const feedRef = post.notice ? adminDb.doc("postFeed/notice") : adminDb.doc("postFeed/main");
         const userRef = hasGuest ? adminDb.doc(`guests/${uid}/status/postUpdates`) : adminDb.doc(`users/${uid}/status/postUpdates`);
 
         await adminDb.runTransaction(async (tx) => {

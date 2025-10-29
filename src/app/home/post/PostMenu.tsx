@@ -18,666 +18,15 @@ import { formatDate } from '@/app/utils/formatDate';
 import { useImageInputs } from './hook/useImageInputs';
 import { useImageGuard } from './hook/useImageGuard';
 import LoadingWrap from '@/app/components/LoadingWrap';
+import { useMediaQuery } from 'react-responsive';
+import { MobileQuillStyle, QuillStyle } from './postStyle';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { FreeMode, Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/free-mode';
+import 'swiper/css/navigation';
+import { CircularCharGauge } from './TextGauge';
 
-const QuillStyle = styled.div<{ notice: boolean, public: boolean }>`
-position: relative;
-width : 860px;
-padding : 20px 0px 0px;
-margin : 0 auto;
-
-    // quill 에디터 랩
-    .quill_wrap{
-        width : 100%;
-        height : 100%;
-        padding: 10px;
-        background : ${({ theme }) => theme.colors.background};
-        border : 1px solid ${({ theme }) => theme.colors.border};
-        border-bottom : none;
-        border-radius : 8px 8px 0px 0px;
-        font-family : var(--font-pretendard-medium);
-
-        &>p{
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            font-size: 0.875rem;
-            color: rgb(153, 153, 153);
-            font-family: var(--font-pretendard-light);
-        }
-    }
-
-    // 포스트 탑 태그, 제목
-    .posting_top{
-        position :relative;
-        display: flex;
-        width: 100%;
-        height : 70px;
-        padding-bottom: 20px;
-        border-bottom : 1px solid ${({ theme }) => theme.colors.border};
-        font-family : var(--font-pretendard-medium);
-    }
-
-    // 공지사항 토글
-    .notice_btn{
-        position : relative;
-        width: 49px;
-        height: 49px;
-        margin-right: 10px;
-        border: ${(props) => (props.notice ? `1px solid ${props.theme.colors.error}` : `1px solid ${props.theme.colors.border}`)};
-        border-radius: 8px;
-        background: ${({ theme }) => theme.colors.background};
-        cursor: pointer;
-
-        p{
-            position: absolute;
-            left : 50%;
-            bottom: 4px;
-            text-align: center;
-            transform: translateX(-50%);
-            font-size: 0.75rem;
-            color : ${(props) => (props.notice ? `${props.theme.colors.error}` : `${props.theme.colors.text_tag}`)};
-            font-family : var(--font-pretendard-medium);
-        }
-    }
-
-    .post_btn{
-        position: absolute;
-        z-index: 1;
-        top: 24px;
-        right: -63px;
-    }
-
-    .tag_sel{
-        flex : 1 0 15%;
-        margin-right : 10px;
-        padding : 0px 12px;
-        outline : none;
-        border: 1px solid ${({ theme }) => theme.colors.border};
-        border-radius : 8px;
-    }
-
-    .title_input_wrap{
-        flex : 1 0 65%;
-        padding : 0px 12px;
-        font-size : 1rem;
-        outline : none;
-        border: 1px solid ${({ theme }) => theme.colors.border};
-        border-radius : 8px;
-
-        .title_input{
-            width : 100%;
-            height : 100%;
-            font-size : 1rem;
-            outline : none;
-            border: none;
-            border-radius : 8px;
-            color : transparent;
-            caret-color: #999;
-            font-family : var(--font-pretendard-medium);
-
-            &::selection {  
-                color: transparent;  
-                background-color:${({ theme }) => theme.colors.primary};
-            }
-        }
-
-        .title_input &.title_input:focus{
-            outline : none;
-        }
-
-        .title_input_value{
-            position: absolute;
-            top: 0;
-            display: flex;
-
-            p{
-                line-height : 3rem;
-            }
-        }
-
-        .title_limit{
-            position: absolute;
-            right: 10px;
-            line-height: 49px;
-            font-size: 0.875rem;
-            color : #999;
-        }
-
-        .title_error{
-            font-size: 0.875rem;
-            color: ${({ theme }) => theme.colors.error};
-            margin-top : 2px;
-            font-family : var(--font-pretendard-medium);
-        }
-    }
-    .ql_content{
-        position: relative;
-        margin-bottom: 60px;
-
-        .posting_limit{
-            position: absolute;
-            right: 10px;
-            bottom: 10px;
-        }
-    }
-// 포스트 발행 버튼
-    .post_btn{
-        position: absolute;
-        z-index: 1;
-        top: 24px;
-        right: -63px;
-        width: 64px;
-        height: 64px;
-        border: 2px solid #1a5bf5;
-        border-left:${({ theme }) => theme.colors.background};
-        border-radius: 0px 8px 8px 0px;
-        background: ${({ theme }) => theme.colors.primary};
-        font-size: 1rem;
-        color: #fff;
-        cursor: pointer;
-        font-family: var(--font-pretendard-medium);
-        text-align: center;
-    }
-
-    .public_btn{
-        position: absolute;
-        z-index: 1;
-        top: 96px;
-        right: -58px;
-        background: ${({ theme }) => theme.colors.primary};
-        width: 49px;
-        height: 49px;
-        margin-right: 10px;
-        border: ${(props) => (!props.public ? `1px solid ${props.theme.colors.error}` : `1px solid ${props.theme.colors.border}`)};
-        border-left:${({ theme }) => theme.colors.background};
-        border-radius: 0px 8px 8px 0px;
-        background: ${({ theme }) => theme.colors.background};
-        cursor: pointer;
-
-        p{
-            position: absolute;
-            left : 50%;
-            bottom: 4px;
-            text-align: center;
-            transform: translateX(-50%);
-            font-size: 0.75rem;
-            color : ${(props) => (!props.public ? `${props.theme.colors.error}` : `${props.theme.colors.text_tag}`)};
-            font-family : var(--font-pretendard-medium);
-        }
-    }
-    .go_main_btn{
-        position: absolute;
-        top: 24px;
-        left: -63px;
-        width: 64px;
-        height: 64px;
-        padding: 6px;
-        border: 1px solid ${({ theme }) => theme.colors.border};
-        border-right: ${({ theme }) => theme.colors.background};
-        background: ${({ theme }) => theme.colors.background};
-        border-radius: 8px 0px 0px 8px;
-
-        div{
-            background-color: ${({ theme }) => theme.colors.background};
-            width: 50px;
-            height: 50px;
-            border-radius: 4px;
-            cursor : pointer;
-        }
-        
-        path,
-        polyline{
-            transition-duration : 0.3s
-        }
-        
-        &:hover path,
-        &:hover polyline{
-            stroke : ${({ theme }) => theme.colors.primary};
-        }
-    }
-    // 에디터 박스
-    .quill{
-        width: 100%;
-        margin: 0 auto;
-        padding-bottom: 39px;
-        border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-
-        .ql-container{
-            margin-top: 20px;
-            border: none;
-        }
-    }
-
-    .ql-snow .ql-image,
-    .ql-snow .ql-link{
-        width : 42px;
-        height : 42px;
-        margin-left : 3px;
-        background-color : ${({ theme }) => theme.colors.background};
-        border-radius : 4px;
-    }
-
-    // 에디터 입력 칸
-    .ql-editor{
-        min-height: calc(100vh - 231px);
-        overflow: visible;
-        padding: 0px 20px;
-        font-size : 1rem;
-    }
-
-    .ql-tooltip{
-        z-index : 1;
-    }
-    // 커스텀 도구
-    .custom_toolbar_wrap{
-        position: absolute;
-        z-index: 1;
-        left: -63px;
-        width: 64px;
-        height: calc(100% - 101px);
-    }
-
-    #custom_toolbar{
-        position: sticky;
-        top : 20px;
-        width: 100%;
-        height: fit-content;
-        padding: 0px 8px;
-        background: ${({ theme }) => theme.colors.background};
-        border: 1px solid ${({ theme }) => theme.colors.border};
-        border-right: 1px solid ${({ theme }) => theme.colors.background};
-        border-radius: 8px 0px 0px 8px;
-    }
-
-    #toolbar span{
-    font-size : 0.75rem;
-    }
-
-    // 삽입 도구
-    .ql_submit_wrap{
-        padding-bottom: 10px;
-        border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-
-        >button{
-            padding: 6px;
-        }
-    }
-
-    .ql_link_wrap{
-    margin-top : 10px;
-    }
-
-    .ql-image svg,
-    .ql-link svg{
-    width: 100%;
-    }
-
-    .ql-image rect,
-    .ql-link path,
-    .ql-image circle,
-    .ql-link line{
-    stroke-width : 1px;
-    }
-
-    // 아래 도구
-    #toolbar-bottom{
-        display : block;
-        width: 100%;
-        padding: 10px 8px;
-    }
-
-    // 폰트 사이즈 , 줄 간격
-    .ql_size_wrap,
-    .ql_lineheight_wrap{
-        display : flex;
-        position : relative;
-    }
-
-    // 도구 버튼
-    .ql_size_toggle,
-    .ql_lineheight_toggle,
-    .ql_color_toggle,
-    .ql_background_toggle,
-    .ql_align_toggle{
-        min-width: 32px;
-        height: 32px;
-        background : ${({ theme }) => theme.colors.background};
-        border : none;
-        border-radius : 2px;
-        font-family : var(--font-pretendard-medium);
-        cursor : pointer;
-
-        rect,
-        line,
-        polyline,
-        path,{
-            transition-duration : 0.1s;
-        }
-    }
-
-    .ql_lineheight_toggle,
-    .ql_color_toggle,
-    .ql_background_toggle,
-    .ql_align_toggle{
-        margin-top: 4px;
-    }
-
-    .ql_lineheight_toggle,
-    .ql_align_toggle{
-        margin-top: 4px;
-
-        &:hover line,
-        &:hover polyline,
-        &:hover path{
-            stroke : ${({ theme }) => theme.colors.primary};
-        }
-    }
-
-    .ql_color_toggle{
-        &:hover line,
-        &:hover polyline,
-        &:hover path{
-            fill : ${({ theme }) => theme.colors.primary};
-        }
-    }
-
-        
-    .ql_background_toggle{
-        padding : 6px;
-
-        svg{
-            border: 1px solid ${({ theme }) => theme.colors.border};
-            border-radius : 2px;
-        }
-    }
-
-    .ql_align_toggle{
-        padding :4px;
-    }
-
-    .ql_style_wrap{
-        padding : 0px 8px;
-    }
-
-    .ql_style_wrap button{
-        min-width : 32px;
-        height : 32px;
-        background-color : ${({ theme }) => theme.colors.background};
-        margin-top : 4px;
-        border : none;
-        border-radius : 2px;
-        padding : 6px;
-    }
-
-    .ql-snow .ql_style_wrap svg{
-        width : 20px;
-        height : 20px;
-    }
-
-    .ql_size_list,
-    .ql_lineheight_list{
-        position: absolute;
-        top: 0px;
-        left: 48px;
-        width: 80px;
-        padding: 8px 0px;
-        background: ${({ theme }) => theme.colors.background};
-        border: 1px solid ${({ theme }) => theme.colors.border};
-        border-radius: 4px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .ql_size_list{
-        top: -60px;
-    }
-
-    .ql_size_item,
-    .ql_lineheight_item{
-        width: 100%;
-        height: 32px;
-    }
-
-    .ql_size_btn,
-    .ql_lineheight_btn{
-        width: 100%;
-        height: 100%;
-        text-align: left;
-        border: none;
-        background: none;
-        cursor: pointer;
-        padding-left: 8px;
-        color: ${({ theme }) => theme.colors.text};
-    }
-
-    & .ql_size_btn:hover,
-    & .ql_lineheight_btn:hover{
-    color : ${({ theme }) => theme.colors.primary};
-    }
-
-    .setFont,
-    .setLineheight {
-    color : ${({ theme }) => theme.colors.primary};
-    }
-
-    .ql-lineheight{
-    margin-top : 4px;
-    }
-
-    .ql-color,
-    .ql-background,
-    .ql-align{
-        display : flex;
-        width : fit-content
-    }
-
-    .ql-color span,
-    .ql-background span{
-        display : none;
-    }
-
-    .ql_color_list,
-    .ql_background_list
-    {
-        position: absolute;
-        left: 50px;
-        display: flex;
-        justify-content: space-around;
-        flex-wrap: wrap;
-        width: 176px;
-        margin-top: 4px;
-        margin-left: 14px;
-        background: ${({ theme }) => theme.colors.background};
-        border: 1px solid ${({ theme }) => theme.colors.border};
-        border-radius: 4px;
-        padding: 8px;
-        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .ql-color .ql_color_pallete,
-    .ql-background .ql_background_pallete{
-        width : 100%;
-        height : 100%;
-        border : none;
-    }
-
-    .ql-color .ql_color_item,
-    .ql-background .ql_background_item{
-        width : 14px;
-        height : 14px;
-        margin-right: 2px
-    }
-
-    .ql-color .ql_color_item:nth-of-type(10n),
-    .ql-background .ql_background_item:nth-of-type(10n){
-        margin-right : 0px;
-    }
-    .ql-color .ql_color_item:nth-of-type(n+11),
-        .ql-background .ql_background_item:nth-of-type(n+11){
-        margin-top : 2px;
-    }
-
-    .ql_color_item:nth-of-type(1) .ql_color_pallete,
-    .ql_background_item:nth-of-type(1) .ql_background_pallete{
-        border : 2px solid ${({ theme }) => theme.colors.border};
-        vertical-align: top; 
-    }
-
-    .ql_color_pallete,
-    .ql_background_pallete,
-    .ql_align_btn
-    {
-        cursor:pointer
-    }
-
-
-
-    .ql_image_wrap,
-    .ql_link_wrap{
-        width: 48px;
-        text-align : center;
-    }
-
-    .ql_align_list{
-        position: absolute;
-        left: 50px;
-        display: flex;
-        justify-content: flex-start;
-        flex-wrap: wrap;
-        width: 140px;
-        margin-top: 4px;
-        margin-left: 4px;
-        background: ${({ theme }) => theme.colors.background};
-        border: 1px solid ${({ theme }) => theme.colors.border};
-        border-radius: 4px;
-        padding: 4px;
-        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .ql_align_item{
-        display : block;
-    }
-
-    .ql_align_btn{
-        width : 32px;
-        height : 32px;
-        border: none;
-        background: ${({ theme }) => theme.colors.background};
-        transition-duration : 0.1s;
-
-        &:hover line{
-          stroke: ${({ theme }) => theme.colors.primary};
-        }
-    }
-
-    .setAlign line{
-        stroke : ${({ theme }) => theme.colors.primary};
-    }
-
-    #toolbar {
-        display: block;
-        width: 100%;
-        padding: 10px 0px 10px;
-        border: none;
-
-        rect,
-        path,
-        line,
-        polyline{
-            transition-duration : .3s;
-        }
-    }
-
-
-
-    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="10px"]::before {
-        content: "10px";
-    }
-    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before {
-        content: "12px";
-    }
-    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="14px"]::before {
-        content: "14px";
-    }
-    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="16px"]::before {
-        content: "16px";
-    }
-    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="18px"]::before {
-        content: "18px";
-    }
-    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="20px"]::before {
-        content: "20px";
-    }
-    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="24px"]::before {
-        content: "24px";
-    }
-    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="28px"]::before {
-        content: "28px";
-    }
-    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="32px"]::before {
-        content: "32px";
-    }
-    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="36px"]::before {
-        content: "36px";
-    }
-    .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="40px"]::before {
-        content: "40px";
-    }
-
-
-    @media (max-width: 1200px) {
-        position: relative;
-        left: 80px;
-        width: calc(100% - 80px);
-        padding: 0;
-        margin: 0;
-
-        .quill_wrap{
-            width: calc(100% - 84px);
-            height: 100%;
-            padding: 10px;
-        }
-
-        .posting_top {
-            position: relative;
-            width: 100%;
-            height: fit-content;
-            flex-direction: row;
-            flex-wrap: wrap;
-
-            .tag_sel {
-                height: 49px;
-                flex: 1 0 100%;
-                max-width: calc(100% - 60px);
-                padding: 0px 12px;
-                margin-right: 0px;
-            }
-
-            .title_input_wrap {
-                position: relative;
-                flex: 1 0 100%;
-                margin-top: 10px;
-                height: fit-content;
-                
-                .title_input{
-                    height : 49px;
-                }
-            }
-
-            .title_error {
-                margin-bottom: 10px;
-            }
-        }
-
-        .quill_wrap>p {
-            bottom: 10px;
-            right: 96px;
-        }
-
-        .post_btn {
-            right: 20px;
-        }
-    }
-`
 const LoadModal = styled.div`
 position:fixed;
 top:0;
@@ -781,6 +130,8 @@ export default function PostMenu() {
     const [selectBgColor, setSelectedBgColor] = useState<string>('#ffffff');
     const [selectLineheight, setSelectedLineHeight] = useState<string>('1.5');
     const [selectAlign, setSelectedAlign] = useState<string>('left');
+
+    const isMobile = useMediaQuery({ maxWidth: 1200 });
 
     const colorPallete = {
         color: [
@@ -967,6 +318,17 @@ export default function PostMenu() {
     }
 
     const postingText = useMemo(() => extractPlainText(posting as string), [posting]);
+
+    function countGraphemes(s: string) {
+        try {
+            const seg = new Intl.Segmenter('ko', { granularity: 'grapheme' });
+            return Array.from(seg.segment(s)).length;
+        } catch {
+            return Array.from(s).length; // 폴백
+        }
+    }
+
+    const charCount = useMemo(() => countGraphemes(postingText), [postingText]);
 
     // 글 작성 중 떠나면 저장
     const handleLeavePosting = () => {
@@ -1486,328 +848,418 @@ export default function PostMenu() {
 
     return (
         <>
-            <QuillStyle notice={checkedNotice} public={checkedPublic}>
-                <div className='quill_wrap'>
-                    <button className='go_main_btn' onClick={handleLeavePosting}>
-                        <motion.div
-                            variants={btnVariants(theme)}
-                            whileHover="otherHover"
-                            whileTap="otherClick">
-                            <svg viewBox="-5 -5 32 32">
-                                <g>
-                                    <polyline points="8.55 8.72 3.37 14.49 8.55 19.68" fill='none' strokeLinecap='round' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                    <path d="M3.37,14.49h8.27a8.54,8.54,0,0,0,4.18-1,5.45,5.45,0,0,0,3-5,5.48,5.48,0,0,0-3-5,8.63,8.63,0,0,0-4.23-1H9.51" css={css`stroke : ${theme.colors.icon_on}`} fill='none' strokeLinecap='round' strokeWidth={1.5} />
-                                    <rect width="22.18" height="22.18" fill='none' />
-                                </g>
-                            </svg>
-                        </motion.div>
-                    </button>
-                    <div className='posting_top'>
-                        {isAdmin &&
+            {isMobile ?
+                <MobileQuillStyle notice={checkedNotice} public={checkedPublic}>
+                    <div className='quill_wrap'>
+                        <div className='posting_top'>
+                            <button className='go_main_btn' onClick={handleLeavePosting}>
+                                취소
+                            </button>
+                            <div className='tag_wrap'>
+                                {isAdmin &&
+                                    <motion.button
+                                        variants={btnVariants(theme)}
+                                        whileHover={checkedNotice ? "NtcHover" : "NtcOffHover"}
+                                        whileTap={checkedNotice ? "NtcClick" : "NtcOffClick"}
+                                        className='notice_btn' onClick={handleCheckedNotice}>
+                                        {checkedNotice ?
+                                            <>
+                                                <p>공지 ON</p>
+                                            </>
+                                            :
+                                            <>
+                                                <p>공지 OFF</p>
+                                            </>
+                                        }
+                                    </motion.button>
+                                }
+                                {checkedNotice ?
+                                    <select ref={tagRef} className='tag_sel' defaultValue={'공지사항'}>
+                                        <option value="공지사항">공지사항</option>
+                                    </select>
+                                    :
+                                    <select ref={tagRef} className='tag_sel' defaultValue={'기타'} onChange={(e) => handleSelectTag(e)}>
+                                        <option value="기타">기타</option>
+                                        <option value="잡담">잡담</option>
+                                        <option value="공부">공부</option>
+                                        <option value="일상">일상</option>
+                                    </select>
+                                }
+                            </div>
                             <motion.button
                                 variants={btnVariants(theme)}
-                                whileHover={checkedNotice ? "NtcHover" : "NtcOffHover"}
-                                whileTap={checkedNotice ? "NtcClick" : "NtcOffClick"}
-                                className='notice_btn' onClick={handleCheckedNotice}>
-                                {checkedNotice ?
+                                whileHover={checkedPublic ? "NtcHover" : "NtcOffHover"}
+                                whileTap={checkedPublic ? "NtcClick" : "NtcOffClick"}
+                                className='public_btn' onClick={handleCheckedPublic}>
+                                {checkedPublic ?
                                     <>
-                                        <svg width="32" height="32" viewBox="0 8 40 40">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40">
                                             <g>
-                                                <path className='notice_path_01' d="M29.55,26.26,28.36,25a1.14,1.14,0,0,1-.3-.77V19.26a8.29,8.29,0,0,0-7-8.32,8.09,8.09,0,0,0-9.14,8v5.23a1.14,1.14,0,0,1-.3.77l-1.19,1.31a1.72,1.72,0,0,0,1.26,2.87H28.29A1.72,1.72,0,0,0,29.55,26.26Z" fill="none" stroke='#fa5741' strokeWidth={'2'} />
-                                                <path className='notice_path_02' d="M17.51,29.13a.34.34,0,0,0-.35.37,2.86,2.86,0,0,0,5.68,0,.34.34,0,0,0-.35-.37Z" fill="none" stroke='#fa5741' strokeWidth={'2'} />
-                                                <circle cx="20" cy="9.15" r="1.15" fill="none" stroke='#fa5741' strokeWidth={'2'} />
-                                                <rect width="32" height="32" fill="none" />
+                                                <rect width="36" height="36" fill="none" />
+                                                <path css={css`fill : ${theme.colors.icon_off}; stroke: ${theme.colors.icon_off}`} d="M21.57678,24.32535a2.01015,2.01015,0,1,0-3.208,1.60584l-.56543,1.77838a.3.3,0,0,0,.28589.391h2.95459a.30015.30015,0,0,0,.28613-.391l-.56543-1.77838A2.00072,2.00072,0,0,0,21.57678,24.32535Z" />
+                                                <path css={css`fill : ${theme.colors.icon_off}; stroke: ${theme.colors.icon_off}`} strokeWidth={'0.5'} d="M24.76039,16.89108a2.50281,2.50281,0,0,1,2.5,2.5v8.60583a2.50281,2.50281,0,0,1-2.5,2.5H14.37281a2.50281,2.50281,0,0,1-2.5-2.5V19.39108a2.50281,2.50281,0,0,1,2.5-2.5H24.76039m0-1.5H14.37281a4,4,0,0,0-4,4v8.60583a4,4,0,0,0,4,4H24.76039a3.99993,3.99993,0,0,0,4-4V19.39108a3.99994,3.99994,0,0,0-4-4Z" />
+                                                <path css={css`fill : ${theme.colors.icon_off}; stroke: ${theme.colors.icon_off}`} strokeWidth={'0.5'} d="M21.64882,9.50308a2.55566,2.55566,0,0,1,2.55273,2.55281V15.3464H14.887V12.05589a2.55577,2.55577,0,0,1,2.55286-2.55281h4.209m0-1.5h-4.209A4.05287,4.05287,0,0,0,13.387,12.05589V16.8464H25.70155V12.05589a4.05275,4.05275,0,0,0-4.05273-4.05281Z" />
                                             </g>
                                         </svg>
-                                        <p>공지</p>
                                     </>
                                     :
                                     <>
-                                        <svg width="32" height="32" viewBox="0 8 40 40">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40">
                                             <g>
-                                                <path className='notice_path_01' d="M29.55,26.26,28.36,25a1.14,1.14,0,0,1-.3-.77V19.26a8.29,8.29,0,0,0-7-8.32,8.09,8.09,0,0,0-9.14,8v5.23a1.14,1.14,0,0,1-.3.77l-1.19,1.31a1.72,1.72,0,0,0,1.26,2.87H28.29A1.72,1.72,0,0,0,29.55,26.26Z" fill="none" stroke='#ccc' strokeWidth={'2'} />
-                                                <path className='notice_path_02' d="M17.51,29.13a.34.34,0,0,0-.35.37,2.86,2.86,0,0,0,5.68,0,.34.34,0,0,0-.35-.37Z" fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2'} />
-                                                <circle cx="20" cy="9.15" r="1.15" fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2'} />
-                                                <rect width="32" height="32" fill="none" />
+                                                <rect width="36" height="36" fill="none" />
+                                                <path fill='#fa5741' stroke='none' d="M21.57678,24.32535a2.01015,2.01015,0,1,0-3.208,1.60584l-.56543,1.77838a.3.3,0,0,0,.28589.391h2.95459a.30015.30015,0,0,0,.28613-.391l-.56543-1.77838A2.00072,2.00072,0,0,0,21.57678,24.32535Z" />
+                                                <path fill='#fa5741' stroke='#fa5741' strokeWidth={'0.5'} d="M24.76039,16.89108a2.50281,2.50281,0,0,1,2.5,2.5v8.60583a2.50281,2.50281,0,0,1-2.5,2.5H14.37281a2.50281,2.50281,0,0,1-2.5-2.5V19.39108a2.50281,2.50281,0,0,1,2.5-2.5H24.76039m0-1.5H14.37281a4,4,0,0,0-4,4v8.60583a4,4,0,0,0,4,4H24.76039a3.99993,3.99993,0,0,0,4-4V19.39108a3.99994,3.99994,0,0,0-4-4Z" />
+                                                <path fill='#fa5741' stroke='#fa5741' strokeWidth={'0.5'} d="M21.64882,9.50308a2.55566,2.55566,0,0,1,2.55273,2.55281V15.3464H14.887V12.05589a2.55577,2.55577,0,0,1,2.55286-2.55281h4.209m0-1.5h-4.209A4.05287,4.05287,0,0,0,13.387,12.05589V16.8464H25.70155V12.05589a4.05275,4.05275,0,0,0-4.05273-4.05281Z" />
                                             </g>
                                         </svg>
-                                        <p>공지</p>
+
                                     </>
                                 }
                             </motion.button>
-                        }
-                        {checkedNotice ?
-                            <select ref={tagRef} className='tag_sel' defaultValue={'공지사항'}>
-                                <option value="공지사항">공지사항</option>
-                            </select>
-                            :
-                            <select ref={tagRef} className='tag_sel' defaultValue={'기타'} onChange={(e) => handleSelectTag(e)}>
-                                <option value="기타">기타</option>
-                                <option value="잡담">잡담</option>
-                                <option value="공부">공부</option>
-                                <option value="일상">일상</option>
-                            </select>
-                        }
+                            {uploadLoading ?
+                                <button className='post_btn'><LoadingWrap /></button>
+                                :
+                                <motion.button variants={btnVariants(theme)} whileHover="loginHover" className='post_btn' onClick={uploadPost}>발행</motion.button>
+                            }
+
+                        </div>
                         <div className='title_input_wrap'>
                             <input className='title_input' type="text" placeholder='제목' value={postTitle as string} onChange={handlePostingTitle} />
-                            <div className='title_input_value'>
-                                <p>{postTitle?.slice(0, title_limit_count)}</p>
-                                <p css={css`color: ${theme.colors.error}`}>{postTitle?.slice(title_limit_count)}</p>
-                            </div>
-                            <span className='title_limit'>{postTitle?.length} / 20</span>
-                            {postTitle && postTitle?.length > 20 &&
-                                <p className='title_error'>{titleError}</p>
-                            }
                         </div>
+                        <div className='posting_wrap'>
+                            <div className='ql_content'>
+                                <ReactQuill ref={quillRef} formats={formats} value={posting as string} placeholder='내용을 입력해주세요.' onChange={handlePostingEditor} modules={SetModules} />
+                            </div>
+                            <div className='custom_toolbar_wrap'>
+                                <div id="custom_toolbar">
+                                    <div id='toolbar'>
+                                        {/* <!-- Indent --> */}
+                                        <div className='ql_style_wrap'>
+                                            <Swiper
+                                                modules={[FreeMode, Navigation]}
+                                                slidesPerView="auto"      // 버튼 폭만큼 자동으로 보이게
+                                                spaceBetween={0}          // 버튼 사이 간격
+                                                freeMode={{ enabled: true, momentum: true }}  // 부드러운 스크롤
+                                                centeredSlides={false}
+                                                watchOverflow
+                                                grabCursor                // 마우스 커서가 '집게' 느낌
+                                                className="ql-toolbar-swiper">
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-image"></motion.button>
+                                                </SwiperSlide>
 
-                    </div>
-                    {/* <!-- Quill Custom Toolbar --> */}
-                    <div className='custom_toolbar_wrap'>
-                        <div id="custom_toolbar">
-                            <div id='toolbar'>
-                                {/* <!-- Links and Images --> */}
-                                <div className='ql_submit_wrap'>
-                                    <div className='ql_image_wrap'>
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-image"></motion.button>
-                                        <span>이미지</span>
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-link"></motion.button>
+                                                </SwiperSlide>
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="+1"></motion.button>
+                                                </SwiperSlide>
+                                                <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="-1"></motion.button>
+
+                                                {/* <!-- Header -->  */}
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-header" value="1"></motion.button>
+                                                </SwiperSlide>
+                                                {/* <!-- Formatting --> */}
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-bold"></motion.button>
+                                                </SwiperSlide>
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-italic"></motion.button>
+                                                </SwiperSlide>
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-underline"></motion.button>
+                                                </SwiperSlide>
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-strike"></motion.button>
+                                                </SwiperSlide>
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql-code-block'></motion.button>
+                                                </SwiperSlide>
+                                                {/* <!-- Subscript / Superscript --> */}
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="sub"></motion.button>
+                                                </SwiperSlide>
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="super"></motion.button>
+                                                </SwiperSlide>
+
+                                                {/* <!-- Clean --> */}
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-clean"></motion.button>
+                                                </SwiperSlide>
+                                                <SwiperSlide>
+                                                    <button></button>
+                                                </SwiperSlide>
+                                            </Swiper>
+                                            <div className='swiper_right'>
+                                                <div className='text_gauge'>
+                                                    <CircularCharGauge count={charCount} max={2500} size={20} stroke={2} />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className='ql_link_wrap'>
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-link"></motion.button>
-                                        <span>링크</span>
-                                    </div>
-                                </div>
-                                {/* <!-- Indent --> */}
-                                <div className='ql_style_wrap'>
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="+1"></motion.button>
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="-1"></motion.button>
-
-                                    {/* <!-- Header -->  */}
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-header" value="1"></motion.button>
-
-                                    {/* <!-- Formatting --> */}
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-bold"></motion.button>
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-italic"></motion.button>
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-underline"></motion.button>
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-strike"></motion.button>
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql-code-block'></motion.button>
-                                    {/* <!-- Subscript / Superscript --> */}
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="sub"></motion.button>
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="super"></motion.button>
-
-                                    {/* <!-- Clean --> */}
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-clean"></motion.button>
                                 </div>
                             </div>
-
-                            <div id='toolbar-bottom' ref={styleToolRef}>
-                                {/* <!-- Font Size --> */}
-                                <div className='ql_size_wrap'>
-                                    <motion.button
-                                        variants={btnVariants(theme)}
-                                        whileHover={{
-                                            color: '#0087ff'
-                                        }}
-                                        className='ql_size_toggle' onClick={() => toolToggleHandle('fontsize')}>
-                                        {selectFontSize}
-                                    </motion.button>
-                                    {toolToggle === 'fontsize' &&
-                                        <ul className='ql_size_list'>
-                                            {fontSizeOptions.map((size, ftIndex) => (
-                                                <li className='ql_size_item' key={ftIndex}>
-                                                    <button data-size-select={size.value} data-label-select={size.label} type='button' className='ql_size_btn'
-                                                        onClick={(e) => {
-                                                            const dataSize = (e.currentTarget as HTMLElement).getAttribute('data-size-select')
-                                                            const datalabel = (e.currentTarget as HTMLElement).getAttribute('data-label-select')
-                                                            handleFontSizeChange(dataSize, datalabel)
-                                                        }
-                                                        }>
-                                                        {size.label}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    }
-                                </div>
-
-                                {/* <!-- Line Height --> */}
-                                <div className='ql_lineheight_wrap'>
-                                    <motion.button
-                                        variants={btnVariants(theme)}
-                                        whileHover="otherHover" className='ql_lineheight_toggle' onClick={() => toolToggleHandle('lineheight')}>
-                                        <svg viewBox="0 0 32 32">
-                                            <g>
-                                                <rect width="32" height="32" fill='none' />
-                                                <line x1="8" y1="8" x2="24" y2="8" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                <line x1="8" y1="24" x2="24" y2="24" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                <polyline points="14.21 12.55 16.25 10.4 18.4 12.55" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                <line x1="16.25" y1="10.32" x2="16.25" y2="21.6" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                <polyline points="18.35 19.45 16.31 21.6 14.15 19.45" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                            </g>
-                                        </svg>
-                                    </motion.button>
-                                    {toolToggle === 'lineheight' &&
-                                        <ul className='ql_lineheight_list'>
-                                            {lineheight.map((height, lhIndex) => (
-                                                <li className='ql_lineheight_item' key={lhIndex}>
-                                                    <button data-lineheight-select={height} type='button' className={selectLineheight === height ? 'ql_lineheight_btn setLineheight' : 'ql_lineheight_btn'}
-                                                        onClick={(e) => {
-                                                            const dataHeight = (e.currentTarget as HTMLElement).getAttribute('data-lineheight-select')
-                                                            handleLineheightChange(dataHeight)
-                                                        }
-                                                        }>
-                                                        {height}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    }
-                                </div>
-
-                                {/* <!-- Font Color --> */}
-                                <div className='ql-color' >
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql_color_toggle' onClick={() => toolToggleHandle('color')}>
-                                        <svg viewBox="0 0 32 32">
-                                            <g >
-                                                <rect width="32" height="32" fill='none' />
-                                                <path d="M20.73,9h-13a.24.24,0,0,0-.25.23v2.88h.69a2.43,2.43,0,0,1,.43-1.09H13a.24.24,0,0,1,.25.22V23.7a.24.24,0,0,0,.25.23H15a.24.24,0,0,0,.25-.23V11.28a.25.25,0,0,1,.26-.22h4a2.19,2.19,0,0,1,.8,1.46H21V9.27A.24.24,0,0,0,20.73,9Z" css={css`fill : ${theme.colors.icon_on}`} />
-                                                <rect x="19.74" y="19.43" width="4.5" height="4.5" rx="0.3" fill={selectColor} />
-                                            </g>
-                                        </svg>
-                                    </motion.button>
-                                    {toolToggle === 'color' &&
-                                        <ul className='ql_color_list'>
-                                            {colorPallete.color.map((color, clIndex) => (
-                                                <li className='ql_color_item' key={clIndex}>
-                                                    <button css={css`background-color : ${color};`} type='button' className='ql_color_pallete ql_color_none' data-color-select={color}
-                                                        onClick={(e) => {
-                                                            const dataColor = (e.currentTarget as HTMLElement).getAttribute('data-color-select');
-                                                            handleFontColorChange(dataColor || '색상 없음')
-                                                        }}>
-                                                        {color === '#191919' ?
-                                                            <span className='ql_color_behind'>색상 없음</span>
-                                                            :
-                                                            <span className='ql_color_behind'>{color}</span>
-                                                        }
-                                                    </button>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    }
-                                </div>
-
-                                {/* <!-- Background Color --> */}
-                                <div className="ql-background">
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql_background_toggle' onClick={() => toolToggleHandle('background')}>
-                                        <svg viewBox="0 0 32 32">
-                                            <g>
-                                                <rect width="32" height="32" fill='none' />
-                                                <path d="M25.62,6H6.37A.35.35,0,0,0,6,6.31v3.86H7a3.2,3.2,0,0,1,.64-1.46h6.5a.34.34,0,0,1,.37.3V25.69a.35.35,0,0,0,.38.31h2.25a.35.35,0,0,0,.38-.31V9a.33.33,0,0,1,.37-.3h5.88a2.88,2.88,0,0,1,1.19,2h1V6.31A.35.35,0,0,0,25.62,6Z" fill={selectBgColor} />
-                                            </g>
-                                        </svg>
-                                    </motion.button>
-                                    {toolToggle === 'background' &&
-                                        <ul className='ql_background_list'>
-                                            {colorPallete.background.map((bgColor, bgIndex) => (
-                                                <li className='ql_background_item' key={bgIndex}>
-                                                    <button css={css`background-color : ${bgColor};`} type='button' className='ql_background_pallete ql_background_none' data-color-select={bgColor}
-                                                        onClick={(e) => {
-                                                            const color = (e.currentTarget as HTMLElement).getAttribute('data-color-select');
-                                                            handleFontBgChange(color || '색상 없음')
-                                                        }}>
-                                                        {bgColor === '#ffffff' ?
-                                                            <span className='ql_color_behind'>색상 없음</span>
-                                                            :
-                                                            <span className='ql_color_behind'>{bgColor}</span>
-                                                        }
-                                                    </button>
-                                                </li>
-                                            ))}
-
-                                        </ul>
-                                    }
-                                </div>
-
-                                {/* <!-- Text Align --> */}
-                                <div className="ql-align">
-                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql_align_toggle' onClick={() => toolToggleHandle('align')}>
-                                        {selectAlign === 'left' ?
-                                            <svg viewBox="0 0 32 32">
+                        </div>
+                    </div>
+                </MobileQuillStyle>
+                :
+                <QuillStyle notice={checkedNotice} public={checkedPublic}>
+                    <div className='quill_wrap'>
+                        <button className='go_main_btn' onClick={handleLeavePosting}>
+                            <motion.div
+                                variants={btnVariants(theme)}
+                                whileHover="otherHover"
+                                whileTap="otherClick">
+                                <svg viewBox="-5 -5 32 32">
+                                    <g>
+                                        <polyline points="8.55 8.72 3.37 14.49 8.55 19.68" fill='none' strokeLinecap='round' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                        <path d="M3.37,14.49h8.27a8.54,8.54,0,0,0,4.18-1,5.45,5.45,0,0,0,3-5,5.48,5.48,0,0,0-3-5,8.63,8.63,0,0,0-4.23-1H9.51" css={css`stroke : ${theme.colors.icon_on}`} fill='none' strokeLinecap='round' strokeWidth={1.5} />
+                                        <rect width="22.18" height="22.18" fill='none' />
+                                    </g>
+                                </svg>
+                            </motion.div>
+                        </button>
+                        <div className='posting_top'>
+                            {isAdmin &&
+                                <motion.button
+                                    variants={btnVariants(theme)}
+                                    whileHover={checkedNotice ? "NtcHover" : "NtcOffHover"}
+                                    whileTap={checkedNotice ? "NtcClick" : "NtcOffClick"}
+                                    className='notice_btn' onClick={handleCheckedNotice}>
+                                    {checkedNotice ?
+                                        <>
+                                            <svg width="32" height="32" viewBox="0 8 40 40">
                                                 <g>
-                                                    <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                    <line x1="6" y1="11.25" x2="18" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                    <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                    <line x1="6" y1="20.75" x2="18" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                    <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                    <rect width="32" height="32" fill='none' />
+                                                    <path className='notice_path_01' d="M29.55,26.26,28.36,25a1.14,1.14,0,0,1-.3-.77V19.26a8.29,8.29,0,0,0-7-8.32,8.09,8.09,0,0,0-9.14,8v5.23a1.14,1.14,0,0,1-.3.77l-1.19,1.31a1.72,1.72,0,0,0,1.26,2.87H28.29A1.72,1.72,0,0,0,29.55,26.26Z" fill="none" stroke='#fa5741' strokeWidth={'2'} />
+                                                    <path className='notice_path_02' d="M17.51,29.13a.34.34,0,0,0-.35.37,2.86,2.86,0,0,0,5.68,0,.34.34,0,0,0-.35-.37Z" fill="none" stroke='#fa5741' strokeWidth={'2'} />
+                                                    <circle cx="20" cy="9.15" r="1.15" fill="none" stroke='#fa5741' strokeWidth={'2'} />
+                                                    <rect width="32" height="32" fill="none" />
                                                 </g>
                                             </svg>
-                                            : selectAlign === 'center' ?
+                                            <p>공지</p>
+                                        </>
+                                        :
+                                        <>
+                                            <svg width="32" height="32" viewBox="0 8 40 40">
+                                                <g>
+                                                    <path className='notice_path_01' d="M29.55,26.26,28.36,25a1.14,1.14,0,0,1-.3-.77V19.26a8.29,8.29,0,0,0-7-8.32,8.09,8.09,0,0,0-9.14,8v5.23a1.14,1.14,0,0,1-.3.77l-1.19,1.31a1.72,1.72,0,0,0,1.26,2.87H28.29A1.72,1.72,0,0,0,29.55,26.26Z" fill="none" stroke='#ccc' strokeWidth={'2'} />
+                                                    <path className='notice_path_02' d="M17.51,29.13a.34.34,0,0,0-.35.37,2.86,2.86,0,0,0,5.68,0,.34.34,0,0,0-.35-.37Z" fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2'} />
+                                                    <circle cx="20" cy="9.15" r="1.15" fill="none" css={css`stroke : ${theme.colors.icon_off}`} strokeWidth={'2'} />
+                                                    <rect width="32" height="32" fill="none" />
+                                                </g>
+                                            </svg>
+                                            <p>공지</p>
+                                        </>
+                                    }
+                                </motion.button>
+                            }
+                            {checkedNotice ?
+                                <select ref={tagRef} className='tag_sel' defaultValue={'공지사항'}>
+                                    <option value="공지사항">공지사항</option>
+                                </select>
+                                :
+                                <select ref={tagRef} className='tag_sel' defaultValue={'기타'} onChange={(e) => handleSelectTag(e)}>
+                                    <option value="기타">기타</option>
+                                    <option value="잡담">잡담</option>
+                                    <option value="공부">공부</option>
+                                    <option value="일상">일상</option>
+                                </select>
+                            }
+                            <div className='title_input_wrap'>
+                                <input className='title_input' type="text" placeholder='제목' value={postTitle as string} onChange={handlePostingTitle} />
+                                <div className='title_input_value'>
+                                    <p>{postTitle?.slice(0, title_limit_count)}</p>
+                                    <p css={css`color: ${theme.colors.error}`}>{postTitle?.slice(title_limit_count)}</p>
+                                </div>
+                                <span className='title_limit'>{postTitle?.length} / 20</span>
+                                {postTitle && postTitle?.length > 20 &&
+                                    <p className='title_error'>{titleError}</p>
+                                }
+                            </div>
+                        </div>
+                        {/* <!-- Quill Custom Toolbar --> */}
+                        <div className='custom_toolbar_wrap'>
+                            <div id="custom_toolbar">
+                                <div id='toolbar'>
+                                    {/* <!-- Links and Images --> */}
+                                    <div className='ql_submit_wrap'>
+                                        <div className='ql_image_wrap'>
+                                            <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-image"></motion.button>
+                                            <span>이미지</span>
+                                        </div>
+                                        <div className='ql_link_wrap'>
+                                            <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-link"></motion.button>
+                                            <span>링크</span>
+                                        </div>
+                                    </div>
+                                    {/* <!-- Indent --> */}
+                                    <div className='ql_style_wrap'>
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="+1"></motion.button>
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="-1"></motion.button>
+
+                                        {/* <!-- Header -->  */}
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-header" value="1"></motion.button>
+
+                                        {/* <!-- Formatting --> */}
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-bold"></motion.button>
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-italic"></motion.button>
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-underline"></motion.button>
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-strike"></motion.button>
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql-code-block'></motion.button>
+                                        {/* <!-- Subscript / Superscript --> */}
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="sub"></motion.button>
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="super"></motion.button>
+
+                                        {/* <!-- Clean --> */}
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-clean"></motion.button>
+                                    </div>
+                                </div>
+
+                                <div id='toolbar-bottom' ref={styleToolRef}>
+                                    {/* <!-- Font Size --> */}
+                                    <div className='ql_size_wrap'>
+                                        <motion.button
+                                            variants={btnVariants(theme)}
+                                            whileHover={{
+                                                color: '#0087ff'
+                                            }}
+                                            className='ql_size_toggle' onClick={() => toolToggleHandle('fontsize')}>
+                                            {selectFontSize}
+                                        </motion.button>
+                                        {toolToggle === 'fontsize' &&
+                                            <ul className='ql_size_list'>
+                                                {fontSizeOptions.map((size, ftIndex) => (
+                                                    <li className='ql_size_item' key={ftIndex}>
+                                                        <button data-size-select={size.value} data-label-select={size.label} type='button' className='ql_size_btn'
+                                                            onClick={(e) => {
+                                                                const dataSize = (e.currentTarget as HTMLElement).getAttribute('data-size-select')
+                                                                const datalabel = (e.currentTarget as HTMLElement).getAttribute('data-label-select')
+                                                                handleFontSizeChange(dataSize, datalabel)
+                                                            }
+                                                            }>
+                                                            {size.label}
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        }
+                                    </div>
+
+                                    {/* <!-- Line Height --> */}
+                                    <div className='ql_lineheight_wrap'>
+                                        <motion.button
+                                            variants={btnVariants(theme)}
+                                            whileHover="otherHover" className='ql_lineheight_toggle' onClick={() => toolToggleHandle('lineheight')}>
+                                            <svg viewBox="0 0 32 32">
+                                                <g>
+                                                    <rect width="32" height="32" fill='none' />
+                                                    <line x1="8" y1="8" x2="24" y2="8" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                    <line x1="8" y1="24" x2="24" y2="24" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                    <polyline points="14.21 12.55 16.25 10.4 18.4 12.55" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                    <line x1="16.25" y1="10.32" x2="16.25" y2="21.6" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                    <polyline points="18.35 19.45 16.31 21.6 14.15 19.45" fill='none' css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                </g>
+                                            </svg>
+                                        </motion.button>
+                                        {toolToggle === 'lineheight' &&
+                                            <ul className='ql_lineheight_list'>
+                                                {lineheight.map((height, lhIndex) => (
+                                                    <li className='ql_lineheight_item' key={lhIndex}>
+                                                        <button data-lineheight-select={height} type='button' className={selectLineheight === height ? 'ql_lineheight_btn setLineheight' : 'ql_lineheight_btn'}
+                                                            onClick={(e) => {
+                                                                const dataHeight = (e.currentTarget as HTMLElement).getAttribute('data-lineheight-select')
+                                                                handleLineheightChange(dataHeight)
+                                                            }
+                                                            }>
+                                                            {height}
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        }
+                                    </div>
+
+                                    {/* <!-- Font Color --> */}
+                                    <div className='ql-color' >
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql_color_toggle' onClick={() => toolToggleHandle('color')}>
+                                            <svg viewBox="0 0 32 32">
+                                                <g >
+                                                    <rect width="32" height="32" fill='none' />
+                                                    <path d="M20.73,9h-13a.24.24,0,0,0-.25.23v2.88h.69a2.43,2.43,0,0,1,.43-1.09H13a.24.24,0,0,1,.25.22V23.7a.24.24,0,0,0,.25.23H15a.24.24,0,0,0,.25-.23V11.28a.25.25,0,0,1,.26-.22h4a2.19,2.19,0,0,1,.8,1.46H21V9.27A.24.24,0,0,0,20.73,9Z" css={css`fill : ${theme.colors.icon_on}`} />
+                                                    <rect x="19.74" y="19.43" width="4.5" height="4.5" rx="0.3" fill={selectColor} />
+                                                </g>
+                                            </svg>
+                                        </motion.button>
+                                        {toolToggle === 'color' &&
+                                            <ul className='ql_color_list'>
+                                                {colorPallete.color.map((color, clIndex) => (
+                                                    <li className='ql_color_item' key={clIndex}>
+                                                        <button css={css`background-color : ${color};`} type='button' className='ql_color_pallete ql_color_none' data-color-select={color}
+                                                            onClick={(e) => {
+                                                                const dataColor = (e.currentTarget as HTMLElement).getAttribute('data-color-select');
+                                                                handleFontColorChange(dataColor || '색상 없음')
+                                                            }}>
+                                                            {color === '#191919' ?
+                                                                <span className='ql_color_behind'>색상 없음</span>
+                                                                :
+                                                                <span className='ql_color_behind'>{color}</span>
+                                                            }
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        }
+                                    </div>
+
+                                    {/* <!-- Background Color --> */}
+                                    <div className="ql-background">
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql_background_toggle' onClick={() => toolToggleHandle('background')}>
+                                            <svg viewBox="0 0 32 32">
+                                                <g>
+                                                    <rect width="32" height="32" fill='none' />
+                                                    <path d="M25.62,6H6.37A.35.35,0,0,0,6,6.31v3.86H7a3.2,3.2,0,0,1,.64-1.46h6.5a.34.34,0,0,1,.37.3V25.69a.35.35,0,0,0,.38.31h2.25a.35.35,0,0,0,.38-.31V9a.33.33,0,0,1,.37-.3h5.88a2.88,2.88,0,0,1,1.19,2h1V6.31A.35.35,0,0,0,25.62,6Z" fill={selectBgColor} />
+                                                </g>
+                                            </svg>
+                                        </motion.button>
+                                        {toolToggle === 'background' &&
+                                            <ul className='ql_background_list'>
+                                                {colorPallete.background.map((bgColor, bgIndex) => (
+                                                    <li className='ql_background_item' key={bgIndex}>
+                                                        <button css={css`background-color : ${bgColor};`} type='button' className='ql_background_pallete ql_background_none' data-color-select={bgColor}
+                                                            onClick={(e) => {
+                                                                const color = (e.currentTarget as HTMLElement).getAttribute('data-color-select');
+                                                                handleFontBgChange(color || '색상 없음')
+                                                            }}>
+                                                            {bgColor === '#ffffff' ?
+                                                                <span className='ql_color_behind'>색상 없음</span>
+                                                                :
+                                                                <span className='ql_color_behind'>{bgColor}</span>
+                                                            }
+                                                        </button>
+                                                    </li>
+                                                ))}
+
+                                            </ul>
+                                        }
+                                    </div>
+
+                                    {/* <!-- Text Align --> */}
+                                    <div className="ql-align">
+                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql_align_toggle' onClick={() => toolToggleHandle('align')}>
+                                            {selectAlign === 'left' ?
                                                 <svg viewBox="0 0 32 32">
                                                     <g>
-                                                        <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                        <line x1="10" y1="11.25" x2="22" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                        <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                        <line x1="10" y1="20.75" x2="22" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                        <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                        <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                        <line x1="6" y1="11.25" x2="18" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                        <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                        <line x1="6" y1="20.75" x2="18" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                        <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
                                                         <rect width="32" height="32" fill='none' />
                                                     </g>
                                                 </svg>
-                                                : selectAlign === 'right' ?
-                                                    <svg viewBox="0 0 32 32">
-                                                        <g>
-                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="14" y1="11.25" x2="26" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="14" y1="20.75" x2="26" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <rect width="32" height="32" fill='none' />
-                                                        </g>
-                                                    </svg>
-                                                    :
-                                                    <svg viewBox="0 0 32 32">
-                                                        <g>
-                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="6" y1="11.25" x2="26" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="6" y1="20.75" x2="26" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <rect width="32" height="32" fill='none' />
-                                                        </g>
-                                                    </svg>
-                                        }
-                                    </motion.button>
-                                    {toolToggle === 'align' &&
-                                        <ul className='ql_align_list'>
-                                            <li className='ql_align_item'>
-                                                <motion.button
-                                                    variants={btnVariants(theme)}
-                                                    whileHover="otherHover"
-                                                    whileTap="otherClick"
-                                                    className={selectAlign === 'left' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
-                                                    data-align-value='left'
-                                                    onClick={() => { handleAlignChange('left') }}
-                                                >
-                                                    <svg viewBox="0 0 32 32">
-                                                        <g>
-                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                            <line x1="6" y1="11.25" x2="18" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                            <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                            <line x1="6" y1="20.75" x2="18" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
-                                                            <rect width="32" height="32" fill='none' />
-                                                        </g>
-                                                    </svg>
-                                                </motion.button>
-                                            </li>
-                                            <li className='ql_align_item'>
-                                                <motion.button
-                                                    variants={btnVariants(theme)}
-                                                    whileHover="otherHover"
-                                                    whileTap="otherClick"
-                                                    className={selectAlign === 'center' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
-                                                    data-align-value='center'
-                                                    onClick={() => { handleAlignChange('center') }}
-                                                >
+                                                : selectAlign === 'center' ?
                                                     <svg viewBox="0 0 32 32">
                                                         <g>
                                                             <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
@@ -1818,98 +1270,164 @@ export default function PostMenu() {
                                                             <rect width="32" height="32" fill='none' />
                                                         </g>
                                                     </svg>
-                                                </motion.button>
-                                            </li>
-                                            <li className='ql_align_item'>
-                                                <motion.button
-                                                    variants={btnVariants(theme)}
-                                                    whileHover="otherHover"
-                                                    whileTap="otherClick"
-                                                    className={selectAlign === 'right' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
-                                                    data-align-value='right'
-                                                    onClick={() => { handleAlignChange('right') }}
-                                                >
-                                                    <svg viewBox="0 0 32 32">
-                                                        <g>
-                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="14" y1="11.25" x2="26" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="14" y1="20.75" x2="26" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <rect width="32" height="32" fill='none' />
-                                                        </g>
-                                                    </svg>
-                                                </motion.button>
-                                            </li>
-                                            <li className='ql_align_item'>
-                                                <motion.button
-                                                    variants={btnVariants(theme)}
-                                                    whileHover="otherHover"
-                                                    whileTap="otherClick"
-                                                    className={selectAlign === 'justify' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
-                                                    data-align-value='justify'
-                                                    onClick={() => { handleAlignChange('justify') }}
-                                                >
-                                                    <svg viewBox="0 0 32 32">
-                                                        <g>
-                                                            <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="6" y1="11.25" x2="26" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="6" y1="20.75" x2="26" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
-                                                            <rect width="32" height="32" fill='none' />
-                                                        </g>
-                                                    </svg>
-                                                </motion.button>
-                                            </li>
-                                        </ul>
-                                    }
+                                                    : selectAlign === 'right' ?
+                                                        <svg viewBox="0 0 32 32">
+                                                            <g>
+                                                                <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="14" y1="11.25" x2="26" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="14" y1="20.75" x2="26" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <rect width="32" height="32" fill='none' />
+                                                            </g>
+                                                        </svg>
+                                                        :
+                                                        <svg viewBox="0 0 32 32">
+                                                            <g>
+                                                                <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="11.25" x2="26" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="20.75" x2="26" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <rect width="32" height="32" fill='none' />
+                                                            </g>
+                                                        </svg>
+                                            }
+                                        </motion.button>
+                                        {toolToggle === 'align' &&
+                                            <ul className='ql_align_list'>
+                                                <li className='ql_align_item'>
+                                                    <motion.button
+                                                        variants={btnVariants(theme)}
+                                                        whileHover="otherHover"
+                                                        whileTap="otherClick"
+                                                        className={selectAlign === 'left' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
+                                                        data-align-value='left'
+                                                        onClick={() => { handleAlignChange('left') }}
+                                                    >
+                                                        <svg viewBox="0 0 32 32">
+                                                            <g>
+                                                                <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                                <line x1="6" y1="11.25" x2="18" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                                <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                                <line x1="6" y1="20.75" x2="18" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                                <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1.5} />
+                                                                <rect width="32" height="32" fill='none' />
+                                                            </g>
+                                                        </svg>
+                                                    </motion.button>
+                                                </li>
+                                                <li className='ql_align_item'>
+                                                    <motion.button
+                                                        variants={btnVariants(theme)}
+                                                        whileHover="otherHover"
+                                                        whileTap="otherClick"
+                                                        className={selectAlign === 'center' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
+                                                        data-align-value='center'
+                                                        onClick={() => { handleAlignChange('center') }}
+                                                    >
+                                                        <svg viewBox="0 0 32 32">
+                                                            <g>
+                                                                <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="10" y1="11.25" x2="22" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="10" y1="20.75" x2="22" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <rect width="32" height="32" fill='none' />
+                                                            </g>
+                                                        </svg>
+                                                    </motion.button>
+                                                </li>
+                                                <li className='ql_align_item'>
+                                                    <motion.button
+                                                        variants={btnVariants(theme)}
+                                                        whileHover="otherHover"
+                                                        whileTap="otherClick"
+                                                        className={selectAlign === 'right' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
+                                                        data-align-value='right'
+                                                        onClick={() => { handleAlignChange('right') }}
+                                                    >
+                                                        <svg viewBox="0 0 32 32">
+                                                            <g>
+                                                                <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="14" y1="11.25" x2="26" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="14" y1="20.75" x2="26" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <rect width="32" height="32" fill='none' />
+                                                            </g>
+                                                        </svg>
+                                                    </motion.button>
+                                                </li>
+                                                <li className='ql_align_item'>
+                                                    <motion.button
+                                                        variants={btnVariants(theme)}
+                                                        whileHover="otherHover"
+                                                        whileTap="otherClick"
+                                                        className={selectAlign === 'justify' ? 'ql_align_btn setAlign' : 'ql_align_btn'}
+                                                        data-align-value='justify'
+                                                        onClick={() => { handleAlignChange('justify') }}
+                                                    >
+                                                        <svg viewBox="0 0 32 32">
+                                                            <g>
+                                                                <line x1="6" y1="6.5" x2="26" y2="6.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="11.25" x2="26" y2="11.25" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="16" x2="26" y2="16" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="20.75" x2="26" y2="20.75" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <line x1="6" y1="25.5" x2="26" y2="25.5" css={css`stroke : ${theme.colors.icon_on}`} strokeWidth={1} />
+                                                                <rect width="32" height="32" fill='none' />
+                                                            </g>
+                                                        </svg>
+                                                    </motion.button>
+                                                </li>
+                                            </ul>
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className='ql_content'>
-                        <ReactQuill ref={quillRef} formats={formats} value={posting as string} onChange={handlePostingEditor} modules={SetModules} />
-                    </div>
-                    <p>{postingText.length}/ 2500</p>
+                        <div className='ql_content'>
+                            <ReactQuill ref={quillRef} formats={formats} value={posting as string} onChange={handlePostingEditor} modules={SetModules} />
+                        </div>
+                        <p>{postingText.length}/ 2500</p>
 
-                    {uploadLoading ?
-                        <button className='post_btn'><LoadingWrap /></button>
-                        :
-                        <motion.button variants={btnVariants(theme)} whileHover="loginHover" className='post_btn' onClick={uploadPost}>발행</motion.button>
-                    }
-                    <motion.button
-                        variants={btnVariants(theme)}
-                        whileHover={checkedPublic ? "NtcHover" : "NtcOffHover"}
-                        whileTap={checkedPublic ? "NtcClick" : "NtcOffClick"}
-                        className='public_btn' onClick={handleCheckedPublic}>
-                        {checkedPublic ?
-                            <>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40">
-                                    <g>
-                                        <rect width="36" height="36" fill="none" />
-                                        <path css={css`fill : ${theme.colors.icon_off}; stroke: ${theme.colors.icon_off}`} d="M21.57678,24.32535a2.01015,2.01015,0,1,0-3.208,1.60584l-.56543,1.77838a.3.3,0,0,0,.28589.391h2.95459a.30015.30015,0,0,0,.28613-.391l-.56543-1.77838A2.00072,2.00072,0,0,0,21.57678,24.32535Z" />
-                                        <path css={css`fill : ${theme.colors.icon_off}; stroke: ${theme.colors.icon_off}`} strokeWidth={'0.5'} d="M24.76039,16.89108a2.50281,2.50281,0,0,1,2.5,2.5v8.60583a2.50281,2.50281,0,0,1-2.5,2.5H14.37281a2.50281,2.50281,0,0,1-2.5-2.5V19.39108a2.50281,2.50281,0,0,1,2.5-2.5H24.76039m0-1.5H14.37281a4,4,0,0,0-4,4v8.60583a4,4,0,0,0,4,4H24.76039a3.99993,3.99993,0,0,0,4-4V19.39108a3.99994,3.99994,0,0,0-4-4Z" />
-                                        <path css={css`fill : ${theme.colors.icon_off}; stroke: ${theme.colors.icon_off}`} strokeWidth={'0.5'} d="M21.64882,9.50308a2.55566,2.55566,0,0,1,2.55273,2.55281V15.3464H14.887V12.05589a2.55577,2.55577,0,0,1,2.55286-2.55281h4.209m0-1.5h-4.209A4.05287,4.05287,0,0,0,13.387,12.05589V16.8464H25.70155V12.05589a4.05275,4.05275,0,0,0-4.05273-4.05281Z" />
-                                    </g>
-                                </svg>
-                            </>
+                        {uploadLoading ?
+                            <button className='post_btn'><LoadingWrap /></button>
                             :
-                            <>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40">
-                                    <g>
-                                        <rect width="36" height="36" fill="none" />
-                                        <path fill='#fa5741' stroke='none' d="M21.57678,24.32535a2.01015,2.01015,0,1,0-3.208,1.60584l-.56543,1.77838a.3.3,0,0,0,.28589.391h2.95459a.30015.30015,0,0,0,.28613-.391l-.56543-1.77838A2.00072,2.00072,0,0,0,21.57678,24.32535Z" />
-                                        <path fill='#fa5741' stroke='#fa5741' strokeWidth={'0.5'} d="M24.76039,16.89108a2.50281,2.50281,0,0,1,2.5,2.5v8.60583a2.50281,2.50281,0,0,1-2.5,2.5H14.37281a2.50281,2.50281,0,0,1-2.5-2.5V19.39108a2.50281,2.50281,0,0,1,2.5-2.5H24.76039m0-1.5H14.37281a4,4,0,0,0-4,4v8.60583a4,4,0,0,0,4,4H24.76039a3.99993,3.99993,0,0,0,4-4V19.39108a3.99994,3.99994,0,0,0-4-4Z" />
-                                        <path fill='#fa5741' stroke='#fa5741' strokeWidth={'0.5'} d="M21.64882,9.50308a2.55566,2.55566,0,0,1,2.55273,2.55281V15.3464H14.887V12.05589a2.55577,2.55577,0,0,1,2.55286-2.55281h4.209m0-1.5h-4.209A4.05287,4.05287,0,0,0,13.387,12.05589V16.8464H25.70155V12.05589a4.05275,4.05275,0,0,0-4.05273-4.05281Z" />
-                                    </g>
-                                </svg>
-
-                            </>
+                            <motion.button variants={btnVariants(theme)} whileHover="loginHover" className='post_btn' onClick={uploadPost}>발행</motion.button>
                         }
-                    </motion.button>
-                </div >
-            </QuillStyle >
+                        <motion.button
+                            variants={btnVariants(theme)}
+                            whileHover={checkedPublic ? "NtcHover" : "NtcOffHover"}
+                            whileTap={checkedPublic ? "NtcClick" : "NtcOffClick"}
+                            className='public_btn' onClick={handleCheckedPublic}>
+                            {checkedPublic ?
+                                <>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40">
+                                        <g>
+                                            <rect width="36" height="36" fill="none" />
+                                            <path css={css`fill : ${theme.colors.icon_off}; stroke: ${theme.colors.icon_off}`} d="M21.57678,24.32535a2.01015,2.01015,0,1,0-3.208,1.60584l-.56543,1.77838a.3.3,0,0,0,.28589.391h2.95459a.30015.30015,0,0,0,.28613-.391l-.56543-1.77838A2.00072,2.00072,0,0,0,21.57678,24.32535Z" />
+                                            <path css={css`fill : ${theme.colors.icon_off}; stroke: ${theme.colors.icon_off}`} strokeWidth={'0.5'} d="M24.76039,16.89108a2.50281,2.50281,0,0,1,2.5,2.5v8.60583a2.50281,2.50281,0,0,1-2.5,2.5H14.37281a2.50281,2.50281,0,0,1-2.5-2.5V19.39108a2.50281,2.50281,0,0,1,2.5-2.5H24.76039m0-1.5H14.37281a4,4,0,0,0-4,4v8.60583a4,4,0,0,0,4,4H24.76039a3.99993,3.99993,0,0,0,4-4V19.39108a3.99994,3.99994,0,0,0-4-4Z" />
+                                            <path css={css`fill : ${theme.colors.icon_off}; stroke: ${theme.colors.icon_off}`} strokeWidth={'0.5'} d="M21.64882,9.50308a2.55566,2.55566,0,0,1,2.55273,2.55281V15.3464H14.887V12.05589a2.55577,2.55577,0,0,1,2.55286-2.55281h4.209m0-1.5h-4.209A4.05287,4.05287,0,0,0,13.387,12.05589V16.8464H25.70155V12.05589a4.05275,4.05275,0,0,0-4.05273-4.05281Z" />
+                                        </g>
+                                    </svg>
+                                </>
+                                :
+                                <>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40">
+                                        <g>
+                                            <rect width="36" height="36" fill="none" />
+                                            <path fill='#fa5741' stroke='none' d="M21.57678,24.32535a2.01015,2.01015,0,1,0-3.208,1.60584l-.56543,1.77838a.3.3,0,0,0,.28589.391h2.95459a.30015.30015,0,0,0,.28613-.391l-.56543-1.77838A2.00072,2.00072,0,0,0,21.57678,24.32535Z" />
+                                            <path fill='#fa5741' stroke='#fa5741' strokeWidth={'0.5'} d="M24.76039,16.89108a2.50281,2.50281,0,0,1,2.5,2.5v8.60583a2.50281,2.50281,0,0,1-2.5,2.5H14.37281a2.50281,2.50281,0,0,1-2.5-2.5V19.39108a2.50281,2.50281,0,0,1,2.5-2.5H24.76039m0-1.5H14.37281a4,4,0,0,0-4,4v8.60583a4,4,0,0,0,4,4H24.76039a3.99993,3.99993,0,0,0,4-4V19.39108a3.99994,3.99994,0,0,0-4-4Z" />
+                                            <path fill='#fa5741' stroke='#fa5741' strokeWidth={'0.5'} d="M21.64882,9.50308a2.55566,2.55566,0,0,1,2.55273,2.55281V15.3464H14.887V12.05589a2.55577,2.55577,0,0,1,2.55286-2.55281h4.209m0-1.5h-4.209A4.05287,4.05287,0,0,0,13.387,12.05589V16.8464H25.70155V12.05589a4.05275,4.05275,0,0,0-4.05273-4.05281Z" />
+                                        </g>
+                                    </svg>
+
+                                </>
+                            }
+                        </motion.button>
+                    </div >
+                </QuillStyle >}
             {
                 confirmed &&
                 <LoadModal>

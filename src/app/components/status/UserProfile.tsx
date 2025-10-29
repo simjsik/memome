@@ -707,8 +707,8 @@ export default function UserProfile() {
                     prevNotices.filter((notice) => notice.noticeId !== noticeId)
                 );
             } catch (error) {
-                console.error('게시글 삭제 중 오류가 발생했습니다.' + error)
-                alert('게시글 삭제 중 오류가 발생했습니다.')
+                console.error('공지사항 확인 오류' + error)
+                alert('공지사항 확인 중 오류가 발생했습니다.')
             } finally {
                 setAlarmLoading(false);
             }
