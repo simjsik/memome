@@ -954,8 +954,9 @@ export default function PostMenu() {
                                                 <SwiperSlide>
                                                     <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="+1"></motion.button>
                                                 </SwiperSlide>
-                                                <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="-1"></motion.button>
-
+                                                <SwiperSlide>
+                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="-1"></motion.button>
+                                                </SwiperSlide>
                                                 {/* <!-- Header -->  */}
                                                 <SwiperSlide>
                                                     <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-header" value="1"></motion.button>
