@@ -721,8 +721,13 @@ export const MobileQuillStyle = styled.div<{ notice: boolean, public: boolean }>
             border: none;
             background: ${({ theme }) => theme.colors.background};
             padding: 6px;
+
+            svg{
+                width: 100%;
+                height : 100%;
+            }
         }
-            
+
         .post_btn{
             border: none;
             background: ${({ theme }) => theme.colors.primary};
