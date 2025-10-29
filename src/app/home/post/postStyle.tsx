@@ -663,7 +663,7 @@ margin : 0 auto;
 `
 export const MobileQuillStyle = styled.div<{ notice: boolean, public: boolean }>`
     width: 100%;
-    height: 100%;
+    height: 100dvh;
 
     .quill_wrap{
         position: relative;
@@ -870,12 +870,15 @@ export const MobileQuillStyle = styled.div<{ notice: boolean, public: boolean }>
                 position: absolute;
                 right: 0;
                 width: 64px;
-                min-height: 50%;
+                min-height: 100%;
                 line-height: 0;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
+                display: grid;
                 align-items: center;
+                justify-items: center;
+
+                svg{
+                    display: block;
+                }
             }
         }
     }
