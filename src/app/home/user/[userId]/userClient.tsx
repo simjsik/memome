@@ -38,7 +38,7 @@ export default function UserClient({ user }: ClientUserProps) {
     const theme = useTheme();
     const router = useRouter();
     const pathName = usePathname();
-    const usageLimit = useRecoilValue<boolean>(UsageLimitState)
+    const [usageLimit, setUsageLimit] = useRecoilState<boolean>(UsageLimitState)
     const [postTab, setPostTab] = useState<boolean>(true)
     const [dropToggle, setDropToggle] = useState<string>('')
     const [loading, setLoading] = useRecoilState(loadingState);
@@ -59,6 +59,7 @@ export default function UserClient({ user }: ClientUserProps) {
         hasNextPage,
         isLoading: postLoading,
         isError: postError,
+        error: postErr
     } = useInfiniteQuery<
         FetchPostListResponse,
         Error,
@@ -85,8 +86,8 @@ export default function UserClient({ user }: ClientUserProps) {
 
             if (!response.ok) {
                 // 상태별 메시지
-                if (response.status === 429) throw new Error('요청 한도를 초과했어요.');
-                if (response.status === 403) throw new Error('유저 인증이 필요합니다.');
+                if (response.status === 429) throw new Error('LM');
+                if (response.status === 403 || response.status === 401) throw new Error('FB');
                 const msg = await response.text().catch(() => '');
                 throw new Error(msg || `요청 실패 (${response.status})`);
             }
@@ -106,6 +107,7 @@ export default function UserClient({ user }: ClientUserProps) {
         hasNextPage: hasImagePage,
         isLoading: imageLoading,
         isError: imageError,
+        error: imgErr
     } = useInfiniteQuery<
         FetchImageListResponse,
         Error,
@@ -134,8 +136,8 @@ export default function UserClient({ user }: ClientUserProps) {
 
             if (!response.ok) {
                 // 상태별 메시지
-                if (response.status === 429) throw new Error('요청 한도를 초과했어요.');
-                if (response.status === 403) throw new Error('유저 인증이 필요합니다.');
+                if (response.status === 429) throw new Error('LM');
+                if (response.status === 403 || response.status === 401) throw new Error('FB');
                 const msg = await response.text().catch(() => '');
                 throw new Error(msg || `요청 실패 (${response.status})`);
             }
@@ -153,6 +155,21 @@ export default function UserClient({ user }: ClientUserProps) {
 
     // 스크롤 끝나면 포스트 요청
     const isFirstLoad = useRef(true); // 최초 실행 여부 확인
+
+    useEffect(() => {
+        if (postError) {
+            errorHanler(postErr.message)
+        }
+        if (imageError) {
+            errorHanler(imgErr.message)
+        }
+    }, [imageError, postError])
+
+    const errorHanler = (message: string) => {
+        if (message === 'LM') {
+            setUsageLimit(true);
+        }
+    }
 
     useEffect(() => {
         if (usageLimit || !postTab) return; // postTab === false면 실행 안 함.

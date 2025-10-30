@@ -36,6 +36,7 @@ export default function Bookmark() {
         isLoading: firstLoading,
         isFetching: dataLoading,
         isError,
+        error
     } = useInfiniteQuery<
         { data: PostData[]; nextPage: number | undefined }, // TQueryFnData
         Error, // TError
@@ -59,14 +60,10 @@ export default function Bookmark() {
                     body: JSON.stringify({ bookmarkId: currentBookmark, pageParam, pageSize: 4 }),
                     credentials: "include",
                 });
-
                 if (!response.ok) {
                     // 상태별 메시지
-                    if (response.status === 429) {
-                        setUsageLimit(true);
-                        throw new Error('요청 한도를 초과했어요.')
-                    };
-                    if (response.status === 403) throw new Error('유저 인증이 필요합니다.');
+                    if (response.status === 429) throw new Error('LM');
+                    if (response.status === 403 || response.status === 401) throw new Error('FB');
                     const msg = await response.text().catch(() => '');
                     throw new Error(msg || `요청 실패 (${response.status})`);
                 }
@@ -93,9 +90,12 @@ export default function Bookmark() {
 
     useEffect(() => {
         if (isError) {
-            // setUsageLimit(true);
+            if (error.message === 'LM') {
+                setUsageLimit(true);
+            }
         }
     }, [isError])
+
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {

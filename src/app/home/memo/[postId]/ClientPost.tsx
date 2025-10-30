@@ -1,4 +1,4 @@
-/** @jsxImportSource @emotion/react */ // 최상단에 배치
+/** @jsxImportSource @emotion/react */
 "use client";
 
 import { commentModalState, memoCommentCount } from "@/app/state/PostState";

@@ -48,6 +48,7 @@ export default function ClientNotice() {
         isLoading: firstLoading,
         isFetching: dataLoading,
         isError,
+        error
     } = useInfiniteQuery<
         { data: PostData[]; nextPage: Timestamp | undefined }, // TQueryFnData
         Error, // TError
@@ -74,8 +75,8 @@ export default function ClientNotice() {
 
             if (!response.ok) {
                 // 상태별 메시지
-                if (response.status === 429) throw new Error('요청 한도를 초과했어요.');
-                if (response.status === 403) throw new Error('유저 인증이 필요합니다.');
+                if (response.status === 429) throw new Error('LM');
+                if (response.status === 403 || response.status === 401) throw new Error('FB');
                 const msg = await response.text().catch(() => '');
                 throw new Error(msg || `요청 실패 (${response.status})`);
             }
@@ -89,6 +90,15 @@ export default function ClientNotice() {
     });
 
     const noticeList = notices?.pages.flatMap(page => page.data) || [];
+
+    useEffect(() => {
+        if (isError) {
+            if (error.message === 'LM') {
+                setUsageLimit(true);
+            }
+        }
+    }, [isError])
+
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
@@ -146,13 +156,6 @@ export default function ClientNotice() {
         if (!confirmed) return;
         handledeletePost(postId)
     }
-
-    // 에러 발생 시 데이터 요청 중지
-    useEffect(() => {
-        if (isError) {
-            setUsageLimit(true);
-        }
-    }, [isError])
 
     useEffect(() => {
         setLoading(false); // 초기 로딩 해제

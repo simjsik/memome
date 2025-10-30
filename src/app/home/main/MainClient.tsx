@@ -170,8 +170,8 @@ export default function MainHome() {
 
         if (!response.ok) {
           // 상태별 메시지
-          if (response.status === 429) throw new Error('요청 한도를 초과했어요.');
-          if (response.status === 403) throw new Error('유저 인증이 필요합니다.');
+          if (response.status === 429) throw new Error('LM');
+          if (response.status === 403 || response.status === 401) throw new Error('FB');
           const msg = await response.text().catch(() => '');
           throw new Error(msg || `요청 실패 (${response.status})`);
         }
@@ -230,10 +230,10 @@ export default function MainHome() {
     };
   }, [hasNextPage, fetchNextPage])
 
-  // 에러 시 사용 제한
+  // 초과 시 사용 제한
   useEffect(() => {
     if (isError) {
-      if (error.message === '사용량 제한을 초과했습니다. 더 이상 요청할 수 없습니다.') {
+      if (error.message === 'LM') {
         setUsageLimit(true);
       }
     }
