@@ -459,26 +459,24 @@ export default function UserClient({ user }: ClientUserProps) {
                         <>
                             <main className="user_image_post_wrap">
                                 {!loading && userImageList.map((post) => (
-                                    post.images &&
+                                    post.thumbnail &&
                                     <div key={post.id} className="user_image_wrap">
-                                        {post.images.length > 0 && (
-                                            <>
-                                                {routePostId === post.id && <LoadLoading />}
-                                                <div className="image_post_img" css={css`
-                                                            background-image : url(${post.images[0]})
+                                        <>
+                                            {routePostId === post.id && <LoadLoading />}
+                                            <div className="image_post_img" css={css`
+                                                            background-image : url(${post.thumbnail})
                                                         `} onClick={() => handlePostClick(post.id)}>
-                                                    <Image
-                                                        src={post.images[0]}
-                                                        alt="포스트 이미지"
-                                                        fill
-                                                        style={{ objectFit: 'cover' }}
-                                                    />
-                                                </div>
-                                                {post.images.length > 1 &&
-                                                    <div className="image_list_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
-                                                }
-                                            </>
-                                        )}
+                                                <Image
+                                                    src={post.thumbnail}
+                                                    alt="포스트 이미지"
+                                                    fill
+                                                    style={{ objectFit: 'cover' }}
+                                                />
+                                            </div>
+                                            {post.hasImage &&
+                                                <div className="image_list_icon" css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746002760/%EC%9D%B4%EB%AF%B8%EC%A7%80%EB%8D%94%EC%9E%88%EC%9D%8C_gdridk.svg)`}></div>
+                                            }
+                                        </>
                                     </div>
                                 ))}
                             </main>

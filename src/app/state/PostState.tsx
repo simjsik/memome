@@ -25,7 +25,8 @@ export interface PostData {
 
 export interface ImagePostData {
     id: string;
-    images?: string[] | false;
+    thumbnail?: string;
+    hasImage: boolean;
 }
 
 export interface unsavedPostData {
