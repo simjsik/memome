@@ -253,7 +253,6 @@ export async function middleware(req: NextRequest) {
     }
 
     if (AUTH_PUBLIC.some(p => pathname.startsWith(p))) {
-        console.log('로그인 API 패스')
         return NextResponse.next();
     }
 
