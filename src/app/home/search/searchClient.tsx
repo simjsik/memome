@@ -7,8 +7,6 @@ import { SearchBoxWrap } from "./SearchStyle";
 import { css, useTheme } from "@emotion/react";
 import { startTransition, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { collection, doc, getDoc } from "firebase/firestore";
-import { db } from "@/app/DB/firebaseConfig";
 import BookmarkBtn from "@/app/components/BookmarkBtn";
 import { NoMorePost, PostWrap } from "@/app/styled/PostComponents";
 import { loadingState, PostData, statusState, UsageLimitState, UsageLimitToggle } from "@/app/state/PostState";
@@ -89,13 +87,39 @@ function PostHit({ hit }: { hit: PostData }) {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const userDoc = await getDoc(doc(collection(db, 'users'), hit.userId));
-                if (userDoc.exists()) {
-                    const user = userDoc.data() as { displayName: string; photoURL: string | null };
-                    setUserData(user);
+                const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+                const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+
+                console.log(hit, '알고리아 데이터')
+                const userResponse = await fetch('/api/search/user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Project-Host': window.location.origin,
+                        'x-csrf-token': csrfValue
+                    },
+                    body: JSON.stringify({ uid: hit.userId }),
+                    credentials: "include",
+                });
+
+                if (!userResponse.ok) {
+                    if (userResponse.status === 429) throw new Error('LM');
+                    if (userResponse.status === 403 || userResponse.status === 401) throw new Error('FB');
+                    if (userResponse.status === 400) throw new Error('BR');
+                    const msg = await userResponse.text().catch(() => '');
+                    throw new Error(msg || `요청 실패 (${userResponse.status})`);
                 }
-            } catch (error) {
-                console.error('Error fetching user data:', error);
+                const userData = await userResponse.json();
+                const user = userData.user as { displayName: string; photoURL: string };
+                setUserData(user);
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    console.error("일반 오류 발생:", error.message);
+                    throw error;
+                } else {
+                    console.error("알 수 없는 에러 유형:", error);
+                    throw new Error("알 수 없는 에러가 발생했습니다.");
+                }
             } finally {
                 setIsLoading(false);
                 setLoading(false);
