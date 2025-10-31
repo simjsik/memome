@@ -67,7 +67,7 @@ router.post('/posting/cdn', async (req: Request, res: Response) => {
 
             if (imgLength > MAX_IMG) {
                 return res.status(400).json({
-                    message: `입력 가능한 이미지 수(${imgLength - MAX_IMG})를 초과 하였습니다. `,
+                    message: `입력 가능한 이미지 수(${imgLength - MAX_IMG})를 초과 하였습니다.`,
                 });
             }
 

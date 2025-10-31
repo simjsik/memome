@@ -26,6 +26,7 @@ import fetchBookmarkRouter from "./routes/post/bookmarkPost";
 import fetchUserPostRouter from "./routes/post/userPost";
 import fetchCommentRouter from "./routes/post/fetchComment";
 import deleteCommentRouter from "./routes/comment/deleteComment";
+import searchUserRouter from "./routes/search/searchUser";
 import { adminDb } from "./DB/firebaseAdminConfig";
 import { UserRecord } from "firebase-admin/auth";
 import { fromPostData } from "./routes/post/utils/postType";
@@ -279,6 +280,10 @@ app.use('/', fetchPostRouter);
 app.use('/', fetchNoticeRouter);
 app.use('/', fetchBookmarkRouter);
 app.use('/', fetchUserPostRouter);
+
+// // 유저 검색
+app.use('/', searchUserRouter);
+
 
 // Firebase Functions로 배포
 export const ApiRouter = onRequest(app);
