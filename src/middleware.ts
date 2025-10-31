@@ -220,7 +220,9 @@ const styleHashes = [
     "sha256-WnBPKOFanrxhJ8VKEyObZl0FMgrs8zU/gS/0escC7H0=",
     "sha256-pBNoS/Dw2SBKDzUfJdIJzVVWn9J2Qq4AnBKsu2jYKQg=",
     "sha256-181oE+v13en5m1SVaqSDIytwEayc9PNq9twwxL+w3yM=",
-    "sha256-8LZEFGQFNeHdSe2rKZqSBwG/6Ug0K3FUnIJFlCWdaSw="
+    "sha256-8LZEFGQFNeHdSe2rKZqSBwG/6Ug0K3FUnIJFlCWdaSw=",
+    "sha256-whubYi3SMeMYyv4PkNvd7q61eDmhmtiyhvpIgDr3Zio=",
+    "sha256-NJhDrS+mvoFOZgQpeSUOqEYAUL3V9oLdB7+UWrSJHC0=",
 ];
 
 const scriptSrc = [`'self'`, `'nonce-${nonce}'`, "https://apis.google.com"];
