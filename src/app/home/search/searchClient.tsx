@@ -87,6 +87,7 @@ function PostHit({ hit }: { hit: PostData }) {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
+
                 const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
                 const csrfValue = csrf ? decodeURIComponent(csrf) : '';
 
@@ -140,7 +141,7 @@ function PostHit({ hit }: { hit: PostData }) {
     }
 
     if (!userData) {
-        return <p>User not found</p>;
+        return <LoadingWrap />
     }
 
     return (

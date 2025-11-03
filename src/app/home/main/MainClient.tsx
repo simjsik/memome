@@ -56,6 +56,7 @@ export default function MainHome() {
   const observerLoadRef = useRef(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [routePostId, setRoutePostId] = useState<string | null>(null);
+  
   // 웹소켓 연결---------------------------------------------------------------------------------
   const socketRef = useRef<Socket | null>(null);
 
