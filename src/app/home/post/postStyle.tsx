@@ -824,6 +824,7 @@ export const MobileQuillStyle = styled.div<{ notice: boolean, public: boolean }>
                 position: relative;
                 width: 100%;
                 height: 48px;
+                border-top: 1px solid ${({ theme }) => theme.colors.border};
 
                 .ql_submit_wrap{
                     display: flex;
@@ -831,12 +832,13 @@ export const MobileQuillStyle = styled.div<{ notice: boolean, public: boolean }>
 
                 #toolbar{
                     border : none;
-                    border-top: 1px solid ${({ theme }) => theme.colors.border};
                     padding : 0;
                 }
             }
         }
-
+        .ql-toolbar.ql-snow{
+            border : none;
+        }
         .ql-snow.ql-toolbar button, .ql-snow .ql-toolbar button{
             background: none;
             border: none;
