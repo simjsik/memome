@@ -18,7 +18,7 @@ const LogoutButton = styled(motion.button)`
     height : 52px;
     background : ${({ theme }) => theme.colors.background};
     color : ${({ theme }) => theme.colors.error};
-    border : 1px solid #ededed;
+    border : 1px solid ${({ theme }) => theme.colors.border};
     border-radius : 4px;
     font-size : 1rem;
     font-family : var(--font-pretendard-medium);
@@ -47,19 +47,7 @@ const LogoutButton = styled(motion.button)`
         font-size : 0.875rem
     }
 `
-// const LogInButton = css`
-//     position : absolute;
-//     bottom: 20px;
-//     width : calc(100% - 40px);
-//     height : 52px;
-//     background : #0087ff;
-//     color : #fff;
-//     border : none;
-//     border-radius : 4px;
-//     font-size : 16px;
-//     font-family : var(--font-pretendard-medium)
-//     cursor : pointer;
-// `
+
 export default function Logout() {
     const setHasLogin = useSetRecoilState<boolean>(DidYouLogin)
     const [user, setUser] = useRecoilState<userData>(userState)
