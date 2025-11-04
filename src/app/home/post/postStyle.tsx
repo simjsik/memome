@@ -97,6 +97,7 @@ margin : 0 auto;
             color : transparent;
             caret-color: #999;
             font-family : var(--font-pretendard-medium);
+            background-color : ${({ theme }) => theme.colors.background};
 
             &::selection {  
                 color: transparent;  
@@ -246,6 +247,11 @@ margin : 0 auto;
         overflow: visible;
         padding: 0px 20px;
         font-size : 1rem;
+    }
+
+    .ql-editor:empty::before{
+        color: ${({ theme }) => theme.colors.text};
+        font-style: normal;
     }
 
     .ql-tooltip{
@@ -756,6 +762,7 @@ export const MobileQuillStyle = styled.div<{ notice: boolean, public: boolean }>
             border-radius: 8px;
             caret-color: #999;
             z-index : 1;
+            background-color : ${({ theme }) => theme.colors.background};
 
             &::selection {  
                 color: transparent;  

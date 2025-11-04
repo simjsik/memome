@@ -88,8 +88,8 @@ export const LoginInputWrap = styled.div`
     margin-top: 10px;
     padding : 0px;
     border-radius : 4px;
-    border : 1px solid ${({ theme }) => theme.colors.border};
-    
+    border : 1px solid ${({ theme }) => theme.colors.border};    
+
     div {
     padding: 8px 10px;
     }
