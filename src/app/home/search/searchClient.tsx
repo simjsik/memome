@@ -91,7 +91,6 @@ function PostHit({ hit }: { hit: PostData }) {
                 const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
                 const csrfValue = csrf ? decodeURIComponent(csrf) : '';
 
-                console.log(hit, '알고리아 데이터')
                 const userResponse = await fetch('/api/search/user', {
                     method: 'POST',
                     headers: {
