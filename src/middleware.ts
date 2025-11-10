@@ -223,6 +223,7 @@ const styleHashes = [
     "sha256-8LZEFGQFNeHdSe2rKZqSBwG/6Ug0K3FUnIJFlCWdaSw=",
     "sha256-whubYi3SMeMYyv4PkNvd7q61eDmhmtiyhvpIgDr3Zio=",
     "sha256-NJhDrS+mvoFOZgQpeSUOqEYAUL3V9oLdB7+UWrSJHC0=",
+    'sha256-iy3YgYuF327TN+oyCn0B9S1CiEL4+I++0jKkNJQwcVo=',
 ];
 
 const scriptSrc = [`'self'`, `'nonce-${nonce}'`, "https://apis.google.com"];
