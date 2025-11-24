@@ -854,7 +854,8 @@ export default function UserProfile() {
                                     border : 1px solid ${theme.colors.border};
                                     border-radius : 50%;
                                 `}></div>
-                                <p>새 메모를 작성하세요</p>
+                                {currentUser.uid ? <p>새 메모를 작성하세요</p> : <p>메모를 작성하려면 로그인이 필요합니다.</p>}
+
                                 {hasGuest ?
                                     <button className="memo_btn" css={css`color: #aaa`}>메모</button> :
                                     <motion.button

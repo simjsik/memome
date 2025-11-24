@@ -12,16 +12,15 @@ const router = express.Router();
 router.post('/post/notice', async (req: Request, res: Response) => {
     try {
         // 사용량 제한
-        const user = req.get('x-user-uid');
+        const uid = req.get('x-user-uid');
+        const user = uid ? uid : '';
 
-        if (!user) {
-            return res.status(403).json({ error: '유저가 없습니다' });
-        }
+        if (user) {
+            const useage = await usageLimit(user);
 
-        const useage = await usageLimit(user);
-
-        if (!useage) {
-            return res.status(429).json({ error: '사용량이 초과되었습니다.' });
+            if (!useage) {
+                return res.status(429).json({ error: '사용량이 초과되었습니다.' });
+            }
         }
 
         // 포스트 요청

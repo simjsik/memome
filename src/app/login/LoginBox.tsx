@@ -177,7 +177,7 @@ export default function LoginBox() {
             const { user: popupUser } = await signInWithPopup(auths, provider);
             const googleToken = await popupUser.getIdToken();
             // userCredential를 전부 보내주면 보안 상 문제가 생김. ( 최소 권한 원칙 )
-            
+
             const googleResponse = await fetch("/api/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", 'Project-Host': window.location.origin },
@@ -404,6 +404,10 @@ export default function LoginBox() {
                                     variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     whileTap="otherClick" onClick={handleGuestLogin}>게스트 로그인</GuestLoginBtn>}
+                                <GuestLoginBtn
+                                    variants={btnVariants(theme)}
+                                    whileHover="otherHover"
+                                    whileTap="otherClick" onClick={() => router.push('home/main')}>둘러보기</GuestLoginBtn>
                             </div>
                         </OtherLoginWrap>
                     </LoginButtonWrap >

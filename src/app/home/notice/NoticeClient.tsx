@@ -99,7 +99,6 @@ export default function ClientNotice() {
         }
     }, [isError])
 
-
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {
         if (!yourLogin || usageLimit) {
