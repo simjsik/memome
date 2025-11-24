@@ -59,30 +59,40 @@ export default function ClientNotice() {
         retry: false,
         queryKey: ['notices'],
         queryFn: async ({ pageParam }) => {
-            const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
-            const csrfValue = csrf ? decodeURIComponent(csrf) : '';
+            try {
+                const csrf = document.cookie.split('; ').find(c => c?.startsWith('csrfToken='))?.split('=')[1];
+                const csrfValue = csrf ? decodeURIComponent(csrf) : '';
 
-            const response = await fetch(`/api/post/notice`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Project-Host': window.location.origin,
-                    'x-csrf-token': csrfValue
-                },
-                body: JSON.stringify({ pageParam, pageSize: 8 }),
-                credentials: "include",
-            });
+                const response = await fetch(`/api/post/notice`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Project-Host': window.location.origin,
+                        'x-csrf-token': csrfValue
+                    },
+                    body: JSON.stringify({ pageParam, pageSize: 8 }),
+                    credentials: "include",
+                });
 
-            if (!response.ok) {
-                // 상태별 메시지
-                if (response.status === 429) throw new Error('LM');
-                if (response.status === 403 || response.status === 401) throw new Error('FB');
-                const msg = await response.text().catch(() => '');
-                throw new Error(msg || `요청 실패 (${response.status})`);
+                if (!response.ok) {
+                    // 상태별 메시지
+                    if (response.status === 429) throw new Error('LM');
+                    if (response.status === 403 || response.status === 401) throw new Error('FB');
+                    const msg = await response.text().catch(() => '');
+                    throw new Error(msg || `요청 실패 (${response.status})`);
+                }
+
+                const data = await response.json();
+                return data
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    console.error("일반 오류 발생:", error.message);
+                    throw error;
+                } else {
+                    console.error("알 수 없는 에러 유형:", error);
+                    throw new Error("알 수 없는 에러가 발생했습니다.");
+                }
             }
-
-            const data = await response.json();
-            return data
         },
         getNextPageParam: (lastPage) => lastPage.nextPage,
         staleTime: 5 * 60 * 1000,
@@ -98,7 +108,6 @@ export default function ClientNotice() {
             }
         }
     }, [isError])
-
 
     // 스크롤 끝나면 포스트 요청
     useEffect(() => {

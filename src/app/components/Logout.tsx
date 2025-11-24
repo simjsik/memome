@@ -95,17 +95,23 @@ export default function Logout() {
             alert("로그아웃 시도 중 에러가 발생했습니다..");
         }
     }
-
     // Function
     return (
-        <>
+        <>{user.uid ? <LogoutButton
+            variants={btnVariants(theme)}
+            whileHover="otherHover"
+            whileTap="otherClick"
+            onClick={handleLogout}>
+            로그아웃
+        </LogoutButton> :
             <LogoutButton
                 variants={btnVariants(theme)}
                 whileHover="otherHover"
                 whileTap="otherClick"
-                onClick={handleLogout}>
-                로그아웃
+                onClick={() => router.push('/login')}>
+                로그인
             </LogoutButton >
+        }
         </>
     )
 }

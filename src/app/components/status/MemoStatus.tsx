@@ -344,7 +344,7 @@ export default function MemoStatus({ post }: MemoStatusType) {
                     replyCount: 0,
                 } as Comment
 
-                const PostResponse = await fetch(`/api/comment`, {
+                const commentResponse = await fetch(`/api/comment`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -355,11 +355,12 @@ export default function MemoStatus({ post }: MemoStatusType) {
                     credentials: "include",
                 });
 
-                if (!PostResponse.ok) {
-                    throw new Error(`포스트 업로드 실패 : ${PostResponse.status}`);
+                if (!commentResponse.ok) {
+                    if (commentResponse.status === 403 || commentResponse.status === 401) throw new Error('FB');
+                    throw new Error(`댓글 업로드 실패 : ${commentResponse.status}`);
                 }
 
-                const commentData = await PostResponse.json();
+                const commentData = await commentResponse.json();
 
                 if (commentData) {
                     // 서버에서 업데이트 정보를 받으면 호출
@@ -371,9 +372,14 @@ export default function MemoStatus({ post }: MemoStatusType) {
                 setCommentText('');
                 setReplyText('');
                 setActiveReply(null);
-            } catch (error) {
-                console.error('댓글 추가 중 오류:', error);
-                alert('댓글 추가에 실패했습니다.');
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    console.error('댓글 추가 중 오류:', error);
+                    alert('로그인 필요합니다.');
+                } else {
+                    console.error('댓글 추가 중 오류:', error);
+                    alert('댓글 작성에 실패 했습니다.');
+                }
             }
         }
     }

@@ -15,8 +15,13 @@ async function sha256Hex(input: string): Promise<string> {
 
 const ACCESS_SECRET = process.env.JWT_SECRET || '';
 const CSRF_SECRET = process.env.CSRF_SECRET || '';
+
 const PASS_PATH = [
     "/login",
+    "/home/memo",
+    "/home/main",
+    "/home/notice",
+    "/home/search",
     "/_next",
     "/static",
     "/favicon.ico",
@@ -24,9 +29,11 @@ const PASS_PATH = [
 ]
 
 const AUTH_PUBLIC = [
+    "/api/post",
     "/api/login",
     "/api/logout",
     "/api/customToken",
+    "/api/search/user",
 ];
 
 const nonce = generateNonce();
@@ -245,7 +252,6 @@ async function verifyJwt(token: string, secret: string): Promise<JWTPayload> {
     return payload as JWTPayload;
 }
 
-// 1) 인증·리다이렉트 로직 (기존 코드)
 export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
     const method = (req.method || "GET").toUpperCase();
@@ -439,13 +445,12 @@ export async function middleware(req: NextRequest) {
     }
 
     const res = NextResponse.next({
-        request: { headers: requestHeaders },       // 수정된 요청 헤더 사용
+        request: { headers: requestHeaders },
     });
 
     const styleHashTokens = styleHashes.map(h => `'${h}'`).join(' ');
 
     if (process.env.NODE_ENV !== "production") {
-        // 개발에서만 임시 허용
         scriptSrc.push(`'unsafe-eval'`);
     }
 

@@ -56,6 +56,8 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const auth = getAuth();
+        
+        if (!auth) return;
 
         const AUTH_FLAG_KEY = 'authInProgress';
         const STALE_THRESHOLD = 10_000; // 10s

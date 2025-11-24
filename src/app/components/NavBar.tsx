@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { selectedMenuState } from '../state/LayoutState';
 import { usePathname, useRouter } from 'next/navigation';
-import { DidYouLogin, hasGuestState, ImageUrls, ImageUrlsState, loginToggleState, newNoticeState, PostContentState, PostPublicState, PostTagState, PostTitleState, statusState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
+import { DidYouLogin, hasGuestState, ImageUrls, ImageUrlsState, newNoticeState, PostContentState, PostPublicState, PostTagState, PostTitleState, statusState, UsageLimitState, UsageLimitToggle, userData, userState } from '../state/PostState';
 import { useEffect } from 'react';
 import { css, useTheme } from '@emotion/react';
 import { saveUnsavedPost } from '../utils/saveUnsavedPost';
@@ -182,8 +182,7 @@ border-radius : 8px;
 
 export default function NavBar() {
     const yourLogin = useRecoilValue(DidYouLogin);
-    const currentUser = useRecoilValue<userData | null>(userState);
-    const setLoginToggle = useSetRecoilState<boolean>(loginToggleState);
+    const currentUser = useRecoilValue<userData>(userState);
     const [selectedMenu, setSelectedMenu] = useRecoilState<number>(selectedMenuState);
     const [newNotice, setNewNotice] = useRecoilState<boolean>(newNoticeState);
     const usageLimit = useRecoilValue<boolean>(UsageLimitState);
@@ -200,6 +199,7 @@ export default function NavBar() {
     // State
     const router = useRouter();
     const path = usePathname();
+
     useEffect(() => {
         if (path) {
             const pathSegment = path?.split('/').filter(Boolean);
@@ -236,30 +236,29 @@ export default function NavBar() {
             saveUnsavedPost(unsavedPost)
         }
 
-        if (usageLimit || !yourLogin) {
+        if (usageLimit) {
             if (usageLimit) {
                 setLimitToggle(true);
-                return;
-            }
-
-            if (!yourLogin) {
-                setLoginToggle(true);
                 return;
             }
         }
         if (NavTitle === 1) {
             router.push('/home/notice');
             setNewNotice(false);
+            setSelectedMenu(NavTitle);
         } else if (NavTitle === 2) {
             router.push('/home/main');
-        } else if (NavTitle === 3) {
-            router.push(`/home/bookmark/${currentUser?.uid}`);
-        } else if (NavTitle === 4) {
-            router.push(`/home/user/${currentUser?.uid}`)
-        } else if (NavTitle === 5) {
+            setSelectedMenu(NavTitle);
+        } else if (NavTitle === 3 && yourLogin) {
+            router.push(`/home/bookmark/${currentUser.uid}`);
+            setSelectedMenu(NavTitle);
+        } else if (NavTitle === 4 && yourLogin) {
+            router.push(`/home/user/${currentUser.uid}`);
+            setSelectedMenu(NavTitle);
+        } else if (NavTitle === 5 && yourLogin) {
             router.push('/home/post');
+            setSelectedMenu(NavTitle);
         }
-        setSelectedMenu(NavTitle);
     }
 
     // 768 상태 창 핸들러
@@ -278,7 +277,6 @@ export default function NavBar() {
         }
     }, [hasGuest])
     // Function
-
 
     return (
         <>
