@@ -544,7 +544,6 @@ const SwiperHits = () => {
 
 export default function SearchComponent() {
     const router = useRouter();
-    const yourLogin = useRecoilValue(DidYouLogin)
     const setMobileStatus = useSetRecoilState<boolean>(statusState)
     const usageLimit = useRecoilValue<boolean>(UsageLimitState)
     const setLimitToggle = useSetRecoilState<boolean>(UsageLimitToggle)
@@ -552,7 +551,7 @@ export default function SearchComponent() {
     const handleSearch = (event: React.KeyboardEvent<HTMLDivElement>) => {
         // 엔터키를 감지
         if (event.key === 'Enter') {
-            if (!yourLogin || usageLimit) {
+            if (usageLimit) {
                 if (usageLimit) {
                     return setLimitToggle(true);
                 }

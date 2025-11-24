@@ -15,10 +15,13 @@ async function sha256Hex(input: string): Promise<string> {
 
 const ACCESS_SECRET = process.env.JWT_SECRET || '';
 const CSRF_SECRET = process.env.CSRF_SECRET || '';
+
 const PASS_PATH = [
     "/login",
+    "/home/memo",
     "/home/main",
     "/home/notice",
+    "/home/search",
     "/_next",
     "/static",
     "/favicon.ico",
@@ -30,6 +33,7 @@ const AUTH_PUBLIC = [
     "/api/login",
     "/api/logout",
     "/api/customToken",
+    "/api/search/user",
 ];
 
 const nonce = generateNonce();
