@@ -1,2 +1,5 @@
 User-agent: *
+Allow: /
 Disallow: /home/bookmark
+
+Sitemap: https://memome-delta.vercel.app/sitemap.xml
