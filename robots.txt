@@ -1,0 +1,3 @@
+User-Agent: *
+Allow: /
+Sitemap: https://https://memome-delta.vercel.app/sitemap.xml

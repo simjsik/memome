@@ -11,7 +11,7 @@ type LayoutProps = {
 
 export const metadata: Metadata = {
   verification: {
-    google: 'fvSAX_fKzSjOdV60yKEwBunm7-Gc4BcJkBzw7ZoaQi0',
+    google: 'MIrr3EbzhfSVsv0wYXBNUhyOZAzuC4fE7oRFoQ0j678',
   },
   category: 'Technology',
 };
