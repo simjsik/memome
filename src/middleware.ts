@@ -26,8 +26,10 @@ const PASS_PATH = [
     "/static",
     "/favicon.ico",
     '/.well-known',
+    '/sitemap.xml',
+    '/robots.txt',
+    '/google'
 ]
-
 const AUTH_PUBLIC = [
     "/api/post",
     "/api/login",
