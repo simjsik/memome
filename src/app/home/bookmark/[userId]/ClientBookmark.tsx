@@ -179,6 +179,7 @@ export default function Bookmark() {
                                     className='post_drop_menu_btn'
                                     css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1736451404/%EB%B2%84%ED%8A%BC%EB%8D%94%EB%B3%B4%EA%B8%B0_obrxte.svg)`}
                                     onClick={(event) => { event.preventDefault(); event.stopPropagation(); }}
+                                    aria-label="포스트 옵션"
                                 >
                                 </button>
                             </div>
@@ -220,7 +221,8 @@ export default function Bookmark() {
                                         <motion.button
                                             variants={btnVariants(theme)}
                                             whileHover="iconWrapHover"
-                                            whileTap="iconWrapClick" className='post_comment_btn'>
+                                            whileTap="iconWrapClick" className='post_comment_btn'
+                                            aria-label="포스트 댓글">
                                             <motion.div
                                                 variants={btnVariants(theme)}
                                                 whileHover="iconHover"
@@ -250,7 +252,8 @@ export default function Bookmark() {
                                 variants={btnVariants(theme)}
                                 whileHover="loginHover"
                                 whileTap="loginClick"
-                                onClick={() => fetchNextPage()}>재요청</motion.button>
+                                onClick={() => fetchNextPage()}
+                                aria-label="포스트 재요청">재요청</motion.button>
                         </NoMorePost>
                     }
                     {

@@ -300,10 +300,12 @@ export default function UserClient({ user }: ClientUserProps) {
                     <motion.button
                         variants={btnVariants(theme)}
                         whileHover="otherHover"
-                        className="memo_tab" onClick={() => setPostTab(true)}>메모</motion.button>
+                        className="memo_tab" onClick={() => setPostTab(true)}
+                        aria-label="메모 탭">메모</motion.button>
                     <motion.button
                         variants={btnVariants(theme)}
-                        whileHover="otherHover" className="image_tab" onClick={() => setPostTab(false)}>이미지</motion.button>
+                        whileHover="otherHover" className="image_tab" onClick={() => setPostTab(false)}
+                        aria-label="이미지 탭">이미지</motion.button>
                 </div >
                 {
                     postTab ?
@@ -351,9 +353,11 @@ export default function UserClient({ user }: ClientUserProps) {
                                                                 <ul>
                                                                     <li className='post_drop_menu'>
                                                                         <motion.button
+                                                                            aria-label="포스트 옵션"
                                                                             variants={btnVariants(theme)}
                                                                             whileHover="otherHover"
-                                                                            onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id as string); }} className='post_dlt_btn'>게시글 삭제</motion.button>
+                                                                            onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id as string); }}
+                                                                            className='post_dlt_btn'>게시글 삭제</motion.button>
                                                                     </li>
                                                                 </ul>
                                                             </div>
@@ -398,6 +402,7 @@ export default function UserClient({ user }: ClientUserProps) {
                                             <div className='post_bottom_wrap'>
                                                 <div className='post_comment'>
                                                     <motion.button
+                                                        aria-label="포스트 댓글"
                                                         variants={btnVariants(theme)}
                                                         whileHover="iconWrapHover"
                                                         whileTap="iconWrapClick" className='post_comment_btn'>
@@ -431,7 +436,8 @@ export default function UserClient({ user }: ClientUserProps) {
                                         variants={btnVariants(theme)}
                                         whileHover="loginHover"
                                         whileTap="loginClick"
-                                        onClick={() => fetchNextPage()}>재요청</motion.button>
+                                        onClick={() => fetchNextPage()}
+                                        aria-label="포스트 재요청">재요청</motion.button>
                                 </NoMorePost>
                             }
                             {
@@ -489,7 +495,8 @@ export default function UserClient({ user }: ClientUserProps) {
                                         variants={btnVariants(theme)}
                                         whileHover="loginHover"
                                         whileTap="loginClick"
-                                        onClick={() => fetchNextPage()}>재요청</motion.button>
+                                        onClick={() => fetchNextPage()}
+                                        aria-label="포스트 재요청">재요청</motion.button>
                                 </NoMorePost>
                             }
                             {

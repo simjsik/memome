@@ -56,7 +56,7 @@ export default function MainHome() {
   const observerLoadRef = useRef(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [routePostId, setRoutePostId] = useState<string | null>(null);
-  
+
   // 웹소켓 연결---------------------------------------------------------------------------------
   const socketRef = useRef<Socket | null>(null);
 
@@ -374,7 +374,9 @@ export default function MainHome() {
                               <motion.button
                                 variants={btnVariants(theme)}
                                 whileHover="otherHover"
-                                onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id as string); }} className='post_dlt_btn'>게시글 삭제</motion.button>
+                                onClick={(event) => { event.preventDefault(); event.stopPropagation(); deletePost(post.id as string); }}
+                                className='post_dlt_btn'
+                                aria-label="게시글 삭제">게시글 삭제</motion.button>
                             </li>
                           </ul>
                         </div>
@@ -411,7 +413,8 @@ export default function MainHome() {
                       <motion.button
                         variants={btnVariants(theme)}
                         whileHover="iconWrapHover"
-                        whileTap="iconWrapClick" className='post_comment_btn'>
+                        whileTap="iconWrapClick" className='post_comment_btn'
+                        aria-label="포스트 댓글">
                         <motion.div
                           variants={btnVariants(theme)}
                           whileHover="iconHover"
@@ -442,7 +445,8 @@ export default function MainHome() {
                 variants={btnVariants(theme)}
                 whileHover="loginHover"
                 whileTap="loginClick"
-                onClick={() => fetchNextPage()}>재요청</motion.button>
+                onClick={() => fetchNextPage()}
+                aria-label="포스트 재요청">재요청</motion.button>
             </NoMorePost>
           }
           {

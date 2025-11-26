@@ -216,7 +216,8 @@ export default function StatusBox() {
                                         variants={btnVariants(theme)}
                                         whileHover="otherHover"
                                         whileTap="otherClick"
-                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); statusHandle(); }}>취소</motion.button>
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); statusHandle(); }}
+                                        aria-label="상태토글">취소</motion.button>
                                 </PostListWrap>
                             }
                             {(path === `/home/memo/${params?.postId}` && commentOn && !mobileStatus) &&

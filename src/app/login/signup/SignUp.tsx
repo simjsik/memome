@@ -253,7 +253,8 @@ export default function SignUp() {
                                     variants={btnVariants(theme)}
                                     whileHover="loginHover"
                                     whileTap="loginClick"
-                                    onClick={() => router.push('/login')}>로그인 하러가기</EmotionLoginBtn>
+                                    onClick={() => router.push('/login')}
+                                    aria-label="로그인 하러가기">로그인 하러가기</EmotionLoginBtn>
                             </div>
                         </LoginButtonWrap>
                         :
@@ -316,12 +317,14 @@ export default function SignUp() {
                                     variants={btnVariants(theme)}
                                     whileHover="loginHover"
                                     whileTap="loginClick"
-                                    type="submit">회원가입</EmotionLoginBtn>
+                                    type="submit"
+                                    aria-label="회원가입">회원가입</EmotionLoginBtn>
                                 <motion.button
                                     variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     whileTap="otherClick"
-                                    className="login_back" onClick={(e) => { e.preventDefault(); router.push('/login') }}>기존 계정으로 로그인</motion.button>
+                                    className="login_back" onClick={(e) => { e.preventDefault(); router.push('/login') }}
+                                    aria-label="기존 계정으로 로그인">기존 계정으로 로그인</motion.button>
                             </form>
                         </LoginButtonWrap >
                 }

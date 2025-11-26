@@ -125,9 +125,9 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
     return (
         <>
             {repliesToggle ?
-                <button className="reply_toggle_btn" onClick={() => setReplieToggle(prev => !prev)}>답글 닫기</button >
+                <button className="reply_toggle_btn" onClick={() => setReplieToggle(prev => !prev)} aria-label="답글 토글">답글 닫기</button >
                 :
-                <button className="reply_toggle_btn" onClick={() => setReplieToggle(prev => !prev)}>답글 보기</button >
+                <button className="reply_toggle_btn" onClick={() => setReplieToggle(prev => !prev)} aria-label="답글 토글">답글 보기</button >
             }
             {repliesToggle &&
                 <>
@@ -145,7 +145,8 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                                     <p className="memo_comment_user">{reply.displayName}</p>
                                     <p className="memo_comment_uid">@{reply.userId?.slice(0, 8)}...</p>
                                     <button className="comment_delete_btn"
-                                        onClick={() => handleDelReply(reply.parentId!, reply.id)}>
+                                        onClick={() => handleDelReply(reply.parentId!, reply.id)}
+                                        aria-label="답글 지우기">
                                         <div className="comment_delete_icon"
                                             css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746003900/%EC%A7%80%EC%9B%8C%EB%B2%84%EB%A6%AC%EA%B8%B0_uiox61.svg)`}
                                         ></div>
@@ -154,7 +155,8 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                                 <span className="memo_reply_uid">@{reply.displayName}-{reply.userId?.slice(0, 3)}...</span>
                                 <p className="memo_reply">{reply.commentText}</p>
                                 <time className="memo_comment_date">{formatDate(reply.createAt)}</time>
-                                <button className="comment_reply_btn" onClick={() => toggleReply(reply.id)}>답글</button>
+                                <button className="comment_reply_btn" onClick={() => toggleReply(reply.id)}
+                                    aria-label="답글 토글">답글</button>
                                 {activeReply === reply.id && (
                                     <div className="reply_input_wrap">
                                         <input
@@ -167,6 +169,7 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
                                         <button
                                             className="comment_upload_btn"
                                             onClick={() => handleAddReply(commentId, reply.id)}
+                                            aria-label="답글 입력"
                                         >
                                             등록
                                         </button>
@@ -179,7 +182,7 @@ export default function ReplyComponent({ postId, commentId }: ReplyProps) {
             }
             {isLoading && <LoadingWrap />}
             {((hasNextPage && repliesToggle) && !isFetchingNextPage) &&
-                <>{isLoading ? <LoadingWrap /> : <button className="reply_more_btn" onClick={handleMoreReply}>더 보기</button>}</>
+                <>{isLoading ? <LoadingWrap /> : <button className="reply_more_btn" onClick={handleMoreReply} aria-label="더 보기">더 보기</button>}</>
             }
         </>
     )

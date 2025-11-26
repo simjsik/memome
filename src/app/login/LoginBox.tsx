@@ -369,7 +369,7 @@ export default function LoginBox() {
                             <div className="auto_login_btn">
                                 {
                                     hasAutoLogin ?
-                                        <button className="auto_on" onClick={() => handleAutoLoginToggle(false)}>
+                                        <button className="auto_on" onClick={() => handleAutoLoginToggle(false)} aria-label="자동 로그인 끄기">
                                             <div className="auto_on_icon">
                                                 <Image
                                                     src={'https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746267045/%EC%9E%90%EB%8F%99%EB%A1%9C%EA%B7%B8%EC%9D%B8%EC%B2%B4%ED%81%AC_gaqgly.svg'}
@@ -382,7 +382,7 @@ export default function LoginBox() {
                                             </div>
                                         </button>
                                         :
-                                        <button className="auto_off" onClick={() => handleAutoLoginToggle(true)}></button>
+                                        <button className="auto_off" onClick={() => handleAutoLoginToggle(true)} aria-label="자동 로그인 켜기"></button>
                                 }
                                 <p>자동 로그인</p>
                             </div>

@@ -780,7 +780,8 @@ export default function UserProfile() {
                 <motion.button
                     variants={btnVariants(theme)}
                     whileHover="otherHover"
-                    whileTap="otherClick" className="update_toggle_btn" onClick={handleUpdateToggle}>
+                    whileTap="otherClick" className="update_toggle_btn" onClick={handleUpdateToggle}
+                    aria-label="프로필 수정 토글">
                     {updateToggle ?
                         '프로필 수정 취소'
                         :
@@ -811,7 +812,8 @@ export default function UserProfile() {
                                             whileHover={{
                                                 textDecoration: "underline",
                                             }}
-                                            className="photo_reset" onClick={handleResetPhoto}>사진 제거</motion.button>
+                                            className="photo_reset" onClick={handleResetPhoto}
+                                            aria-label="프로필 사진 제거">사진 제거</motion.button>
                                     </div>
                                     <div className="photo_preview" css={css`background-image : url(${updateUserPhotoPreview})`}></div>
                                     <input id="photo_input" ref={updatePhotoRef} onChange={handlePhotoChange} type="file" accept="image/*" />
@@ -821,17 +823,20 @@ export default function UserProfile() {
                                 {(updateUserName !== currentUser.name || Boolean(updateUserPhoto) || updateUserPhotoPreview !== currentUser.photo) &&
                                     <div className="update_btn_wrap">
                                         <p>저장하지 않은 변경 사항이 있습니다!</p>
-                                        <button className="reset_update_btn" onClick={(e) => { e.preventDefault(); handleProfileReset(); }}>
+                                        <button className="reset_update_btn" onClick={(e) => { e.preventDefault(); handleProfileReset(); }}
+                                            aria-label="프로필 되돌리기">
                                             되돌리기
                                         </button>
                                         {loading ?
-                                            <motion.button className="update_btn">
+                                            <motion.div className="update_btn">
                                                 <BeatLoader color="#fff" size={8} />
-                                            </motion.button>
+                                            </motion.div>
                                             : <motion.button
                                                 variants={btnVariants(theme)}
                                                 whileHover="loginHover"
-                                                whileTap="loginClick" className="update_btn" onClick={(e) => { e.preventDefault(); updateToProfile(updateUserPhoto, updateUserName); }}>
+                                                whileTap="loginClick" className="update_btn"
+                                                onClick={(e) => { e.preventDefault(); updateToProfile(updateUserPhoto, updateUserName); }}
+                                                aria-label="프로필 업데이트">
                                                 변경 사항 적용
                                             </motion.button>
                                         }
@@ -857,11 +862,13 @@ export default function UserProfile() {
                                 {currentUser.uid ? <p>새 메모를 작성하세요</p> : <p>메모를 작성하려면 로그인이 필요합니다.</p>}
 
                                 {hasGuest ?
-                                    <button className="memo_btn" css={css`color: #aaa`}>메모</button> :
+                                    <button className="memo_btn" css={css`color: #aaa`} aria-label="메모하기">메모</button> :
                                     <motion.button
                                         variants={btnVariants(theme)}
                                         whileHover="otherHover"
-                                        whileTap="otherClick" className="memo_btn" onClick={handleMemoClick}>메모</motion.button>
+                                        whileTap="otherClick" className="memo_btn" 
+                                        onClick={handleMemoClick}
+                                        aria-label="메모하기">메모</motion.button>
                                 }
                             </div>
                             <MyAlarmWrap className="my_alarm_wrap">
@@ -883,12 +890,13 @@ export default function UserProfile() {
                                                 </div>
                                                 <time className="alram_date">{formatDate(notice.noticeAt)}</time>
                                                 {alarmLoading ?
-                                                    <button><BeatLoader color="#000" size={8} /></button>
+                                                    <button aria-label="알림 확인"><BeatLoader color="#000" size={8} /></button>
                                                     :
                                                     <motion.button
                                                         variants={btnVariants(theme)}
                                                         whileHover="loginHover"
-                                                        whileTap="loginClick" onClick={() => noticeConfirm(notice.noticeId)}>알림 확인</motion.button>
+                                                        whileTap="loginClick" onClick={() => noticeConfirm(notice.noticeId)}
+                                                        aria-label="알림 확인">알림 확인</motion.button>
                                                 }
 
                                             </div>

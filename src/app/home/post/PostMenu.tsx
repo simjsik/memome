@@ -852,7 +852,7 @@ export default function PostMenu() {
                 <MobileQuillStyle notice={checkedNotice} public={checkedPublic}>
                     <div className='quill_wrap'>
                         <div className='posting_top'>
-                            <button className='go_main_btn' onClick={handleLeavePosting}>
+                            <button className='go_main_btn' onClick={handleLeavePosting} aria-label="메인으로 이동">
                                 취소
                             </button>
                             <div className='tag_wrap'>
@@ -861,7 +861,8 @@ export default function PostMenu() {
                                         variants={btnVariants(theme)}
                                         whileHover={checkedNotice ? "NtcHover" : "NtcOffHover"}
                                         whileTap={checkedNotice ? "NtcClick" : "NtcOffClick"}
-                                        className='notice_btn' onClick={handleCheckedNotice}>
+                                        className='notice_btn' onClick={handleCheckedNotice}
+                                        aria-label="공지사항">
                                         {checkedNotice ?
                                             <>
                                                 <p>공지 ON</p>
@@ -890,7 +891,8 @@ export default function PostMenu() {
                                 variants={btnVariants(theme)}
                                 whileHover={checkedPublic ? "NtcHover" : "NtcOffHover"}
                                 whileTap={checkedPublic ? "NtcClick" : "NtcOffClick"}
-                                className='public_btn' onClick={handleCheckedPublic}>
+                                className='public_btn' onClick={handleCheckedPublic}
+                                aria-label="포스트 비공개">
                                 {checkedPublic ?
                                     <>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40">
@@ -917,9 +919,9 @@ export default function PostMenu() {
                                 }
                             </motion.button>
                             {uploadLoading ?
-                                <button className='post_btn'><LoadingWrap /></button>
+                                <button className='post_btn' aria-label="포스트 작성"><LoadingWrap /></button>
                                 :
-                                <motion.button variants={btnVariants(theme)} whileHover="loginHover" className='post_btn' onClick={uploadPost}>발행</motion.button>
+                                <motion.button variants={btnVariants(theme)} whileHover="loginHover" className='post_btn' onClick={uploadPost} aria-label="포스트 작성">발행</motion.button>
                             }
 
                         </div>
@@ -945,52 +947,52 @@ export default function PostMenu() {
                                                 grabCursor                // 마우스 커서가 '집게' 느낌
                                                 className="ql-toolbar-swiper">
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-image"></motion.button>
+                                                    <motion.button aria-label="이미지 입력" variants={btnVariants(theme)} whileHover="otherHover" className="ql-image"></motion.button>
                                                 </SwiperSlide>
 
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-link"></motion.button>
+                                                    <motion.button aria-label="링크 입력" variants={btnVariants(theme)} whileHover="otherHover" className="ql-link"></motion.button>
                                                 </SwiperSlide>
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="+1"></motion.button>
+                                                    <motion.button aria-label="들여쓰기" variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="+1"></motion.button>
                                                 </SwiperSlide>
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="-1"></motion.button>
+                                                    <motion.button aria-label="들여쓰기 취소" variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="-1"></motion.button>
                                                 </SwiperSlide>
                                                 {/* <!-- Header -->  */}
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-header" value="1"></motion.button>
+                                                    <motion.button aria-label="헤더 입력" variants={btnVariants(theme)} whileHover="otherHover" className="ql-header" value="1"></motion.button>
                                                 </SwiperSlide>
                                                 {/* <!-- Formatting --> */}
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-bold"></motion.button>
+                                                    <motion.button aria-label="굵은 글씨체" variants={btnVariants(theme)} whileHover="otherHover" className="ql-bold"></motion.button>
                                                 </SwiperSlide>
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-italic"></motion.button>
+                                                    <motion.button aria-label="기울이기" variants={btnVariants(theme)} whileHover="otherHover" className="ql-italic"></motion.button>
                                                 </SwiperSlide>
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-underline"></motion.button>
+                                                    <motion.button aria-label="밑줄" variants={btnVariants(theme)} whileHover="otherHover" className="ql-underline"></motion.button>
                                                 </SwiperSlide>
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-strike"></motion.button>
+                                                    <motion.button aria-label="줄 긋기" variants={btnVariants(theme)} whileHover="otherHover" className="ql-strike"></motion.button>
                                                 </SwiperSlide>
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql-code-block'></motion.button>
+                                                    <motion.button aria-label="코드 블럭" variants={btnVariants(theme)} whileHover="otherHover" className='ql-code-block'></motion.button>
                                                 </SwiperSlide>
                                                 {/* <!-- Subscript / Superscript --> */}
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="sub"></motion.button>
+                                                    <motion.button aria-label="아래 첨자" variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="sub"></motion.button>
                                                 </SwiperSlide>
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="super"></motion.button>
+                                                    <motion.button aria-label="윗 첨자" variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="super"></motion.button>
                                                 </SwiperSlide>
 
                                                 {/* <!-- Clean --> */}
                                                 <SwiperSlide>
-                                                    <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-clean"></motion.button>
+                                                    <motion.button aria-label="스타일 제거" variants={btnVariants(theme)} whileHover="otherHover" className="ql-clean"></motion.button>
                                                 </SwiperSlide>
                                                 <SwiperSlide>
-                                                    <button></button>
+                                                    <button aria-label="공백"></button>
                                                 </SwiperSlide>
                                             </Swiper>
                                             <div className='swiper_right'>
@@ -1008,7 +1010,7 @@ export default function PostMenu() {
                 :
                 <QuillStyle notice={checkedNotice} public={checkedPublic}>
                     <div className='quill_wrap'>
-                        <button className='go_main_btn' onClick={handleLeavePosting}>
+                        <button aria-label="메인으로 이동" className='go_main_btn' onClick={handleLeavePosting}>
                             <motion.div
                                 variants={btnVariants(theme)}
                                 whileHover="otherHover"
@@ -1028,7 +1030,8 @@ export default function PostMenu() {
                                     variants={btnVariants(theme)}
                                     whileHover={checkedNotice ? "NtcHover" : "NtcOffHover"}
                                     whileTap={checkedNotice ? "NtcClick" : "NtcOffClick"}
-                                    className='notice_btn' onClick={handleCheckedNotice}>
+                                    className='notice_btn' onClick={handleCheckedNotice}
+                                    aria-label="공지사항">
                                     {checkedNotice ?
                                         <>
                                             <svg width="32" height="32" viewBox="0 8 40 40">
@@ -1087,34 +1090,34 @@ export default function PostMenu() {
                                     {/* <!-- Links and Images --> */}
                                     <div className='ql_submit_wrap'>
                                         <div className='ql_image_wrap'>
-                                            <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-image"></motion.button>
+                                            <motion.button aria-label="이미지 입력" variants={btnVariants(theme)} whileHover="otherHover" className="ql-image"></motion.button>
                                             <span>이미지</span>
                                         </div>
                                         <div className='ql_link_wrap'>
-                                            <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-link"></motion.button>
+                                            <motion.button aria-label="링크 입력" variants={btnVariants(theme)} whileHover="otherHover" className="ql-link"></motion.button>
                                             <span>링크</span>
                                         </div>
                                     </div>
                                     {/* <!-- Indent --> */}
                                     <div className='ql_style_wrap'>
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="+1"></motion.button>
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="-1"></motion.button>
+                                        <motion.button aria-label="들여쓰기" variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="+1"></motion.button>
+                                        <motion.button aria-label="들여쓰기 취소" variants={btnVariants(theme)} whileHover="otherHover" className="ql-indent" value="-1"></motion.button>
 
                                         {/* <!-- Header -->  */}
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-header" value="1"></motion.button>
+                                        <motion.button aria-label="헤더 입력" variants={btnVariants(theme)} whileHover="otherHover" className="ql-header" value="1"></motion.button>
 
                                         {/* <!-- Formatting --> */}
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-bold"></motion.button>
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-italic"></motion.button>
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-underline"></motion.button>
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-strike"></motion.button>
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql-code-block'></motion.button>
+                                        <motion.button aria-label="굵은 글씨체" variants={btnVariants(theme)} whileHover="otherHover" className="ql-bold"></motion.button>
+                                        <motion.button aria-label="기울이기" variants={btnVariants(theme)} whileHover="otherHover" className="ql-italic"></motion.button>
+                                        <motion.button aria-label="밑줄" variants={btnVariants(theme)} whileHover="otherHover" className="ql-underline"></motion.button>
+                                        <motion.button aria-label="줄 긋기" variants={btnVariants(theme)} whileHover="otherHover" className="ql-strike"></motion.button>
+                                        <motion.button aria-label="코드 블럭" variants={btnVariants(theme)} whileHover="otherHover" className='ql-code-block'></motion.button>
                                         {/* <!-- Subscript / Superscript --> */}
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="sub"></motion.button>
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="super"></motion.button>
+                                        <motion.button aria-label="아래 첨자" variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="sub"></motion.button>
+                                        <motion.button aria-label="윗 첨자" variants={btnVariants(theme)} whileHover="otherHover" className="ql-script" value="super"></motion.button>
 
                                         {/* <!-- Clean --> */}
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className="ql-clean"></motion.button>
+                                        <motion.button aria-label="스타일 제거" variants={btnVariants(theme)} whileHover="otherHover" className="ql-clean"></motion.button>
                                     </div>
                                 </div>
 
@@ -1126,14 +1129,20 @@ export default function PostMenu() {
                                             whileHover={{
                                                 color: '#0087ff'
                                             }}
-                                            className='ql_size_toggle' onClick={() => toolToggleHandle('fontsize')}>
+                                            className='ql_size_toggle' onClick={() => toolToggleHandle('fontsize')}
+                                            aria-label="글씨 크기">
                                             {selectFontSize}
                                         </motion.button>
                                         {toolToggle === 'fontsize' &&
                                             <ul className='ql_size_list'>
                                                 {fontSizeOptions.map((size, ftIndex) => (
                                                     <li className='ql_size_item' key={ftIndex}>
-                                                        <button data-size-select={size.value} data-label-select={size.label} type='button' className='ql_size_btn'
+                                                        <button
+                                                            aria-label="글씨 크기"
+                                                            data-size-select={size.value}
+                                                            data-label-select={size.label}
+                                                            type='button'
+                                                            className='ql_size_btn'
                                                             onClick={(e) => {
                                                                 const dataSize = (e.currentTarget as HTMLElement).getAttribute('data-size-select')
                                                                 const datalabel = (e.currentTarget as HTMLElement).getAttribute('data-label-select')
@@ -1152,7 +1161,10 @@ export default function PostMenu() {
                                     <div className='ql_lineheight_wrap'>
                                         <motion.button
                                             variants={btnVariants(theme)}
-                                            whileHover="otherHover" className='ql_lineheight_toggle' onClick={() => toolToggleHandle('lineheight')}>
+                                            whileHover="otherHover"
+                                            className='ql_lineheight_toggle'
+                                            onClick={() => toolToggleHandle('lineheight')}
+                                            aria-label="줄 간격">
                                             <svg viewBox="0 0 32 32">
                                                 <g>
                                                     <rect width="32" height="32" fill='none' />
@@ -1168,7 +1180,7 @@ export default function PostMenu() {
                                             <ul className='ql_lineheight_list'>
                                                 {lineheight.map((height, lhIndex) => (
                                                     <li className='ql_lineheight_item' key={lhIndex}>
-                                                        <button data-lineheight-select={height} type='button' className={selectLineheight === height ? 'ql_lineheight_btn setLineheight' : 'ql_lineheight_btn'}
+                                                        <button aria-label="줄 간격" data-lineheight-select={height} type='button' className={selectLineheight === height ? 'ql_lineheight_btn setLineheight' : 'ql_lineheight_btn'}
                                                             onClick={(e) => {
                                                                 const dataHeight = (e.currentTarget as HTMLElement).getAttribute('data-lineheight-select')
                                                                 handleLineheightChange(dataHeight)
@@ -1184,7 +1196,7 @@ export default function PostMenu() {
 
                                     {/* <!-- Font Color --> */}
                                     <div className='ql-color' >
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql_color_toggle' onClick={() => toolToggleHandle('color')}>
+                                        <motion.button aria-label="글 색상" variants={btnVariants(theme)} whileHover="otherHover" className='ql_color_toggle' onClick={() => toolToggleHandle('color')}>
                                             <svg viewBox="0 0 32 32">
                                                 <g >
                                                     <rect width="32" height="32" fill='none' />
@@ -1197,7 +1209,7 @@ export default function PostMenu() {
                                             <ul className='ql_color_list'>
                                                 {colorPallete.color.map((color, clIndex) => (
                                                     <li className='ql_color_item' key={clIndex}>
-                                                        <button css={css`background-color : ${color};`} type='button' className='ql_color_pallete ql_color_none' data-color-select={color}
+                                                        <button aria-label="글 색상" css={css`background-color : ${color};`} type='button' className='ql_color_pallete ql_color_none' data-color-select={color}
                                                             onClick={(e) => {
                                                                 const dataColor = (e.currentTarget as HTMLElement).getAttribute('data-color-select');
                                                                 handleFontColorChange(dataColor || '색상 없음')
@@ -1216,7 +1228,7 @@ export default function PostMenu() {
 
                                     {/* <!-- Background Color --> */}
                                     <div className="ql-background">
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql_background_toggle' onClick={() => toolToggleHandle('background')}>
+                                        <motion.button aria-label="글 배경 색상" variants={btnVariants(theme)} whileHover="otherHover" className='ql_background_toggle' onClick={() => toolToggleHandle('background')}>
                                             <svg viewBox="0 0 32 32">
                                                 <g>
                                                     <rect width="32" height="32" fill='none' />
@@ -1228,7 +1240,7 @@ export default function PostMenu() {
                                             <ul className='ql_background_list'>
                                                 {colorPallete.background.map((bgColor, bgIndex) => (
                                                     <li className='ql_background_item' key={bgIndex}>
-                                                        <button css={css`background-color : ${bgColor};`} type='button' className='ql_background_pallete ql_background_none' data-color-select={bgColor}
+                                                        <button aria-label="글 배경 색상" css={css`background-color : ${bgColor};`} type='button' className='ql_background_pallete ql_background_none' data-color-select={bgColor}
                                                             onClick={(e) => {
                                                                 const color = (e.currentTarget as HTMLElement).getAttribute('data-color-select');
                                                                 handleFontBgChange(color || '색상 없음')
@@ -1248,7 +1260,7 @@ export default function PostMenu() {
 
                                     {/* <!-- Text Align --> */}
                                     <div className="ql-align">
-                                        <motion.button variants={btnVariants(theme)} whileHover="otherHover" className='ql_align_toggle' onClick={() => toolToggleHandle('align')}>
+                                        <motion.button aria-label="글 정렬" variants={btnVariants(theme)} whileHover="otherHover" className='ql_align_toggle' onClick={() => toolToggleHandle('align')}>
                                             {selectAlign === 'left' ?
                                                 <svg viewBox="0 0 32 32">
                                                     <g>
@@ -1298,7 +1310,7 @@ export default function PostMenu() {
                                         {toolToggle === 'align' &&
                                             <ul className='ql_align_list'>
                                                 <li className='ql_align_item'>
-                                                    <motion.button
+                                                    <motion.button aria-label="왼쪽 정렬"
                                                         variants={btnVariants(theme)}
                                                         whileHover="otherHover"
                                                         whileTap="otherClick"
@@ -1320,6 +1332,7 @@ export default function PostMenu() {
                                                 </li>
                                                 <li className='ql_align_item'>
                                                     <motion.button
+                                                        aria-label="중앙 정렬"
                                                         variants={btnVariants(theme)}
                                                         whileHover="otherHover"
                                                         whileTap="otherClick"
@@ -1341,6 +1354,7 @@ export default function PostMenu() {
                                                 </li>
                                                 <li className='ql_align_item'>
                                                     <motion.button
+                                                        aria-label="오른쪽 정렬"
                                                         variants={btnVariants(theme)}
                                                         whileHover="otherHover"
                                                         whileTap="otherClick"
@@ -1362,6 +1376,7 @@ export default function PostMenu() {
                                                 </li>
                                                 <li className='ql_align_item'>
                                                     <motion.button
+                                                        aria-label="가지런히 정렬"
                                                         variants={btnVariants(theme)}
                                                         whileHover="otherHover"
                                                         whileTap="otherClick"
@@ -1393,15 +1408,16 @@ export default function PostMenu() {
                         <p>{postingText.length}/ 2500</p>
 
                         {uploadLoading ?
-                            <button className='post_btn'><LoadingWrap /></button>
+                            <button aria-label="포스트 발행" className='post_btn'><LoadingWrap /></button>
                             :
-                            <motion.button variants={btnVariants(theme)} whileHover="loginHover" className='post_btn' onClick={uploadPost}>발행</motion.button>
+                            <motion.button aria-label="포스트 발행" variants={btnVariants(theme)} whileHover="loginHover" className='post_btn' onClick={uploadPost}>발행</motion.button>
                         }
                         <motion.button
                             variants={btnVariants(theme)}
                             whileHover={checkedPublic ? "NtcHover" : "NtcOffHover"}
                             whileTap={checkedPublic ? "NtcClick" : "NtcOffClick"}
-                            className='public_btn' onClick={handleCheckedPublic}>
+                            className='public_btn' onClick={handleCheckedPublic}
+                            aria-label="포스트 비공개">
                             {checkedPublic ?
                                 <>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 40 40">
@@ -1437,8 +1453,8 @@ export default function PostMenu() {
                         <p>작성 중인 내용이 있습니다.</p>
                         <span><time>{formatDate(postDate)}</time>에 작성 중이던 내용이 있습니다.</span>
                         <span>이어서 작성하시겠습니까?</span>
-                        <button className='load_ok_btn' onClick={() => handleLoadPost(true)}>확인</button>
-                        <button className='load_no_btn' onClick={() => handleLoadPost(false)}>취소</button>
+                        <button aria-label="불러오기" className='load_ok_btn' onClick={() => handleLoadPost(true)}>확인</button>
+                        <button aria-label="불러오기 취소" className='load_no_btn' onClick={() => handleLoadPost(false)}>취소</button>
                     </div>
                 </LoadModal>
             }

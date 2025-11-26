@@ -101,16 +101,18 @@ export default function Logout() {
             variants={btnVariants(theme)}
             whileHover="otherHover"
             whileTap="otherClick"
-            onClick={handleLogout}>
+            onClick={handleLogout}
+            aria-label="로그아웃">
             로그아웃
         </LogoutButton> :
             <LogoutButton
                 variants={btnVariants(theme)}
                 whileHover="otherHover"
                 whileTap="otherClick"
-                onClick={() => router.push('/login')}>
+                onClick={() => router.push('/login')}
+                aria-label="로그인">
                 로그인
-            </LogoutButton >
+            </LogoutButton>
         }
         </>
     )

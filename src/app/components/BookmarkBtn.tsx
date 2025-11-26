@@ -136,7 +136,9 @@ export default function BookmarkBtn({ postId }: PostId) {
             variants={btnVariants(theme)}
             whileHover="iconWrapHover"
             whileTap="iconWrapClick"
-            onClick={(event) => { event.preventDefault(); event.stopPropagation(); addBookmark(postId); }}>
+            onClick={(event) => { event.preventDefault(); event.stopPropagation(); addBookmark(postId); }}
+            aria-label="북마크 추가"
+        >
             <motion.svg width="28" height="28" viewBox="0 0 38 38">
                 <g>
                     {bookmarked ?

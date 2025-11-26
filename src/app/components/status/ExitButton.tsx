@@ -49,6 +49,7 @@ export default function ExitButton() {
             variants={btnVariants(theme)}
             whileHover="otherHover"
             whileTap="otherClick"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCommentOn(false); }}>닫기</ExitButtons>
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCommentOn(false); }}
+            aria-label="댓글 닫기">닫기</ExitButtons>
     )
 }

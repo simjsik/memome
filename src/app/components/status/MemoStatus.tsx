@@ -465,7 +465,8 @@ export default function MemoStatus({ post }: MemoStatusType) {
                                             <p className="memo_comment_user">{comment.displayName}</p>
                                             <p className="memo_comment_uid">@{comment.userId.slice(0, 8)}...</p>
                                             <button className="comment_delete_btn"
-                                                onClick={() => handleDelComment(comment.id)}>
+                                                onClick={() => handleDelComment(comment.id)}
+                                                aria-label="댓글 닫기">
                                                 <div className="comment_delete_icon"
                                                     css={css`background-image : url(https://res.cloudinary.com/dsi4qpkoa/image/upload/v1746003900/%EC%A7%80%EC%9B%8C%EB%B2%84%EB%A6%AC%EA%B8%B0_uiox61.svg)`}
                                                 ></div>
@@ -476,7 +477,8 @@ export default function MemoStatus({ post }: MemoStatusType) {
                                         <motion.button variants={btnVariants(theme)}
                                             whileHover="otherHover"
                                             whileTap="otherClick"
-                                            className="comment_reply_btn" onClick={() => toggleReply(comment.id)}>답글</motion.button>
+                                            className="comment_reply_btn" onClick={() => toggleReply(comment.id)}
+                                            aria-label="답글 토글">답글</motion.button>
                                         {activeReply === comment.id && (
                                             <div className="reply_input_wrap">
                                                 <textarea
@@ -491,6 +493,7 @@ export default function MemoStatus({ post }: MemoStatusType) {
                                                     whileTap="otherClick"
                                                     className="comment_upload_btn"
                                                     onClick={() => handleAddReply(comment.id, comment.id)}
+                                                    aria-label="답글 입력"
                                                 >
                                                     등록
                                                 </motion.button>
@@ -535,7 +538,8 @@ export default function MemoStatus({ post }: MemoStatusType) {
                                         <motion.button variants={btnVariants(theme)}
                                             whileHover="otherHover"
                                             whileTap="otherClick"
-                                            className="comment_upload_btn" onClick={() => handleAddComment(null, 'comment')}>등록</motion.button>
+                                            className="comment_upload_btn" onClick={() => handleAddComment(null, 'comment')}
+                                            aria-label="댓글 입력">등록</motion.button>
                                     </PostCommentInputStyle>
                                     :
                                     <motion.button css={
@@ -553,7 +557,8 @@ export default function MemoStatus({ post }: MemoStatusType) {
                                         variants={btnVariants(theme)}
                                         whileHover="otherHover"
                                         whileTap="otherClick"
-                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setcommentInputOn(true) }}>댓글 쓰기</motion.button>
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setcommentInputOn(true) }}
+                                        aria-label="댓글 토글">댓글 쓰기</motion.button>
                                 }
                             </>
                             :
@@ -570,7 +575,8 @@ export default function MemoStatus({ post }: MemoStatusType) {
                                 <motion.button variants={btnVariants(theme)}
                                     whileHover="otherHover"
                                     whileTap="otherClick"
-                                    className="comment_upload_btn" onClick={() => handleAddComment(null, 'comment')}>등록</motion.button>
+                                    className="comment_upload_btn" onClick={() => handleAddComment(null, 'comment')}
+                                    aria-label="댓글 입력">등록</motion.button>
                             </PostCommentInputStyle>
                         }
                     </div>
