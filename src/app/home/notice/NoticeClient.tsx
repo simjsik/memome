@@ -321,7 +321,7 @@ export default function ClientNotice() {
                     <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`} />
                     {(!loading && dataLoading) && <LoadingWrap />}
                     {isError &&
-                        <NoMorePost id='post_error' aria-live='polite' role='status'>
+                        <NoMorePost id='post_error' role='status'>
                             <span>포스트 로드 중 문제가 발생했습니다.</span>
                             <motion.button className='retry_post_btn'
                                 variants={btnVariants(theme)}

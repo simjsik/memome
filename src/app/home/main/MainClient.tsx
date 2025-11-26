@@ -439,7 +439,7 @@ export default function MainHome() {
           <div ref={observerLoadRef} css={css`height: 1px; display: ${(dataLoading || firstLoading || isError) ? "none" : "block"};`} />
           {(!loading && dataLoading) && <LoadingWrap />}
           {isError &&
-            <NoMorePost id='post_error' aria-live='polite' role='status'>
+            <NoMorePost id='post_error' role='status'>
               <span>포스트 로드 중 문제가 발생했습니다.</span>
               <motion.button className='retry_post_btn'
                 variants={btnVariants(theme)}
@@ -453,7 +453,7 @@ export default function MainHome() {
             (!hasNextPage && !dataLoading && !loading) &&
             <>
               {postList.length > 0 ?
-                <NoMorePost id='no_more_post' aria-live="polite" role="status">
+                <NoMorePost id='no_more_post' role="status">
                   <div className="no_more_icon">
                     <Image src={`https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966548/%EB%A9%94%EC%9D%B8%EB%8B%A4%EB%B4%A4%EC%9D%8C_fahwir.svg`}
                       alt="전체 포스트 확인 완료"
@@ -465,7 +465,7 @@ export default function MainHome() {
                   <span>전체 메모를 전부 확인했습니다.</span>
                 </NoMorePost>
                 :
-                <NoMorePost id='no_more_post' aria-live="polite" role="status">
+                <NoMorePost id='no_more_post' role="status">
                   <div className="no_more_icon">
                     <Image src={`https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744966543/%EB%A9%94%EB%AA%A8%EC%97%86%EC%96%B4_d0sm6q.svg`}
                       alt="포스트 없음"

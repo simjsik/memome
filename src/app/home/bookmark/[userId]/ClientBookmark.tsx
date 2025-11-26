@@ -246,7 +246,7 @@ export default function Bookmark() {
                     <div ref={observerLoadRef} css={css`height: 1px; visibility: ${(dataLoading || firstLoading) ? "hidden" : "visible"};`} />
                     {(!loading && dataLoading) && <LoadingWrap />}
                     {isError &&
-                        <NoMorePost id='post_error' aria-live='polite' role='status'>
+                        <NoMorePost id='post_error' role='status'>
                             <span>포스트 로드 중 문제가 발생했습니다.</span>
                             <motion.button className='retry_post_btn'
                                 variants={btnVariants(theme)}
@@ -260,7 +260,7 @@ export default function Bookmark() {
                         (!hasNextPage && !dataLoading && !loading) &&
                         <>
                             {bookmarkList.length > 0 ?
-                                <NoMorePost id='no_more_post' aria-live="polite" role="status">
+                                <NoMorePost id='no_more_post' role="status">
                                     <div className="no_more_icon">
                                         <Image src={`https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965256/%EB%B6%81%EB%A7%88%ED%81%AC%EB%8B%A4%EB%B4%A4%EC%96%B4_vvrw2f.svg`}
                                             alt="전체 포스트 확인 완료"
@@ -272,7 +272,7 @@ export default function Bookmark() {
                                     <span>북마크된 메모를 전부 확인했습니다.</span>
                                 </NoMorePost>
                                 :
-                                <NoMorePost id='no_more_post' aria-live="polite" role="status">
+                                <NoMorePost id='no_more_post' role="status">
                                     <div className="no_more_icon">
                                         <Image src={`https://res.cloudinary.com/dsi4qpkoa/image/upload/v1744965256/%EB%B6%81%EB%A7%88%ED%81%AC%EC%97%86%EC%96%B4_fkhi4n.svg`}
                                             alt="포스트 없음"
