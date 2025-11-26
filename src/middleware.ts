@@ -26,8 +26,6 @@ const PASS_PATH = [
     "/static",
     "/favicon.ico",
     '/.well-known',
-    '/sitemap.xml',
-    '/robots.txt',
     '/google'
 ]
 const AUTH_PUBLIC = [
@@ -260,6 +258,10 @@ export async function middleware(req: NextRequest) {
     const isRefresh = pathname === '/api/refresh' && method === 'POST';
 
     if (PASS_PATH.some(prefix => pathname.startsWith(prefix))) {
+        return NextResponse.next();
+    }
+    
+    if (pathname === '/sitemap.xml' || pathname === '/robots.txt') {
         return NextResponse.next();
     }
 
