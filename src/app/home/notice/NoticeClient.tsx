@@ -211,8 +211,8 @@ export default function ClientNotice() {
     const handleUsernameClick = useHandleUsernameClick();
     return (
         <>
-            <PostWrap id="notice_post">
-                <section aria-labelledby="notice_post">
+            <PostWrap aria-labelledby="notice_post">
+                <section id="notice_post">
                     {/* 무한 스크롤 구조 */}
                     {!loading && noticeList.map((post) => (
                         <motion.div

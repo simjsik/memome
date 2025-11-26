@@ -319,8 +319,8 @@ export default function MainHome() {
           whileTap="loginClick">새로운 업데이트 확인</NewPostBtn>
       }
       {/* 공지사항 제외 전체 포스트 */}
-      <PostWrap id='main_post'>
-        <section aria-labelledby='main_post'>
+      <PostWrap aria-labelledby='main_post'>
+        <section id='main_post'>
           {(!loading && isAddUpdatePost) && <LoadingWrap />}
           {/* 무한 스크롤 구조 */}
           {!loading && postList.map(post => (
