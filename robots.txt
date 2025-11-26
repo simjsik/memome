@@ -1,3 +1,5 @@
 User-Agent: *
 Allow: /
-Sitemap: https://https://memome-delta.vercel.app/sitemap.xml
+Disallow: /home/bookmark
+
+Sitemap: https://memome-delta.vercel.app/sitemap.xml
