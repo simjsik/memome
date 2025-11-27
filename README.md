@@ -1,4 +1,4 @@
-<a align='left' href='https://memome-delta.vercel.app/' target='blank'>
+<a align='left' href='https://memome-delta.vercel.app/' target='_blank'>
   <img width='160px' margin="0 auto" src="https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737169919/%EC%BB%AC%EB%9F%AC%EB%A1%9C%EA%B3%A0_snbplg.svg"/>
 </a>
 <p align='left'>
@@ -35,11 +35,11 @@
   </p>
   <img src="https://img.shields.io/badge/React-61DAFB?style=flat&logo=React&logoColor=white">
   <img src="https://img.shields.io/badge/Recoil-0179f3?style=flat&logo=Recoil&logoColor=white">
-  <img src="https://img.shields.io/badge/React Query-F73E51?style=flat">
+  <img src="https://img.shields.io/badge/React Query-F73E51?style=flat&logo=reactquery&logoColor=white">
   <br/>
   
   <img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=Firebase&logoColor=white">
-  <img src="https://img.shields.io/badge/Cloudinary-0179f3?style=flat">
+  <img src="https://img.shields.io/badge/Cloudinary-0179f3?style=flat&logo=cloudinary&logoColor=white">
 
   <img src="https://img.shields.io/badge/Github-181717?style=flat&logo=Github&logoColor=white">
   <img src="https://img.shields.io/badge/Vercel-000000?style=flat&logo=Vercel&logoColor=white">
