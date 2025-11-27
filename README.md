@@ -1,6 +1,6 @@
-<p align='left'>
+<a align='left' href='https://memome-delta.vercel.app/'>
   <img width='160px' margin="0 auto" src="https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737169919/%EC%BB%AC%EB%9F%AC%EB%A1%9C%EA%B3%A0_snbplg.svg"/>
-</p>
+</a>
 <p align='left'>
   개인 SNS 블로그 프로젝트 MEMOME 입니다!
     <br/>
