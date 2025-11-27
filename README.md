@@ -1,12 +1,13 @@
 <a align='left' href='https://memome-delta.vercel.app/' target='_blank'>
   <img width='160px' margin="0 auto" src="https://res.cloudinary.com/dsi4qpkoa/image/upload/v1737169919/%EC%BB%AC%EB%9F%AC%EB%A1%9C%EA%B3%A0_snbplg.svg"/>
 </a>
+<p>$\tiny{\color{#9097a2}\quad 클릭\ 시\ 이동합니다.}$</p>
 <p align='left'>
-  개인 SNS 블로그 프로젝트 MEMOME 입니다!
+  개인 SNS 블로그 프로젝트 MEMOME 입니다! 
     <br/>
-    $\small{\color{#9097a2}\quad React\ Infinite\ Query와\ Firestore\ 연동으로\ 무한\ 스크롤\ 탐색\ 페이지를\ 구현.}$
+    $\small{\color{#9097a2}\quad 포스트\ CRUD와\ 무한\ 스크롤\ 탐색\ 기능이\ 적용된\ SNS식\ 블로그\ 프로젝트\ 입니다.}$
    <br/>
-    $\small{\color{#9097a2}\quad Emotion\ 라이브러리로\ 스타일\ 컴포넌트를\ 관리해\ CSS\ 유지보수\ 및\ 컴포넌트\ 재활용} $
+    $\small{\color{#9097a2}\quad 비공개\ 글,\ 포스트\ 태그,\ 글\ 작성\ 도구\ 등을\ 이용해\ 포스트\ 옵션\ 추가가\ 가능합니다.} $
 </p>
 <div>
   주요 기능
