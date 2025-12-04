@@ -168,8 +168,8 @@ export default function UsageLimit() {
                         <p>일일 제공 사용량이 초과되었습니다.</p>
                         <span>초기화 까지 남은 시간 : {timeLeft}</span>
                         <div className="usage_btn_wrap">
-                            <button onClick={handleLogout}>로그아웃</button>
-                            <button onClick={handleUsageBox}>현 상태로 둘러보기</button>
+                            <button aria-label="로그아웃" onClick={handleLogout}>로그아웃</button>
+                            <button aria-label="둘러보기" onClick={handleUsageBox}>현 상태로 둘러보기</button>
                         </div>
                     </div>
                 </UsageWrap >

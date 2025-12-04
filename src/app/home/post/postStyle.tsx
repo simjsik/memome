@@ -1,6 +1,8 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client";
 import styled from "@emotion/styled";
+import "quill/dist/quill.snow.css";
+
 
 export const QuillStyle = styled.div<{ notice: boolean, public: boolean }>`
 position: relative;
