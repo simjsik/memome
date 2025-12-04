@@ -32,7 +32,6 @@ export const LoginButtonWrap = styled.main`
         background: #fff;
         color: ${({ theme }) => theme.colors.primary};
         font-size: 1rem;
-        font-family: var(--font-pretendard-medium);
         cursor: pointer;
     }
 
@@ -102,7 +101,7 @@ export const LoginInputWrap = styled.div`
 
     p{
       font-size : 0.875rem;
-      font-family : var(--font-pretendard-light)
+      font-weight : 400;
     }
 `
 export const LoginInput = styled.input`
@@ -112,7 +111,6 @@ export const LoginInput = styled.input`
             padding: 4px 0px;
             border : none;
             font-size: 1rem;
-            font-family : var(--font-pretendard-medium);
             font-weight: 500;
 
             &:focus{
@@ -128,7 +126,6 @@ export const CreateInput = styled.input`
             border : 1px solid ${({ theme }) => theme.colors.border};
             border-radius : 8px;
             font-size: 1rem;
-            font-family : var(--font-pretendard-medium);
             font-weight: 500;
 
             &:focus{
@@ -145,7 +142,6 @@ export const CreateButton = styled.a`
     border: none;
     color : ${({ theme }) => theme.colors.primary};
     font-size : 0.875rem;
-    font-family : var(--font-pretendard-bold);
     font-weight: 700;
     border-bottom: 1px solid ${({ theme }) => theme.colors.primary};
     cursor: pointer;
@@ -160,7 +156,6 @@ export const LoginButton = styled(motion.button)`
     background : ${({ theme }) => theme.colors.primary};
     color: #fff;
     font-size : 1rem;
-    font-family : var(--font-pretendard-medium);
     cursor: pointer;
 `
 
@@ -175,7 +170,6 @@ export const GoogleButton = styled.button`
     border-radius : 4px;
     cursor : pointer;
     font-size : 0.875rem;
-    font-family : var(--font-pretendard-medium);
     font-weight: 500;
     cursor: pointer;
 `
@@ -190,7 +184,6 @@ width: 100%;
     border-radius : 4px;
     cursor : pointer;
     font-size : 0.875rem;
-    font-family : var(--font-pretendard-medium);
     font-weight: 500;
     cursor: pointer;
 `

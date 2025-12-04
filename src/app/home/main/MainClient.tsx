@@ -400,7 +400,7 @@ export default function MainHome() {
                           src={post.thumbnail as string}
                           alt="포스트 이미지"
                           fill
-                          priority
+                          priority={true}
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           css={css`object-fit: cover`} />
                         {post.hasImage &&

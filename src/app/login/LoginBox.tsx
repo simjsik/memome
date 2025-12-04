@@ -35,16 +35,15 @@ export const LoginWrap = css`
 
         p:nth-of-type(1){
             font-size: 0.75rem;
-            font-family: var(--font-pretendard-light);
+            font-weight : 400;
         }
         p:nth-of-type(2){
             font-size: 0.75rem;
-            font-family: var(--font-pretendard-bold);
+            font-weight : 700;
             margin-top: 4px;
         }
         span{
             font-size: 0.875rem;
-            font-family: var(--font-pretendard-medium);
         }
     }
 

@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */ // 최상단에 배치
 "use client"
 import { ReactNode, useEffect, useState } from "react";
-import { PretendardBold, PretendardLight, PretendardMedium } from "@/app/styled/FontsComponets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import "./page.module.css";
@@ -16,6 +15,7 @@ import GlobalLoadingWrap from "./components/GlobalLoading";
 import { darkTheme, lightTheme } from "./styled/theme";
 import GlobalStyles from "./styled/GlobalStyles";
 import { usePostUpdateChecker } from "./hook/ClientPolling";
+import { Pretendard } from "./styled/FontsComponets";
 
 const queryClient = new QueryClient();
 
@@ -25,7 +25,6 @@ interface CustomClaims {
         guest?: boolean;
     };
 }
-
 
 function InitializeLoginComponent({ children }: { children: ReactNode }) {
     const setUser = useSetRecoilState(userState);
@@ -56,7 +55,7 @@ function InitializeLoginComponent({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const auth = getAuth();
-        
+
         if (!auth) return;
 
         const AUTH_FLAG_KEY = 'authInProgress';
@@ -209,7 +208,7 @@ export default function ProviderClient({ children, nonce }: { children: ReactNod
     }, []);
 
     return (
-        <div className={`${PretendardLight.variable} ${PretendardMedium.variable} ${PretendardBold.variable} main_wrap`}>
+        <div className={`${Pretendard.variable} main_wrap`}>
             <QueryClientProvider client={queryClient}>
                 <RecoilRoot>
                     <CacheProvider value={cache}>

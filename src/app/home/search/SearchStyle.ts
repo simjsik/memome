@@ -90,7 +90,7 @@ export const SearchBoxWrap = styled.div`
         text-decoration : underline;
     }
     .ais_user_uid{
-        font-family : var(--font-pretendard-light);
+        font-weight : 400;
         font-size : 0.875rem;
     }
 
@@ -123,7 +123,7 @@ export const SearchBoxWrap = styled.div`
 
     .ais_post_tag{
         font-size: 0.875rem;
-        font-family: var(--font-pretendard-light);
+        font-weight : 400;
     }
 
     .ais_post_title{
@@ -154,7 +154,6 @@ export const SearchBoxWrap = styled.div`
       }
 
         .post_comment{
-            font-family : var(--font-pretendard-medium);
             font-size : 0.875rem;
             color: ${({ theme }) => theme.colors.text};
             margin-left : 0px;

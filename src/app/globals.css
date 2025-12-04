@@ -8,7 +8,8 @@ div,
 p,
 span,
 a {
-  font-family: var(--font-pretendard-medium);
+  font-family: var(--font-pretendard);
+  font-weight : 500;
 }
 
 section{
@@ -58,7 +59,8 @@ body {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  font-family: var(--font-pretendard-medium);
+  font-family: var(--font-pretendard);
+  font-weight : 500;
 }
 
 a {

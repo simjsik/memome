@@ -210,7 +210,6 @@ export default function StatusBox() {
                                             border : 1px solid ${theme.colors.border};
                                             border-radius : 4px;
                                             font-size : 1rem;
-                                            font-family : var(--font-pretendard-medium);
                                             cursor : pointer;`
                                     }
                                         variants={btnVariants(theme)}

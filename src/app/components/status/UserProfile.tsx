@@ -37,13 +37,12 @@ height : 100%;
 
 .user_name{
     font-size: 1.25rem;
-    font-family: var(--font-pretendard-bold);
+    font-weight : 700;
 }
 
 .user_uid{
     font-size : 0.875rem;
     color: ${({ theme }) => theme.colors.text_tag};
-    font-family: var(--font-pretendard-medium);
 }
 
 .user_photo{
@@ -180,7 +179,7 @@ margin-top : 20px;
                 background: none;
                 text-align: center;
                 -webkit-text-decoration: underline;
-                font-family: var(--font-pretendard-light);
+                font-weight : 400;
                 cursor: pointer;
                 font-size : 0.75rem
         }

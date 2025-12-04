@@ -18,7 +18,6 @@ color : ${({ theme }) => theme.colors.text};
 border : 1px solid ${({ theme }) => theme.colors.border};
 border-radius : 4px;
 font-size : 1rem;
-font-family : var(--font-pretendard-medium);
 cursor : pointer;
 
     @media (min-width : 481px) and (max-width: 1200px) {

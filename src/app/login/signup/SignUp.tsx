@@ -52,7 +52,6 @@ const SignUpForm = css`
 
     label{
         font-size : 0.875rem;
-        font-family: var(--font-pretendard-medium);
     }
 `
 
@@ -65,7 +64,7 @@ const SignUpWrap = css`
     
     .sign_up_text{
         font-size: 1.25rem;
-        font-family: var(--font-pretendard-bold);
+        font-weight : 700;
         line-height: 28px;
     }
 
@@ -79,7 +78,7 @@ const SignUpWrap = css`
     }
 
     span{
-        font-family: var(--font-pretendard-light);
+        font-weight : 400;
         display: block;
         margin-top: 12px;
     }

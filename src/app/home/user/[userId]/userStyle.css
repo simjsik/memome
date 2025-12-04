@@ -32,12 +32,12 @@
 
 .user_name {
     font-size: 1rem;
-    font-family: var(--font-pretendard-bold);
+    font-weight : 700;
 }
 
 .user_uid {
     display: block;
-    font-family: var(--font-pretendard-light);
+    font-weight : 400;
     color: var(--tag);
     font-size: 0.75rem;
 }

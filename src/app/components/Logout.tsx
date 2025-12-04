@@ -21,7 +21,7 @@ const LogoutButton = styled(motion.button)`
     border : 1px solid ${({ theme }) => theme.colors.border};
     border-radius : 4px;
     font-size : 1rem;
-    font-family : var(--font-pretendard-medium);
+    font-weight : 500;
     cursor : pointer;
 
     @media (max-width: 1200px) {

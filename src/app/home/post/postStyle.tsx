@@ -19,7 +19,6 @@ margin : 0 auto;
         border : 1px solid ${({ theme }) => theme.colors.border};
         border-bottom : none;
         border-radius : 8px 8px 0px 0px;
-        font-family : var(--font-pretendard-medium);
 
         &>p{
             position: absolute;
@@ -27,7 +26,7 @@ margin : 0 auto;
             right: 10px;
             font-size: 0.875rem;
             color: rgb(153, 153, 153);
-            font-family: var(--font-pretendard-light);
+            font-weight : 400;
         }
     }
 
@@ -39,7 +38,6 @@ margin : 0 auto;
         height : 70px;
         padding-bottom: 20px;
         border-bottom : 1px solid ${({ theme }) => theme.colors.border};
-        font-family : var(--font-pretendard-medium);
     }
 
     // 공지사항 토글
@@ -61,7 +59,6 @@ margin : 0 auto;
             transform: translateX(-50%);
             font-size: 0.75rem;
             color : ${(props) => (props.notice ? `${props.theme.colors.error}` : `${props.theme.colors.text_tag}`)};
-            font-family : var(--font-pretendard-medium);
         }
     }
 
@@ -98,7 +95,6 @@ margin : 0 auto;
             border-radius : 8px;
             color : transparent;
             caret-color: #999;
-            font-family : var(--font-pretendard-medium);
             background-color : ${({ theme }) => theme.colors.background};
 
             &::selection {  
@@ -133,7 +129,6 @@ margin : 0 auto;
             font-size: 0.875rem;
             color: ${({ theme }) => theme.colors.error};
             margin-top : 2px;
-            font-family : var(--font-pretendard-medium);
         }
     }
     .ql_content{
@@ -161,7 +156,6 @@ margin : 0 auto;
         font-size: 1rem;
         color: #fff;
         cursor: pointer;
-        font-family: var(--font-pretendard-medium);
         text-align: center;
     }
 
@@ -188,7 +182,6 @@ margin : 0 auto;
             transform: translateX(-50%);
             font-size: 0.75rem;
             color : ${(props) => (!props.public ? `${props.theme.colors.error}` : `${props.theme.colors.text_tag}`)};
-            font-family : var(--font-pretendard-medium);
         }
     }
     .go_main_btn{
@@ -335,7 +328,6 @@ margin : 0 auto;
         background : ${({ theme }) => theme.colors.background};
         border : none;
         border-radius : 2px;
-        font-family : var(--font-pretendard-medium);
         cursor : pointer;
 
         rect,
@@ -699,7 +691,6 @@ export const MobileQuillStyle = styled.div<{ notice: boolean, public: boolean }>
             p{
                 font-size: 1rem;
                 color : ${(props) => (props.notice ? `${props.theme.colors.error}` : `${props.theme.colors.text_tag}`)};
-                font-family: var(--font-pretendard-medium);
                 white-space: nowrap;
                 text-align: center;
             }

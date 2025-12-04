@@ -26,6 +26,8 @@ export default async function RootLayout({ children }: LayoutProps) {
     <html lang="ko">
       <Head>
         <link rel="preload" href="/app/global.css" as="style" />
+        <link rel="dns-prefetch" href="https://memome-delta.vercel.app" />
+        <link rel="preconnect" href="https://memome-delta.vercel.app" crossOrigin="anonymous" />
       </Head>
       <body>
         <ProviderClient nonce={headerNonce}>

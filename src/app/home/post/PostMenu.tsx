@@ -89,7 +89,7 @@ z-index : 5;
         margin-right : 10px;
         border: 1px solid ${({ theme }) => theme.colors.primary};
         color : ${({ theme }) => theme.colors.primary};
-        font-family : var(--font-pretendard-bold);
+        font-weight : 700;
     }
 
     .load_no_btn{

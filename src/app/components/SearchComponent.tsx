@@ -18,8 +18,7 @@ position: relative;
     h2{
     flex: 1 0 100%;
     font-size: 1.25rem;
-    font-weight: normal;
-    font-family: var(--font-pretendard-bold);
+    font-weight : 700;
     }
     // --------------------------------------------------------
 
@@ -234,7 +233,7 @@ position: relative;
                 .result_comment{
                 color: ${({ theme }) => theme.colors.error};
                 font-size: 0.875rem;
-                font-family: var(--font-pretendard-bold);
+                font-weight : 700;
                 line-height: 26px;
                 }
             }

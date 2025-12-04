@@ -146,6 +146,7 @@ align-content: flex-start;
       .post_title{
         border-bottom: none;
         font-size : 1.25rem;
+        font-weight : 700;
       }
 
       .notice_tag{
@@ -180,14 +181,14 @@ align-content: flex-start;
       }
 
       .user_name{
-        font-family : var(--font-pretendard-bold);
+        font-weight : 700;
         min-width : fit-content;
       }
 
       .user_uid,
       .post_date{
         flex : 0 0 auto;
-        font-family : var(--font-pretendard-light);
+        font-weight : 400;
       }
 
       .user_name,
@@ -224,7 +225,6 @@ align-content: flex-start;
       }
 
       .post_comment{
-        font-family : var(--font-pretendard-medium);
         font-size : 1rem;
         color: ${({ theme }) => theme.colors.text};
         margin-left : 2px;
@@ -611,11 +611,11 @@ width: 100%;
 
   .memo_comment_user{
     font-size : 0.875rem;
-    font-family : var(--font-pretendard-bold);
+    font-weight : 700;
   }
 
   .memo_comment_uid {
-    font-family: var(--font-pretendard-light);
+    font-weight : 400;
     font-size: 0.875rem;
     margin-left: 4px;
   }
@@ -642,7 +642,6 @@ width: 100%;
 
   .reply_toggle_btn,
   .reply_more_btn{
-      font-family: var(--font-pretendard-medium);
       color: ${({ theme }) => theme.colors.primary};
       cursor : pointer;
       border: none;
@@ -719,7 +718,6 @@ width: 100%;
     outline: none;
     border: none;
     padding: 10px;
-    font-family: var(--font-pretendard-medium);
   }
 
   .reply_input_wrap{
@@ -744,7 +742,6 @@ width: 100%;
       outline: none;
       border: 1px solid ${({ theme }) => theme.colors.border};
       padding: 10px;
-      font-family: var(--font-pretendard-medium);
       font-size : 0.75rem;
     }
 }

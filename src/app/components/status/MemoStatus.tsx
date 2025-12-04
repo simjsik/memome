@@ -41,7 +41,7 @@ overflow: hidden;
 
     .user_id p{
         font-size : 1.125rem;
-        font-family : var(--font-pretendard-bold);
+        font-weight : 700;
     }
 
     .user_id span{
@@ -51,7 +51,7 @@ overflow: hidden;
         overflow : hidden;
         text-overflow :ellipsis;
         font-size : 0.875rem;
-        font-family : var(--font-pretendard-light);
+        font-weight : 400;
     }
 
     // 프로필
@@ -132,7 +132,7 @@ overflow: hidden;
         text-overflow: ellipsis;
         white-space:nowrap;
         font-size : 0.875rem;
-        font-family : var(--font-pretendard-bold);
+        font-weight : 700;
     }
 
     .memo_date{
@@ -551,7 +551,6 @@ export default function MemoStatus({ post }: MemoStatusType) {
                                             border : 1px solid ${theme.colors.border};
                                             border-radius : 4px;
                                             font-size : 1rem;
-                                            font-family : var(--font-pretendard-medium);
                                             cursor : pointer;`
                                     }
                                         variants={btnVariants(theme)}

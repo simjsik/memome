@@ -34,7 +34,7 @@ export const UsageWrap = styled.div<{ Limit: boolean }>`
 
     p {
         font-size: 1.25rem;
-        font-family: var(--font-pretendard-bold);
+        font-weight : 700;
     }
 
     span{
@@ -62,7 +62,6 @@ export const UsageWrap = styled.div<{ Limit: boolean }>`
         border: none;
         background: #0087ff;
         color: #fff;
-        font-family: var(--font-pretendard-medium);
         font-size: 0.875rem;
         border-radius : 6px;
         cursor : pointer;

@@ -61,7 +61,7 @@ border-right : 1px solid ${({ theme }) => theme.colors.border};
 .post_title{
     font-size : 1.25rem;
     line-height : 32px;
-    font-family : var(--font-pretendard-bold);
+    font-weight : 700;
 }
 
 .user_id{
@@ -85,7 +85,7 @@ line-height : 32px;
 
 .user_id>span{
     margin-left : 4px;
-    font-family: var(--font-pretendard-light);
+    font-weight : 400;
     color: ${({ theme }) => theme.colors.text_tag};
 }
 
