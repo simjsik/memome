@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { PretendardBold, PretendardLight, PretendardMedium } from "@/app/styled/FontsComponets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import "./globals.css";
+import "./page.module.css";
 import { adminState, bookMarkState, DidYouLogin, hasGuestState, loadingState, userState } from "./state/PostState";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "./DB/firebaseConfig";

@@ -3,6 +3,7 @@ import "./globals.css";
 import ProviderClient from './ProviderClients';
 import { headers } from 'next/headers';
 import { Metadata } from 'next';
+import Head from 'next/head';
 
 type LayoutProps = {
   children: ReactNode;
@@ -14,12 +15,18 @@ export const metadata: Metadata = {
     google: 'MIrr3EbzhfSVsv0wYXBNUhyOZAzuC4fE7oRFoQ0j678',
   },
   category: 'Technology',
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default async function RootLayout({ children }: LayoutProps) {
   const headerNonce = headers().get('x-csp-nonce') ?? '';
   return (
     <html lang="ko">
+      <Head>
+        <link rel="preload" href="/app/global.css" as="style" />
+      </Head>
       <body>
         <ProviderClient nonce={headerNonce}>
           {children}
