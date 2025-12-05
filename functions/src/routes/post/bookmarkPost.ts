@@ -66,7 +66,7 @@ router.post('/post/bookmark', async (req: Request, res: Response) => {
 
                     const data = s.data() as fromPostData;
 
-                    // 5) 가시성 필터: 공지 제외 + 공개 or 내 글
+                    // 가시성 필터: 공지 제외 + 공개 or 내 글
                     if (!(data.public === true || data.userId === user)) continue;
 
                     results.push({ id, ...data });
