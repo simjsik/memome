@@ -30,6 +30,7 @@ const PASS_PATH = [
 ]
 const AUTH_PUBLIC = [
     "/api/post",
+    "/api/post/notice",
     "/api/login",
     "/api/logout",
     "/api/customToken",
@@ -255,17 +256,18 @@ async function verifyJwt(token: string, secret: string): Promise<JWTPayload> {
 export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
     const method = (req.method || "GET").toUpperCase();
+
     const isRefresh = pathname === '/api/refresh' && method === 'POST';
 
     if (PASS_PATH.some(prefix => pathname.startsWith(prefix))) {
         return NextResponse.next();
     }
-    
+
     if (pathname === '/sitemap.xml' || pathname === '/robots.txt') {
         return NextResponse.next();
     }
 
-    if (AUTH_PUBLIC.some(p => pathname.startsWith(p))) {
+    if (AUTH_PUBLIC.some(p => pathname === p || pathname === `${p}/`)) {
         return NextResponse.next();
     }
 
@@ -443,6 +445,7 @@ export async function middleware(req: NextRequest) {
     const requestHeaders = new Headers(req.headers);
 
     if (!isRefresh) {
+        console.log('API 테스트', userPayload!.uid)
         requestHeaders.set("x-user-uid", String(userPayload!.uid));
         if (userPayload!.admin === true) requestHeaders.set("x-user-admin", String(userPayload!.admin));
         if (userPayload!.hasGuest === true) requestHeaders.set('x-user-guest', String(userPayload!.hasGuest));
