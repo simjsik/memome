@@ -130,8 +130,6 @@ export default function MainHome() {
     const sockets = socketRef.current;
     if (currentUser) {
       sockets.emit("register", { uid: currentUser?.uid }); // UID를 서버에 전송
-
-      if (!currentUser.uid) return console.error('유저 없음');
     }
   }, [currentUser])
 
