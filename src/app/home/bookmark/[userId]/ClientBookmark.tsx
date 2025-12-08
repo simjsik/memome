@@ -147,9 +147,9 @@ export default function Bookmark() {
                 <section id='bookmark_post'>
                     {!loading && <h2 className='all_post'>내 북마크</h2>}
                     {/* 무한 스크롤 구조 */}
-                    {!loading && bookmarkList.length > 0 && bookmarkList.map((post) => (
+                    {!loading && bookmarkList.length > 0 && bookmarkList.map((post, id) => (
                         <motion.article
-                            key={post?.id}
+                            key={id}
                             className='post_box'
                             onClick={(event) => { event.preventDefault(); handlePostClick(post?.id as string); }}
                             whileHover='otherHover'

@@ -47,8 +47,8 @@ function CustomInfiniteHits() {
 
     return (
         <div className="ais_infinite_result_wrap">
-            {items.map((hit) => (
-                <PostHit key={hit.objectID} hit={hit} />
+            {items.map((hit, id) => (
+                <PostHit key={id} hit={hit} />
             ))}
             {!isLastPage && (
                 <button aria-label="포스트 더 보기" onClick={showMore}>더 보기</button>
@@ -149,7 +149,6 @@ function PostHit({ hit }: { hit: PostData }) {
                 <motion.div
                     whileHover="otherHover"
                     variants={btnVariants(theme)}
-                    key={hit.objectID as string}
                     className='post_box'
                 >
                     {routePostId === hit.objectID && <LoadLoading />}

@@ -311,9 +311,9 @@ export default function UserClient({ user }: ClientUserProps) {
                     postTab ?
                         <>
                             <PostWrap $userPage={true}>
-                                {!loading && userPostList.length > 0 && userPostList.map((post) => (
+                                {!loading && userPostList.length > 0 && userPostList.map((post, id) => (
                                     <motion.div
-                                        key={post?.id}
+                                        key={id}
                                         className='post_box'
                                         onClick={(event) => { event.preventDefault(); handlePostClick(post?.id as string); }}
                                         whileHover='otherHover'
@@ -464,9 +464,9 @@ export default function UserClient({ user }: ClientUserProps) {
                         :
                         <>
                             <main className="user_image_post_wrap">
-                                {!loading && userImageList.map((post) => (
+                                {!loading && userImageList.map((post, id) => (
                                     post.thumbnail &&
-                                    <div key={post.id} className="user_image_wrap">
+                                    <div key={id} className="user_image_wrap">
                                         <>
                                             {routePostId === post.id && <LoadLoading />}
                                             <div className="image_post_img" css={css`

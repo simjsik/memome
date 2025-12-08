@@ -214,11 +214,11 @@ export default function ClientNotice() {
             <PostWrap aria-labelledby="notice_post">
                 <section id="notice_post">
                     {/* 무한 스크롤 구조 */}
-                    {!loading && noticeList.map((post) => (
+                    {!loading && noticeList.map((post, id) => (
                         <motion.div
                             whileHover='otherHover'
                             variants={btnVariants(theme)}
-                            key={post.id}
+                            key={id}
                             className='post_box'
                         >
                             {routePostId === post.id && <LoadLoading />}
