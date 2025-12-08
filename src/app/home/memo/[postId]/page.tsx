@@ -4,42 +4,12 @@ import { PostDetailWrap } from "./memoStyle";
 import { Metadata } from "next";
 import { adminDb } from "@/app/DB/firebaseAdminConfig";
 import { SSRcleanHtml } from '@/app/utils/CleanHtml';
-import { Timestamp } from 'firebase-admin/firestore';
+import { formatDate } from '@/app/utils/formatDate';
+
 interface MemoPageProps {
     params: {
         postId: string;
     };
-}
-
-const formatDate = (createAt: Timestamp | Date | string | number): string => {
-    const date: Date =
-        createAt instanceof Timestamp
-            ? createAt.toDate()
-            : new Date(createAt);
-
-    const now = new Date();
-    const befMs = now.getTime() - date.getTime();
-
-    const befHour = befMs / (1000 * 60 * 60);
-
-    const befDay = befMs / (1000 * 60 * 24);
-
-    if (befHour < 24) {
-        // 0시간 방지
-        const hours = Math.max(Math.round(befHour), 1);
-        return `${hours}시간 전`;
-    }
-
-    if (befDay < 7) {
-        const days = Math.max(Math.round(befDay), 1);
-        return `${days}일 전`;
-    }
-
-    return date.toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-    })
 }
 
 // 동적 메타데이터 설정
@@ -119,7 +89,7 @@ export default async function MemoPage({ params }: MemoPageProps) {
     const post = postSnap.data();
     const userId = post?.userId;
     const commentLength = post?.commentCount as number;
-
+    const postCreateAt = post?.createAt.toMillis();
     // 포스트 데이터에 유저 이름 매핑하기
     const userDocRef = adminDb.collection("users").doc(userId); // DocumentReference 생성
     const userDoc = await userDocRef.get(); // 문서 데이터 가져오기
@@ -142,9 +112,9 @@ export default async function MemoPage({ params }: MemoPageProps) {
                                 style={{ backgroundImage: `url(${userData?.photoURL})` }}
                             ></div>
                             <p>
-                                {userData?.displayName} ·
+                                {userData?.displayName} ·&nbsp;
                             </p>
-                            <time>{formatDate(post?.createAt)}</time>
+                            <time>{formatDate(postCreateAt)}</time>
                         </div>
                     </div>
                 </div>
